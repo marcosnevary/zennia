@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { toRomaji } from 'wanakana'
   import { symbolOf, type KanaScript } from './kana'
   import { emptyStats, STATS_SORT_OPTIONS, accuracy, attempts, percent, sortTallies, sumTallies, type StatsSort } from './stats'
   import type { Stats, Tally, Word } from './types'
@@ -25,7 +26,10 @@
       rows: sortTallies(
         Object.entries(stats.kana).filter(([key]) => key.startsWith(`${script.id}:`)),
         sort,
-      ).map(([key, tally]) => ({ key, symbol: symbolOf(script.id, key.slice(script.id.length + 1)), tally })),
+      ).map(([key, tally]) => {
+        const hiragana = key.slice(script.id.length + 1)
+        return { key, symbol: symbolOf(script.id, hiragana), romaji: toRomaji(hiragana), tally }
+      }),
     })).filter((script) => script.rows.length),
   )
 
@@ -99,12 +103,13 @@
     {@render summary(kanaTotal)}
     {#each kanaRows as script (script.id)}
       <h3>{script.label}</h3>
-      <ul class="kana">
-        {#each script.rows as { key, symbol, tally } (key)}
-          <li class={level(tally)} title="{tally.hits} correct, {tally.misses} wrong">
-            <span class="char" lang="ja">{symbol}</span>
-            <span class="pct">{percent(accuracy(tally))}</span>
+      <ul class="words">
+        {#each script.rows as { key, symbol, romaji, tally } (key)}
+          <li>
+            <span class="jp" lang="ja">{symbol}</span>
+            <span class="reading muted">{romaji}</span>
             <span class="counts">✓{tally.hits} ✗{tally.misses}</span>
+            <span class="badge {level(tally)}">{percent(accuracy(tally))}</span>
           </li>
         {/each}
       </ul>
@@ -180,26 +185,6 @@
     list-style: none;
     margin: 0;
     padding: 0;
-  }
-  .kana {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
-    gap: 8px;
-  }
-  .kana li {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 8px 4px;
-    border: 1px solid;
-    border-radius: 10px;
-  }
-  .char {
-    font-size: 1.6rem;
-    line-height: 1.2;
-  }
-  .pct {
-    font-weight: 700;
   }
   .counts {
     font-size: 0.8rem;
