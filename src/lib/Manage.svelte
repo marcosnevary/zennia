@@ -208,7 +208,7 @@
     Loads a file created by <strong>Export JSON</strong>. A plain list of words also works, where each item has
     <code>japanese</code>, <code>hiragana</code> and optionally <code>meaning</code>. Imported words are
     <strong>added</strong> to your current list, nothing is replaced or deleted. Words you already have (same word and
-    reading) are skipped, and invalid items are ignored. A summary is shown when it finishes.
+    reading) are skipped, and invalid items are ignored.
   </p>
 
   <h3>Import Anki deck (.txt)</h3>
