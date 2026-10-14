@@ -1,22 +1,29 @@
 <script lang="ts">
-  import { buildKana, type Kana, type KanaGroup, type KanaScript } from './kana'
+  import {
+    KANA_SECTIONS,
+    buildKana,
+    kanaKey,
+    symbolOf,
+    type Kana,
+    type KanaScript,
+    type KanaSection,
+  } from './kana'
   import { checkAnswer, toDisplayRomaji } from './romaji'
   import type { Verdict } from './types'
-
-  let scripts = $state<KanaScript[]>(['hiragana', 'katakana'])
-  let groups = $state<KanaGroup[]>(['basic'])
 
   const SCRIPTS: { id: KanaScript; label: string }[] = [
     { id: 'hiragana', label: 'Hiragana' },
     { id: 'katakana', label: 'Katakana' },
   ]
-  const GROUPS: { id: KanaGroup; label: string }[] = [
-    { id: 'basic', label: 'Basic' },
-    { id: 'dakuten', label: 'Dakuten (ga, za, pa…)' },
-    { id: 'combo', label: 'Combinations (kya, sha…)' },
-  ]
 
-  const pool = $derived(buildKana(scripts, groups))
+  const basic = KANA_SECTIONS.find((s) => s.id === 'basic')!
+
+  /** Keys (see `kanaKey`) of the characters included in practice; starts with the basic set */
+  let selected = $state<string[]>(
+    SCRIPTS.flatMap((s) => basic.rows.flatMap((r) => cellsOf(r.cells).map((h) => kanaKey(s.id, h)))),
+  )
+
+  const pool = $derived(buildKana(selected))
 
   let current = $state<Kana | null>(null)
   let answer = $state('')
@@ -25,6 +32,14 @@
   let lastSymbol: string | null = null
   let hits = $state(0)
   let total = $state(0)
+
+  function cellsOf(cells: (string | null)[]): string[] {
+    return cells.filter((c): c is string => c !== null)
+  }
+
+  function sectionKeys(script: KanaScript, section: KanaSection): string[] {
+    return section.rows.flatMap((r) => cellsOf(r.cells).map((h) => kanaKey(script, h)))
+  }
 
   function next() {
     // picks a random symbol, avoiding the previous one when there are others
@@ -36,17 +51,23 @@
     queueMicrotask(() => inputEl?.focus())
   }
 
-  function toggle<T>(list: T[], item: T): T[] {
-    return list.includes(item) ? list.filter((x) => x !== item) : [...list, item]
-  }
-
   // changing the selection starts a fresh round and score
-  function change(update: () => void) {
-    update()
+  function setSelected(keys: string[]) {
+    selected = keys
     hits = 0
     total = 0
     lastSymbol = null
     next()
+  }
+
+  function setKeys(keys: string[], on: boolean) {
+    const rest = selected.filter((k) => !keys.includes(k))
+    setSelected(on ? [...rest, ...keys] : rest)
+  }
+
+  /** Clicking a group of keys selects them all, or clears them when all were already selected. */
+  function toggleKeys(keys: string[]) {
+    setKeys(keys, !keys.every((k) => selected.includes(k)))
   }
 
   function submit(event: Event) {
@@ -67,37 +88,6 @@
 
   next()
 </script>
-
-<div class="options">
-  <fieldset>
-    <legend>Script</legend>
-    {#each SCRIPTS as s (s.id)}
-      <label>
-        <input
-          type="checkbox"
-          checked={scripts.includes(s.id)}
-          disabled={scripts.length === 1 && scripts.includes(s.id)}
-          onchange={() => change(() => (scripts = toggle(scripts, s.id)))}
-        />
-        {s.label}
-      </label>
-    {/each}
-  </fieldset>
-  <fieldset>
-    <legend>Characters</legend>
-    {#each GROUPS as g (g.id)}
-      <label>
-        <input
-          type="checkbox"
-          checked={groups.includes(g.id)}
-          disabled={groups.length === 1 && groups.includes(g.id)}
-          onchange={() => change(() => (groups = toggle(groups, g.id)))}
-        />
-        {g.label}
-      </label>
-    {/each}
-  </fieldset>
-</div>
 
 {#if current}
   <section class="card">
@@ -128,34 +118,78 @@
   </section>
 
   <p class="muted score">Correct: {hits} of {total}</p>
+{:else}
+  <p class="muted">Select at least one character below to practice.</p>
 {/if}
 
+<div class="tables">
+  {#each SCRIPTS as script (script.id)}
+    {@const scriptKeys = KANA_SECTIONS.flatMap((s) => sectionKeys(script.id, s))}
+    <section class="script">
+      <header>
+        <h2>{script.label}</h2>
+        <span class="muted">{scriptKeys.filter((k) => selected.includes(k)).length} selected</span>
+        <button onclick={() => setKeys(scriptKeys, true)}>All</button>
+        <button onclick={() => setKeys(scriptKeys, false)}>None</button>
+      </header>
+
+      {#each KANA_SECTIONS as section (section.id)}
+        {@const keys = sectionKeys(script.id, section)}
+        <div class="group">
+          <div class="group-head">
+            <h3>{section.title}</h3>
+            <button class="link" onclick={() => setKeys(keys, true)}>All</button>
+            <button class="link" onclick={() => setKeys(keys, false)}>None</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                {#each section.columns as col (col)}
+                  <th scope="col">{col}</th>
+                {/each}
+              </tr>
+            </thead>
+            <tbody>
+              {#each section.rows as r, i (i)}
+                {@const rowKeys = cellsOf(r.cells).map((h) => kanaKey(script.id, h))}
+                <tr>
+                  <th scope="row">
+                    <button
+                      class="link"
+                      title="Toggle the whole row"
+                      onclick={() => toggleKeys(rowKeys)}
+                    >
+                      {r.label || '·'}
+                    </button>
+                  </th>
+                  {#each r.cells as cell, c (c)}
+                    <td>
+                      {#if cell}
+                        {@const key = kanaKey(script.id, cell)}
+                        <button
+                          class="cell"
+                          class:on={selected.includes(key)}
+                          aria-pressed={selected.includes(key)}
+                          lang="ja"
+                          onclick={() => toggleKeys([key])}
+                        >
+                          {symbolOf(script.id, cell)}
+                        </button>
+                      {/if}
+                    </td>
+                  {/each}
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
+      {/each}
+    </section>
+  {/each}
+</div>
+
 <style>
-  .options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 16px;
-  }
-  fieldset {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 16px;
-    margin: 0;
-    padding: 6px 12px 8px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-  }
-  legend {
-    padding: 0 4px;
-    font-size: 0.85rem;
-    color: var(--muted);
-  }
-  label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
   .card {
     margin-top: 24px;
     padding: 24px 16px;
@@ -195,5 +229,82 @@
   }
   .score {
     text-align: center;
+  }
+
+  .tables {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .script {
+    padding: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .script > header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .script > header span {
+    margin-right: auto;
+    font-size: 0.85rem;
+  }
+  h2 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+  h3 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  .group {
+    margin-top: 16px;
+  }
+  .group-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  table {
+    margin-top: 4px;
+    border-collapse: separate;
+    border-spacing: 4px;
+  }
+  th {
+    font-weight: normal;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  td {
+    padding: 0;
+  }
+  .cell {
+    width: 100%;
+    min-width: 40px;
+    padding: 6px 0;
+    font-size: 1.2rem;
+    color: var(--muted);
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .cell.on {
+    color: var(--on);
+    background: var(--on-bg);
+    border: 1px solid var(--on);
+  }
+  .link {
+    padding: 0 2px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    background: none;
+    border: none;
+    text-decoration: underline;
+    cursor: pointer;
   }
 </style>
