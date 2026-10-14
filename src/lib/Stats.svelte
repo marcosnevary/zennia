@@ -34,10 +34,6 @@
     hits: wordTotal.hits + stats.drill.hits,
     misses: wordTotal.misses + stats.drill.misses,
   })
-  const breakdown = $derived([
-    { label: 'Words', tally: wordTotal },
-    { label: 'Hiragana & Katakana practice', tally: stats.drill },
-  ])
 
   /** good / ok / poor, always shown together with the percentage text */
   function level(tally: Tally): 'ok' | 'warn' | 'bad' {
@@ -54,10 +50,6 @@
   <p class="muted">No statistics yet. Answer some words or kana in Practice and they will show up here.</p>
 {:else}
   <section class="summary">
-    <div class="tile">
-      <span class="value">{attempts(overall)}</span>
-      <span class="label">Answers</span>
-    </div>
     <div class="tile ok">
       <span class="value">{overall.hits}</span>
       <span class="label">✓ Correct</span>
@@ -70,16 +62,11 @@
       <span class="value">{percent(accuracy(overall))}</span>
       <span class="label">Accuracy</span>
     </div>
+    <div class="tile">
+      <span class="value">{attempts(overall)}</span>
+      <span class="label">Answers</span>
+    </div>
   </section>
-
-  <ul class="breakdown">
-    {#each breakdown as { label, tally } (label)}
-      <li>
-        <span>{label}</span>
-        <span class="counts">✓{tally.hits} ✗{tally.misses} · {percent(accuracy(tally))}</span>
-      </li>
-    {/each}
-  </ul>
 
   <div class="toolbar">
     <label>
@@ -171,16 +158,6 @@
   .tile.warn .label,
   .tile.bad .label {
     color: inherit;
-  }
-  .breakdown {
-    margin-top: 8px;
-    font-size: 0.9rem;
-    color: var(--muted);
-  }
-  .breakdown li {
-    display: flex;
-    justify-content: space-between;
-    padding: 2px 4px;
   }
   .toolbar {
     display: flex;
