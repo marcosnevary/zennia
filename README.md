@@ -1,19 +1,63 @@
 # zennia
 
-A web app for practicing Japanese. Type the romaji reading of a word, or of a single hiragana/katakana symbol, and zennia checks it by sound and shows the correct answer.
+zennia is a simple web app for practicing Japanese. It shows you a word (or a single hiragana or katakana symbol), you type how it sounds in romaji, and it tells you right away whether you got it right.
 
-Built with Svelte 5, Vite, TypeScript and [wanakana](https://github.com/WaniKani/WanaKana). There is no backend: everything lives in your browser's localStorage.
+There is no account and nothing to install: your words and progress stay in your own browser.
 
-## Features
+## What you can do
 
-- **Word practice:** a random word from your pool, never the same one twice in a row. After checking, you see the hiragana, the generated romaji and the meaning.
-- **Kana practice:** drill hiragana and katakana symbols. Pick characters one by one, by row, by group (basic, dakuten, combinations) or all at once.
-- **Smart checking:** compares sound, not text. `shi/si`, `chi/ti`, `tsu/tu`, `fu/hu`, `ji/zi`, macrons (`ō`), uppercase and extra spaces are all accepted. If only a vowel's length is off (`tokyo` instead of `toukyou`), the result is "almost" and counts as a miss, because length changes the word.
-- **Word management:** add, edit and delete words. Each word stores its Japanese text, hiragana reading and meaning; romaji is always derived from the hiragana.
-- **Import and export:** JSON backups (always merged into the pool, duplicates ignored) and import from an Anki "Notes in Plain Text" export.
-- **Stats:** lifetime hits and misses per word and per kana symbol, plus a session scoreboard with accuracy and streak.
+### Practice words
 
-## Getting started
+Build your own word list and drill it. zennia picks a random word, never the same one twice in a row. Type the reading in romaji and press Check. You will see whether you were right, the correct hiragana and romaji, and the meaning of the word.
+
+### Practice hiragana and katakana
+
+Switch the practice mode to drill single symbols. Choose exactly what to study: individual characters, whole rows, groups (basic, dakuten, combinations) or everything at once.
+
+### Typing is forgiving
+
+zennia compares the sound, not the exact spelling, so you can type however you are used to:
+
+- `shi` or `si`, `chi` or `ti`, `tsu` or `tu`, `fu` or `hu`, `ji` or `zi`
+- Macrons (`ō`, `ū`), uppercase letters and extra spaces
+- A double `nn` at the end of a word for ん
+
+One thing is strict on purpose: vowel length. Typing `tokyo` for とうきょう is marked "almost" and counts as a miss, because a long vowel can change the word (おばさん is not おばあさん).
+
+### Manage your words
+
+Open the **Words** tab to add, edit or delete words. Each word has:
+
+- the Japanese text (kanji included)
+- its reading in hiragana
+- its meaning
+
+You only enter the hiragana. The romaji is generated from it automatically.
+
+### Track your progress
+
+The **Stats** tab shows how many times you got each word and each kana symbol right or wrong over time. While you practice, a scoreboard shows your correct and wrong answers, accuracy and current streak for the session.
+
+## Bringing in words
+
+In the **Words** tab you can:
+
+- **Import from Anki:** in Anki, choose File → Export and set the format to *Notes in Plain Text* (not "Cards in Plain Text"), then pick the file with "Import Anki deck (.txt)". The first three columns must be the Japanese word, its hiragana reading and the meaning, in that order; other columns are ignored. Rows without a valid hiragana reading and repeated word and reading pairs are skipped, and a summary tells you how many.
+- **Export and import JSON:** save your whole word list to a file, and load it back later or on another device. Importing adds to your list and ignores duplicates.
+
+## Your data and backups
+
+Everything is stored in your browser's local storage, which means:
+
+- It is tied to one browser on one device. Words you add on your phone will not appear on your computer unless you export and import them.
+- It is tied to the web address. If the address changes, the new one starts empty, so export your words first.
+- Clearing your browser data erases it.
+
+Export your words to JSON from time to time as a backup. Your stats are not part of the export.
+
+## For developers
+
+zennia is built with Svelte 5, Vite, TypeScript and [wanakana](https://github.com/WaniKani/WanaKana), with no backend.
 
 ```bash
 npm install
@@ -23,34 +67,4 @@ npm run check    # type checking
 npm run build    # production build into dist/
 ```
 
-## Project layout
-
-```
-src/
-  App.svelte               tabs and persistence
-  lib/
-    Practice.svelte        practice shell (words / kana switch)
-    WordPractice.svelte    word practice
-    KanaPractice.svelte    hiragana/katakana practice
-    Scoreboard.svelte      session scoreboard
-    Manage.svelte          word CRUD and import/export
-    Stats.svelte           lifetime stats view
-    romaji.ts              normalization and answer checking
-    kana.ts                kana grid
-    words.ts               validation of external data and merging
-    stats.ts               hit/miss tallies
-    anki.ts                Anki deck (.txt) import
-    io.ts                  JSON export/import
-    storage.ts             single point of data access (localStorage)
-    types.ts               shared types
-```
-
-To move storage to IndexedDB or a backend, only `storage.ts` needs to change.
-
-## Data and backups
-
-Data is stored per browser and per domain (keys `zennia:words` and `zennia:stats`). Export your words as JSON from time to time, and always before changing the app's URL, since the new address starts empty.
-
-## Deploying
-
-The project is a plain Vite app, so it deploys to Vercel with no configuration: import the repository, and the build (`npm run build`) and output (`dist`) are detected automatically.
+All data access goes through `src/lib/storage.ts`, so moving to IndexedDB or a backend only requires changing that file. Answer checking lives in `src/lib/romaji.ts`. The app is a plain Vite project and deploys to Vercel with no configuration.
