@@ -113,7 +113,7 @@
 </script>
 
 {#if current}
-  <Scoreboard {hits} {total} {streak} {bestStreak} onreset={resetSession} />
+  <Scoreboard {hits} {total} {streak} {bestStreak} lifetime={stats.drill} onreset={resetSession} />
 
   <section class="card">
     <p class="symbol" lang="ja">{current.symbol}</p>

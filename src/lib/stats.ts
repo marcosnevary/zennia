@@ -4,7 +4,7 @@ import { kanaBreakdown } from './romaji'
 import type { Stats, Tally, Verdict, Word } from './types'
 
 export function emptyStats(): Stats {
-  return { words: {}, kana: {} }
+  return { words: {}, kana: {}, drill: { hits: 0, misses: 0 } }
 }
 
 function count(value: unknown): number {
@@ -25,7 +25,12 @@ function sanitizeTallies(raw: unknown): Record<string, Tally> {
 /** Validates stats read from storage; anything malformed becomes empty. */
 export function sanitizeStats(raw: unknown): Stats {
   const o = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {}
-  return { words: sanitizeTallies(o.words), kana: sanitizeTallies(o.kana) }
+  const drill = (o.drill ?? {}) as Record<string, unknown>
+  return {
+    words: sanitizeTallies(o.words),
+    kana: sanitizeTallies(o.kana),
+    drill: { hits: count(drill.hits), misses: count(drill.misses) },
+  }
 }
 
 function bump(tallies: Record<string, Tally>, key: string, hit: boolean): void {
@@ -50,6 +55,16 @@ export function recordAnswer(stats: Stats, word: Word, input: string, verdict: V
 /** Records one answer of the hiragana/katakana practice. */
 export function recordKana(stats: Stats, script: KanaScript, hiragana: string, hit: boolean): void {
   bump(stats.kana, kanaKey(script, hiragana), hit)
+  if (hit) stats.drill.hits++
+  else stats.drill.misses++
+}
+
+/** Sum of every tally in a record. */
+export function sumTallies(tallies: Record<string, Tally>): Tally {
+  return Object.values(tallies).reduce(
+    (sum, t) => ({ hits: sum.hits + t.hits, misses: sum.misses + t.misses }),
+    { hits: 0, misses: 0 },
+  )
 }
 
 export function attempts(tally: Tally): number {

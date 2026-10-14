@@ -1,6 +1,6 @@
 <script lang="ts">
   import { symbolOf, type KanaScript } from './kana'
-  import { emptyStats, STATS_SORT_OPTIONS, accuracy, attempts, percent, sortTallies, type StatsSort } from './stats'
+  import { emptyStats, STATS_SORT_OPTIONS, accuracy, attempts, percent, sortTallies, sumTallies, type StatsSort } from './stats'
   import type { Stats, Tally, Word } from './types'
 
   let { words, stats = $bindable() }: { words: Word[]; stats: Stats } = $props()
@@ -29,12 +29,15 @@
     })).filter((script) => script.rows.length),
   )
 
-  const overall = $derived(
-    Object.values(stats.words).reduce(
-      (sum, t) => ({ hits: sum.hits + t.hits, misses: sum.misses + t.misses }),
-      { hits: 0, misses: 0 },
-    ),
-  )
+  const wordTotal = $derived(sumTallies(stats.words))
+  const overall = $derived({
+    hits: wordTotal.hits + stats.drill.hits,
+    misses: wordTotal.misses + stats.drill.misses,
+  })
+  const breakdown = $derived([
+    { label: 'Words', tally: wordTotal },
+    { label: 'Hiragana & Katakana practice', tally: stats.drill },
+  ])
 
   /** good / ok / poor, always shown together with the percentage text */
   function level(tally: Tally): 'ok' | 'warn' | 'bad' {
@@ -48,7 +51,7 @@
 </script>
 
 {#if !attempts(overall)}
-  <p class="muted">No statistics yet. Answer some words in Practice and they will show up here.</p>
+  <p class="muted">No statistics yet. Answer some words or kana in Practice and they will show up here.</p>
 {:else}
   <section class="summary">
     <div class="tile">
@@ -68,6 +71,15 @@
       <span class="label">Accuracy</span>
     </div>
   </section>
+
+  <ul class="breakdown">
+    {#each breakdown as { label, tally } (label)}
+      <li>
+        <span>{label}</span>
+        <span class="counts">✓{tally.hits} ✗{tally.misses} · {percent(accuracy(tally))}</span>
+      </li>
+    {/each}
+  </ul>
 
   <div class="toolbar">
     <label>
@@ -99,6 +111,7 @@
     </ul>
   {/each}
 
+  {#if wordRows.length}
   <h2>Words</h2>
   <ul class="words">
     {#each wordRows as { word, tally } (word.id)}
@@ -110,6 +123,7 @@
       </li>
     {/each}
   </ul>
+  {/if}
 {/if}
 
 <style>
@@ -157,6 +171,16 @@
   .tile.warn .label,
   .tile.bad .label {
     color: inherit;
+  }
+  .breakdown {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  .breakdown li {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 4px;
   }
   .toolbar {
     display: flex;

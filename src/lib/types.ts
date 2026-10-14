@@ -28,6 +28,8 @@ export interface Tally {
 export interface Stats {
   words: Record<string, Tally>
   kana: Record<string, Tally>
+  /** Answers of the hiragana/katakana practice only (`kana` also counts the kana inside words) */
+  drill: Tally
 }
 
 export interface StatsFile {

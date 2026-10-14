@@ -60,6 +60,8 @@ describe('recordKana and mixed scripts', () => {
     expect(stats.kana['katakana:か']).toEqual({ hits: 0, misses: 1 })
     expect(stats.kana['hiragana:か']).toEqual({ hits: 1, misses: 0 })
     expect(stats.kana['katakana:こ']).toEqual({ hits: 1, misses: 0 })
+    // only the symbol-by-symbol practice feeds the drill total
+    expect(stats.drill).toEqual({ hits: 1, misses: 1 })
   })
 })
 
