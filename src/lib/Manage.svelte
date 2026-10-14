@@ -219,22 +219,26 @@
     <li>Enable <strong>Include HTML and media references</strong> (required to read the furigana).</li>
     <li>Export, then pick the file with <strong>Import Anki deck</strong>.</li>
   </ol>
-  <p>How the cards are read:</p>
+  <p>
+    Each card needs a <strong>front</strong> with the Japanese word and a <strong>back</strong> with the reading and the
+    meaning. Two layouts are recognised:
+  </p>
   <ul>
-    <li>The <strong>front</strong> of the card becomes the Japanese word.</li>
     <li>
-      The <strong>reading</strong> comes from the furigana on the back. Words written only in kana are their own reading.
+      <strong>Simple:</strong> the back has the meaning as plain text, then the reading inside a block with the class
+      <code>hiragana</code> (usually after a divider line).
     </li>
-    <li>The <strong>meaning</strong> is taken from the first block of text on the back.</li>
     <li>
-      Cards whose reading cannot be turned into kana, and repeated word + reading pairs, are skipped. The summary tells you
-      how many.
+      <strong>Furigana (e.g. the Kaishi deck):</strong> the back starts with the word with furigana (<code>&lt;ruby&gt;</code>
+      tags) and the meaning is the first block of text below it. This needs the HTML option above.
+    </li>
+    <li>In both, a word written only in kana is its own reading.</li>
+    <li>
+      Cards whose reading cannot be found or is not kana, and repeated word + reading pairs, are skipped. The summary
+      tells you how many.
     </li>
   </ul>
-  <p class="muted">
-    This works best with decks that show furigana on the back of the card. If most cards are skipped, check that HTML was
-    included in the export.
-  </p>
+  <p class="muted">Decks with a different layout may have most cards skipped.</p>
 
   <div class="row">
     <button class="primary" type="button" onclick={() => helpEl?.close()}>Close</button>

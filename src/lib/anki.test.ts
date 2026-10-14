@@ -44,4 +44,14 @@ describe('importAnkiDeck', () => {
   it('rejects text that is not an Anki export', () => {
     expect(() => importAnkiDeck('just one column')).toThrow()
   })
+  it('reads simple decks: meaning first, reading in a hiragana block', () => {
+    const simple = '#separator:tab\n#html:true\n人\t"person from\n\n<hr class=""notes-divider"">\n\n<div class=""hiragana"">\n    じん\n</div>"'
+    expect(importAnkiDeck(simple)).toMatchObject({
+      skipped: 0,
+      words: [{ japanese: '人', hiragana: 'じん', meaning: 'person from' }],
+    })
+  })
+  it('uses a kana-only front as its own reading when the back has no reading', () => {
+    expect(importAnkiDeck('ねこ\tcat\n')).toMatchObject({ words: [{ japanese: 'ねこ', hiragana: 'ねこ', meaning: 'cat' }] })
+  })
 })
