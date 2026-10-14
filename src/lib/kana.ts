@@ -32,8 +32,6 @@ const row = (label: string, cells: string): KanaRow => ({
   cells: [...cells].map((c) => (c === '・' ? null : c)),
 })
 
-// ぢ / づ (and their combinations) are left out: they sound like じ / ず,
-// so there is no single romaji to ask for.
 export const KANA_SECTIONS: KanaSection[] = [
   {
     id: 'main',
@@ -53,7 +51,7 @@ export const KANA_SECTIONS: KanaSection[] = [
       row('ん', 'ん・・・・'),
       { ...row('g', 'がぎぐげご'), gap: true },
       row('z', 'ざじずぜぞ'),
-      row('d', 'だ・・でど'),
+      row('d', 'だぢづでど'),
       row('b', 'ばびぶべぼ'),
       row('p', 'ぱぴぷぺぽ'),
     ],
@@ -72,6 +70,7 @@ export const KANA_SECTIONS: KanaSection[] = [
       { label: 'ry', cells: ['りゃ', 'りゅ', 'りょ'] },
       { label: 'gy', cells: ['ぎゃ', 'ぎゅ', 'ぎょ'] },
       { label: 'j', cells: ['じゃ', 'じゅ', 'じょ'] },
+      { label: 'dy', cells: ['ぢゃ', 'ぢゅ', 'ぢょ'] },
       { label: 'by', cells: ['びゃ', 'びゅ', 'びょ'] },
       { label: 'py', cells: ['ぴゃ', 'ぴゅ', 'ぴょ'] },
     ],
@@ -91,6 +90,12 @@ export function symbolOf(script: KanaScript, hiragana: string): string {
 export const ALL_HIRAGANA: string[] = KANA_SECTIONS.flatMap((s) =>
   s.rows.flatMap((r) => r.cells.filter((c): c is string => c !== null)),
 )
+
+/** ぢ / づ sound exactly like じ / ず, so either romaji is right (di / ji, du / zu). */
+export function acceptedReadings(hiragana: string): string[] {
+  const alias = hiragana.replace(/ぢ/g, 'じ').replace(/づ/g, 'ず')
+  return alias === hiragana ? [hiragana] : [hiragana, alias]
+}
 
 /** Builds the practice pool from the selected keys (see `kanaKey`). */
 export function buildKana(selected: string[]): Kana[] {

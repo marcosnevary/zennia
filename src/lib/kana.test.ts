@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ALL_HIRAGANA, KANA_SECTIONS, buildKana, kanaKey } from './kana'
+import { ALL_HIRAGANA, KANA_SECTIONS, acceptedReadings, buildKana, kanaKey } from './kana'
 import { checkAnswer, toDisplayRomaji } from './romaji'
 
 describe('buildKana', () => {
@@ -28,7 +28,9 @@ describe('buildKana', () => {
   it('accepts its own displayed romaji for every symbol', () => {
     const all = ALL_HIRAGANA.flatMap((h) => [kanaKey('hiragana', h), kanaKey('katakana', h)])
     for (const k of buildKana(all)) {
-      expect(checkAnswer(toDisplayRomaji(k.hiragana), k.hiragana), k.symbol).toBe('correct')
+      const typed = toDisplayRomaji(k.hiragana)
+      const ok = acceptedReadings(k.hiragana).some((h) => checkAnswer(typed, h) === 'correct')
+      expect(ok, k.symbol).toBe(true)
     }
   })
 
@@ -37,5 +39,20 @@ describe('buildKana', () => {
     expect(checkAnswer('n', 'ん')).toBe('correct')
     expect(checkAnswer('wo', 'を')).toBe('correct')
     expect(checkAnswer('ka', 'き')).toBe('incorrect')
+  })
+
+  it('includes ぢ / づ and accepts both of their spellings', () => {
+    expect(ALL_HIRAGANA).toEqual(expect.arrayContaining(['ぢ', 'づ', 'ぢゃ']))
+    expect(acceptedReadings('ぢ')).toEqual(['ぢ', 'じ'])
+    expect(acceptedReadings('づ')).toEqual(['づ', 'ず'])
+    expect(acceptedReadings('ぢょ')).toEqual(['ぢょ', 'じょ'])
+    expect(acceptedReadings('か')).toEqual(['か'])
+    const ok = (answer: string, h: string) =>
+      acceptedReadings(h).some((r) => checkAnswer(answer, r) === 'correct')
+    expect(ok('di', 'ぢ')).toBe(true)
+    expect(ok('ji', 'ぢ')).toBe(true)
+    expect(ok('du', 'づ')).toBe(true)
+    expect(ok('zu', 'づ')).toBe(true)
+    expect(ok('ka', 'ぢ')).toBe(false)
   })
 })

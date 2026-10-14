@@ -1,6 +1,7 @@
 <script lang="ts">
   import {
     KANA_SECTIONS,
+    acceptedReadings,
     buildKana,
     kanaKey,
     symbolOf,
@@ -78,7 +79,8 @@
     if (verdict) return next()
     if (!answer.trim()) return
     // single sounds have no vowel-length ambiguity: anything but a match is wrong
-    verdict = checkAnswer(answer, current.hiragana) === 'correct' ? 'correct' : 'incorrect'
+    const ok = acceptedReadings(current.hiragana).some((h) => checkAnswer(answer, h) === 'correct')
+    verdict = ok ? 'correct' : 'incorrect'
     total++
     if (verdict === 'correct') hits++
   }
