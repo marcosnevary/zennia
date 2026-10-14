@@ -2,8 +2,8 @@ import { emptyStats, sanitizeStats } from './stats'
 import type { Stats, StatsFile, Word, WordsFile } from './types'
 import { sanitizeWords } from './words'
 
-const KEY = 'nihongo:words'
-const STATS_KEY = 'nihongo:stats'
+const KEY = 'zennia:words'
+const STATS_KEY = 'zennia:stats'
 
 /**
  * Single point of access to the data. To replace localStorage with

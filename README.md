@@ -1,50 +1,56 @@
-# Nihongo
+# Zennia
 
-Web app for practicing Japanese vocabulary: it shows a word, you type its reading in romaji, and it tells you whether you got it right, along with the correct answer and the meaning.
+A web app for practicing Japanese. Type the romaji reading of a word, or of a single hiragana/katakana symbol, and Zennia checks it by sound and shows the correct answer.
 
-Stack: Svelte 5 + Vite + TypeScript, wanakana, localStorage (no backend).
+Built with Svelte 5, Vite, TypeScript and [wanakana](https://github.com/WaniKani/WanaKana). There is no backend: everything lives in your browser's localStorage.
 
-## Running
+## Features
+
+- **Word practice:** a random word from your pool, never the same one twice in a row. After checking, you see the hiragana, the generated romaji and the meaning.
+- **Kana practice:** drill hiragana and katakana symbols. Pick characters one by one, by row, by group (basic, dakuten, combinations) or all at once.
+- **Smart checking:** compares sound, not text. `shi/si`, `chi/ti`, `tsu/tu`, `fu/hu`, `ji/zi`, macrons (`ō`), uppercase and extra spaces are all accepted. If only a vowel's length is off (`tokyo` instead of `toukyou`), the result is "almost" and counts as a miss, because length changes the word.
+- **Word management:** add, edit and delete words. Each word stores its Japanese text, hiragana reading and meaning; romaji is always derived from the hiragana.
+- **Import and export:** JSON backups (always merged into the pool, duplicates ignored) and import from an Anki "Notes in Plain Text" export.
+- **Stats:** lifetime hits and misses per word and per kana symbol, plus a session scoreboard with accuracy and streak.
+
+## Getting started
 
 ```bash
 npm install
-npm run dev      # development
-npm test         # answer-checking logic tests
+npm run dev      # development server
+npm test         # tests
 npm run check    # type checking
 npm run build    # production build into dist/
 ```
 
-## How it works
-
-- **Practice:** picks a word; you type the romaji and the app checks it by comparing the sound in hiragana.
-- **Checking:** accepts `shi/si`, `chi/ti`, `tsu/tu`, `fu/hu`, `ji/zi`, macrons (`ō`), uppercase and extra spaces. If only the length of a vowel differs (`tokyo` instead of `toukyou`), the result is "almost" and counts as an error.
-- **Words:** save the `japanese`, `hiragana` and `meaning`. Romaji is not saved: it is generated from the hiragana.
-- **Import/export:** JSON with a `version` field. Importing always merges into the pool, ignoring duplicates.
-- **Anki import:** Manage → "Import Anki deck (.txt)" reads an Anki "Notes in Plain Text" export (HTML enabled, front + back of each card, e.g. Kaishi 1.5k) and maps word, reading and meaning to the pool.
-- **Data:** lives in the browser's localStorage, per domain. Export the JSON from time to time as a backup.
-
-## Structure
+## Project layout
 
 ```
 src/
-  App.svelte            tabs and persistence
+  App.svelte               tabs and persistence
   lib/
-    types.ts            Word, Verdict, WordsFile
-    romaji.ts           normalization and checking (wanakana)
-    words.ts            validation of external data and merging
-    storage.ts          single point of data access (localStorage)
-    io.ts               JSON export/import
-    anki.ts             Anki deck (.txt) import
-    Practice.svelte     practice screen
-    Manage.svelte       word CRUD and import/export
+    Practice.svelte        practice shell (words / kana switch)
+    WordPractice.svelte    word practice
+    KanaPractice.svelte    hiragana/katakana practice
+    Scoreboard.svelte      session scoreboard
+    Manage.svelte          word CRUD and import/export
+    Stats.svelte           lifetime stats view
+    romaji.ts              normalization and answer checking
+    kana.ts                kana grid
+    words.ts               validation of external data and merging
+    stats.ts               hit/miss tallies
+    anki.ts                Anki deck (.txt) import
+    io.ts                  JSON export/import
+    storage.ts             single point of data access (localStorage)
+    types.ts               shared types
 ```
 
-To replace localStorage with IndexedDB or a backend, rewrite only `storage.ts`.
+To move storage to IndexedDB or a backend, only `storage.ts` needs to change.
 
-## Deploying to Vercel
+## Data and backups
 
-1. Push the project to a GitHub repository.
-2. In Vercel, import the repository. Vite is detected automatically (build `npm run build`, output `dist`).
-3. Every push creates a deploy; branches and PRs get a preview URL.
+Data is stored per browser and per domain (keys `zennia:words` and `zennia:stats`). Export your words as JSON from time to time, and always before changing the app's URL, since the new address starts empty.
 
-Reminder: localStorage is separate per domain. If the URL changes, export the JSON first and import it at the new address.
+## Deploying
+
+The project is a plain Vite app, so it deploys to Vercel with no configuration: import the repository, and the build (`npm run build`) and output (`dist`) are detected automatically.
