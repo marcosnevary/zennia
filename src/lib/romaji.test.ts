@@ -70,6 +70,12 @@ describe('sanitizeWords and mergeWords', () => {
   })
   it('rejects invalid format', () => {
     expect(() => sanitizeWords({ foo: 1 })).toThrow()
+    const c = sanitizeWords([
+      { japanese: '犬', hiragana: 'いぬ', disabled: true },
+      { japanese: '猫', hiragana: 'ねこ', disabled: 'yes' },
+    ])
+    expect(c.words[0].disabled).toBe(true)
+    expect(c.words[1].disabled).toBeUndefined()
   })
   it('merge ignores duplicates', () => {
     const cur = sanitizeWords([{ id: '1', japanese: '犬', hiragana: 'いぬ', meaning: 'dog' }]).words

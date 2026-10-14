@@ -12,6 +12,11 @@
   --warn-bg: #fef9c3;
   --bad: #b91c1c;
   --bad-bg: #fee2e2;
+  /* word state: blue vs orange (color-blind safe), always paired with a text badge */
+  --on: #0062a3;
+  --on-bg: #e3f1fb;
+  --off: #a84300;
+  --off-bg: #fdeee0;
   font-family: system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', sans-serif;
   color: var(--text);
   background: var(--bg);
@@ -32,6 +37,10 @@
     --warn-bg: #422006;
     --bad: #fca5a5;
     --bad-bg: #450a0a;
+    --on: #7ec4f0;
+    --on-bg: #0c2d48;
+    --off: #f4a261;
+    --off-bg: #4a2a0a;
   }
 }
 

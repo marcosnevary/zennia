@@ -6,6 +6,8 @@ export interface Word {
   hiragana: string
   /** Meaning(s), free text */
   meaning: string
+  /** When true the word is excluded from practice (absent = enabled) */
+  disabled?: boolean
 }
 
 export type Verdict = 'correct' | 'almost' | 'incorrect'

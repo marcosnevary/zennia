@@ -66,6 +66,46 @@
     message = 'Word deleted.'
   }
 
+  function toggle(word: Word) {
+    words = words.map((w) => (w.id === word.id ? { ...w, disabled: !w.disabled } : w))
+  }
+
+  // selection (ids that no longer exist are ignored)
+  let selected = $state<Set<string>>(new Set())
+  const selectedWords = $derived(words.filter((w) => selected.has(w.id)))
+  const allSelected = $derived(words.length > 0 && selectedWords.length === words.length)
+
+  function toggleSelected(id: string) {
+    const next = new Set(selected)
+    if (next.has(id)) next.delete(id)
+    else next.add(id)
+    selected = next
+  }
+
+  function toggleSelectAll() {
+    selected = allSelected ? new Set() : new Set(words.map((w) => w.id))
+  }
+
+  function setSelectedDisabled(disabled: boolean) {
+    const count = selectedWords.length
+    words = words.map((w) => {
+      if (!selected.has(w.id)) return w
+      const { disabled: _, ...rest } = w
+      return disabled ? { ...rest, disabled: true } : rest
+    })
+    message = `${count} word(s) ${disabled ? 'disabled' : 'enabled'}.`
+    selected = new Set()
+  }
+
+  function removeSelected() {
+    const count = selectedWords.length
+    if (!confirm(`Delete ${count} selected word(s)?`)) return
+    words = words.filter((w) => !selected.has(w.id))
+    if (editingId && selected.has(editingId)) resetForm()
+    message = `${count} word(s) deleted.`
+    selected = new Set()
+  }
+
   function exportWords() {
     const date = new Date().toISOString().slice(0, 10)
     downloadText(`nihongo-words-${date}.json`, exportJSON(words))
@@ -140,15 +180,35 @@
 {#if words.length === 0}
   <p class="muted">No words yet.</p>
 {:else}
+  <div class="row bulk">
+    <label class="check">
+      <input type="checkbox" checked={allSelected} onchange={toggleSelectAll} />
+      Select all
+    </label>
+    <span class="muted">{selectedWords.length} selected</span>
+    <button onclick={() => setSelectedDisabled(false)} disabled={selectedWords.length === 0}>Enable</button>
+    <button onclick={() => setSelectedDisabled(true)} disabled={selectedWords.length === 0}>Disable</button>
+    <button class="danger" onclick={removeSelected} disabled={selectedWords.length === 0}>Delete</button>
+  </div>
   <ul class="list">
     {#each words as word (word.id)}
-      <li>
+      <li class={word.disabled ? 'off' : 'on'}>
+        <input
+          type="checkbox"
+          checked={selected.has(word.id)}
+          onchange={() => toggleSelected(word.id)}
+          aria-label={`Select ${word.japanese}`}
+        />
         <div class="info">
           <span class="jp" lang="ja">{word.japanese}</span>
+          <span class="badge">{word.disabled ? '✕ Disabled' : '✓ Active'}</span>
           <span class="muted" lang="ja">{word.hiragana} · {toDisplayRomaji(word.hiragana)}</span>
           <span>{word.meaning}</span>
         </div>
         <div class="row">
+          <button onclick={() => toggle(word)} aria-pressed={!word.disabled}>
+            {word.disabled ? 'Enable' : 'Disable'}
+          </button>
           <button onclick={() => edit(word)}>Edit</button>
           <button class="danger" onclick={() => remove(word)}>Delete</button>
         </div>
@@ -202,7 +262,35 @@
     border: 1px solid var(--border);
     border-radius: 8px;
   }
+  .bulk {
+    margin-bottom: 8px;
+  }
+  .check {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  li.on {
+    background: var(--on-bg);
+    border-left: 5px solid var(--on);
+  }
+  li.off {
+    background: var(--off-bg);
+    border-left: 5px solid var(--off);
+  }
+  .badge {
+    justify-self: start;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  li.on .badge {
+    color: var(--on);
+  }
+  li.off .badge {
+    color: var(--off);
+  }
   .info {
+    flex: 1;
     display: grid;
     gap: 2px;
   }
