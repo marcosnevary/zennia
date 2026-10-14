@@ -65,8 +65,7 @@
     <button onclick={onmanage}>{words.length ? 'Manage words' : 'Add words'}</button>
   </p>
 {:else}
-  <Scoreboard {hits} {total} {streak} {bestStreak} lifetime={sumTallies(stats.words)} onreset={resetSession} />
-
+  <Scoreboard {hits} {total} {streak} {bestStreak} lifetime={sumTallies(stats.words)} onreset={resetSession}>
   <section class="card">
     <p class="word" lang="ja">{current.japanese}</p>
 
@@ -98,11 +97,11 @@
       </div>
     {/if}
   </section>
+  </Scoreboard>
 {/if}
 
 <style>
   .card {
-    margin-top: 12px;
     padding: 24px 16px;
     background: var(--surface);
     border: 1px solid var(--border);
