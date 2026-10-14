@@ -131,8 +131,6 @@
       <header>
         <h2>{script.label}</h2>
         <span class="muted">{scriptKeys.filter((k) => selected.includes(k)).length} selected</span>
-        <button onclick={() => setKeys(scriptKeys, true)}>All</button>
-        <button onclick={() => setKeys(scriptKeys, false)}>None</button>
       </header>
 
       {#each KANA_SECTIONS as section (section.id)}
