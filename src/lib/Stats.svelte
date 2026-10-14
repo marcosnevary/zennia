@@ -52,11 +52,11 @@
   <section class="summary">
     <div class="tile ok">
       <span class="value">{overall.hits}</span>
-      <span class="label">✓ Correct</span>
+      <span class="label">Correct</span>
     </div>
     <div class="tile bad">
       <span class="value">{overall.misses}</span>
-      <span class="label">✗ Wrong</span>
+      <span class="label">Wrong</span>
     </div>
     <div class="tile {level(overall)}">
       <span class="value">{percent(accuracy(overall))}</span>
