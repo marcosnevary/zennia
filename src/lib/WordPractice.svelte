@@ -1,8 +1,10 @@
 <script lang="ts">
   import { checkAnswer, toDisplayRomaji } from './romaji'
-  import type { Verdict, Word } from './types'
+  import Scoreboard from './Scoreboard.svelte'
+  import { recordAnswer } from './stats'
+  import type { Stats, Verdict, Word } from './types'
 
-  let { words, onmanage }: { words: Word[]; onmanage: () => void } = $props()
+  let { words, stats = $bindable(), onmanage }: { words: Word[]; stats: Stats; onmanage: () => void } = $props()
 
   let current = $state<Word | null>(null)
   let answer = $state('')
@@ -11,6 +13,15 @@
   let lastId: string | null = null
   let hits = $state(0)
   let total = $state(0)
+  let streak = $state(0)
+  let bestStreak = $state(0)
+
+  function resetSession() {
+    hits = 0
+    total = 0
+    streak = 0
+    bestStreak = 0
+  }
 
   function next() {
     // picks a random word, avoiding the previous one when there are others
@@ -30,7 +41,14 @@
     if (!answer.trim()) return
     verdict = checkAnswer(answer, current.hiragana)
     total++
-    if (verdict === 'correct') hits++
+    if (verdict === 'correct') {
+      hits++
+      streak++
+      bestStreak = Math.max(bestStreak, streak)
+    } else {
+      streak = 0
+    }
+    recordAnswer(stats, current, answer, verdict)
   }
 
   // Space works like Enter (spaces are ignored when comparing anyway)
@@ -47,6 +65,8 @@
     <button onclick={onmanage}>{words.length ? 'Manage words' : 'Add words'}</button>
   </p>
 {:else}
+  <Scoreboard {hits} {total} {streak} {bestStreak} onreset={resetSession} />
+
   <section class="card">
     <p class="word" lang="ja">{current.japanese}</p>
 
@@ -78,13 +98,11 @@
       </div>
     {/if}
   </section>
-
-  <p class="muted score">Correct: {hits} of {total}</p>
 {/if}
 
 <style>
   .card {
-    margin-top: 24px;
+    margin-top: 12px;
     padding: 24px 16px;
     background: var(--surface);
     border: 1px solid var(--border);
@@ -123,8 +141,5 @@
   .incorrect {
     background: var(--bad-bg);
     color: var(--bad);
-  }
-  .score {
-    text-align: center;
   }
 </style>

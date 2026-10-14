@@ -1,15 +1,21 @@
 <script lang="ts">
   import Practice from './lib/Practice.svelte'
   import Manage from './lib/Manage.svelte'
-  import { loadWords, saveWords } from './lib/storage'
-  import type { Word } from './lib/types'
+  import StatsView from './lib/Stats.svelte'
+  import { loadStats, loadWords, saveStats, saveWords } from './lib/storage'
+  import type { Stats, Word } from './lib/types'
 
   let words = $state<Word[]>(loadWords())
-  let tab = $state<'practice' | 'manage'>('practice')
+  let stats = $state<Stats>(loadStats())
+  let tab = $state<'practice' | 'manage' | 'stats'>('practice')
 
   // saves on every change to the pool (snapshot reads the whole list, including nested edits)
   $effect(() => {
     saveWords($state.snapshot(words) as Word[])
+  })
+
+  $effect(() => {
+    saveStats($state.snapshot(stats) as Stats)
   })
 </script>
 
@@ -20,12 +26,15 @@
     <button class:primary={tab === 'manage'} onclick={() => (tab = 'manage')}>
       Words ({words.length})
     </button>
+    <button class:primary={tab === 'stats'} onclick={() => (tab = 'stats')}>Stats</button>
   </nav>
 </header>
 
 <main>
   {#if tab === 'practice'}
-    <Practice {words} onmanage={() => (tab = 'manage')} />
+    <Practice {words} bind:stats onmanage={() => (tab = 'manage')} />
+  {:else if tab === 'stats'}
+    <StatsView {words} bind:stats />
   {:else}
     <Manage bind:words />
   {/if}
