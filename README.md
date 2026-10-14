@@ -20,6 +20,7 @@ npm run build    # production build into dist/
 - **Checking:** accepts `shi/si`, `chi/ti`, `tsu/tu`, `fu/hu`, `ji/zi`, macrons (`ō`), uppercase and extra spaces. If only the length of a vowel differs (`tokyo` instead of `toukyou`), the result is "almost" and counts as an error.
 - **Words:** save the `japanese`, `hiragana` and `meaning`. Romaji is not saved: it is generated from the hiragana.
 - **Import/export:** JSON with a `version` field. Importing can merge (ignoring duplicates) or replace the pool.
+- **Anki import:** Manage → "Import Anki deck (.txt)" reads an Anki "Notes in Plain Text" export (HTML enabled, front + back of each card, e.g. Kaishi 1.5k) and maps word, reading and meaning to the pool.
 - **Data:** lives in the browser's localStorage, per domain. Export the JSON from time to time as a backup.
 
 ## Structure
@@ -33,6 +34,7 @@ src/
     words.ts            validation of external data and merging
     storage.ts          single point of data access (localStorage)
     io.ts               JSON export/import
+    anki.ts             Anki deck (.txt) import
     Practice.svelte     practice screen
     Manage.svelte       word CRUD and import/export
 ```

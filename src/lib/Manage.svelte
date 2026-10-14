@@ -1,9 +1,10 @@
 <script lang="ts">
   import { isKana } from 'wanakana'
+  import { importAnkiDeck } from './anki'
   import { downloadText, exportJSON, importJSON } from './io'
   import { toDisplayRomaji } from './romaji'
   import type { Word } from './types'
-  import { mergeWords, newId } from './words'
+  import { mergeWords, newId, type SanitizeResult } from './words'
 
   let { words = $bindable() }: { words: Word[] } = $props()
 
@@ -71,14 +72,22 @@
     message = `${words.length} word(s) exported.`
   }
 
-  async function importFile(event: Event) {
+  function importFile(event: Event) {
+    return runImport(event, importJSON)
+  }
+
+  function importAnki(event: Event) {
+    return runImport(event, importAnkiDeck)
+  }
+
+  async function runImport(event: Event, parse: (text: string) => SanitizeResult) {
     const input = event.currentTarget as HTMLInputElement
     const file = input.files?.[0]
     input.value = ''
     if (!file) return
     error = ''
     try {
-      const { words: incoming, skipped } = importJSON(await file.text())
+      const { words: incoming, skipped } = parse(await file.text())
       const skippedNote = skipped ? ` ${skipped} invalid item(s) ignored.` : ''
       if (importMode === 'replace') {
         if (!confirm(`Replace the current ${words.length} word(s) with the ${incoming.length} from the file?`)) return
@@ -116,6 +125,10 @@
   <label class="file">
     Import JSON
     <input type="file" accept="application/json,.json" onchange={importFile} hidden />
+  </label>
+  <label class="file" title="Anki: Export Notes → Notes in Plain Text, with HTML enabled">
+    Import Anki deck (.txt)
+    <input type="file" accept="text/plain,.txt,.tsv" onchange={importAnki} hidden />
   </label>
   <select bind:value={importMode} aria-label="Import mode">
     <option value="merge">Merge with the pool</option>
