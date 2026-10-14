@@ -32,6 +32,11 @@
     if (verdict === 'correct') hits++
   }
 
+  // Space works like Enter (spaces are ignored when comparing anyway)
+  function onkeydown(event: KeyboardEvent) {
+    if (event.key === ' ') submit(event)
+  }
+
   next()
 </script>
 
@@ -49,6 +54,7 @@
         type="text"
         bind:this={inputEl}
         bind:value={answer}
+        {onkeydown}
         readonly={verdict !== null}
         placeholder="Type in romaji"
         autocomplete="off"
