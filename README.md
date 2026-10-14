@@ -1,6 +1,6 @@
-# Zennia
+# zennia
 
-A web app for practicing Japanese. Type the romaji reading of a word, or of a single hiragana/katakana symbol, and Zennia checks it by sound and shows the correct answer.
+A web app for practicing Japanese. Type the romaji reading of a word, or of a single hiragana/katakana symbol, and zennia checks it by sound and shows the correct answer.
 
 Built with Svelte 5, Vite, TypeScript and [wanakana](https://github.com/WaniKani/WanaKana). There is no backend: everything lives in your browser's localStorage.
 

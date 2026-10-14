@@ -20,7 +20,7 @@
 </script>
 
 <header>
-  <h1>Zennia</h1>
+  <h1>zennia</h1>
   <nav>
     <button class:primary={tab === 'practice'} onclick={() => (tab = 'practice')}>Practice</button>
     <button class:primary={tab === 'manage'} onclick={() => (tab = 'manage')}>
