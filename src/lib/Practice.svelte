@@ -13,7 +13,7 @@
   let total = $state(0)
 
   function next() {
-    // sorteia uma palavra, evitando repetir a anterior quando há outras
+    // picks a random word, avoiding the previous one when there are others
     const pool = words.length > 1 ? words.filter((w) => w.id !== lastId) : words
     current = pool.length ? pool[Math.floor(Math.random() * pool.length)] : null
     lastId = current?.id ?? null
@@ -37,8 +37,8 @@
 
 {#if !current}
   <p class="muted">
-    Nenhuma palavra cadastrada ainda.
-    <button onclick={onmanage}>Adicionar palavras</button>
+    No words saved yet.
+    <button onclick={onmanage}>Add words</button>
   </p>
 {:else}
   <section class="card">
@@ -50,29 +50,29 @@
         bind:this={inputEl}
         bind:value={answer}
         readonly={verdict !== null}
-        placeholder="Digite em romaji"
+        placeholder="Type in romaji"
         autocomplete="off"
         autocapitalize="off"
         autocorrect="off"
         spellcheck="false"
       />
-      <button class="primary" type="submit">{verdict ? 'Próxima' : 'Verificar'}</button>
+      <button class="primary" type="submit">{verdict ? 'Next' : 'Check'}</button>
     </form>
 
     {#if verdict}
       <div class="result {verdict}" role="status">
         <strong>
-          {#if verdict === 'correct'}Correto!
-          {:else if verdict === 'almost'}Quase: só o comprimento de uma vogal difere.
-          {:else}Incorreto.{/if}
+          {#if verdict === 'correct'}Correct!
+          {:else if verdict === 'almost'}Almost: only the length of a vowel differs.
+          {:else}Incorrect.{/if}
         </strong>
         <p class="answer" lang="ja">{current.hiragana} · {toDisplayRomaji(current.hiragana)}</p>
-        <p>{current.meaning || '(sem significado cadastrado)'}</p>
+        <p>{current.meaning || '(no meaning saved)'}</p>
       </div>
     {/if}
   </section>
 
-  <p class="muted score">Acertos: {hits} de {total}</p>
+  <p class="muted score">Correct: {hits} of {total}</p>
 {/if}
 
 <style>

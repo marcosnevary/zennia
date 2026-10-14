@@ -1,16 +1,16 @@
 export interface Word {
   id: string
-  /** Palavra em japonês (kanji/kana), como aparece na prática */
+  /** Japanese word (kanji/kana), as shown in practice */
   japanese: string
-  /** Leitura em hiragana: é a fonte da verdade para a correção */
+  /** Reading in hiragana: the source of truth for checking answers */
   hiragana: string
-  /** Significado(s), texto livre */
+  /** Meaning(s), free text */
   meaning: string
 }
 
 export type Verdict = 'correct' | 'almost' | 'incorrect'
 
-/** Formato do arquivo de exportação e do localStorage */
+/** Format of the export file and of localStorage */
 export interface WordsFile {
   version: 1
   exportedAt?: string

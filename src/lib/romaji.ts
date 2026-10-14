@@ -3,7 +3,7 @@ import type { Verdict } from './types'
 
 const VOWEL_KANA: Record<string, string> = { a: 'あ', i: 'い', u: 'う', e: 'え', o: 'お' }
 
-/** Cada vogal com macron pode ser escrita de mais de uma forma em kana. */
+/** Each macron vowel can be written in more than one way in kana. */
 const MACRONS: Record<string, string[]> = {
   ā: ['aa'],
   ī: ['ii'],
@@ -14,7 +14,7 @@ const MACRONS: Record<string, string[]> = {
 
 const MAX_CANDIDATES = 256
 
-/** Expande macrons em todas as grafias possíveis (ō → ou / oo). */
+/** Expands macrons into every possible spelling (ō → ou / oo). */
 function expandMacrons(text: string): string[] {
   let results = ['']
   for (const ch of text) {
@@ -29,11 +29,11 @@ function expandMacrons(text: string): string[] {
 }
 
 /**
- * Converte para hiragana e troca a marca de vogal longa (ー) pela vogal
- * correspondente, para que こーひー e こおひい sejam o mesmo som.
+ * Converts to hiragana and replaces the long vowel mark (ー) with the
+ * matching vowel, so that こーひー and こおひい are the same sound.
  */
 export function normalizeKana(text: string): string {
-  // a wanakana converte ー em う para a linha do o; aqui usamos sempre a mesma vogal
+  // wanakana converts ー to う in the o row; here we always use the same vowel
   const hira = toHiragana(text.replace(/\s+/g, ''), { convertLongVowelMark: false })
   let out = ''
   for (const ch of hira) {
@@ -48,7 +48,7 @@ export function normalizeKana(text: string): string {
   return out
 }
 
-/** Romaji sem distinguir o comprimento das vogais (usado só para detectar "quase"). */
+/** Romaji ignoring vowel length (used only to detect "almost"). */
 function skeleton(kana: string): string {
   return toRomaji(kana)
     .replace(/aa/g, 'a')
@@ -59,17 +59,17 @@ function skeleton(kana: string): string {
 }
 
 /**
- * Compara o que foi digitado com o hiragana cadastrado.
- * - correct: mesmo som (aceita shi/si, chi/ti, tsu/tu, fu/hu, macrons, maiúsculas)
- * - almost: só o comprimento de alguma vogal difere
- * - incorrect: qualquer outra diferença
+ * Compares what was typed with the saved hiragana.
+ * - correct: same sound (accepts shi/si, chi/ti, tsu/tu, fu/hu, macrons, uppercase)
+ * - almost: only the length of some vowel differs
+ * - incorrect: any other difference
  */
 export function checkAnswer(input: string, hiragana: string): Verdict {
   if (!input.trim()) return 'incorrect'
 
   const target = normalizeKana(hiragana)
   const typed = expandMacrons(input.trim().toLowerCase())
-  // "nn" no fim da palavra é uma forma comum de digitar ん
+  // "nn" at the end of a word is a common way to type ん
   const variants = typed.flatMap((t) => (t.endsWith('nn') ? [t, t.slice(0, -1)] : [t]))
   const candidates = variants.map(normalizeKana)
 
@@ -81,7 +81,7 @@ export function checkAnswer(input: string, hiragana: string): Verdict {
   return 'incorrect'
 }
 
-/** Romaji exibido na resposta: derivado do hiragana, nunca salvo. */
+/** Romaji shown in the answer: derived from the hiragana, never saved. */
 export function toDisplayRomaji(hiragana: string): string {
   return toRomaji(normalizeKana(hiragana))
 }

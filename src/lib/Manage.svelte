@@ -30,19 +30,19 @@
     const h = hiragana.trim()
     const m = meaning.trim()
     if (!j || !h) {
-      error = 'Preencha a palavra em japonês e o hiragana.'
+      error = 'Fill in the Japanese word and the hiragana.'
       return
     }
     if (!isKana(h)) {
-      error = 'O hiragana deve conter apenas kana (hiragana, katakana ou ー).'
+      error = 'The hiragana field must contain only kana (hiragana, katakana or ー).'
       return
     }
     if (editingId) {
       words = words.map((w) => (w.id === editingId ? { ...w, japanese: j, hiragana: h, meaning: m } : w))
-      message = 'Palavra atualizada.'
+      message = 'Word updated.'
     } else {
       words = [{ id: newId(), japanese: j, hiragana: h, meaning: m }, ...words]
-      message = 'Palavra adicionada.'
+      message = 'Word added.'
     }
     resetForm()
     japaneseEl?.focus()
@@ -59,16 +59,16 @@
   }
 
   function remove(word: Word) {
-    if (!confirm(`Excluir "${word.japanese}"?`)) return
+    if (!confirm(`Delete "${word.japanese}"?`)) return
     words = words.filter((w) => w.id !== word.id)
     if (editingId === word.id) resetForm()
-    message = 'Palavra excluída.'
+    message = 'Word deleted.'
   }
 
   function exportWords() {
     const date = new Date().toISOString().slice(0, 10)
-    downloadText(`nihongo-palavras-${date}.json`, exportJSON(words))
-    message = `${words.length} palavras exportadas.`
+    downloadText(`nihongo-words-${date}.json`, exportJSON(words))
+    message = `${words.length} word(s) exported.`
   }
 
   async function importFile(event: Event) {
@@ -79,53 +79,53 @@
     error = ''
     try {
       const { words: incoming, skipped } = importJSON(await file.text())
-      const skippedNote = skipped ? ` ${skipped} item(ns) inválido(s) ignorado(s).` : ''
+      const skippedNote = skipped ? ` ${skipped} invalid item(s) ignored.` : ''
       if (importMode === 'replace') {
-        if (!confirm(`Substituir as ${words.length} palavras atuais por ${incoming.length} do arquivo?`)) return
+        if (!confirm(`Replace the current ${words.length} word(s) with the ${incoming.length} from the file?`)) return
         words = incoming
-        message = `Pool substituída: ${incoming.length} palavras.${skippedNote}`
+        message = `Pool replaced: ${incoming.length} word(s).${skippedNote}`
       } else {
         const result = mergeWords(words, incoming)
         words = result.words
-        message = `${result.added} adicionada(s), ${result.duplicates} já existia(m).${skippedNote}`
+        message = `${result.added} added, ${result.duplicates} already existed.${skippedNote}`
       }
       resetForm()
     } catch (e) {
-      error = e instanceof Error ? e.message : 'Não foi possível importar o arquivo.'
+      error = e instanceof Error ? e.message : 'Could not import the file.'
     }
   }
 </script>
 
-<h2>{editingId ? 'Editar palavra' : 'Nova palavra'}</h2>
+<h2>{editingId ? 'Edit word' : 'New word'}</h2>
 <form class="form" onsubmit={save}>
-  <input type="text" lang="ja" placeholder="Japonês (ex.: 食べる)" bind:value={japanese} bind:this={japaneseEl} />
-  <input type="text" lang="ja" placeholder="Hiragana (ex.: たべる)" bind:value={hiragana} />
-  <input type="text" placeholder="Significado (ex.: comer)" bind:value={meaning} />
+  <input type="text" lang="ja" placeholder="Japanese (e.g. 食べる)" bind:value={japanese} bind:this={japaneseEl} />
+  <input type="text" lang="ja" placeholder="Hiragana (e.g. たべる)" bind:value={hiragana} />
+  <input type="text" placeholder="Meaning (e.g. to eat)" bind:value={meaning} />
   <div class="row">
-    <button class="primary" type="submit">{editingId ? 'Salvar' : 'Adicionar'}</button>
-    {#if editingId}<button type="button" onclick={resetForm}>Cancelar</button>{/if}
+    <button class="primary" type="submit">{editingId ? 'Save' : 'Add'}</button>
+    {#if editingId}<button type="button" onclick={resetForm}>Cancel</button>{/if}
   </div>
 </form>
 
 {#if error}<p class="error" role="alert">{error}</p>{/if}
 {#if message}<p class="muted" role="status">{message}</p>{/if}
 
-<h2>Importar e exportar</h2>
+<h2>Import and export</h2>
 <div class="row">
-  <button onclick={exportWords} disabled={words.length === 0}>Exportar JSON</button>
+  <button onclick={exportWords} disabled={words.length === 0}>Export JSON</button>
   <label class="file">
-    Importar JSON
+    Import JSON
     <input type="file" accept="application/json,.json" onchange={importFile} hidden />
   </label>
-  <select bind:value={importMode} aria-label="Modo de importação">
-    <option value="merge">Mesclar com a pool</option>
-    <option value="replace">Substituir a pool</option>
+  <select bind:value={importMode} aria-label="Import mode">
+    <option value="merge">Merge with the pool</option>
+    <option value="replace">Replace the pool</option>
   </select>
 </div>
 
-<h2>Palavras ({words.length})</h2>
+<h2>Words ({words.length})</h2>
 {#if words.length === 0}
-  <p class="muted">Nenhuma palavra ainda.</p>
+  <p class="muted">No words yet.</p>
 {:else}
   <ul class="list">
     {#each words as word (word.id)}
@@ -136,8 +136,8 @@
           <span>{word.meaning}</span>
         </div>
         <div class="row">
-          <button onclick={() => edit(word)}>Editar</button>
-          <button class="danger" onclick={() => remove(word)}>Excluir</button>
+          <button onclick={() => edit(word)}>Edit</button>
+          <button class="danger" onclick={() => remove(word)}>Delete</button>
         </div>
       </li>
     {/each}
