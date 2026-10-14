@@ -13,7 +13,7 @@ MVP done and running locally (`npm run dev`). Stack: Svelte 5 + Vite + TypeScrip
 - **Practice:** shows the Japanese word, a romaji box and a Check button; the result shows correct/almost/incorrect, the hiragana, the generated romaji and the meaning; Next button.
 - **Drawing:** random word from the pool, never repeating the previous one in a row.
 - **Manage words:** add, edit and delete inside the app.
-- **Import and export:** JSON, with the option to merge or replace.
+- **Import and export:** JSON, always merged into the pool (duplicates ignored).
 - **Persistence:** localStorage, no backend.
 
 The meaning is free text, so several meanings go in the same field.

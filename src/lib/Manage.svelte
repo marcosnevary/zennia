@@ -4,7 +4,7 @@
   import { downloadText, exportJSON, importJSON } from './io'
   import { toDisplayRomaji } from './romaji'
   import type { Word } from './types'
-  import { mergeWords, newId, type SanitizeResult } from './words'
+  import { mergeWords, newId, SORT_OPTIONS, sortWords, type SanitizeResult, type SortDirection, type SortKey } from './words'
 
   let { words = $bindable() }: { words: Word[] } = $props()
 
@@ -19,7 +19,6 @@
   let dialogEl = $state<HTMLDialogElement>()
   let error = $state('')
   let message = $state('')
-  let importMode = $state<'merge' | 'replace'>('merge')
   let japaneseEl = $state<HTMLInputElement>()
 
   function resetForm() {
@@ -86,12 +85,16 @@
   // selection (ids that no longer exist are ignored)
   let selected = $state<Set<string>>(new Set())
   let query = $state('')
+  let sortKey = $state<SortKey>('list')
+  let sortDirection = $state<SortDirection>('asc')
   const visibleWords = $derived.by(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return words
-    return words.filter((w) =>
-      [w.japanese, w.hiragana, toDisplayRomaji(w.hiragana), w.meaning].some((field) => field.toLowerCase().includes(q)),
-    )
+    const matches = !q
+      ? words
+      : words.filter((w) =>
+          [w.japanese, w.hiragana, toDisplayRomaji(w.hiragana), w.meaning].some((field) => field.toLowerCase().includes(q)),
+        )
+    return sortWords(matches, sortKey, sortDirection)
   })
   const selectedWords = $derived(words.filter((w) => selected.has(w.id)))
   const allSelected = $derived(visibleWords.length > 0 && visibleWords.every((w) => selected.has(w.id)))
@@ -154,15 +157,9 @@
     try {
       const { words: incoming, skipped } = parse(await file.text())
       const skippedNote = skipped ? ` ${skipped} invalid item(s) ignored.` : ''
-      if (importMode === 'replace') {
-        if (!confirm(`Replace the current ${words.length} word(s) with the ${incoming.length} from the file?`)) return
-        words = incoming
-        message = `Pool replaced: ${incoming.length} word(s).${skippedNote}`
-      } else {
-        const result = mergeWords(words, incoming)
-        words = result.words
-        message = `${result.added} added, ${result.duplicates} already existed.${skippedNote}`
-      }
+      const result = mergeWords(words, incoming)
+      words = result.words
+      message = `${result.added} added, ${result.duplicates} already existed.${skippedNote}`
       resetForm()
     } catch (e) {
       error = e instanceof Error ? e.message : 'Could not import the file.'
@@ -208,10 +205,6 @@
     Import Anki deck (.txt)
     <input type="file" accept="text/plain,.txt,.tsv" onchange={importAnki} hidden />
   </label>
-  <select bind:value={importMode} aria-label="Import mode">
-    <option value="merge">Merge with the pool</option>
-    <option value="replace">Replace the pool</option>
-  </select>
 </div>
 
 {#snippet eyeIcon()}
@@ -235,14 +228,30 @@
 {#if words.length === 0}
   <p class="muted">No words yet.</p>
 {:else}
-  <input
-    type="search"
-    class="search"
-    placeholder="Search by word, reading, romaji or meaning"
-    aria-label="Search words"
-    bind:value={query}
-    oninput={onSearch}
-  />
+  <div class="toolbar">
+    <input
+      type="search"
+      class="search"
+      placeholder="Search by word, reading, romaji or meaning"
+      aria-label="Search words"
+      bind:value={query}
+      oninput={onSearch}
+    />
+    <div class="sort">
+      <select bind:value={sortKey} aria-label="Sort by">
+        {#each SORT_OPTIONS as option (option.key)}
+          <option value={option.key}>{option.label}</option>
+        {/each}
+      </select>
+      <button
+        onclick={() => (sortDirection = sortDirection === 'asc' ? 'desc' : 'asc')}
+        aria-label={sortDirection === 'asc' ? 'Ascending' : 'Descending'}
+        title={sortDirection === 'asc' ? 'Ascending (click to reverse)' : 'Descending (click to reverse)'}
+      >
+        {sortDirection === 'asc' ? '↑ Ascending' : '↓ Descending'}
+      </button>
+    </div>
+  </div>
   <div class="row bulk">
     <label class="check">
       <input type="checkbox" checked={allSelected} onchange={toggleSelectAll} />
@@ -370,6 +379,28 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 8px;
+  }
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .toolbar .search {
+    flex: 1;
+    min-width: 200px;
+    width: auto;
+    margin-bottom: 0;
+  }
+  .sort button {
+    /* fixed width so the toolbar does not shift when the direction flips */
+    width: 9.5em;
+  }
+  .sort {
+    display: flex;
+    gap: 8px;
+    align-items: center;
   }
   .bulk {
     margin-bottom: 8px;
