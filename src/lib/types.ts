@@ -18,3 +18,19 @@ export interface WordsFile {
   exportedAt?: string
   words: Word[]
 }
+
+export interface Tally {
+  hits: number
+  misses: number
+}
+
+/** Lifetime results: per word (by id) and per kana of the hiragana/katakana practice (see `kanaKey`) */
+export interface Stats {
+  words: Record<string, Tally>
+  kana: Record<string, Tally>
+}
+
+export interface StatsFile {
+  version: 1
+  stats: Stats
+}

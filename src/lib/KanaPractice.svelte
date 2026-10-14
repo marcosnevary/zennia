@@ -10,7 +10,11 @@
     type KanaSection,
   } from './kana'
   import { checkAnswer, toDisplayRomaji } from './romaji'
-  import type { Verdict } from './types'
+  import Scoreboard from './Scoreboard.svelte'
+  import { recordKana } from './stats'
+  import type { Stats, Verdict } from './types'
+
+  let { stats = $bindable() }: { stats: Stats } = $props()
 
   const SCRIPTS: { id: KanaScript; label: string }[] = [
     { id: 'hiragana', label: 'Hiragana' },
@@ -35,6 +39,15 @@
   let lastSymbol: string | null = null
   let hits = $state(0)
   let total = $state(0)
+  let streak = $state(0)
+  let bestStreak = $state(0)
+
+  function resetSession() {
+    hits = 0
+    total = 0
+    streak = 0
+    bestStreak = 0
+  }
 
   function cellsOf(cells: (string | null)[]): string[] {
     return cells.filter((c): c is string => c !== null)
@@ -57,8 +70,7 @@
   // changing the selection starts a fresh round and score
   function setSelected(keys: string[]) {
     selected = keys
-    hits = 0
-    total = 0
+    resetSession()
     lastSymbol = null
     next(false) // keep focus on the clicked cell so the page does not jump
   }
@@ -82,7 +94,14 @@
     const ok = acceptedReadings(current.hiragana).some((h) => checkAnswer(answer, h) === 'correct')
     verdict = ok ? 'correct' : 'incorrect'
     total++
-    if (verdict === 'correct') hits++
+    if (ok) {
+      hits++
+      streak++
+      bestStreak = Math.max(bestStreak, streak)
+    } else {
+      streak = 0
+    }
+    recordKana(stats, current.script, current.hiragana, ok)
   }
 
   // Space works like Enter
@@ -120,8 +139,7 @@
       </div>
     {/if}
   </section>
-
-  <p class="muted score">Correct: {hits} of {total}</p>
+  <Scoreboard {hits} {total} {streak} {bestStreak} onreset={resetSession} />
 {:else}
   <p class="muted">Select at least one character below to practice.</p>
 {/if}
@@ -245,10 +263,6 @@
     background: var(--bad-bg);
     color: var(--bad);
   }
-  .score {
-    text-align: center;
-  }
-
   .tables {
     display: flex;
     flex-direction: column;

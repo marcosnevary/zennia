@@ -1,9 +1,9 @@
 <script lang="ts">
   import WordPractice from './WordPractice.svelte'
   import KanaPractice from './KanaPractice.svelte'
-  import type { Word } from './types'
+  import type { Stats, Word } from './types'
 
-  let { words, onmanage }: { words: Word[]; onmanage: () => void } = $props()
+  let { words, stats = $bindable(), onmanage }: { words: Word[]; stats: Stats; onmanage: () => void } = $props()
 
   let mode = $state<'words' | 'kana'>('words')
 </script>
@@ -14,9 +14,9 @@
 </div>
 
 {#if mode === 'words'}
-  <WordPractice {words} {onmanage} />
+  <WordPractice {words} bind:stats {onmanage} />
 {:else}
-  <KanaPractice />
+  <KanaPractice bind:stats />
 {/if}
 
 <style>
