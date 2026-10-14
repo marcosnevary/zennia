@@ -43,14 +43,14 @@
     return section.rows.flatMap((r) => cellsOf(r.cells).map((h) => kanaKey(script, h)))
   }
 
-  function next() {
+  function next(focusInput = true) {
     // picks a random symbol, avoiding the previous one when there are others
     const choices = pool.length > 1 ? pool.filter((k) => k.symbol !== lastSymbol) : pool
     current = choices.length ? choices[Math.floor(Math.random() * choices.length)] : null
     lastSymbol = current?.symbol ?? null
     answer = ''
     verdict = null
-    queueMicrotask(() => inputEl?.focus())
+    if (focusInput) queueMicrotask(() => inputEl?.focus({ preventScroll: true }))
   }
 
   // changing the selection starts a fresh round and score
@@ -59,7 +59,7 @@
     hits = 0
     total = 0
     lastSymbol = null
-    next()
+    next(false) // keep focus on the clicked cell so the page does not jump
   }
 
   function setKeys(keys: string[], on: boolean) {
