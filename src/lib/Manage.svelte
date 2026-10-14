@@ -216,29 +216,24 @@
   <ol>
     <li>Select the deck and choose <strong>File → Export…</strong></li>
     <li>Set the format to <strong>Notes in Plain Text (.txt)</strong>.</li>
-    <li>Enable <strong>Include HTML and media references</strong> (required to read the furigana).</li>
+    <li>Enable <strong>Include HTML and media references</strong>.</li>
     <li>Export, then pick the file with <strong>Import Anki deck</strong>.</li>
   </ol>
-  <p>
-    Each card needs a <strong>front</strong> with the Japanese word and a <strong>back</strong> with the reading and the
-    meaning. Two layouts are recognised:
-  </p>
+  <p>The cards must follow this layout:</p>
   <ul>
+    <li>The <strong>front</strong> is the Japanese word.</li>
+    <li>The <strong>back</strong> is the meaning.</li>
     <li>
-      <strong>Simple:</strong> the back has the meaning as plain text, then the reading inside a block with the class
-      <code>hiragana</code> (usually after a divider line).
-    </li>
-    <li>
-      <strong>Furigana (e.g. the Kaishi deck):</strong> the back starts with the word with furigana (<code>&lt;ruby&gt;</code>
-      tags) and the meaning is the first block of text below it. This needs the HTML option above.
-    </li>
-    <li>In both, a word written only in kana is its own reading.</li>
-    <li>
-      Cards whose reading cannot be found or is not kana, and repeated word + reading pairs, are skipped. The summary
-      tells you how many.
+      The back also needs a third field named <code>hiragana</code> holding the reading in hiragana (in the exported file,
+      a block with the class <code>hiragana</code>).
     </li>
   </ul>
-  <p class="muted">Decks with a different layout may have most cards skipped.</p>
+  <p>
+    Cards without a valid hiragana reading, and repeated word + reading pairs, are skipped. The summary tells you how many.
+  </p>
+  <p class="muted">
+    Special case: the <strong>Kaishi 1.5k</strong> deck can also be imported as it is.
+  </p>
 
   <div class="row">
     <button class="primary" type="button" onclick={() => helpEl?.close()}>Close</button>
