@@ -1,7 +1,7 @@
 <script lang="ts">
   import { checkAnswer, toDisplayRomaji } from './romaji'
   import Scoreboard from './Scoreboard.svelte'
-  import { recordAnswer, sumTallies } from './stats'
+  import { recordAnswer } from './stats'
   import type { Stats, Verdict, Word } from './types'
 
   let { words, stats = $bindable(), onmanage }: { words: Word[]; stats: Stats; onmanage: () => void } = $props()
@@ -65,7 +65,6 @@
     <button onclick={onmanage}>{words.length ? 'Manage words' : 'Add words'}</button>
   </p>
 {:else}
-  <Scoreboard {hits} {total} {streak} {bestStreak} lifetime={sumTallies(stats.words)} onreset={resetSession}>
   <section class="card">
     <p class="word" lang="ja">{current.japanese}</p>
 
@@ -97,11 +96,12 @@
       </div>
     {/if}
   </section>
-  </Scoreboard>
+  <Scoreboard {hits} {total} {streak} {bestStreak} onreset={resetSession} />
 {/if}
 
 <style>
   .card {
+    margin-top: 24px;
     padding: 24px 16px;
     background: var(--surface);
     border: 1px solid var(--border);

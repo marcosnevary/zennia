@@ -113,7 +113,6 @@
 </script>
 
 {#if current}
-  <Scoreboard {hits} {total} {streak} {bestStreak} lifetime={stats.drill} onreset={resetSession}>
   <section class="card">
     <p class="symbol" lang="ja">{current.symbol}</p>
 
@@ -140,7 +139,7 @@
       </div>
     {/if}
   </section>
-  </Scoreboard>
+  <Scoreboard {hits} {total} {streak} {bestStreak} onreset={resetSession} />
 {:else}
   <p class="muted">Select at least one character below to practice.</p>
 {/if}
@@ -228,6 +227,7 @@
 
 <style>
   .card {
+    margin-top: 24px;
     padding: 24px 16px;
     background: var(--surface);
     border: 1px solid var(--border);

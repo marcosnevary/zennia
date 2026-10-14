@@ -1,83 +1,56 @@
 <script lang="ts">
-  import type { Snippet } from 'svelte'
-  import { accuracy, attempts, percent } from './stats'
-  import type { Tally } from './types'
+  import { accuracy, percent } from './stats'
 
   let {
     hits,
     total,
     streak,
     bestStreak,
-    lifetime,
     onreset,
-    children,
-  }: {
-    hits: number
-    total: number
-    streak: number
-    bestStreak: number
-    /** All-time results for what is being practiced */
-    lifetime: Tally
-    onreset: () => void
-    /** The practice card, shown next to the scores */
-    children: Snippet
-  } = $props()
+  }: { hits: number; total: number; streak: number; bestStreak: number; onreset: () => void } = $props()
 
   const misses = $derived(total - hits)
   const sessionAccuracy = $derived(accuracy({ hits, misses }))
 </script>
 
-<div class="layout">
-  <div class="main">{@render children()}</div>
+<section class="scoreboard" aria-label="Session score">
+  <div class="tile ok">
+    <span class="value">{hits}</span>
+    <span class="label">Correct</span>
+  </div>
+  <div class="tile bad">
+    <span class="value">{misses}</span>
+    <span class="label">Wrong</span>
+  </div>
+  <div
+    class="tile"
+    class:ok={sessionAccuracy !== null && sessionAccuracy >= 0.8}
+    class:warn={sessionAccuracy !== null && sessionAccuracy >= 0.5 && sessionAccuracy < 0.8}
+    class:bad={sessionAccuracy !== null && sessionAccuracy < 0.5}
+  >
+    <span class="value">{percent(sessionAccuracy)}</span>
+    <span class="label">Accuracy</span>
+  </div>
+  <div class="tile">
+    <span class="value">{streak}</span>
+    <span class="label">Streak (best {bestStreak})</span>
+  </div>
+  <div class="tile">
+    <span class="value">{total}</span>
+    <span class="label">Total</span>
+  </div>
+</section>
 
-  <aside class="scoreboard" aria-label="Scores">
-    <div class="tile ok">
-      <span class="value">{hits}</span>
-      <span class="label">✓ Correct</span>
-    </div>
-    <div class="tile bad">
-      <span class="value">{misses}</span>
-      <span class="label">✗ Wrong</span>
-    </div>
-    <div
-      class="tile"
-      class:ok={sessionAccuracy !== null && sessionAccuracy >= 0.8}
-      class:warn={sessionAccuracy !== null && sessionAccuracy >= 0.5 && sessionAccuracy < 0.8}
-      class:bad={sessionAccuracy !== null && sessionAccuracy < 0.5}
-    >
-      <span class="value">{percent(sessionAccuracy)}</span>
-      <span class="label">Accuracy</span>
-    </div>
-    <div class="tile">
-      <span class="value">{streak}</span>
-      <span class="label">Streak (best {bestStreak})</span>
-    </div>
-    <div class="tile">
-      <span class="value">{attempts(lifetime)}</span>
-      <span class="label">Total · {percent(accuracy(lifetime))}</span>
-      <span class="label">✓{lifetime.hits} ✗{lifetime.misses}</span>
-    </div>
-    <button onclick={onreset} disabled={!total}>Reset session</button>
-  </aside>
-</div>
+<p class="footer">
+  <button onclick={onreset} disabled={!total}>Reset session</button>
+</p>
 
 <style>
-  .layout {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    margin-top: 24px;
-  }
-  .main {
-    flex: 1;
-    min-width: 0;
-  }
   .scoreboard {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
     gap: 8px;
-    width: 150px;
-    flex-shrink: 0;
+    margin-top: 12px;
   }
   .tile {
     display: flex;
@@ -119,20 +92,13 @@
   .tile.bad .label {
     color: inherit;
   }
-  @media (max-width: 640px) {
-    .layout {
-      flex-direction: column;
-    }
-    .main,
+  .footer {
+    margin: 12px 0 0;
+    text-align: center;
+  }
+  @media (max-width: 480px) {
     .scoreboard {
-      width: 100%;
-    }
-    .scoreboard {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-    }
-    .scoreboard button {
-      grid-column: 1 / -1;
+      grid-template-columns: repeat(3, 1fr);
     }
   }
 </style>
