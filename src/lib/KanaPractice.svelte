@@ -264,9 +264,9 @@
   }
   .script > header {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
+    gap: 2px;
   }
   .script > header span {
     font-size: 0.85rem;
