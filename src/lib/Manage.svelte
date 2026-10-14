@@ -212,28 +212,16 @@
   </p>
 
   <h3>Import Anki deck (.txt)</h3>
-  <p>In Anki, export the deck like this:</p>
-  <ol>
-    <li>Select the deck and choose <strong>File → Export…</strong></li>
-    <li>Set the format to <strong>Notes in Plain Text (.txt)</strong>.</li>
-    <li>Enable <strong>Include HTML and media references</strong>.</li>
-    <li>Export, then pick the file with <strong>Import Anki deck</strong>.</li>
-  </ol>
-  <p>The cards must follow this layout:</p>
-  <ul>
-    <li>The <strong>front</strong> is the Japanese word.</li>
-    <li>The <strong>back</strong> is the meaning.</li>
-    <li>
-      The back also needs a third field named <code>hiragana</code> holding the reading in hiragana (in the exported file,
-      a block with the class <code>hiragana</code>).
-    </li>
-  </ul>
   <p>
-    Cards without a valid hiragana reading, and repeated word + reading pairs, are skipped. The summary tells you how many.
+    In Anki, choose <strong>File → Export…</strong>, set the format to <strong>Notes in Plain Text (.txt)</strong> and enable
+    <strong>Include HTML and media references</strong>. Then pick the exported file with <strong>Import Anki deck</strong>.
   </p>
-  <p class="muted">
-    Special case: the <strong>Kaishi 1.5k</strong> deck can also be imported as it is.
+  <p>
+    Each card must have the Japanese word on the <strong>front</strong> and the meaning on the <strong>back</strong>, plus a
+    third field named <code>hiragana</code> on the back with the reading in hiragana. Cards without a valid hiragana
+    reading, and repeated word + reading pairs, are skipped; the summary tells you how many.
   </p>
+  <p class="muted">Special case: the <strong>Kaishi 1.5k</strong> deck can also be imported as it is.</p>
 
   <div class="row">
     <button class="primary" type="button" onclick={() => helpEl?.close()}>Close</button>
