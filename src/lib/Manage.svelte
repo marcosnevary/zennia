@@ -399,9 +399,7 @@
   dialog.help h3 {
     margin: 16px 0 4px;
   }
-  dialog.help p,
-  dialog.help ul,
-  dialog.help ol {
+  dialog.help p {
     margin: 4px 0 8px;
   }
   .error {
