@@ -213,15 +213,14 @@
 
   <h3>Import Anki deck (.txt)</h3>
   <p>
-    In Anki, choose <strong>File → Export…</strong>, set the format to <strong>Notes in Plain Text (.txt)</strong> and enable
-    <strong>Include HTML and media references</strong>. Then pick the exported file with <strong>Import Anki deck</strong>.
+    In Anki, choose <strong>File → Export…</strong>, and set the format to
+    <strong>Notes in Plain Text (.txt)</strong> (not "Cards in Plain Text"). Then pick the exported file with <strong>Import Anki deck</strong>.
   </p>
   <p>
-    Each card must have the Japanese word on the <strong>front</strong> and the meaning on the <strong>back</strong>, plus a
-    third field named <code>hiragana</code> on the back with the reading in hiragana. Cards without a valid hiragana
-    reading, and repeated word + reading pairs, are skipped; the summary tells you how many.
+    The first three columns of the file must be, in this order, the <strong>Japanese word</strong>, its
+    <strong>hiragana</strong> reading and the <strong>meaning</strong>. Any other column is ignored. Rows without a valid
+    hiragana reading, and repeated word + reading pairs, are skipped; the summary tells you how many.
   </p>
-  <p class="muted">Special case: the <strong>Kaishi 1.5k</strong> deck can also be imported as it is.</p>
 
   <div class="row">
     <button class="primary" type="button" onclick={() => helpEl?.close()}>Close</button>
@@ -238,7 +237,7 @@
     Import JSON
     <input type="file" accept="application/json,.json" onchange={importFile} hidden />
   </label>
-  <label class="file" title="Anki: Export Notes → Notes in Plain Text, with HTML enabled">
+  <label class="file" title="Anki: Export → Notes in Plain Text. Columns: word, hiragana, meaning">
     Import Anki deck (.txt)
     <input type="file" accept="text/plain,.txt,.tsv" onchange={importAnki} hidden />
   </label>
