@@ -87,8 +87,11 @@
 
   {#if attempts(wordTotal)}
     <div class="section-head">
-      <h2>Words</h2>
-      <button onclick={() => (showWords = !showWords)} aria-expanded={showWords}>{showWords ? 'Hide' : 'Show'}</button>
+      <h2>
+        <button class="toggle" onclick={() => (showWords = !showWords)} aria-expanded={showWords}>
+          <span aria-hidden="true">{showWords ? '▾' : '▸'}</span> Words
+        </button>
+      </h2>
     </div>
     {#if showWords}
     {@render summary(wordTotal)}
@@ -107,8 +110,11 @@
 
   {#if attempts(kanaTotal)}
     <div class="section-head">
-      <h2>Hiragana &amp; Katakana</h2>
-      <button onclick={() => (showKana = !showKana)} aria-expanded={showKana}>{showKana ? 'Hide' : 'Show'}</button>
+      <h2>
+        <button class="toggle" onclick={() => (showKana = !showKana)} aria-expanded={showKana}>
+          <span aria-hidden="true">{showKana ? '▾' : '▸'}</span> Hiragana &amp; Katakana
+        </button>
+      </h2>
     </div>
     {#if showKana}
     {@render summary(kanaTotal)}
@@ -176,14 +182,21 @@
     color: inherit;
   }
   .section-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
     margin-top: 24px;
   }
   .section-head h2 {
     margin: 0;
+  }
+  .toggle {
+    display: block;
+    width: 100%;
+    padding: 4px 0;
+    font: inherit;
+    font-weight: inherit;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
   }
   .toolbar {
     display: flex;
