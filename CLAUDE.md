@@ -2,41 +2,41 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-App web pessoal (em português) para praticar vocabulário de japonês: mostra uma palavra, o usuário digita a leitura em romaji e o app corrige. Svelte 5 + Vite + TypeScript + wanakana, dados só em localStorage (sem backend). Decisões e backlog completos em [docs/decisoes.md](docs/decisoes.md).
+Personal web app (in English) for practicing Japanese vocabulary: it shows a word, the user types the reading in romaji, and the app checks it. Svelte 5 + Vite + TypeScript + wanakana, data only in localStorage (no backend). Full decisions and backlog in [docs/decisions.md](docs/decisions.md).
 
-## Comandos
+## Commands
 
 ```bash
-npm run dev      # servidor de desenvolvimento
-npm test         # vitest run (todos os testes)
-npx vitest run src/lib/romaji.test.ts -t "macron"   # um arquivo / um teste por nome
+npm run dev      # development server
+npm test         # vitest run (all tests)
+npx vitest run src/lib/romaji.test.ts -t "macron"   # one file / one test by name
 npm run check    # svelte-check (tsconfig.app.json) + tsc (tsconfig.node.json)
-npm run build    # build de produção em dist/
+npm run build    # production build into dist/
 ```
 
-Não há linter configurado. Os testes ficam em um único arquivo, [src/lib/romaji.test.ts](src/lib/romaji.test.ts), que cobre também `words.ts` (sanitize/merge).
+No linter is configured. The tests live in a single file, [src/lib/romaji.test.ts](src/lib/romaji.test.ts), which also covers `words.ts` (sanitize/merge).
 
-## Arquitetura
+## Architecture
 
-- [src/App.svelte](src/App.svelte) é dono do estado `words` (`$state`) e o persiste com um `$effect` que chama `saveWords($state.snapshot(words))`. Duas abas: `Practice` (recebe `words`) e `Manage` (`bind:words`, faz o CRUD e import/export). Qualquer mudança na pool é salva automaticamente; não chame `saveWords` nos componentes.
-- [src/lib/storage.ts](src/lib/storage.ts) é o **único** ponto de acesso ao localStorage (chave `nihongo:words`, formato `{ version: 1, words }`). Trocar por IndexedDB/backend deve mexer só nele. Leitura passa por `sanitizeWords`; falhas viram lista vazia / são ignoradas silenciosamente.
-- [src/lib/words.ts](src/lib/words.ts): `sanitizeWords` valida qualquer dado externo (localStorage ou arquivo importado; aceita array ou `{ words }`, descarta itens sem `japanese`/`hiragana`, regenera ids duplicados). `mergeWords` deduplica por id ou por `japanese|hiragana`.
-- [src/lib/io.ts](src/lib/io.ts): exportar/importar JSON (com `version` para migrações) e download pelo navegador.
+- [src/App.svelte](src/App.svelte) owns the `words` state (`$state`) and persists it with an `$effect` that calls `saveWords($state.snapshot(words))`. Two tabs: `Practice` (receives `words`) and `Manage` (`bind:words`, does the CRUD and import/export). Any change to the pool is saved automatically; do not call `saveWords` in components.
+- [src/lib/storage.ts](src/lib/storage.ts) is the **only** access point to localStorage (key `nihongo:words`, format `{ version: 1, words }`). Swapping for IndexedDB/a backend should touch only this file. Reads go through `sanitizeWords`; failures become an empty list / are silently ignored.
+- [src/lib/words.ts](src/lib/words.ts): `sanitizeWords` validates any external data (localStorage or imported file; accepts an array or `{ words }`, discards items without `japanese`/`hiragana`, regenerates duplicate ids). `mergeWords` deduplicates by id or by `japanese|hiragana`.
+- [src/lib/io.ts](src/lib/io.ts): JSON export/import (with `version` for migrations) and browser download.
 - [src/lib/types.ts](src/lib/types.ts): `Word { id, japanese, hiragana, meaning }`, `Verdict`, `WordsFile`.
 
-### Correção ([src/lib/romaji.ts](src/lib/romaji.ts))
+### Checking ([src/lib/romaji.ts](src/lib/romaji.ts))
 
-O ponto mais sutil do projeto. A resposta é comparada **pelo som, em hiragana**, não pelo texto:
+The subtlest part of the project. The answer is compared **by sound, in hiragana**, not by text:
 
-- `normalizeKana` converte para hiragana via wanakana com `convertLongVowelMark: false` e troca `ー` pela vogal anterior (a wanakana por padrão converte `ー` em `う` na linha do o, o que quebraria `コーヒー` = `koohii`).
-- `checkAnswer` expande macrons em todas as grafias (`ō` → `ou`/`oo`, limitado a 256 candidatos), aceita `nn` final como ん e compara com o hiragana normalizado → `correct`.
-- Se só o comprimento de vogal difere (comparação por `skeleton`), retorna `almost`, que **conta como erro**: o comprimento muda a palavra (おばさん/おばあさん). Não relaxe isso sem decisão do usuário.
-- O romaji exibido (`toDisplayRomaji`) é sempre derivado do hiragana; **nunca é salvo** no modelo de dados. O hiragana é cadastrado manualmente (kanji não converte de forma confiável).
+- `normalizeKana` converts to hiragana via wanakana with `convertLongVowelMark: false` and replaces `ー` with the previous vowel (wanakana by default converts `ー` to `う` in the o row, which would break `コーヒー` = `koohii`).
+- `checkAnswer` expands macrons into every spelling (`ō` → `ou`/`oo`, capped at 256 candidates), accepts a final `nn` as ん and compares with the normalized hiragana → `correct`.
+- If only the vowel length differs (comparison by `skeleton`), it returns `almost`, which **counts as an error**: length changes the word (おばさん/おばあさん). Do not relax this without a decision from the user.
+- The displayed romaji (`toDisplayRomaji`) is always derived from the hiragana; it is **never saved** in the data model. The hiragana is entered manually (kanji do not convert reliably).
 
-## Convenções
+## Conventions
 
-- Svelte 5: usar sempre runes (`$state`, `$derived`, `$effect`), não a sintaxe do Svelte 4. Sem SvelteKit.
-- Código, comentários e textos da UI em português.
-- Mensagens de commit em inglês, seguindo o padrão Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`...).
-- A interface é provisória (CSS simples e escopado); prioridade é a funcionalidade.
-- Deploy previsto na Vercel (Vite detectado automaticamente). O localStorage é por domínio, então mudar de URL exige exportar/importar o JSON.
+- Svelte 5: always use runes (`$state`, `$derived`, `$effect`), not Svelte 4 syntax. No SvelteKit.
+- Code, comments and UI text in English.
+- Commit messages in English, following Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`...).
+- The interface is provisional (simple, scoped CSS); functionality is the priority.
+- Deploy planned on Vercel (Vite detected automatically). localStorage is per domain, so changing the URL requires exporting/importing the JSON.

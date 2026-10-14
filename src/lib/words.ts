@@ -10,9 +10,9 @@ export interface SanitizeResult {
 }
 
 /**
- * Valida dados de fora (localStorage ou arquivo importado).
- * Aceita uma lista de palavras ou um objeto { words: [...] }.
- * Itens sem `japanese` ou `hiragana` são ignorados e contados em `skipped`.
+ * Validates external data (localStorage or an imported file).
+ * Accepts a list of words or an object { words: [...] }.
+ * Items without `japanese` or `hiragana` are ignored and counted in `skipped`.
  */
 export function sanitizeWords(raw: unknown): SanitizeResult {
   const list = Array.isArray(raw)
@@ -21,7 +21,7 @@ export function sanitizeWords(raw: unknown): SanitizeResult {
       ? (raw as { words: unknown[] }).words
       : null
 
-  if (!list) throw new Error('Formato inválido: esperava uma lista de palavras.')
+  if (!list) throw new Error('Invalid format: expected a list of words.')
 
   const words: Word[] = []
   let skipped = 0
@@ -55,7 +55,7 @@ export interface MergeResult {
   duplicates: number
 }
 
-/** Junta palavras novas à pool, ignorando as que já existem (mesmo id ou mesma palavra + hiragana). */
+/** Adds new words to the pool, skipping ones that already exist (same id or same word + hiragana). */
 export function mergeWords(current: Word[], incoming: Word[]): MergeResult {
   const ids = new Set(current.map((w) => w.id))
   const keys = new Set(current.map((w) => `${w.japanese}|${w.hiragana}`))

@@ -7,7 +7,7 @@
   let words = $state<Word[]>(loadWords())
   let tab = $state<'practice' | 'manage'>('practice')
 
-  // salva a cada mudança na pool (snapshot lê a lista inteira, inclusive edições internas)
+  // saves on every change to the pool (snapshot reads the whole list, including nested edits)
   $effect(() => {
     saveWords($state.snapshot(words) as Word[])
   })
@@ -16,9 +16,9 @@
 <header>
   <h1>Nihongo</h1>
   <nav>
-    <button class:primary={tab === 'practice'} onclick={() => (tab = 'practice')}>Prática</button>
+    <button class:primary={tab === 'practice'} onclick={() => (tab = 'practice')}>Practice</button>
     <button class:primary={tab === 'manage'} onclick={() => (tab = 'manage')}>
-      Palavras ({words.length})
+      Words ({words.length})
     </button>
   </nav>
 </header>

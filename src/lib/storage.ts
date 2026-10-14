@@ -4,8 +4,8 @@ import { sanitizeWords } from './words'
 const KEY = 'nihongo:words'
 
 /**
- * Único ponto de acesso aos dados. Para trocar o localStorage por
- * IndexedDB ou um backend, basta reescrever estas duas funções.
+ * Single point of access to the data. To replace localStorage with
+ * IndexedDB or a backend, just rewrite these two functions.
  */
 export function loadWords(): Word[] {
   try {
@@ -22,6 +22,6 @@ export function saveWords(words: Word[]): void {
   try {
     localStorage.setItem(KEY, JSON.stringify(data))
   } catch {
-    // armazenamento cheio ou bloqueado: o app segue funcionando em memória
+    // storage full or blocked: the app keeps working in memory
   }
 }

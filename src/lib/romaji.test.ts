@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest'
 import { checkAnswer, toDisplayRomaji } from './romaji'
 import { mergeWords, sanitizeWords } from './words'
 
-describe('checkAnswer: aceita variações de sistema', () => {
-  it('romaji exato', () => {
+describe('checkAnswer: accepts spelling-system variations', () => {
+  it('exact romaji', () => {
     expect(checkAnswer('taberu', 'たべる')).toBe('correct')
   })
-  it('maiúsculas e espaços extras', () => {
+  it('uppercase and extra spaces', () => {
     expect(checkAnswer('  Taberu ', 'たべる')).toBe('correct')
   })
   it('shi/si, chi/ti, tsu/tu, fu/hu, ji/zi', () => {
@@ -17,17 +17,17 @@ describe('checkAnswer: aceita variações de sistema', () => {
     expect(checkAnswer('huro', 'ふろ')).toBe('correct')
     expect(checkAnswer('zikan', 'じかん')).toBe('correct')
   })
-  it('macron aceita qualquer expansão', () => {
+  it('macron accepts any expansion', () => {
     expect(checkAnswer('tōkyō', 'とうきょう')).toBe('correct')
     expect(checkAnswer('ōkii', 'おおきい')).toBe('correct')
     expect(checkAnswer('ōsaka', 'おおさか')).toBe('correct')
   })
-  it('katakana cadastrado em hiragana ou com ー', () => {
+  it('katakana saved as hiragana or with ー', () => {
     expect(checkAnswer('koohii', 'コーヒー')).toBe('correct')
     expect(checkAnswer('ko-hi-', 'こーひー')).toBe('correct')
     expect(checkAnswer('koohii', 'こおひい')).toBe('correct')
   })
-  it('ん antes de vogal e geminada', () => {
+  it('ん before a vowel and gemination', () => {
     expect(checkAnswer("kin'en", 'きんえん')).toBe('correct')
     expect(checkAnswer('kinen', 'きねん')).toBe('correct')
     expect(checkAnswer('nn', 'ん')).toBe('correct')
@@ -37,14 +37,14 @@ describe('checkAnswer: aceita variações de sistema', () => {
   })
 })
 
-describe('checkAnswer: vogal longa e erros', () => {
-  it('só o comprimento da vogal difere → almost', () => {
+describe('checkAnswer: long vowel and errors', () => {
+  it('only the vowel length differs → almost', () => {
     expect(checkAnswer('tokyo', 'とうきょう')).toBe('almost')
     expect(checkAnswer('obasan', 'おばあさん')).toBe('almost')
     expect(checkAnswer('yuki', 'ゆうき')).toBe('almost')
     expect(checkAnswer('biru', 'ビール')).toBe('almost')
   })
-  it('palavras diferentes → incorrect', () => {
+  it('different words → incorrect', () => {
     expect(checkAnswer('nomu', 'たべる')).toBe('incorrect')
     expect(checkAnswer('', 'たべる')).toBe('incorrect')
     expect(checkAnswer('食べる', 'たべる')).toBe('incorrect')
@@ -52,30 +52,30 @@ describe('checkAnswer: vogal longa e erros', () => {
 })
 
 describe('toDisplayRomaji', () => {
-  it('gera romaji a partir do hiragana', () => {
+  it('generates romaji from hiragana', () => {
     expect(toDisplayRomaji('たべる')).toBe('taberu')
     expect(toDisplayRomaji('がっこう')).toBe('gakkou')
     expect(toDisplayRomaji('コーヒー')).toBe('koohii')
   })
 })
 
-describe('sanitizeWords e mergeWords', () => {
-  it('aceita lista ou objeto com words e ignora itens inválidos', () => {
-    const a = sanitizeWords([{ japanese: '犬', hiragana: 'いぬ', meaning: 'cachorro' }, { japanese: '' }, 5])
+describe('sanitizeWords and mergeWords', () => {
+  it('accepts a list or an object with words and ignores invalid items', () => {
+    const a = sanitizeWords([{ japanese: '犬', hiragana: 'いぬ', meaning: 'dog' }, { japanese: '' }, 5])
     expect(a.words).toHaveLength(1)
     expect(a.skipped).toBe(2)
     expect(a.words[0].id).toBeTruthy()
-    const b = sanitizeWords({ version: 1, words: [{ id: 'x', japanese: '猫', hiragana: 'ねこ', meaning: 'gato' }] })
+    const b = sanitizeWords({ version: 1, words: [{ id: 'x', japanese: '猫', hiragana: 'ねこ', meaning: 'cat' }] })
     expect(b.words[0].id).toBe('x')
   })
-  it('rejeita formato inválido', () => {
+  it('rejects invalid format', () => {
     expect(() => sanitizeWords({ foo: 1 })).toThrow()
   })
-  it('mesclar ignora duplicados', () => {
-    const cur = sanitizeWords([{ id: '1', japanese: '犬', hiragana: 'いぬ', meaning: 'cachorro' }]).words
+  it('merge ignores duplicates', () => {
+    const cur = sanitizeWords([{ id: '1', japanese: '犬', hiragana: 'いぬ', meaning: 'dog' }]).words
     const inc = sanitizeWords([
-      { id: '2', japanese: '犬', hiragana: 'いぬ', meaning: 'cão' },
-      { id: '3', japanese: '猫', hiragana: 'ねこ', meaning: 'gato' },
+      { id: '2', japanese: '犬', hiragana: 'いぬ', meaning: 'hound' },
+      { id: '3', japanese: '猫', hiragana: 'ねこ', meaning: 'cat' },
     ]).words
     const r = mergeWords(cur, inc)
     expect(r.added).toBe(1)
