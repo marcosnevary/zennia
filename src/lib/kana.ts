@@ -48,7 +48,7 @@ export const KANA_SECTIONS: KanaSection[] = [
       row('y', 'や・ゆ・よ'),
       row('r', 'らりるれろ'),
       row('w', 'わ・・・を'),
-      row('', 'ん・・・・'),
+      row('ん', 'ん・・・・'),
     ],
   },
   {

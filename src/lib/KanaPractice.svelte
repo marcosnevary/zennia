@@ -141,48 +141,64 @@
             <button class="link" onclick={() => setKeys(keys, true)}>All</button>
             <button class="link" onclick={() => setKeys(keys, false)}>None</button>
           </div>
-          <table>
-            <thead>
-              <tr>
-                <th></th>
-                {#each section.columns as col (col)}
-                  <th scope="col">{col}</th>
-                {/each}
-              </tr>
-            </thead>
-            <tbody>
-              {#each section.rows as r, i (i)}
-                {@const rowKeys = cellsOf(r.cells).map((h) => kanaKey(script.id, h))}
+          <!-- transposed: one column per consonant row, one row per vowel -->
+          <div class="scroll">
+            <table>
+              <thead>
                 <tr>
-                  <th scope="row">
-                    <button
-                      class="link"
-                      title="Toggle the whole row"
-                      onclick={() => toggleKeys(rowKeys)}
-                    >
-                      {r.label || '·'}
-                    </button>
-                  </th>
-                  {#each r.cells as cell, c (c)}
-                    <td>
-                      {#if cell}
-                        {@const key = kanaKey(script.id, cell)}
-                        <button
-                          class="cell"
-                          class:on={selected.includes(key)}
-                          aria-pressed={selected.includes(key)}
-                          lang="ja"
-                          onclick={() => toggleKeys([key])}
-                        >
-                          {symbolOf(script.id, cell)}
-                        </button>
-                      {/if}
-                    </td>
+                  <th></th>
+                  {#each section.rows as r, i (i)}
+                    {@const colKeys = cellsOf(section.rows[i].cells).map((h) => kanaKey(script.id, h))}
+                    <th scope="col">
+                      <button
+                        class="link"
+                        title="Toggle the whole column"
+                        onclick={() => toggleKeys(colKeys)}
+                      >
+                        {r.label || '·'}
+                      </button>
+                    </th>
                   {/each}
                 </tr>
-              {/each}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {#each section.columns as col, c (col)}
+                  {@const lineKeys = section.rows
+                    .map((r) => r.cells[c])
+                    .filter((h): h is string => !!h)
+                    .map((h) => kanaKey(script.id, h))}
+                  <tr>
+                    <th scope="row">
+                      <button
+                        class="link"
+                        title="Toggle the whole row"
+                        onclick={() => toggleKeys(lineKeys)}
+                      >
+                        {col}
+                      </button>
+                    </th>
+                    {#each section.rows as r, i (i)}
+                      {@const cell = r.cells[c]}
+                      <td>
+                        {#if cell}
+                          {@const key = kanaKey(script.id, cell)}
+                          <button
+                            class="cell"
+                            class:on={selected.includes(key)}
+                            aria-pressed={selected.includes(key)}
+                            lang="ja"
+                            onclick={() => toggleKeys([key])}
+                          >
+                            {symbolOf(script.id, cell)}
+                          </button>
+                        {/if}
+                      </td>
+                    {/each}
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          </div>
         </div>
       {/each}
     </section>
@@ -232,10 +248,13 @@
   }
 
   .tables {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    display: flex;
+    flex-direction: column;
     gap: 16px;
     margin-top: 24px;
+  }
+  .scroll {
+    overflow-x: auto;
   }
   .script {
     padding: 12px;
