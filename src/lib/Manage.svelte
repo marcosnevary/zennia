@@ -138,7 +138,7 @@
 
   function exportWords() {
     const date = new Date().toISOString().slice(0, 10)
-    downloadText(`nihongo-words-${date}.json`, exportJSON(words))
+    downloadText(`zennia-words-${date}.json`, exportJSON(words))
     message = `${words.length} word(s) exported.`
   }
 
