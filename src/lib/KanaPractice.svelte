@@ -309,9 +309,11 @@
     padding-left: 20px;
   }
   .cell {
-    width: 100%;
-    min-width: 40px;
-    padding: 6px 0;
+    /* same size for every cell, single or double kana */
+    width: 52px;
+    height: 40px;
+    padding: 0;
+    white-space: nowrap;
     font-size: 1.2rem;
     color: var(--muted);
     background: transparent;
