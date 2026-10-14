@@ -41,7 +41,7 @@
     const h = hiragana.trim()
     error = validate(j, h)
     if (error) return
-    words = [{ id: newId(), japanese: j, hiragana: h, meaning: meaning.trim(), addedAt: Date.now() }, ...words]
+    words = [{ id: newId(), japanese: j, hiragana: h, meaning: meaning.trim() }, ...words]
     message = 'Word added.'
     resetForm()
     japaneseEl?.focus()
@@ -156,10 +156,7 @@
     if (!file) return
     error = ''
     try {
-      const parsed = parse(await file.text())
-      const skipped = parsed.skipped
-      const now = Date.now()
-      const incoming = parsed.words.map((w) => (w.addedAt === undefined ? { ...w, addedAt: now } : w))
+      const { words: incoming, skipped } = parse(await file.text())
       const skippedNote = skipped ? ` ${skipped} invalid item(s) ignored.` : ''
       if (importMode === 'replace') {
         if (!confirm(`Replace the current ${words.length} word(s) with the ${incoming.length} from the file?`)) return
@@ -252,14 +249,11 @@
       oninput={onSearch}
     />
     <div class="sort">
-      <label class="check">
-        Sort by
-        <select bind:value={sortKey} aria-label="Sort by">
-          {#each SORT_OPTIONS as option (option.key)}
-            <option value={option.key}>{option.label}</option>
-          {/each}
-        </select>
-      </label>
+      <select bind:value={sortKey} aria-label="Sort by">
+        {#each SORT_OPTIONS as option (option.key)}
+          <option value={option.key}>{option.label}</option>
+        {/each}
+      </select>
       <button
         onclick={() => (sortDirection = sortDirection === 'asc' ? 'desc' : 'asc')}
         aria-label={sortDirection === 'asc' ? 'Ascending' : 'Descending'}
@@ -409,6 +403,10 @@
     min-width: 200px;
     width: auto;
     margin-bottom: 0;
+  }
+  .sort button {
+    /* fixed width so the toolbar does not shift when the direction flips */
+    width: 9.5em;
   }
   .sort {
     display: flex;

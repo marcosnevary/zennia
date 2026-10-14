@@ -43,10 +43,7 @@ export function sanitizeWords(raw: unknown): SanitizeResult {
     let id = typeof o.id === 'string' && o.id ? o.id : newId()
     if (seenIds.has(id)) id = newId()
     seenIds.add(id)
-    const word: Word = { id, japanese, hiragana, meaning }
-    if (typeof o.addedAt === 'number' && Number.isFinite(o.addedAt)) word.addedAt = o.addedAt
-    if (o.disabled === true) word.disabled = true
-    words.push(word)
+    words.push(o.disabled === true ? { id, japanese, hiragana, meaning, disabled: true } : { id, japanese, hiragana, meaning })
   }
 
   return { words, skipped }
@@ -81,12 +78,11 @@ export function mergeWords(current: Word[], incoming: Word[]): MergeResult {
   return { words, added, duplicates }
 }
 
-export type SortKey = 'list' | 'added' | 'japanese' | 'reading' | 'meaning' | 'status'
+export type SortKey = 'list' | 'japanese' | 'reading' | 'meaning' | 'status'
 export type SortDirection = 'asc' | 'desc'
 
 export const SORT_OPTIONS: { key: SortKey; label: string }[] = [
   { key: 'list', label: 'List order' },
-  { key: 'added', label: 'Date added' },
   { key: 'japanese', label: 'Word' },
   { key: 'reading', label: 'Reading' },
   { key: 'meaning', label: 'Meaning' },
@@ -96,7 +92,7 @@ export const SORT_OPTIONS: { key: SortKey; label: string }[] = [
 const collator = new Intl.Collator('ja')
 
 /**
- * Returns a sorted copy of the list. `list` keeps the stored order (newest additions first), `added` sorts by date (oldest first when ascending);
+ * Returns a sorted copy of the list. `list` keeps the stored order (newest additions first)
  * `status` puts active words first when ascending. Ties keep the stored order, and
  * the direction only flips the criterion, not the tie-break.
  */
@@ -105,11 +101,6 @@ export function sortWords(words: Word[], key: SortKey, direction: SortDirection)
   const sign = direction === 'asc' ? 1 : -1
   const compare = (a: Word, b: Word): number => {
     switch (key) {
-      case 'added':
-        // words without a date go last in either direction (pre-multiplied to cancel the outer sign)
-        if (a.addedAt === undefined || b.addedAt === undefined)
-          return sign * (Number(a.addedAt === undefined) - Number(b.addedAt === undefined))
-        return a.addedAt - b.addedAt
       case 'japanese':
         return collator.compare(a.japanese, b.japanese)
       case 'reading':

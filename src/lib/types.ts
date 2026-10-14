@@ -6,8 +6,6 @@ export interface Word {
   hiragana: string
   /** Meaning(s), free text */
   meaning: string
-  /** When the word was added (ms since epoch); absent in words saved before this field existed */
-  addedAt?: number
   /** When true the word is excluded from practice (absent = enabled) */
   disabled?: boolean
 }
