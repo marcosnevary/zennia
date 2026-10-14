@@ -16,11 +16,13 @@
     { id: 'katakana', label: 'Katakana' },
   ]
 
-  const basic = KANA_SECTIONS.find((s) => s.id === 'basic')!
+  const basic = KANA_SECTIONS[0]
+  // the basic set is everything before the dakuten block
+  const BASIC_ROWS = basic.rows.slice(0, basic.rows.findIndex((r) => r.gap))
 
   /** Keys (see `kanaKey`) of the characters included in practice; starts with the basic set */
   let selected = $state<string[]>(
-    SCRIPTS.flatMap((s) => basic.rows.flatMap((r) => cellsOf(r.cells).map((h) => kanaKey(s.id, h)))),
+    SCRIPTS.flatMap((s) => BASIC_ROWS.flatMap((r) => cellsOf(r.cells).map((h) => kanaKey(s.id, h)))),
   )
 
   const pool = $derived(buildKana(selected))
@@ -148,8 +150,8 @@
                 <tr>
                   <th></th>
                   {#each section.rows as r, i (i)}
-                    {@const colKeys = cellsOf(section.rows[i].cells).map((h) => kanaKey(script.id, h))}
-                    <th scope="col">
+                    {@const colKeys = cellsOf(r.cells).map((h) => kanaKey(script.id, h))}
+                    <th scope="col" class:gap={r.gap}>
                       <button
                         class="link"
                         title="Toggle the whole column"
@@ -179,7 +181,7 @@
                     </th>
                     {#each section.rows as r, i (i)}
                       {@const cell = r.cells[c]}
-                      <td>
+                      <td class:gap={r.gap}>
                         {#if cell}
                           {@const key = kanaKey(script.id, cell)}
                           <button
@@ -301,6 +303,10 @@
   }
   td {
     padding: 0;
+  }
+  th.gap,
+  td.gap {
+    padding-left: 20px;
   }
   .cell {
     width: 100%;

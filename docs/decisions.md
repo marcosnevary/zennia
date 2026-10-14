@@ -11,7 +11,7 @@ MVP done and running locally (`npm run dev`). Stack: Svelte 5 + Vite + TypeScrip
 ## MVP features
 
 - **Practice:** shows the Japanese word, a romaji box and a Check button; the result shows correct/almost/incorrect, the hiragana, the generated romaji and the meaning; Next button.
-- **Kana practice:** a mode switch at the top of Practice (Words / Hiragana & Katakana). Shows one symbol, the user types its romaji; same check/Next flow, no meaning. Below it, one table per script (hiragana, katakana) lets the user pick characters one by one, by row, by group (basic, dakuten, combinations) or all/none; the basic set starts selected, and changing the selection resets the score. ぢ/づ are left out (same sound as じ/ず). The grid lives in `src/lib/kana.ts` (defined in hiragana, katakana derived) and answers are checked with `checkAnswer`; there is no "almost" verdict.
+- **Kana practice:** a mode switch at the top of Practice (Words / Hiragana & Katakana). Shows one symbol, the user types its romaji; same check/Next flow, no meaning. Below it, one table per script (hiragana, katakana) lets the user pick characters one by one, by row, by group (basic + dakuten in one table with a wider gap between them, combinations) or all/none; the basic set starts selected, and changing the selection resets the score. ぢ/づ are left out (same sound as じ/ず). The grid lives in `src/lib/kana.ts` (defined in hiragana, katakana derived) and answers are checked with `checkAnswer`; there is no "almost" verdict.
 - **Drawing:** random word from the pool, never repeating the previous one in a row.
 - **Manage words:** add, edit and delete inside the app.
 - **Import and export:** JSON, always merged into the pool (duplicates ignored).

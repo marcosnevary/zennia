@@ -15,6 +15,8 @@ export interface KanaRow {
   label: string
   /** Hiragana cells in column order; null leaves a gap in the grid */
   cells: (string | null)[]
+  /** Leaves extra space before this row's column (separates blocks inside one table) */
+  gap?: boolean
 }
 
 export interface KanaSection {
@@ -34,8 +36,8 @@ const row = (label: string, cells: string): KanaRow => ({
 // so there is no single romaji to ask for.
 export const KANA_SECTIONS: KanaSection[] = [
   {
-    id: 'basic',
-    title: 'Basic',
+    id: 'main',
+    title: 'Basic & Dakuten',
     columns: ['a', 'i', 'u', 'e', 'o'],
     rows: [
       row('', 'あいうえお'),
@@ -49,14 +51,7 @@ export const KANA_SECTIONS: KanaSection[] = [
       row('r', 'らりるれろ'),
       row('w', 'わ・・・を'),
       row('ん', 'ん・・・・'),
-    ],
-  },
-  {
-    id: 'dakuten',
-    title: 'Dakuten',
-    columns: ['a', 'i', 'u', 'e', 'o'],
-    rows: [
-      row('g', 'がぎぐげご'),
+      { ...row('g', 'がぎぐげご'), gap: true },
       row('z', 'ざじずぜぞ'),
       row('d', 'だ・・でど'),
       row('b', 'ばびぶべぼ'),
