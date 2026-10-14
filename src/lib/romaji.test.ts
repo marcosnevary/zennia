@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { checkAnswer, toDisplayRomaji } from './romaji'
-import { mergeWords, sanitizeWords } from './words'
+import { mergeWords, sanitizeWords, sortWords } from './words'
 
 describe('checkAnswer: accepts spelling-system variations', () => {
   it('exact romaji', () => {
@@ -87,5 +87,33 @@ describe('sanitizeWords and mergeWords', () => {
     expect(r.added).toBe(1)
     expect(r.duplicates).toBe(1)
     expect(r.words).toHaveLength(2)
+  })
+})
+
+describe('sortWords', () => {
+  const w = (id: string, japanese: string, hiragana: string, meaning = '', disabled?: boolean) =>
+    disabled ? { id, japanese, hiragana, meaning, disabled } : { id, japanese, hiragana, meaning }
+  const list = [w('1', '犬', 'いぬ', 'dog'), w('2', '猫', 'ねこ', ''), w('3', '赤', 'あか', 'red', true), w('4', '木', 'き', 'tree')]
+  const ids = (xs: { id: string }[]) => xs.map((x) => x.id).join('')
+
+  it('keeps or reverses the stored order', () => {
+    expect(ids(sortWords(list, 'list', 'asc'))).toBe('1234')
+    expect(ids(sortWords(list, 'list', 'desc'))).toBe('4321')
+  })
+
+  it('sorts by reading in gojūon order', () => {
+    expect(ids(sortWords(list, 'reading', 'asc'))).toBe('3142')
+    expect(ids(sortWords(list, 'reading', 'desc'))).toBe('2413')
+  })
+
+  it('puts words without a meaning last in both directions', () => {
+    expect(ids(sortWords(list, 'meaning', 'asc'))).toBe('1342')
+    expect(ids(sortWords(list, 'meaning', 'desc'))).toBe('4312')
+  })
+
+  it('sorts by status keeping ties in stored order, and does not mutate the input', () => {
+    expect(ids(sortWords(list, 'status', 'asc'))).toBe('1243')
+    expect(ids(sortWords(list, 'status', 'desc'))).toBe('3124')
+    expect(ids(list)).toBe('1234')
   })
 })

@@ -77,3 +77,41 @@ export function mergeWords(current: Word[], incoming: Word[]): MergeResult {
 
   return { words, added, duplicates }
 }
+
+export type SortKey = 'list' | 'japanese' | 'reading' | 'meaning' | 'status'
+export type SortDirection = 'asc' | 'desc'
+
+export const SORT_OPTIONS: { key: SortKey; label: string }[] = [
+  { key: 'list', label: 'List order' },
+  { key: 'japanese', label: 'Word' },
+  { key: 'reading', label: 'Reading' },
+  { key: 'meaning', label: 'Meaning' },
+  { key: 'status', label: 'Status (active first)' },
+]
+
+const collator = new Intl.Collator('ja')
+
+/**
+ * Returns a sorted copy of the list. `list` keeps the stored order (newest additions first);
+ * `status` puts active words first when ascending. Ties keep the stored order, and
+ * the direction only flips the criterion, not the tie-break.
+ */
+export function sortWords(words: Word[], key: SortKey, direction: SortDirection): Word[] {
+  if (key === 'list') return direction === 'asc' ? [...words] : [...words].reverse()
+  const sign = direction === 'asc' ? 1 : -1
+  const compare = (a: Word, b: Word): number => {
+    switch (key) {
+      case 'japanese':
+        return collator.compare(a.japanese, b.japanese)
+      case 'reading':
+        return collator.compare(a.hiragana, b.hiragana)
+      case 'meaning':
+        // words without a meaning go last in either direction (pre-multiplied to cancel the outer sign)
+        if (!a.meaning || !b.meaning) return sign * (Number(!a.meaning) - Number(!b.meaning))
+        return collator.compare(a.meaning, b.meaning)
+      case 'status':
+        return Number(!!a.disabled) - Number(!!b.disabled)
+    }
+  }
+  return [...words].sort((a, b) => sign * compare(a, b) || 0)
+}

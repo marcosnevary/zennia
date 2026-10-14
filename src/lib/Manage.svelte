@@ -4,7 +4,7 @@
   import { downloadText, exportJSON, importJSON } from './io'
   import { toDisplayRomaji } from './romaji'
   import type { Word } from './types'
-  import { mergeWords, newId, type SanitizeResult } from './words'
+  import { mergeWords, newId, SORT_OPTIONS, sortWords, type SanitizeResult, type SortDirection, type SortKey } from './words'
 
   let { words = $bindable() }: { words: Word[] } = $props()
 
@@ -86,12 +86,16 @@
   // selection (ids that no longer exist are ignored)
   let selected = $state<Set<string>>(new Set())
   let query = $state('')
+  let sortKey = $state<SortKey>('list')
+  let sortDirection = $state<SortDirection>('asc')
   const visibleWords = $derived.by(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return words
-    return words.filter((w) =>
-      [w.japanese, w.hiragana, toDisplayRomaji(w.hiragana), w.meaning].some((field) => field.toLowerCase().includes(q)),
-    )
+    const matches = !q
+      ? words
+      : words.filter((w) =>
+          [w.japanese, w.hiragana, toDisplayRomaji(w.hiragana), w.meaning].some((field) => field.toLowerCase().includes(q)),
+        )
+    return sortWords(matches, sortKey, sortDirection)
   })
   const selectedWords = $derived(words.filter((w) => selected.has(w.id)))
   const allSelected = $derived(visibleWords.length > 0 && visibleWords.every((w) => selected.has(w.id)))
@@ -243,6 +247,23 @@
     bind:value={query}
     oninput={onSearch}
   />
+  <div class="row sort">
+    <label class="check">
+      Sort by
+      <select bind:value={sortKey} aria-label="Sort by">
+        {#each SORT_OPTIONS as option (option.key)}
+          <option value={option.key}>{option.label}</option>
+        {/each}
+      </select>
+    </label>
+    <button
+      onclick={() => (sortDirection = sortDirection === 'asc' ? 'desc' : 'asc')}
+      aria-label={sortDirection === 'asc' ? 'Ascending' : 'Descending'}
+      title={sortDirection === 'asc' ? 'Ascending (click to reverse)' : 'Descending (click to reverse)'}
+    >
+      {sortDirection === 'asc' ? '↑ Ascending' : '↓ Descending'}
+    </button>
+  </div>
   <div class="row bulk">
     <label class="check">
       <input type="checkbox" checked={allSelected} onchange={toggleSelectAll} />
@@ -371,6 +392,7 @@
     border: 1px solid var(--border);
     border-radius: 8px;
   }
+  .sort,
   .bulk {
     margin-bottom: 8px;
   }
