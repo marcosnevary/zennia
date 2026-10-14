@@ -7,6 +7,8 @@
   let { words, stats = $bindable() }: { words: Word[]; stats: Stats } = $props()
 
   let sort = $state<StatsSort>('misses')
+  let showWords = $state(true)
+  let showKana = $state(true)
 
   const byId = $derived(new Map(words.map((w) => [w.id, w])))
   // stats of deleted words stay saved but are not listed
@@ -84,7 +86,11 @@
   </div>
 
   {#if attempts(wordTotal)}
-    <h2>Words</h2>
+    <div class="section-head">
+      <h2>Words</h2>
+      <button onclick={() => (showWords = !showWords)} aria-expanded={showWords}>{showWords ? 'Hide' : 'Show'}</button>
+    </div>
+    {#if showWords}
     {@render summary(wordTotal)}
     <ul class="words">
       {#each wordRows as { word, tally } (word.id)}
@@ -96,10 +102,15 @@
         </li>
       {/each}
     </ul>
+    {/if}
   {/if}
 
   {#if attempts(kanaTotal)}
-    <h2>Hiragana &amp; Katakana</h2>
+    <div class="section-head">
+      <h2>Hiragana &amp; Katakana</h2>
+      <button onclick={() => (showKana = !showKana)} aria-expanded={showKana}>{showKana ? 'Hide' : 'Show'}</button>
+    </div>
+    {#if showKana}
     {@render summary(kanaTotal)}
     {#each kanaRows as script (script.id)}
       <h3>{script.label}</h3>
@@ -114,6 +125,7 @@
         {/each}
       </ul>
     {/each}
+    {/if}
   {/if}
 {/if}
 
@@ -162,6 +174,16 @@
   .tile.warn .label,
   .tile.bad .label {
     color: inherit;
+  }
+  .section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .section-head h2 {
+    margin: 0;
   }
   .toolbar {
     display: flex;
