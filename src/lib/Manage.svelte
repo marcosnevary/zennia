@@ -19,7 +19,6 @@
   let dialogEl = $state<HTMLDialogElement>()
   let error = $state('')
   let message = $state('')
-  let importMode = $state<'merge' | 'replace'>('merge')
   let japaneseEl = $state<HTMLInputElement>()
 
   function resetForm() {
@@ -158,15 +157,9 @@
     try {
       const { words: incoming, skipped } = parse(await file.text())
       const skippedNote = skipped ? ` ${skipped} invalid item(s) ignored.` : ''
-      if (importMode === 'replace') {
-        if (!confirm(`Replace the current ${words.length} word(s) with the ${incoming.length} from the file?`)) return
-        words = incoming
-        message = `Pool replaced: ${incoming.length} word(s).${skippedNote}`
-      } else {
-        const result = mergeWords(words, incoming)
-        words = result.words
-        message = `${result.added} added, ${result.duplicates} already existed.${skippedNote}`
-      }
+      const result = mergeWords(words, incoming)
+      words = result.words
+      message = `${result.added} added, ${result.duplicates} already existed.${skippedNote}`
       resetForm()
     } catch (e) {
       error = e instanceof Error ? e.message : 'Could not import the file.'
@@ -212,10 +205,6 @@
     Import Anki deck (.txt)
     <input type="file" accept="text/plain,.txt,.tsv" onchange={importAnki} hidden />
   </label>
-  <select bind:value={importMode} aria-label="Import mode">
-    <option value="merge">Merge with the pool</option>
-    <option value="replace">Replace the pool</option>
-  </select>
 </div>
 
 {#snippet eyeIcon()}

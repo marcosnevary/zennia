@@ -19,7 +19,7 @@ npm run build    # production build into dist/
 - **Practice:** picks a word; you type the romaji and the app checks it by comparing the sound in hiragana.
 - **Checking:** accepts `shi/si`, `chi/ti`, `tsu/tu`, `fu/hu`, `ji/zi`, macrons (`ō`), uppercase and extra spaces. If only the length of a vowel differs (`tokyo` instead of `toukyou`), the result is "almost" and counts as an error.
 - **Words:** save the `japanese`, `hiragana` and `meaning`. Romaji is not saved: it is generated from the hiragana.
-- **Import/export:** JSON with a `version` field. Importing can merge (ignoring duplicates) or replace the pool.
+- **Import/export:** JSON with a `version` field. Importing always merges into the pool, ignoring duplicates.
 - **Anki import:** Manage → "Import Anki deck (.txt)" reads an Anki "Notes in Plain Text" export (HTML enabled, front + back of each card, e.g. Kaishi 1.5k) and maps word, reading and meaning to the pool.
 - **Data:** lives in the browser's localStorage, per domain. Export the JSON from time to time as a backup.
 
