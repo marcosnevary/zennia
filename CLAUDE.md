@@ -22,6 +22,7 @@ No linter is configured. The tests live in a single file, [src/lib/romaji.test.t
 - [src/lib/storage.ts](src/lib/storage.ts) is the **only** access point to localStorage (key `nihongo:words`, format `{ version: 1, words }`). Swapping for IndexedDB/a backend should touch only this file. Reads go through `sanitizeWords`; failures become an empty list / are silently ignored.
 - [src/lib/words.ts](src/lib/words.ts): `sanitizeWords` validates any external data (localStorage or imported file; accepts an array or `{ words }`, discards items without `japanese`/`hiragana`, regenerates duplicate ids). `mergeWords` deduplicates by id or by `japanese|hiragana`.
 - [src/lib/io.ts](src/lib/io.ts): JSON export/import (with `version` for migrations) and browser download.
+- [src/lib/anki.ts](src/lib/anki.ts): imports an Anki "Notes in Plain Text" export (tab-separated, quoted multi-line HTML fields, only front + back per card). Word = front text; reading = the back's headword with each `<ruby>` replaced by its `<rt>` furigana (kana-only words are their own reading); meaning = the first nested `<div>` on the back. Cards whose reading isn't pure kana are skipped; repeated word + reading pairs are deduplicated.
 - [src/lib/types.ts](src/lib/types.ts): `Word { id, japanese, hiragana, meaning }`, `Verdict`, `WordsFile`.
 
 ### Checking ([src/lib/romaji.ts](src/lib/romaji.ts))
