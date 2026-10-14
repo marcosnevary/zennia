@@ -41,7 +41,7 @@
     const h = hiragana.trim()
     error = validate(j, h)
     if (error) return
-    words = [{ id: newId(), japanese: j, hiragana: h, meaning: meaning.trim() }, ...words]
+    words = [{ id: newId(), japanese: j, hiragana: h, meaning: meaning.trim(), addedAt: Date.now() }, ...words]
     message = 'Word added.'
     resetForm()
     japaneseEl?.focus()
@@ -156,7 +156,10 @@
     if (!file) return
     error = ''
     try {
-      const { words: incoming, skipped } = parse(await file.text())
+      const parsed = parse(await file.text())
+      const skipped = parsed.skipped
+      const now = Date.now()
+      const incoming = parsed.words.map((w) => (w.addedAt === undefined ? { ...w, addedAt: now } : w))
       const skippedNote = skipped ? ` ${skipped} invalid item(s) ignored.` : ''
       if (importMode === 'replace') {
         if (!confirm(`Replace the current ${words.length} word(s) with the ${incoming.length} from the file?`)) return
@@ -239,30 +242,32 @@
 {#if words.length === 0}
   <p class="muted">No words yet.</p>
 {:else}
-  <input
-    type="search"
-    class="search"
-    placeholder="Search by word, reading, romaji or meaning"
-    aria-label="Search words"
-    bind:value={query}
-    oninput={onSearch}
-  />
-  <div class="row sort">
-    <label class="check">
-      Sort by
-      <select bind:value={sortKey} aria-label="Sort by">
-        {#each SORT_OPTIONS as option (option.key)}
-          <option value={option.key}>{option.label}</option>
-        {/each}
-      </select>
-    </label>
-    <button
-      onclick={() => (sortDirection = sortDirection === 'asc' ? 'desc' : 'asc')}
-      aria-label={sortDirection === 'asc' ? 'Ascending' : 'Descending'}
-      title={sortDirection === 'asc' ? 'Ascending (click to reverse)' : 'Descending (click to reverse)'}
-    >
-      {sortDirection === 'asc' ? '↑ Ascending' : '↓ Descending'}
-    </button>
+  <div class="toolbar">
+    <input
+      type="search"
+      class="search"
+      placeholder="Search by word, reading, romaji or meaning"
+      aria-label="Search words"
+      bind:value={query}
+      oninput={onSearch}
+    />
+    <div class="sort">
+      <label class="check">
+        Sort by
+        <select bind:value={sortKey} aria-label="Sort by">
+          {#each SORT_OPTIONS as option (option.key)}
+            <option value={option.key}>{option.label}</option>
+          {/each}
+        </select>
+      </label>
+      <button
+        onclick={() => (sortDirection = sortDirection === 'asc' ? 'desc' : 'asc')}
+        aria-label={sortDirection === 'asc' ? 'Ascending' : 'Descending'}
+        title={sortDirection === 'asc' ? 'Ascending (click to reverse)' : 'Descending (click to reverse)'}
+      >
+        {sortDirection === 'asc' ? '↑ Ascending' : '↓ Descending'}
+      </button>
+    </div>
   </div>
   <div class="row bulk">
     <label class="check">
@@ -392,7 +397,24 @@
     border: 1px solid var(--border);
     border-radius: 8px;
   }
-  .sort,
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .toolbar .search {
+    flex: 1;
+    min-width: 200px;
+    width: auto;
+    margin-bottom: 0;
+  }
+  .sort {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
   .bulk {
     margin-bottom: 8px;
   }

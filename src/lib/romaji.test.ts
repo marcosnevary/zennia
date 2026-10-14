@@ -101,6 +101,12 @@ describe('sortWords', () => {
     expect(ids(sortWords(list, 'list', 'desc'))).toBe('4321')
   })
 
+  it('sorts by date added with undated words last in both directions', () => {
+    const dated = [{ ...w('1', 'a', 'あ'), addedAt: 20 }, w('2', 'b', 'い'), { ...w('3', 'c', 'う'), addedAt: 10 }]
+    expect(ids(sortWords(dated, 'added', 'asc'))).toBe('312')
+    expect(ids(sortWords(dated, 'added', 'desc'))).toBe('132')
+  })
+
   it('sorts by reading in gojūon order', () => {
     expect(ids(sortWords(list, 'reading', 'asc'))).toBe('3142')
     expect(ids(sortWords(list, 'reading', 'desc'))).toBe('2413')
