@@ -265,10 +265,10 @@
   .script > header {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
   }
   .script > header span {
-    margin-right: auto;
     font-size: 0.85rem;
   }
   h2 {
@@ -286,10 +286,11 @@
   .group-head {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
   }
   table {
-    margin-top: 4px;
+    margin: 4px auto 0;
     border-collapse: separate;
     border-spacing: 4px;
   }

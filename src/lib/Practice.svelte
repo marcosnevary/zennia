@@ -22,6 +22,7 @@
 <style>
   .modes {
     display: flex;
+    justify-content: center;
     gap: 8px;
     margin-top: 16px;
   }
