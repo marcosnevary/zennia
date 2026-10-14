@@ -1,10 +1,8 @@
-import { isKatakana, toHiragana } from 'wanakana'
 import { kanaKey, type KanaScript } from './kana'
-import { kanaBreakdown } from './romaji'
 import type { Stats, Tally, Verdict, Word } from './types'
 
 export function emptyStats(): Stats {
-  return { words: {}, kana: {}, drill: { hits: 0, misses: 0 } }
+  return { words: {}, kana: {} }
 }
 
 function count(value: unknown): number {
@@ -25,12 +23,7 @@ function sanitizeTallies(raw: unknown): Record<string, Tally> {
 /** Validates stats read from storage; anything malformed becomes empty. */
 export function sanitizeStats(raw: unknown): Stats {
   const o = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {}
-  const drill = (o.drill ?? {}) as Record<string, unknown>
-  return {
-    words: sanitizeTallies(o.words),
-    kana: sanitizeTallies(o.kana),
-    drill: { hits: count(drill.hits), misses: count(drill.misses) },
-  }
+  return { words: sanitizeTallies(o.words), kana: sanitizeTallies(o.kana) }
 }
 
 function bump(tallies: Record<string, Tally>, key: string, hit: boolean): void {
@@ -40,23 +33,14 @@ function bump(tallies: Record<string, Tally>, key: string, hit: boolean): void {
   tallies[key] = tally
 }
 
-/**
- * Records one checked answer. "almost" counts as a miss, like in the session score.
- * Mutates `stats` so it works directly on Svelte state.
- */
-export function recordAnswer(stats: Stats, word: Word, input: string, verdict: Verdict): void {
+/** Records one checked answer of the word practice. "almost" counts as a miss, like in the session score. */
+export function recordAnswer(stats: Stats, word: Word, verdict: Verdict): void {
   bump(stats.words, word.id, verdict === 'correct')
-  for (const { kana, hit } of kanaBreakdown(input, word.hiragana)) {
-    const script: KanaScript = isKatakana(kana) ? 'katakana' : 'hiragana'
-    bump(stats.kana, kanaKey(script, toHiragana(kana)), hit)
-  }
 }
 
 /** Records one answer of the hiragana/katakana practice. */
 export function recordKana(stats: Stats, script: KanaScript, hiragana: string, hit: boolean): void {
   bump(stats.kana, kanaKey(script, hiragana), hit)
-  if (hit) stats.drill.hits++
-  else stats.drill.misses++
 }
 
 /** Sum of every tally in a record. */

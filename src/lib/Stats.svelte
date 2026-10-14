@@ -30,10 +30,7 @@
   )
 
   const wordTotal = $derived(sumTallies(stats.words))
-  const overall = $derived({
-    hits: wordTotal.hits + stats.drill.hits,
-    misses: wordTotal.misses + stats.drill.misses,
-  })
+  const kanaTotal = $derived(sumTallies(stats.kana))
 
   /** good / ok / poor, always shown together with the percentage text */
   function level(tally: Tally): 'ok' | 'warn' | 'bad' {
@@ -46,28 +43,30 @@
   }
 </script>
 
-{#if !attempts(overall)}
-  <p class="muted">No statistics yet. Answer some words or kana in Practice and they will show up here.</p>
-{:else}
+{#snippet summary(tally: Tally)}
   <section class="summary">
     <div class="tile ok">
-      <span class="value">{overall.hits}</span>
+      <span class="value">{tally.hits}</span>
       <span class="label">Correct</span>
     </div>
     <div class="tile bad">
-      <span class="value">{overall.misses}</span>
+      <span class="value">{tally.misses}</span>
       <span class="label">Wrong</span>
     </div>
-    <div class="tile {level(overall)}">
-      <span class="value">{percent(accuracy(overall))}</span>
+    <div class="tile {level(tally)}">
+      <span class="value">{percent(accuracy(tally))}</span>
       <span class="label">Accuracy</span>
     </div>
     <div class="tile">
-      <span class="value">{attempts(overall)}</span>
+      <span class="value">{attempts(tally)}</span>
       <span class="label">Answers</span>
     </div>
   </section>
+{/snippet}
 
+{#if !attempts(wordTotal) && !attempts(kanaTotal)}
+  <p class="muted">No statistics yet. Answer some words or kana in Practice and they will show up here.</p>
+{:else}
   <div class="toolbar">
     <label>
       Sort by
@@ -80,36 +79,36 @@
     <button class="danger" onclick={reset}>Reset stats</button>
   </div>
 
-  <h2>Kana</h2>
-  <p class="muted note">
-    Counts both the hiragana/katakana practice and the kana inside the words you answered; for words, a miss means that
-    kana was not typed correctly.
-  </p>
-  {#each kanaRows as script (script.id)}
-    <h3>{script.label}</h3>
-    <ul class="kana">
-      {#each script.rows as { key, symbol, tally } (key)}
-        <li class={level(tally)} title="{tally.hits} correct, {tally.misses} wrong">
-          <span class="char" lang="ja">{symbol}</span>
-          <span class="pct">{percent(accuracy(tally))}</span>
+  {#if attempts(wordTotal)}
+    <h2>Words</h2>
+    {@render summary(wordTotal)}
+    <ul class="words">
+      {#each wordRows as { word, tally } (word.id)}
+        <li>
+          <span class="jp" lang="ja">{word.japanese}</span>
+          <span class="reading muted" lang="ja">{word.hiragana}</span>
           <span class="counts">✓{tally.hits} ✗{tally.misses}</span>
+          <span class="badge {level(tally)}">{percent(accuracy(tally))}</span>
         </li>
       {/each}
     </ul>
-  {/each}
+  {/if}
 
-  {#if wordRows.length}
-  <h2>Words</h2>
-  <ul class="words">
-    {#each wordRows as { word, tally } (word.id)}
-      <li>
-        <span class="jp" lang="ja">{word.japanese}</span>
-        <span class="reading muted" lang="ja">{word.hiragana}</span>
-        <span class="counts">✓{tally.hits} ✗{tally.misses}</span>
-        <span class="badge {level(tally)}">{percent(accuracy(tally))}</span>
-      </li>
+  {#if attempts(kanaTotal)}
+    <h2>Hiragana &amp; Katakana</h2>
+    {@render summary(kanaTotal)}
+    {#each kanaRows as script (script.id)}
+      <h3>{script.label}</h3>
+      <ul class="kana">
+        {#each script.rows as { key, symbol, tally } (key)}
+          <li class={level(tally)} title="{tally.hits} correct, {tally.misses} wrong">
+            <span class="char" lang="ja">{symbol}</span>
+            <span class="pct">{percent(accuracy(tally))}</span>
+            <span class="counts">✓{tally.hits} ✗{tally.misses}</span>
+          </li>
+        {/each}
+      </ul>
     {/each}
-  </ul>
   {/if}
 {/if}
 
@@ -118,7 +117,7 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 8px;
-    margin-top: 24px;
+    margin: 8px 0 16px;
   }
   .tile {
     display: flex;
@@ -176,10 +175,6 @@
     margin: 16px 0 8px;
     font-size: 0.95rem;
     color: var(--muted);
-  }
-  .note {
-    margin: 0 0 8px;
-    font-size: 0.85rem;
   }
   ul {
     list-style: none;

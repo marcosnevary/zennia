@@ -48,7 +48,7 @@
     } else {
       streak = 0
     }
-    recordAnswer(stats, current, answer, verdict)
+    recordAnswer(stats, current, verdict)
   }
 
   // Space works like Enter (spaces are ignored when comparing anyway)

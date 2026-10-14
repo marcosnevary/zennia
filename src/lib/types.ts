@@ -24,12 +24,10 @@ export interface Tally {
   misses: number
 }
 
-/** Lifetime results: per word (by id) and per kana (as written in the reading) */
+/** Lifetime results: per word (by id) and per kana of the hiragana/katakana practice (see `kanaKey`) */
 export interface Stats {
   words: Record<string, Tally>
   kana: Record<string, Tally>
-  /** Answers of the hiragana/katakana practice only (`kana` also counts the kana inside words) */
-  drill: Tally
 }
 
 export interface StatsFile {
