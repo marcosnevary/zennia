@@ -14,7 +14,8 @@
 
   function next() {
     // picks a random word, avoiding the previous one when there are others
-    const pool = words.length > 1 ? words.filter((w) => w.id !== lastId) : words
+    const enabled = words.filter((w) => !w.disabled)
+    const pool = enabled.length > 1 ? enabled.filter((w) => w.id !== lastId) : enabled
     current = pool.length ? pool[Math.floor(Math.random() * pool.length)] : null
     lastId = current?.id ?? null
     answer = ''
@@ -42,8 +43,8 @@
 
 {#if !current}
   <p class="muted">
-    No words saved yet.
-    <button onclick={onmanage}>Add words</button>
+    {words.length ? 'All words are disabled.' : 'No words saved yet.'}
+    <button onclick={onmanage}>{words.length ? 'Manage words' : 'Add words'}</button>
   </p>
 {:else}
   <section class="card">

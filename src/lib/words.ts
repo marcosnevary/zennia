@@ -43,7 +43,7 @@ export function sanitizeWords(raw: unknown): SanitizeResult {
     let id = typeof o.id === 'string' && o.id ? o.id : newId()
     if (seenIds.has(id)) id = newId()
     seenIds.add(id)
-    words.push({ id, japanese, hiragana, meaning })
+    words.push(o.disabled === true ? { id, japanese, hiragana, meaning, disabled: true } : { id, japanese, hiragana, meaning })
   }
 
   return { words, skipped }
