@@ -365,8 +365,12 @@
     color: var(--on);
     background: var(--on-bg);
   }
-  /* selected cells keep the light blue at rest and hover black and white; unselected ones use the blue hover */
+  /* selected cells keep the light blue at rest and hover blue and white; unselected ones hover black and white */
   .cell.on:hover {
+    color: var(--accent-text);
+    background: var(--accent);
+  }
+  .cell:not(.on):hover {
     color: var(--bg);
     background: var(--text);
     --lift-shadow: color-mix(in srgb, var(--text) 55%, black);
