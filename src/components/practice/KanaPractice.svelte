@@ -11,7 +11,6 @@
   } from '../../core/kana'
   import { checkAnswer, toDisplayRomaji } from '../../core/romaji'
   import Scoreboard from './Scoreboard.svelte'
-  import KanaHeatmap from './KanaHeatmap.svelte'
   import { drawWeight, pickWeighted, recordKana } from '../../data/stats'
   import { loadKanaSelection, saveKanaSelection } from '../../data/storage'
   import type { Stats, Verdict } from '../../core/types'
@@ -44,7 +43,6 @@
   let verdict = $state<Verdict | null>(null)
   let inputEl = $state<HTMLInputElement>()
   let lastSymbol: string | null = null
-  let showHeatmap = $state(false)
   let hits = $state(0)
   let total = $state(0)
   let streak = $state(0)
@@ -150,14 +148,6 @@
   <Scoreboard {hits} {total} {streak} {bestStreak} onreset={resetSession} />
 {:else}
   <p class="muted">Select at least one character below to practice.</p>
-{/if}
-
-<div class="toolbar">
-  <button onclick={() => (showHeatmap = true)}>Heatmap</button>
-</div>
-
-{#if showHeatmap}
-  <KanaHeatmap {stats} onclose={() => (showHeatmap = false)} />
 {/if}
 
 <div class="tables">
@@ -284,11 +274,6 @@
   .incorrect {
     background: var(--bad-bg);
     color: var(--bad);
-  }
-  .toolbar {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 24px;
   }
   .tables {
     display: flex;
