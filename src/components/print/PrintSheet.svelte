@@ -28,19 +28,26 @@
 {#if data}
   <div class="sheet">
     {#each rows as row (row.word.id)}
-      <section class="row" style:--cell="{SHEET.cell}mm" style:--gap="{SHEET.gap}mm">
-        {#each row.groups as kind, g (g)}
-          <div class="group">
-            {#each row.chars as char, c (c)}
-              {@render cell(char, kind, data[char])}
-            {/each}
-          </div>
-        {/each}
-      </section>
+      <div class="word">
+        {@render squares(row.chars, row.groups, SHEET.cell, data)}
+        {@render squares(row.chars, row.smallGroups, SHEET.smallCell, data)}
+      </div>
     {/each}
     <p class="credit">Stroke order data: KanjiVG (kanjivg.tagaini.net), CC BY-SA 3.0.</p>
   </div>
 {/if}
+
+{#snippet squares(chars: string[], groups: CellKind[], size: number, data: StrokeData)}
+  <section class="row" style:--cell="{size}mm" style:--gap="{SHEET.gap}mm">
+    {#each groups as kind, g (g)}
+      <div class="group">
+        {#each chars as char, c (c)}
+          {@render cell(char, kind, data[char])}
+        {/each}
+      </div>
+    {/each}
+  </section>
+{/snippet}
 
 {#snippet cell(char: string, kind: CellKind, strokes: CharStrokes | undefined)}
   <svg class="cell" viewBox="0 0 109 109" aria-label={kind === 'blank' ? 'Empty square' : char}>
@@ -76,12 +83,16 @@
     background: #fff;
     color: #000;
   }
+  /* a word and its two kinds of rows stay on one page */
+  .word {
+    margin-bottom: 5mm;
+    break-inside: avoid;
+  }
   .row {
     display: flex;
     flex-wrap: wrap;
     gap: 2mm var(--gap);
-    margin-bottom: 4mm;
-    break-inside: avoid;
+    margin-bottom: 2mm;
   }
   .group {
     display: flex;
@@ -95,16 +106,19 @@
   .group > .cell:first-child {
     margin-left: 0;
   }
+  /* lines keep the same thickness in large and small squares */
   .frame {
     fill: none;
     stroke: #444;
-    stroke-width: 1.2;
+    stroke-width: 0.75px;
+    vector-effect: non-scaling-stroke;
   }
   .guide {
     fill: none;
     stroke: #bbb;
-    stroke-width: 0.8;
-    stroke-dasharray: 3 3;
+    stroke-width: 0.5px;
+    stroke-dasharray: 2 2;
+    vector-effect: non-scaling-stroke;
   }
   .strokes {
     fill: none;
