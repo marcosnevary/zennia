@@ -121,11 +121,11 @@
 {#if !attempts(wordTotal) && !attempts(kanaTotal)}
   <p class="muted">No statistics yet. Answer some words or kana in Practice and they will show up here.</p>
 {:else}
+  {@render summary(total)}
+
   <div class="toolbar">
     <button class="danger" onclick={reset}>Reset stats</button>
   </div>
-
-  {@render summary(total)}
 
   <h2>Practiced ({visibleRows.length === rows.size ? rows.size : `${visibleRows.length} of ${rows.size}`})</h2>
   <div class="toolbar">
