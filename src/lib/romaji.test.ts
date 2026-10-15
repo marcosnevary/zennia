@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { checkAnswer, toDisplayRomaji } from './romaji'
-import { drawWeight, pickWeighted } from './stats'
+import { drawWeight, meanAttempts, pickWeighted } from './stats'
 import { mergeWords, sanitizeWords, sortWords } from './words'
 
 describe('checkAnswer: accepts spelling-system variations', () => {
@@ -120,13 +120,22 @@ describe('sortWords', () => {
 })
 
 describe('drawWeight and pickWeighted', () => {
-  it('weighs missed items above new ones, and new ones above mastered ones', () => {
-    const failing = drawWeight({ hits: 1, misses: 5 })
-    const unseen = drawWeight(undefined)
-    const mastered = drawWeight({ hits: 20, misses: 0 })
-    expect(failing).toBeGreaterThan(unseen)
-    expect(unseen).toBeGreaterThan(mastered)
+  it('weighs new items above missed ones, and missed ones above mastered ones', () => {
+    const unseen = drawWeight(undefined, 3)
+    const failing = drawWeight({ hits: 0, misses: 1 }, 3)
+    const mastered = drawWeight({ hits: 20, misses: 0 }, 3)
+    expect(unseen).toBeGreaterThan(failing)
+    expect(failing).toBeGreaterThan(mastered)
     expect(mastered).toBeGreaterThan(0)
+  })
+  it('damps items shown more than the average and lifts those shown less', () => {
+    const tally = { hits: 2, misses: 4 }
+    expect(drawWeight(tally, 1)).toBeLessThan(drawWeight(tally, 6))
+    expect(drawWeight(tally, 1)).toBeLessThan(drawWeight({ hits: 0, misses: 1 }, 1))
+  })
+  it('meanAttempts counts items without a tally as zero', () => {
+    expect(meanAttempts([undefined, { hits: 1, misses: 1 }, { hits: 4, misses: 0 }, undefined])).toBe(1.5)
+    expect(meanAttempts([])).toBe(0)
   })
   it('a miss raises the weight', () => {
     expect(drawWeight({ hits: 5, misses: 1 })).toBeGreaterThan(drawWeight({ hits: 6, misses: 0 }))

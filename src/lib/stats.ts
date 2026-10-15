@@ -82,20 +82,31 @@ export function sortTallies(entries: [string, Tally][], sort: StatsSort): [strin
   )
 }
 
-/** Weight of an item that was never answered: seen more often than a mastered one, less than a failing one. */
-const UNSEEN_WEIGHT = 3
+/** Weight of an item that was never answered: above the ceiling of any answered one, so everything gets seen. */
+const UNSEEN_WEIGHT = 6
 const MIN_WEIGHT = 0.5
 const WEIGHT_RANGE = 4.5
 
+/** Mean number of answers per item, counting items without a tally as zero. */
+export function meanAttempts(tallies: (Tally | undefined)[]): number {
+  if (!tallies.length) return 0
+  return tallies.reduce((sum, t) => sum + (t ? attempts(t) : 0), 0) / tallies.length
+}
+
 /**
- * How likely an item is to be drawn, relative to the others. Uses a smoothed miss rate
- * (one phantom miss and one phantom hit), so a single miss does not dominate and a long
- * run of hits slowly pushes the item down without ever removing it. Range: 0.5 to 5.
+ * How likely an item is to be drawn, relative to the others. Never-answered items come first.
+ * For the rest, a smoothed miss rate (one phantom miss and one phantom hit) gives the base
+ * weight, 0.5 to 5, so a single miss does not dominate and hits slowly lower it. That base is
+ * then scaled by how the item's attempts compare with `mean` (see `meanAttempts`): items shown
+ * more than average are damped and those shown less are lifted (about 0.65x to 1.25x), so a few
+ * hard items cannot take over the session.
  */
-export function drawWeight(tally: Tally | undefined): number {
-  if (!tally || attempts(tally) === 0) return UNSEEN_WEIGHT
-  const missRate = (tally.misses + 1) / (attempts(tally) + 2)
-  return MIN_WEIGHT + WEIGHT_RANGE * missRate
+export function drawWeight(tally: Tally | undefined, mean = 0): number {
+  const n = tally ? attempts(tally) : 0
+  if (!tally || n === 0) return UNSEEN_WEIGHT
+  const missRate = (tally.misses + 1) / (n + 2)
+  const coverage = Math.pow(Math.min(2, Math.max(0.25, (mean + 1) / (n + 1))), 0.3)
+  return (MIN_WEIGHT + WEIGHT_RANGE * missRate) * coverage
 }
 
 /** Weighted random choice; `random` returns a number in [0, 1) and can be replaced in tests. */
