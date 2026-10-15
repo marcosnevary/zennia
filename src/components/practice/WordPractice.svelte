@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { checkAnswer, toDisplayRomaji } from './romaji'
+  import { checkAnswer, toDisplayRomaji } from '../../core/romaji'
   import Scoreboard from './Scoreboard.svelte'
-  import { recordAnswer } from './stats'
-  import type { Stats, Verdict, Word } from './types'
+  import { recordAnswer } from '../../data/stats'
+  import type { Stats, Verdict, Word } from '../../core/types'
 
   let { words, stats = $bindable(), onmanage }: { words: Word[]; stats: Stats; onmanage: () => void } = $props()
 

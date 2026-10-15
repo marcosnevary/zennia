@@ -1,5 +1,5 @@
-import { kanaKey, type KanaScript } from './kana'
-import type { Stats, Tally, Verdict, Word } from './types'
+import { kanaKey, type KanaScript } from '../core/kana'
+import type { Stats, Tally, Verdict, Word } from '../core/types'
 
 export function emptyStats(): Stats {
   return { words: {}, kana: {} }

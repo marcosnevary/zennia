@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { accuracy, emptyStats, recordAnswer, recordKana, sanitizeStats, sortTallies } from './stats'
-import type { Word } from './types'
+import type { Word } from '../core/types'
 
 const word: Word = { id: 'w1', japanese: '食べる', hiragana: 'たべる', meaning: '' }
 

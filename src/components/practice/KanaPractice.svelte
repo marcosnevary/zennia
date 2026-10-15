@@ -8,12 +8,12 @@
     type Kana,
     type KanaScript,
     type KanaSection,
-  } from './kana'
-  import { checkAnswer, toDisplayRomaji } from './romaji'
+  } from '../../core/kana'
+  import { checkAnswer, toDisplayRomaji } from '../../core/romaji'
   import Scoreboard from './Scoreboard.svelte'
-  import { recordKana } from './stats'
-  import { loadKanaSelection, saveKanaSelection } from './storage'
-  import type { Stats, Verdict } from './types'
+  import { recordKana } from '../../data/stats'
+  import { loadKanaSelection, saveKanaSelection } from '../../data/storage'
+  import type { Stats, Verdict } from '../../core/types'
 
   let { stats = $bindable() }: { stats: Stats } = $props()
 
