@@ -58,11 +58,14 @@
     justify-content: space-between;
     gap: 12px;
     flex-wrap: wrap;
+    padding-top: 10px;
     padding-bottom: 16px;
     border-bottom: 2px solid var(--text);
   }
   h1 {
-    font-size: 1.4rem;
+    font-family: 'Libron', Georgia, serif;
+    font-weight: 700;
+    font-size: 1.8rem;
     margin: 0;
   }
   nav {
