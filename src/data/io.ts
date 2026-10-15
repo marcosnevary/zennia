@@ -1,4 +1,4 @@
-import type { Word, WordsFile } from './types'
+import type { Word, WordsFile } from '../core/types'
 import { sanitizeWords, type SanitizeResult } from './words'
 
 /** Serializes the pool to JSON (format with `version`, for future migrations). */

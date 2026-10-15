@@ -1,11 +1,11 @@
 <script lang="ts">
   import Help from './Help.svelte'
   import { isKana } from 'wanakana'
-  import { importAnkiDeck } from './anki'
-  import { downloadText, exportJSON, importJSON } from './io'
-  import { toDisplayRomaji } from './romaji'
-  import type { Word } from './types'
-  import { mergeWords, newId, SORT_OPTIONS, sortWords, type SanitizeResult, type SortDirection, type SortKey } from './words'
+  import { importAnkiDeck } from '../../data/anki'
+  import { downloadText, exportJSON, importJSON } from '../../data/io'
+  import { toDisplayRomaji } from '../../core/romaji'
+  import type { Word } from '../../core/types'
+  import { mergeWords, newId, SORT_OPTIONS, sortWords, type SanitizeResult, type SortDirection, type SortKey } from '../../data/words'
 
   let { words = $bindable() }: { words: Word[] } = $props()
 

@@ -1,10 +1,10 @@
 <script lang="ts">
-  import WordPractice from './lib/WordPractice.svelte'
-  import KanaPractice from './lib/KanaPractice.svelte'
-  import Manage from './lib/Manage.svelte'
-  import StatsView from './lib/Stats.svelte'
-  import { loadStats, loadWords, saveStats, saveWords } from './lib/storage'
-  import type { Stats, Word } from './lib/types'
+  import WordPractice from './components/practice/WordPractice.svelte'
+  import KanaPractice from './components/practice/KanaPractice.svelte'
+  import Manage from './components/manage/Manage.svelte'
+  import StatsView from './components/stats/Stats.svelte'
+  import { loadStats, loadWords, saveStats, saveWords } from './data/storage'
+  import type { Stats, Word } from './core/types'
 
   let words = $state<Word[]>(loadWords())
   let stats = $state<Stats>(loadStats())

@@ -1,4 +1,4 @@
-import type { Word } from './types'
+import type { Word } from '../core/types'
 
 export function newId(): string {
   return crypto.randomUUID()

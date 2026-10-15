@@ -1,5 +1,5 @@
 import { emptyStats, sanitizeStats } from './stats'
-import type { Stats, StatsFile, Word, WordsFile } from './types'
+import type { Stats, StatsFile, Word, WordsFile } from '../core/types'
 import { sanitizeWords } from './words'
 
 const KEY = 'zennia:words'

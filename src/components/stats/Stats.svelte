@@ -1,8 +1,8 @@
 <script lang="ts">
   import { toRomaji } from 'wanakana'
-  import { symbolOf, type KanaScript } from './kana'
-  import { emptyStats, STATS_SORT_OPTIONS, accuracy, attempts, percent, sortTallies, sumTallies, type StatsSort } from './stats'
-  import type { Stats, Tally, Word } from './types'
+  import { symbolOf, type KanaScript } from '../../core/kana'
+  import { emptyStats, STATS_SORT_OPTIONS, accuracy, attempts, percent, sortTallies, sumTallies, type StatsSort } from '../../data/stats'
+  import type { Stats, Tally, Word } from '../../core/types'
 
   let { words, stats = $bindable() }: { words: Word[]; stats: Stats } = $props()
 

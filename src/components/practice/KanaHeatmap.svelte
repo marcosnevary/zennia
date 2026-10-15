@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { KANA_SECTIONS, kanaKey, symbolOf, type KanaScript } from './kana'
-  import { attempts } from './stats'
-  import type { Stats } from './types'
+  import { KANA_SECTIONS, kanaKey, symbolOf, type KanaScript } from '../../core/kana'
+  import { attempts } from '../../data/stats'
+  import type { Stats } from '../../core/types'
 
   let { stats, onclose }: { stats: Stats; onclose: () => void } = $props()
 
