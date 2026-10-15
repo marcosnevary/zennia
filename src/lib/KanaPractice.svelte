@@ -12,6 +12,7 @@
   import { checkAnswer, toDisplayRomaji } from './romaji'
   import Scoreboard from './Scoreboard.svelte'
   import { recordKana } from './stats'
+  import { loadKanaSelection, saveKanaSelection } from './storage'
   import type { Stats, Verdict } from './types'
 
   let { stats = $bindable() }: { stats: Stats } = $props()
@@ -25,10 +26,15 @@
   // the basic set is everything before the dakuten block
   const BASIC_ROWS = basic.rows.slice(0, basic.rows.findIndex((r) => r.gap))
 
-  /** Keys (see `kanaKey`) of the characters included in practice; starts with the basic set */
+  /** Keys (see `kanaKey`) of the characters included in practice; defaults to the basic hiragana, then remembers the last choice */
   let selected = $state<string[]>(
-    SCRIPTS.flatMap((s) => BASIC_ROWS.flatMap((r) => cellsOf(r.cells).map((h) => kanaKey(s.id, h)))),
+    loadKanaSelection() ??
+      BASIC_ROWS.flatMap((r) => cellsOf(r.cells).map((h) => kanaKey('hiragana', h))),
   )
+
+  $effect(() => {
+    saveKanaSelection($state.snapshot(selected))
+  })
 
   const pool = $derived(buildKana(selected))
 

@@ -112,7 +112,7 @@
     <div class="section-head">
       <h2>
         <button class="toggle" onclick={() => (showKana = !showKana)} aria-expanded={showKana}>
-          <span aria-hidden="true">{showKana ? '▾' : '▸'}</span> Hiragana &amp; Katakana
+          <span aria-hidden="true">{showKana ? '▾' : '▸'}</span> Kana
         </button>
       </h2>
     </div>

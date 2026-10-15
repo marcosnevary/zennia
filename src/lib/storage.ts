@@ -4,6 +4,7 @@ import { sanitizeWords } from './words'
 
 const KEY = 'zennia:words'
 const STATS_KEY = 'zennia:stats'
+const KANA_KEY = 'zennia:kana-selection'
 
 /**
  * Single point of access to the data. To replace localStorage with
@@ -42,6 +43,27 @@ export function saveStats(stats: Stats): void {
   const data: StatsFile = { version: 1, stats }
   try {
     localStorage.setItem(STATS_KEY, JSON.stringify(data))
+  } catch {
+    // storage full or blocked: the app keeps working in memory
+  }
+}
+
+/** Saved kana selection (keys, see `kanaKey`), or null when nothing valid was saved. */
+export function loadKanaSelection(): string[] | null {
+  try {
+    const raw = localStorage.getItem(KANA_KEY)
+    if (!raw) return null
+    const data: unknown = JSON.parse(raw)
+    if (!Array.isArray(data)) return null
+    return data.filter((k): k is string => typeof k === 'string')
+  } catch {
+    return null
+  }
+}
+
+export function saveKanaSelection(keys: string[]): void {
+  try {
+    localStorage.setItem(KANA_KEY, JSON.stringify(keys))
   } catch {
     // storage full or blocked: the app keeps working in memory
   }
