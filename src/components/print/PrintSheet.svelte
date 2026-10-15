@@ -1,24 +1,32 @@
 <script lang="ts">
+  import { onMount, tick } from 'svelte'
   import { sheetRow, SHEET, type CellKind } from '../../core/sheet'
-  import { loadStrokes, type CharStrokes } from '../../data/strokes'
+  import { loadStrokes, type CharStrokes, type StrokeData } from '../../data/strokes'
   import type { Word } from '../../core/types'
 
   let { words, onclose }: { words: Word[]; onclose: () => void } = $props()
 
   const rows = $derived(words.map((word) => ({ word, ...sheetRow(word.japanese) })))
-  const strokesPromise = loadStrokes()
+  let data = $state<StrokeData>()
+
+  // the sheet only exists for printing: once it is rendered, the browser's print dialog (with its preview) opens
+  onMount(async () => {
+    try {
+      data = await loadStrokes()
+    } catch {
+      alert('Could not load the stroke order data. Check your connection and try again.')
+      onclose()
+      return
+    }
+    await tick()
+    window.print()
+  })
 </script>
 
-<div class="toolbar">
-  <button class="primary" onclick={() => window.print()}>Print</button>
-  <button onclick={onclose}>Back</button>
-  <span class="muted">{words.length} word(s) · A4</span>
-</div>
+<svelte:window onafterprint={onclose} />
 
-<div class="sheet">
-  {#await strokesPromise}
-    <p class="status">Loading stroke order data…</p>
-  {:then data}
+{#if data}
+  <div class="sheet">
     {#each rows as row (row.word.id)}
       <section class="row" style:--cell="{SHEET.cell}mm" style:--gap="{SHEET.gap}mm">
         {#each row.groups as kind, g (g)}
@@ -31,10 +39,8 @@
       </section>
     {/each}
     <p class="credit">Stroke order data: KanjiVG (kanjivg.tagaini.net), CC BY-SA 3.0.</p>
-  {:catch}
-    <p class="status">Could not load the stroke order data. Check your connection and try again.</p>
-  {/await}
-</div>
+  </div>
+{/if}
 
 {#snippet cell(char: string, kind: CellKind, strokes: CharStrokes | undefined)}
   <svg class="cell" viewBox="0 0 109 109" aria-label={kind === 'blank' ? 'Empty square' : char}>
@@ -64,25 +70,11 @@
 {/snippet}
 
 <style>
-  .toolbar {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    margin-bottom: 16px;
-  }
-  /* the page is always black on white, whatever the app theme is */
+  /* the sheet only exists for the print dialog: black on white whatever the app theme is */
   .sheet {
-    width: 186mm;
-    max-width: 100%;
-    margin: 0 auto;
-    padding: 12mm;
-    box-sizing: content-box;
+    display: none;
     background: #fff;
     color: #000;
-    box-shadow: 0 0 0 1px var(--muted);
-  }
-  .status {
-    color: #555;
   }
   .row {
     display: flex;
@@ -143,13 +135,8 @@
   }
 
   @media print {
-    .toolbar {
-      display: none;
-    }
     .sheet {
-      width: auto;
-      padding: 0;
-      box-shadow: none;
+      display: block;
     }
     :global(body) {
       background: #fff;
@@ -158,6 +145,9 @@
     :global(body #app) {
       max-width: none;
       padding: 0;
+    }
+    :global(body #app > .app) {
+      display: none;
     }
   }
   @page {

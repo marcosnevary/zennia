@@ -10,7 +10,7 @@
   let words = $state<Word[]>(loadWords())
   let stats = $state<Stats>(loadStats())
   let tab = $state<'words' | 'kana' | 'stats' | 'manage'>('kana')
-  // words of the writing sheet being previewed; the app stays mounted underneath (hidden) to keep its state
+  // words of the writing sheet being printed; it renders hidden and only shows up in the print dialog
   let sheetWords = $state<Word[] | null>(null)
 
   // saves on every change to the pool (snapshot reads the whole list, including nested edits)
@@ -23,7 +23,7 @@
   })
 </script>
 
-<div hidden={sheetWords !== null}>
+<div class="app">
 <header>
   <h1>zennia</h1>
   <nav>
