@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { checkAnswer, toDisplayRomaji } from './romaji'
+import { drawWeight, pickWeighted } from './stats'
 import { mergeWords, sanitizeWords, sortWords } from './words'
 
 describe('checkAnswer: accepts spelling-system variations', () => {
@@ -115,5 +116,40 @@ describe('sortWords', () => {
     expect(ids(sortWords(list, 'status', 'asc'))).toBe('1243')
     expect(ids(sortWords(list, 'status', 'desc'))).toBe('3124')
     expect(ids(list)).toBe('1234')
+  })
+})
+
+describe('drawWeight and pickWeighted', () => {
+  it('weighs new items above missed ones, and missed ones above mastered ones', () => {
+    const unseen = drawWeight(undefined)
+    const failing = drawWeight({ hits: 0, misses: 1 })
+    const mastered = drawWeight({ hits: 20, misses: 0 })
+    expect(unseen).toBeGreaterThan(failing)
+    expect(failing).toBeGreaterThan(mastered)
+    expect(mastered).toBeGreaterThan(0)
+  })
+  it('distrusts small samples: 100% accuracy needs more answers to fade', () => {
+    const weights = [1, 2, 3, 5, 10, 20, 50].map((hits) => drawWeight({ hits, misses: 0 }))
+    for (let i = 1; i < weights.length; i++) expect(weights[i]).toBeLessThan(weights[i - 1])
+    // one correct answer still outweighs a long streak, and stays below an item that was missed
+    expect(weights[0]).toBeGreaterThan(2 * weights[5])
+    expect(weights[0]).toBeLessThan(drawWeight({ hits: 0, misses: 1 }))
+  })
+  it('the same accuracy weighs more with fewer answers', () => {
+    expect(drawWeight({ hits: 1, misses: 1 })).toBeGreaterThan(drawWeight({ hits: 10, misses: 10 }))
+  })
+  it('a miss raises the weight', () => {
+    expect(drawWeight({ hits: 5, misses: 1 })).toBeGreaterThan(drawWeight({ hits: 6, misses: 0 }))
+  })
+  it('picks proportionally to the weights', () => {
+    const items = ['a', 'b']
+    const w = (x: string) => (x === 'a' ? 1 : 3)
+    expect(pickWeighted(items, w, () => 0)).toBe('a')
+    expect(pickWeighted(items, w, () => 0.24)).toBe('a')
+    expect(pickWeighted(items, w, () => 0.26)).toBe('b')
+    expect(pickWeighted(items, w, () => 0.999)).toBe('b')
+  })
+  it('returns null for an empty list', () => {
+    expect(pickWeighted([], () => 1)).toBeNull()
   })
 })
