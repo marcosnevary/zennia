@@ -67,4 +67,4 @@ npm run check    # type checking
 npm run build    # production build into dist/
 ```
 
-All data access goes through `src/lib/storage.ts`, so moving to IndexedDB or a backend only requires changing that file. Answer checking lives in `src/lib/romaji.ts`. The app is a plain Vite project and deploys to Vercel with no configuration.
+All data access goes through `src/data/storage.ts`, so moving to IndexedDB or a backend only requires changing that file. Answer checking lives in `src/core/romaji.ts`. The app is a plain Vite project and deploys to Vercel with no configuration.

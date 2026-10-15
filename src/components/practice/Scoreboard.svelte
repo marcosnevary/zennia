@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { accuracy, percent } from './stats'
+  import { accuracy, percent } from '../../data/stats'
 
   let {
     hits,
