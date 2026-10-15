@@ -1,7 +1,7 @@
 <script lang="ts">
   import { checkAnswer, toDisplayRomaji } from './romaji'
   import Scoreboard from './Scoreboard.svelte'
-  import { drawWeight, meanAttempts, pickWeighted, recordAnswer } from './stats'
+  import { drawWeight, pickWeighted, recordAnswer } from './stats'
   import type { Stats, Verdict, Word } from './types'
 
   let { words, stats = $bindable(), onmanage }: { words: Word[]; stats: Stats; onmanage: () => void } = $props()
@@ -27,8 +27,7 @@
     // picks a word weighted by past mistakes (see drawWeight), avoiding the previous one when there are others
     const enabled = words.filter((w) => !w.disabled)
     const pool = enabled.length > 1 ? enabled.filter((w) => w.id !== lastId) : enabled
-    const mean = meanAttempts(pool.map((w) => stats.words[w.id]))
-    current = pickWeighted(pool, (w) => drawWeight(stats.words[w.id], mean))
+    current = pickWeighted(pool, (w) => drawWeight(stats.words[w.id]))
     lastId = current?.id ?? null
     answer = ''
     verdict = null

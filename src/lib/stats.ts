@@ -87,26 +87,29 @@ const UNSEEN_WEIGHT = 6
 const MIN_WEIGHT = 0.5
 const WEIGHT_RANGE = 4.5
 
-/** Mean number of answers per item, counting items without a tally as zero. */
-export function meanAttempts(tallies: (Tally | undefined)[]): number {
-  if (!tallies.length) return 0
-  return tallies.reduce((sum, t) => sum + (t ? attempts(t) : 0), 0) / tallies.length
+/** How much to distrust a small sample: z-score of the Wilson interval (1.64 is a 90% one-sided bound). */
+const CONFIDENCE_Z = 1.64
+
+/** Upper bound of the miss rate that the sample still makes plausible (Wilson score interval). */
+function missRateUpperBound(misses: number, n: number): number {
+  const z2 = CONFIDENCE_Z * CONFIDENCE_Z
+  const p = misses / n
+  const center = p + z2 / (2 * n)
+  const spread = CONFIDENCE_Z * Math.sqrt((p * (1 - p)) / n + z2 / (4 * n * n))
+  return Math.min(1, (center + spread) / (1 + z2 / n))
 }
 
 /**
  * How likely an item is to be drawn, relative to the others. Never-answered items come first.
- * For the rest, a smoothed miss rate (one phantom miss and one phantom hit) gives the base
- * weight, 0.5 to 5, so a single miss does not dominate and hits slowly lower it. That base is
- * then scaled by how the item's attempts compare with `mean` (see `meanAttempts`): items shown
- * more than average are damped and those shown less are lifted (about 0.65x to 1.25x), so a few
- * hard items cannot take over the session.
+ * For the rest, the weight (0.5 to 5) follows the highest miss rate the history still allows,
+ * not the observed one: with few answers that bound is high, so an item that is 1 for 1 keeps
+ * coming back until enough answers back its accuracy, and then it fades on its own. Misses raise
+ * the weight and hits lower it, but no answered item ever drops to zero.
  */
-export function drawWeight(tally: Tally | undefined, mean = 0): number {
+export function drawWeight(tally: Tally | undefined): number {
   const n = tally ? attempts(tally) : 0
   if (!tally || n === 0) return UNSEEN_WEIGHT
-  const missRate = (tally.misses + 1) / (n + 2)
-  const coverage = Math.pow(Math.min(2, Math.max(0.25, (mean + 1) / (n + 1))), 0.3)
-  return (MIN_WEIGHT + WEIGHT_RANGE * missRate) * coverage
+  return MIN_WEIGHT + WEIGHT_RANGE * missRateUpperBound(tally.misses, n)
 }
 
 /** Weighted random choice; `random` returns a number in [0, 1) and can be replaced in tests. */
