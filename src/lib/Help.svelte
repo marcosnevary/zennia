@@ -77,8 +77,6 @@
     padding: 16px;
     background: var(--bg, var(--surface));
     color: inherit;
-    border: 1px solid var(--border);
-    border-radius: 12px;
   }
   dialog::backdrop {
     background: rgb(0 0 0 / 0.5);

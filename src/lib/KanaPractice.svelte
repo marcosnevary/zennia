@@ -236,8 +236,6 @@
     margin-top: 24px;
     padding: 24px 16px;
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
     text-align: center;
   }
   .symbol {
@@ -249,10 +247,17 @@
     display: flex;
     gap: 8px;
   }
+  /* the only bordered element: the answer field */
+  form input {
+    border: 2px solid var(--text);
+  }
+  form input:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+  }
   .result {
     margin-top: 16px;
     padding: 12px;
-    border-radius: 8px;
     text-align: left;
   }
   .result p {
@@ -281,14 +286,14 @@
   .script {
     padding: 12px;
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
   }
   .script > header {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     gap: 2px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--text);
   }
   .script > header span {
     font-size: 0.85rem;
@@ -298,6 +303,7 @@
     font-size: 1.1rem;
   }
   h3 {
+    flex: 1;
     margin: 0;
     font-size: 0.9rem;
     color: var(--muted);
@@ -308,7 +314,7 @@
   .group-head {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 8px;
   }
   table {
@@ -330,6 +336,7 @@
   }
   .cell {
     /* same size for every cell, single or double kana */
+    --lift: 2px;
     width: 52px;
     height: 40px;
     padding: 0;
@@ -337,14 +344,11 @@
     font-size: 1.2rem;
     color: var(--muted);
     background: transparent;
-    border: 1px dashed var(--border);
-    border-radius: 6px;
     cursor: pointer;
   }
   .cell.on {
     color: var(--on);
     background: var(--on-bg);
-    border: 1px solid var(--on);
   }
   .link {
     padding: 0 2px;

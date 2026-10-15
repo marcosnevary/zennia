@@ -1,10 +1,9 @@
 :root {
-  --bg: #fafaf9;
+  --bg: #ffffff;
   --surface: #ffffff;
   --text: #1c1917;
   --muted: #78716c;
-  --border: #e7e5e4;
-  --accent: #4f46e5;
+  --accent: #1d6fe0;
   --accent-text: #ffffff;
   --ok: #15803d;
   --ok-bg: #dcfce7;
@@ -24,12 +23,11 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #1c1917;
+    --bg: #141210;
     --surface: #292524;
     --text: #f5f5f4;
     --muted: #a8a29e;
-    --border: #44403c;
-    --accent: #818cf8;
+    --accent: #60a5fa;
     --accent-text: #1c1917;
     --ok: #86efac;
     --ok-bg: #14532d;
@@ -46,6 +44,7 @@
 
 * {
   box-sizing: border-box;
+  border-radius: 0;
 }
 
 body {
@@ -69,27 +68,63 @@ input[type='text'] {
   width: 100%;
   padding: 10px 12px;
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: none;
 }
 
 input[type='text']:focus-visible,
 button:focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 1px;
+  outline-offset: 2px;
 }
 
-button {
+/* flat blocks with square corners and no borders; hovering lifts them toward the top-left */
+button,
+select,
+.file {
+  --lift: 4px;
+  position: relative;
+  --lift-shadow: color-mix(in srgb, var(--accent) 55%, black);
   padding: 9px 14px;
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: none;
   cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    background-color 0.12s ease,
+    color 0.12s ease;
+}
+
+button:hover:not(:disabled, .link, .help-btn, .toggle, .no-hover),
+.file:hover {
+  transform: translate(calc(var(--lift) * -1), calc(var(--lift) * -1));
+  /* stacked steps fill the diagonal, so the block looks extruded and stays connected to where it was */
+  box-shadow:
+    calc(var(--lift) * 0.25) calc(var(--lift) * 0.25) 0 var(--lift-shadow),
+    calc(var(--lift) * 0.5) calc(var(--lift) * 0.5) 0 var(--lift-shadow),
+    calc(var(--lift) * 0.75) calc(var(--lift) * 0.75) 0 var(--lift-shadow),
+    var(--lift) var(--lift) 0 var(--lift-shadow);
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+/* the block moves away from the cursor, so without this the hover is lost near the bottom-right edge and it flickers;
+   this extends the hit area back over the spot the button just left */
+button:hover:not(:disabled, .link, .help-btn, .toggle, .no-hover)::after,
+.file:hover::after {
+  content: '';
+  position: absolute;
+  inset: 0 calc(var(--lift) * -1) calc(var(--lift) * -1) 0;
+}
+
+button:active:not(:disabled, .link, .help-btn, .toggle, .no-hover),
+.file:active {
+  transform: none;
+  box-shadow: none;
 }
 
 button.primary {
   background: var(--accent);
-  border-color: var(--accent);
   color: var(--accent-text);
   font-weight: 600;
 }
@@ -98,9 +133,22 @@ button.danger {
   color: var(--bad);
 }
 
+button.danger:hover:not(:disabled) {
+  background: var(--bad);
+  color: var(--surface);
+  --lift-shadow: color-mix(in srgb, var(--bad) 55%, black);
+}
+
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button,
+  .file {
+    transition: none;
+  }
 }
 
 h2 {

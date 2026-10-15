@@ -104,8 +104,6 @@
     margin-top: 24px;
     padding: 24px 16px;
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
     text-align: center;
   }
   .word {
@@ -117,10 +115,17 @@
     display: flex;
     gap: 8px;
   }
+  /* the only bordered element: the answer field */
+  form input {
+    border: 2px solid var(--text);
+  }
+  form input:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+  }
   .result {
     margin-top: 16px;
     padding: 12px;
-    border-radius: 8px;
     text-align: left;
   }
   .result p {

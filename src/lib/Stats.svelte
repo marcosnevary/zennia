@@ -148,8 +148,6 @@
     align-items: center;
     padding: 10px 6px;
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
   }
   .tile .value {
     font-size: 1.8rem;
@@ -163,17 +161,14 @@
   }
   .ok {
     background: var(--ok-bg);
-    border-color: var(--ok);
     color: var(--ok);
   }
   .warn {
     background: var(--warn-bg);
-    border-color: var(--warn);
     color: var(--warn);
   }
   .bad {
     background: var(--bad-bg);
-    border-color: var(--bad);
     color: var(--bad);
   }
   .tile.ok .label,
@@ -208,8 +203,6 @@
   select {
     padding: 8px 10px;
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
   }
   h3 {
     margin: 16px 0 8px;
@@ -233,8 +226,6 @@
     padding: 10px 12px;
     margin-bottom: 6px;
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
   }
   .jp {
     font-size: 1.2rem;
@@ -245,8 +236,7 @@
   .badge {
     min-width: 52px;
     padding: 2px 8px;
-    border: 1px solid;
-    border-radius: 999px;
+    background: color-mix(in srgb, currentColor 15%, transparent);
     font-weight: 700;
     text-align: center;
   }
