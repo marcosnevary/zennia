@@ -365,6 +365,11 @@
     color: var(--on);
     background: var(--on-bg);
   }
+  /* selected cells keep the light blue at rest but hover like every other button */
+  .cell.on:hover {
+    color: var(--accent-text);
+    background: var(--accent);
+  }
   .link {
     padding: 0 2px;
     font-size: 0.8rem;
