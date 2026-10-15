@@ -259,7 +259,7 @@
   }
   /* the only bordered element: the answer field */
   form input {
-    border: 2px solid var(--text);
+    border: 2px solid var(--muted);
   }
   form input:focus-visible {
     outline: none;
