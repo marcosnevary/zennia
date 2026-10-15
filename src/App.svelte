@@ -25,7 +25,7 @@
 
 <div class="app">
 <header>
-  <h1><img src="/logo.png" alt="zennia" /></h1>
+  <h1>zennia</h1>
   <nav>
     <button class:primary={tab === 'kana'} onclick={() => (tab = 'kana')}>Kana</button>
     <button class:primary={tab === 'words'} onclick={() => (tab = 'words')}>Words</button>
@@ -63,18 +63,10 @@
     border-bottom: 2px solid var(--text);
   }
   h1 {
+    font-family: 'Libron', Georgia, serif;
+    font-weight: 700;
+    font-size: 1.8rem;
     margin: 0;
-    line-height: 0;
-  }
-  h1 img {
-    height: 44px;
-    width: auto;
-  }
-  @media (prefers-color-scheme: dark) {
-    h1 img {
-      /* the logo is black on transparent */
-      filter: invert(1);
-    }
   }
   nav {
     display: flex;
