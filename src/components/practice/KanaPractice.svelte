@@ -259,7 +259,7 @@
   }
   /* the only bordered element: the answer field */
   form input {
-    border: 2px solid var(--text);
+    border: 2px solid var(--muted);
   }
   form input:focus-visible {
     outline: none;
@@ -364,6 +364,17 @@
   .cell.on {
     color: var(--on);
     background: var(--on-bg);
+  }
+  /* selected cells keep their light blue while lifting on hover; unselected ones hover black and white */
+  .cell.on:hover {
+    color: var(--on);
+    background: var(--on-bg);
+    --lift-shadow: var(--on);
+  }
+  .cell:not(.on):hover {
+    color: var(--bg);
+    background: var(--text);
+    --lift-shadow: color-mix(in srgb, var(--text) 55%, black);
   }
   .link {
     padding: 0 2px;
