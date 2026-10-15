@@ -51,7 +51,6 @@
 
 {#snippet cell(char: string, kind: CellKind, strokes: CharStrokes | undefined)}
   <svg class="cell" viewBox="0 0 109 109" aria-label={kind === 'blank' ? 'Empty square' : char}>
-    <rect class="frame" x="0" y="0" width="109" height="109" />
     <path class="guide" d="M54.5 0V109M0 54.5H109" />
     {#if kind === 'ref'}
       {#if strokes}
@@ -100,19 +99,16 @@
   .cell {
     width: var(--cell);
     height: var(--cell);
-    /* squares of a repetition share their borders */
-    margin-left: -0.25mm;
+    /* the frame is a CSS border: one drawn inside the SVG would be half clipped at the viewBox edge and lose its right side */
+    box-sizing: border-box;
+    border: 0.25mm solid #444;
+    /* squares of a repetition share one border instead of overlapping two */
+    border-left: none;
   }
   .group > .cell:first-child {
-    margin-left: 0;
+    border-left: 0.25mm solid #444;
   }
   /* lines keep the same thickness in large and small squares */
-  .frame {
-    fill: none;
-    stroke: #444;
-    stroke-width: 0.75px;
-    vector-effect: non-scaling-stroke;
-  }
   .guide {
     fill: none;
     stroke: #bbb;

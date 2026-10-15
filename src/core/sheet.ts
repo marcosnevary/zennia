@@ -7,7 +7,7 @@ export const SHEET = {
   /** side of one small square: half of a large one, so a 2 × 2 grid of them fills a large square */
   smallCell: 7.5,
   /** space between two repetitions of the word */
-  gap: 2,
+  gap: 1.5,
 }
 
 /** What a repetition of the word looks like: strokes + numbers, faint outline to trace over, or empty */

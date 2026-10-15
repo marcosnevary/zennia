@@ -22,10 +22,10 @@ describe('sheetRow', () => {
 
   it('adds a row of small squares with some to trace and the rest empty', () => {
     const { smallGroups } = sheetRow('あ')
-    expect(smallGroups).toHaveLength(19)
+    expect(smallGroups).toHaveLength(20)
     expect(smallGroups[0]).toBe('trace')
     expect(count(smallGroups, 'trace')).toBe(6)
-    expect(count(smallGroups, 'blank')).toBe(13)
+    expect(count(smallGroups, 'blank')).toBe(14)
     // twice as many small repetitions fit as large ones, give or take the gaps
     expect(sheetRow('先生').smallGroups.length).toBeGreaterThan(sheetRow('先生').groups.length)
   })
