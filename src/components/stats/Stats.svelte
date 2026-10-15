@@ -202,7 +202,7 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 8px;
-    margin: 8px 0 16px;
+    margin: 24px 0 16px;
   }
   .tile {
     display: flex;
