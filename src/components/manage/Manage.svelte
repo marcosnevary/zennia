@@ -420,7 +420,6 @@
   li {
     display: flex;
     flex-direction: column;
-    background: var(--surface);
   }
   .top {
     flex: 1;
@@ -472,11 +471,9 @@
     align-items: center;
   }
   li.on {
-    background: var(--on-bg);
     box-shadow: inset 5px 0 0 var(--on);
   }
   li.off {
-    background: var(--off-bg);
     box-shadow: inset 5px 0 0 var(--off);
   }
   .badge {
