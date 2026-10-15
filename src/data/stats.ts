@@ -66,19 +66,28 @@ export function percent(value: number | null): string {
 }
 
 export type StatsSort = 'misses' | 'accuracy' | 'hits'
+export type StatsSortDirection = 'asc' | 'desc'
 
 export const STATS_SORT_OPTIONS: { key: StatsSort; label: string }[] = [
-  { key: 'misses', label: 'Most missed' },
-  { key: 'accuracy', label: 'Lowest accuracy' },
-  { key: 'hits', label: 'Most correct' },
+  { key: 'misses', label: 'Misses' },
+  { key: 'accuracy', label: 'Accuracy' },
+  { key: 'hits', label: 'Correct' },
 ]
 
-/** Sorts [key, tally] entries; ties fall back to more attempts, then key order. */
-export function sortTallies(entries: [string, Tally][], sort: StatsSort): [string, Tally][] {
+/**
+ * Sorts [key, tally] entries by the chosen value (`desc` = highest first). Ties fall back to more
+ * attempts, then key order, whatever the direction.
+ */
+export function sortTallies(
+  entries: [string, Tally][],
+  sort: StatsSort,
+  direction: StatsSortDirection = 'desc',
+): [string, Tally][] {
   const score = ([, t]: [string, Tally]) =>
-    sort === 'misses' ? -t.misses : sort === 'hits' ? -t.hits : (accuracy(t) ?? 1)
+    sort === 'misses' ? t.misses : sort === 'hits' ? t.hits : (accuracy(t) ?? 1)
+  const sign = direction === 'asc' ? 1 : -1
   return [...entries].sort(
-    (a, b) => score(a) - score(b) || attempts(b[1]) - attempts(a[1]) || a[0].localeCompare(b[0], 'ja'),
+    (a, b) => sign * (score(a) - score(b)) || attempts(b[1]) - attempts(a[1]) || a[0].localeCompare(b[0], 'ja'),
   )
 }
 
