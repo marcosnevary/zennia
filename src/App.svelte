@@ -1,5 +1,6 @@
 <script lang="ts">
-  import Practice from './lib/Practice.svelte'
+  import WordPractice from './lib/WordPractice.svelte'
+  import KanaPractice from './lib/KanaPractice.svelte'
   import Manage from './lib/Manage.svelte'
   import StatsView from './lib/Stats.svelte'
   import { loadStats, loadWords, saveStats, saveWords } from './lib/storage'
@@ -7,7 +8,7 @@
 
   let words = $state<Word[]>(loadWords())
   let stats = $state<Stats>(loadStats())
-  let tab = $state<'practice' | 'manage' | 'stats'>('practice')
+  let tab = $state<'words' | 'kana' | 'stats' | 'manage'>('kana')
 
   // saves on every change to the pool (snapshot reads the whole list, including nested edits)
   $effect(() => {
@@ -22,17 +23,18 @@
 <header>
   <h1>zennia</h1>
   <nav>
-    <button class:primary={tab === 'practice'} onclick={() => (tab = 'practice')}>Practice</button>
-    <button class:primary={tab === 'manage'} onclick={() => (tab = 'manage')}>
-      Words ({words.length})
-    </button>
+    <button class:primary={tab === 'kana'} onclick={() => (tab = 'kana')}>Kana</button>
+    <button class:primary={tab === 'words'} onclick={() => (tab = 'words')}>Words</button>
     <button class:primary={tab === 'stats'} onclick={() => (tab = 'stats')}>Stats</button>
+    <button class:primary={tab === 'manage'} onclick={() => (tab = 'manage')}>Settings</button>
   </nav>
 </header>
 
 <main>
-  {#if tab === 'practice'}
-    <Practice {words} bind:stats onmanage={() => (tab = 'manage')} />
+  {#if tab === 'words'}
+    <WordPractice {words} bind:stats onmanage={() => (tab = 'manage')} />
+  {:else if tab === 'kana'}
+    <KanaPractice bind:stats />
   {:else if tab === 'stats'}
     <StatsView {words} bind:stats />
   {:else}
