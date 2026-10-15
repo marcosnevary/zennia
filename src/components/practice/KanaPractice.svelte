@@ -249,6 +249,7 @@
     text-align: center;
   }
   .symbol {
+    font-family: var(--font-serif);
     margin: 0 0 20px;
     font-size: 4rem;
     line-height: 1.2;

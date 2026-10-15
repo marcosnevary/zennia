@@ -46,7 +46,10 @@
   --on-bg: #e3f1fb;
   --off: #a84300;
   --off-bg: #fdeee0;
-  font-family: 'Libron', Georgia, 'Hiragino Mincho ProN', 'Noto Serif JP', 'Yu Mincho', serif;
+  --font-ui: system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', sans-serif;
+  /* Libron for content; the Japanese fallbacks are serif to match */
+  --font-serif: 'Libron', Georgia, 'Hiragino Mincho ProN', 'Noto Serif JP', 'Yu Mincho', serif;
+  font-family: var(--font-ui);
   color: var(--text);
   background: var(--bg);
 }
@@ -182,6 +185,7 @@ button:disabled {
 }
 
 h2 {
+  font-family: var(--font-serif);
   font-size: 1.1rem;
   margin: 24px 0 8px;
 }
