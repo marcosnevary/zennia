@@ -108,7 +108,7 @@
   }
   .word {
     margin: 0 0 20px;
-    font-size: 3rem;
+    font-size: 4.5rem;
     line-height: 1.2;
   }
   form {
