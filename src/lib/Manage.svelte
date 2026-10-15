@@ -138,8 +138,8 @@
 
   function exportWords() {
     const date = new Date().toISOString().slice(0, 10)
-    downloadText(`zennia-words-${date}.json`, exportJSON(words))
-    message = `${words.length} word(s) exported.`
+    downloadText(`zennia-words-${date}.json`, exportJSON(selectedWords))
+    message = `${selectedWords.length} selected word(s) exported.`
   }
 
   function importFile(event: Event) {
@@ -201,7 +201,13 @@
   <Help />
 </div>
 <div class="row wide">
-  <button onclick={exportWords} disabled={words.length === 0}>Export JSON</button>
+  <button
+    onclick={exportWords}
+    disabled={selectedWords.length === 0}
+    title={selectedWords.length === 0 ? 'Select words in the list to export them' : undefined}
+  >
+    Export JSON{selectedWords.length > 0 ? ` (${selectedWords.length})` : ''}
+  </button>
   <label class="file">
     Import JSON
     <input type="file" accept="application/json,.json" onchange={importFile} hidden />
