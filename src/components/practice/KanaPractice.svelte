@@ -365,10 +365,11 @@
     color: var(--on);
     background: var(--on-bg);
   }
-  /* selected cells keep the light blue at rest and hover blue and white; unselected ones hover black and white */
+  /* selected cells keep their light blue while lifting on hover; unselected ones hover black and white */
   .cell.on:hover {
-    color: var(--accent-text);
-    background: var(--accent);
+    color: var(--on);
+    background: var(--on-bg);
+    --lift-shadow: var(--on);
   }
   .cell:not(.on):hover {
     color: var(--bg);
