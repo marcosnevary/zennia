@@ -401,7 +401,7 @@
   input[type='text'],
   .search,
   select {
-    border: 2px solid var(--text);
+    border: 2px solid var(--muted);
   }
   .search {
     appearance: none;
