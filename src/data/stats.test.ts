@@ -47,15 +47,16 @@ describe('accuracy and sorting', () => {
     expect(accuracy({ hits: 0, misses: 0 })).toBeNull()
     expect(accuracy({ hits: 3, misses: 1 })).toBe(0.75)
   })
-  it('sorts by most missed, lowest accuracy and most correct', () => {
+  it('sorts by misses, accuracy and hits in either direction', () => {
     const entries: [string, { hits: number; misses: number }][] = [
       ['a', { hits: 9, misses: 3 }],
       ['b', { hits: 1, misses: 2 }],
       ['c', { hits: 5, misses: 0 }],
     ]
     expect(sortTallies(entries, 'misses').map(([k]) => k)).toEqual(['a', 'b', 'c'])
-    expect(sortTallies(entries, 'accuracy').map(([k]) => k)).toEqual(['b', 'a', 'c'])
+    expect(sortTallies(entries, 'accuracy', 'asc').map(([k]) => k)).toEqual(['b', 'a', 'c'])
     expect(sortTallies(entries, 'hits').map(([k]) => k)).toEqual(['a', 'c', 'b'])
+    expect(sortTallies(entries, 'misses', 'asc').map(([k]) => k)).toEqual(['c', 'b', 'a'])
   })
 })
 

@@ -22,12 +22,7 @@
     <span class="value">{misses}</span>
     <span class="label">Wrong</span>
   </div>
-  <div
-    class="tile"
-    class:ok={sessionAccuracy !== null && sessionAccuracy >= 0.8}
-    class:warn={sessionAccuracy !== null && sessionAccuracy >= 0.5 && sessionAccuracy < 0.8}
-    class:bad={sessionAccuracy !== null && sessionAccuracy < 0.5}
-  >
+  <div class="tile">
     <span class="value">{percent(sessionAccuracy)}</span>
     <span class="label">Accuracy</span>
   </div>
@@ -59,8 +54,8 @@
     align-items: center;
     padding: 10px 6px;
     background: var(--surface);
-    border: 2px solid var(--muted);
-    color: var(--muted);
+    border: 2px solid var(--text);
+    color: var(--text);
   }
   .value {
     font-family: var(--font-serif);
@@ -71,25 +66,8 @@
   }
   .label {
     font-size: 0.8rem;
-    color: var(--muted);
-    text-align: center;
-  }
-  .tile.ok {
-    background: var(--on-bg);
-    color: var(--on);
-  }
-  .tile.warn {
-    background: var(--warn-bg);
-    color: var(--warn);
-  }
-  .tile.bad {
-    background: var(--off-bg);
-    color: var(--off);
-  }
-  .tile.ok .label,
-  .tile.warn .label,
-  .tile.bad .label {
     color: inherit;
+    text-align: center;
   }
   .footer {
     margin: 12px 16px 0;
