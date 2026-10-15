@@ -238,7 +238,7 @@
     margin: 16px 0 8px;
   }
   .toolbar:has(.danger) {
-    justify-content: flex-end;
+    justify-content: center;
   }
   h2 {
     margin: 24px 0 0;
