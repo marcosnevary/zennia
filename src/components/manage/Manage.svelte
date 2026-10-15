@@ -293,32 +293,31 @@
   {/if}
   <ul class="list">
     {#each visibleWords as word (word.id)}
-      <li class={word.disabled ? 'off' : 'on'}>
-        <!-- the whole top area opens the edit dialog; the button inside keeps it keyboard-reachable -->
-        <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-        <div class="top" onclick={() => edit(word)}>
-          <input
-            type="checkbox"
-            checked={selected.has(word.id)}
-            onclick={(e) => e.stopPropagation()}
-            onchange={() => toggleSelected(word.id)}
-            aria-label={`Select ${word.japanese}`}
-          />
-          <button class="info no-hover" aria-label={`Edit ${word.japanese}`}>
-            <span class="jp" lang="ja">{word.japanese}</span>
-            <span class="badge">{word.disabled ? '✕ Disabled' : '✓ Active'}</span>
-            <span class="muted" lang="ja">{word.hiragana} · {toDisplayRomaji(word.hiragana)}</span>
-            <span>{word.meaning}</span>
-          </button>
-        </div>
-        <div class="actions">
-          <button onclick={() => toggle(word)} aria-pressed={!word.disabled}>
-            {#if word.disabled}{@render eyeOffIcon()}Enable{:else}{@render eyeIcon()}Disable{/if}
-          </button>
-          <button class="danger" onclick={() => remove(word)}>
-            {@render trashIcon()}Delete
-          </button>
-        </div>
+      <li class:off={word.disabled}>
+        <input
+          type="checkbox"
+          checked={selected.has(word.id)}
+          onchange={() => toggleSelected(word.id)}
+          aria-label={`Select ${word.japanese}`}
+        />
+        <span class="jp" lang="ja">{word.japanese}</span>
+        <span class="reading muted" lang="ja">{word.hiragana} · {toDisplayRomaji(word.hiragana)}</span>
+        <span class="meaning">{word.meaning}</span>
+        <span class="leader" aria-hidden="true"></span>
+        <button
+          class="icon"
+          onclick={() => toggle(word)}
+          aria-pressed={!word.disabled}
+          aria-label={word.disabled ? 'Enable' : 'Disable'}
+          title={word.disabled ? 'Enable' : 'Disable'}
+        >
+          {#if word.disabled}{@render eyeOffIcon()}{:else}{@render eyeIcon()}{/if}
+        </button>
+        <button class="icon" onclick={() => edit(word)} aria-label="Edit" title="Edit">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+          </svg>
+        </button>
       </li>
     {/each}
   </ul>
@@ -413,21 +412,33 @@
     list-style: none;
     margin: 0;
     padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 8px;
   }
   li {
     display: flex;
-    flex-direction: column;
-  }
-  .top {
-    flex: 1;
-    display: flex;
+    align-items: center;
     gap: 12px;
-    align-items: flex-start;
-    padding: 10px 12px;
-    cursor: pointer;
+    padding: 10px 0;
+  }
+  li.off .jp,
+  li.off .reading,
+  li.off .meaning {
+    opacity: 0.45;
+  }
+  /* row of small, widely spaced square dots between the word and the buttons, as in Stats */
+  .leader {
+    flex: 1;
+    min-width: 16px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--muted) 2px, transparent 2px) left center / 8px 2px repeat-x;
+  }
+  .reading {
+    font-size: 0.9rem;
+  }
+  .meaning {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .search {
     width: 100%;
@@ -469,52 +480,6 @@
     display: flex;
     gap: 6px;
     align-items: center;
-  }
-  .badge {
-    justify-self: start;
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-  li.on .badge {
-    color: var(--on);
-  }
-  li.off .badge {
-    color: var(--off);
-  }
-  /* plain button so the card text is selectable-looking, not button-styled */
-  button.info {
-    flex: 1;
-    display: grid;
-    gap: 2px;
-    justify-items: start;
-    padding: 0;
-    border: none;
-    background: none;
-    color: inherit;
-    font: inherit;
-    text-align: left;
-    cursor: pointer;
-  }
-  /* two rectangular buttons sharing the bottom edge 50/50 */
-  .actions {
-    display: flex;
-  }
-  .actions button {
-    flex: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 8px;
-  }
-  .actions svg {
-    width: 18px;
-    height: 18px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
   }
   button.icon {
     display: inline-flex;
