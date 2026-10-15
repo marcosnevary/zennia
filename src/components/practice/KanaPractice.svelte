@@ -365,10 +365,11 @@
     color: var(--on);
     background: var(--on-bg);
   }
-  /* selected cells keep the light blue at rest but hover like every other button */
+  /* selected cells keep the light blue at rest and hover black and white; unselected ones use the blue hover */
   .cell.on:hover {
-    color: var(--accent-text);
-    background: var(--accent);
+    color: var(--bg);
+    background: var(--text);
+    --lift-shadow: color-mix(in srgb, var(--text) 55%, black);
   }
   .link {
     padding: 0 2px;
