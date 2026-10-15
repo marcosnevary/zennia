@@ -9,6 +9,7 @@ Everything that creates, validates, stores or moves data. Depends only on [`core
 | [`stats.ts`](stats.ts) | Lifetime hit/miss tallies: `emptyStats`, `sanitizeStats`, `recordAnswer` (per word id), `recordKana` (per symbol via `kanaKey`), `drawWeight`/`pickWeighted` (the weighted random draw: Wilson upper bound of the miss rate, so missed and under-sampled items come up more often), and helpers (`accuracy`, `percent`, `sortTallies`...). `almost` counts as a miss. |
 | [`io.ts`](io.ts) | JSON export/import of the word list (with a `version` for migrations) and the browser download helper. |
 | [`anki.ts`](anki.ts) | Imports an Anki "Notes in Plain Text" export (tab-separated, quoted multi-line HTML fields, front + back only). Reading = the back's headword with each `<ruby>` replaced by its `<rt>`; meaning = the first nested `<div>`. Cards whose reading isn't pure kana are skipped; repeated word + reading pairs are merged into one word, with different meanings joined by `; `. |
+| [`strokes.ts`](strokes.ts) | `loadStrokes`: fetches `public/strokes.json` (stroke paths and number positions of kana and kanji from [KanjiVG](https://kanjivg.tagaini.net), CC BY-SA 3.0) the first time a writing sheet is opened. Regenerate the file with `node scripts/build-strokes.mjs <extracted kanjivg kanji dir>`. |
 | `*.test.ts` | Tests for `words`, `stats` and `anki`. |
 
 ## Rules

@@ -7,7 +7,7 @@
   import type { Word } from '../../core/types'
   import { mergeWords, newId, SORT_OPTIONS, sortWords, type SanitizeResult, type SortDirection, type SortKey } from '../../data/words'
 
-  let { words = $bindable() }: { words: Word[] } = $props()
+  let { words = $bindable(), onprint }: { words: Word[]; onprint: (words: Word[]) => void } = $props()
 
   let japanese = $state('')
   let hiragana = $state('')
@@ -264,6 +264,11 @@
     </label>
     <span class="muted">{selectedWords.length} selected</span>
     <div class="bulk-actions" class:hidden={selectedWords.length === 0}>
+      <button class="icon" onclick={() => onprint(selectedWords)} aria-label="Print writing sheet" title="Print writing sheet">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 9V3h10v6M7 17H4v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6h-3M7 14h10v7H7z" />
+        </svg>
+      </button>
       <button class="icon" onclick={() => setSelectedDisabled(false)} aria-label="Enable selected" title="Enable selected">
         {@render eyeIcon()}
       </button>

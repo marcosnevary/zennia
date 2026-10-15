@@ -3,12 +3,15 @@
   import KanaPractice from './components/practice/KanaPractice.svelte'
   import Manage from './components/manage/Manage.svelte'
   import StatsView from './components/stats/Stats.svelte'
+  import PrintSheet from './components/print/PrintSheet.svelte'
   import { loadStats, loadWords, saveStats, saveWords } from './data/storage'
   import type { Stats, Word } from './core/types'
 
   let words = $state<Word[]>(loadWords())
   let stats = $state<Stats>(loadStats())
   let tab = $state<'words' | 'kana' | 'stats' | 'manage'>('kana')
+  // words of the writing sheet being printed; it renders hidden and only shows up in the print dialog
+  let sheetWords = $state<Word[] | null>(null)
 
   // saves on every change to the pool (snapshot reads the whole list, including nested edits)
   $effect(() => {
@@ -20,6 +23,7 @@
   })
 </script>
 
+<div class="app">
 <header>
   <h1>zennia</h1>
   <nav>
@@ -38,9 +42,14 @@
   {:else if tab === 'stats'}
     <StatsView {words} bind:stats />
   {:else}
-    <Manage bind:words />
+    <Manage bind:words onprint={(selected) => (sheetWords = selected)} />
   {/if}
 </main>
+</div>
+
+{#if sheetWords}
+  <PrintSheet words={sheetWords} onclose={() => (sheetWords = null)} />
+{/if}
 
 <style>
   header {
