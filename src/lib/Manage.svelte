@@ -174,7 +174,7 @@
   <input type="text" lang="ja" placeholder="Japanese (e.g. 食べる)" bind:value={japanese} bind:this={japaneseEl} />
   <input type="text" lang="ja" placeholder="Hiragana (e.g. たべる)" bind:value={hiragana} />
   <input type="text" placeholder="Meaning (e.g. to eat)" bind:value={meaning} />
-  <div class="row">
+  <div class="row wide">
     <button class="primary" type="submit">Add</button>
   </div>
 </form>
@@ -200,7 +200,7 @@
   <h2>Import and export</h2>
   <Help />
 </div>
-<div class="row">
+<div class="row wide">
   <button onclick={exportWords} disabled={words.length === 0}>Export JSON</button>
   <label class="file">
     Import JSON
@@ -248,13 +248,6 @@
           <option value={option.key}>{option.label}</option>
         {/each}
       </select>
-      <button
-        onclick={() => (sortDirection = sortDirection === 'asc' ? 'desc' : 'asc')}
-        aria-label={sortDirection === 'asc' ? 'Ascending' : 'Descending'}
-        title={sortDirection === 'asc' ? 'Ascending (click to reverse)' : 'Descending (click to reverse)'}
-      >
-        {sortDirection === 'asc' ? '↑ Ascending' : '↓ Descending'}
-      </button>
     </div>
   </div>
   <div class="row bulk">
@@ -274,6 +267,20 @@
         {@render trashIcon()}
       </button>
     </div>
+    <button
+      class="icon no-hover"
+      onclick={() => (sortDirection = sortDirection === 'asc' ? 'desc' : 'asc')}
+      aria-label={sortDirection === 'asc' ? 'Ascending' : 'Descending'}
+      title={sortDirection === 'asc' ? 'Ascending (click to reverse)' : 'Descending (click to reverse)'}
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        {#if sortDirection === 'asc'}
+          <path d="M12 19V5M5 12l7-7 7 7" />
+        {:else}
+          <path d="M12 5v14M5 12l7 7 7-7" />
+        {/if}
+      </svg>
+    </button>
   </div>
   {#if visibleWords.length === 0}
     <p class="muted">No words match your search.</p>
@@ -322,14 +329,35 @@
     display: grid;
     gap: 8px;
   }
+  /* section titles get a divider underneath; the heading wrapper carries it when the title has a help icon */
+  h2 {
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+    border-bottom: 2px solid var(--text);
+  }
   .heading {
     display: flex;
     align-items: center;
     gap: 6px;
-    margin: 24px 0 8px;
+    margin: 24px 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--text);
+  }
+  .heading h2,
+  dialog h2 {
+    padding: 0;
+    border: none;
   }
   .heading h2 {
     margin: 0;
+  }
+  dialog h2 {
+    margin-bottom: 8px;
+  }
+  /* buttons share the whole row evenly */
+  .wide > * {
+    flex: 1;
+    text-align: center;
   }
   .row {
     display: flex;
@@ -337,32 +365,46 @@
     flex-wrap: wrap;
     align-items: center;
   }
-  .file {
-    padding: 9px 14px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    cursor: pointer;
-  }
   select {
-    padding: 9px 10px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    /* custom chevron so the arrow keeps its distance from the border */
+    padding: 9px 36px 9px 10px;
+    appearance: none;
+    background-color: var(--surface);
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--text) 50%),
+      linear-gradient(135deg, var(--text) 50%, transparent 50%);
+    background-position:
+      calc(100% - 19px) 50%,
+      calc(100% - 13px) 50%;
+    background-size: 6px 6px;
+    background-repeat: no-repeat;
   }
   dialog {
     width: min(420px, calc(100vw - 32px));
     padding: 16px;
     background: var(--bg, var(--surface));
     color: inherit;
-    border: 1px solid var(--border);
-    border-radius: 12px;
   }
   dialog::backdrop {
     background: rgb(0 0 0 / 0.5);
   }
   dialog h2 {
     margin-top: 0;
+  }
+  /* every field in Settings gets the same square border; focus recolors it instead of stacking an outline */
+  input[type='text'],
+  .search,
+  select {
+    border: 2px solid var(--text);
+  }
+  .search {
+    appearance: none;
+  }
+  input[type='text']:focus-visible,
+  .search:focus-visible,
+  select:focus-visible {
+    outline: none;
+    border-color: var(--accent);
   }
   .error {
     color: var(--bad);
@@ -383,16 +425,12 @@
     flex-wrap: wrap;
     padding: 10px 12px;
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
   }
   .search {
     width: 100%;
     padding: 10px 12px;
     margin-bottom: 8px;
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
   }
   .toolbar {
     display: flex;
@@ -406,10 +444,6 @@
     min-width: 200px;
     width: auto;
     margin-bottom: 0;
-  }
-  .sort button {
-    /* fixed width so the toolbar does not shift when the direction flips */
-    width: 9.5em;
   }
   .sort {
     display: flex;
@@ -435,11 +469,11 @@
   }
   li.on {
     background: var(--on-bg);
-    border-left: 5px solid var(--on);
+    box-shadow: inset 5px 0 0 var(--on);
   }
   li.off {
     background: var(--off-bg);
-    border-left: 5px solid var(--off);
+    box-shadow: inset 5px 0 0 var(--off);
   }
   .badge {
     justify-self: start;

@@ -49,6 +49,8 @@
     justify-content: space-between;
     gap: 12px;
     flex-wrap: wrap;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--text);
   }
   h1 {
     font-size: 1.4rem;
@@ -57,5 +59,9 @@
   nav {
     display: flex;
     gap: 8px;
+  }
+  nav button {
+    /* fixed width so the bold active tab does not resize the bar */
+    width: 6.5em;
   }
 </style>

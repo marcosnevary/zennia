@@ -14,11 +14,11 @@
 </script>
 
 <section class="scoreboard" aria-label="Session score">
-  <div class="tile ok">
+  <div class="tile">
     <span class="value">{hits}</span>
     <span class="label">Correct</span>
   </div>
-  <div class="tile bad">
+  <div class="tile">
     <span class="value">{misses}</span>
     <span class="label">Wrong</span>
   </div>
@@ -50,7 +50,8 @@
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 8px;
-    margin-top: 12px;
+    /* same 16px inset as the card's padding, so it lines up with the input and the Check button */
+    margin: 12px 16px 0;
   }
   .tile {
     display: flex;
@@ -58,8 +59,8 @@
     align-items: center;
     padding: 10px 6px;
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
+    border: 2px solid var(--muted);
+    color: var(--muted);
   }
   .value {
     font-size: 1.8rem;
@@ -73,19 +74,16 @@
     text-align: center;
   }
   .tile.ok {
-    background: var(--ok-bg);
-    border-color: var(--ok);
-    color: var(--ok);
+    background: var(--on-bg);
+    color: var(--on);
   }
   .tile.warn {
     background: var(--warn-bg);
-    border-color: var(--warn);
     color: var(--warn);
   }
   .tile.bad {
-    background: var(--bad-bg);
-    border-color: var(--bad);
-    color: var(--bad);
+    background: var(--off-bg);
+    color: var(--off);
   }
   .tile.ok .label,
   .tile.warn .label,
@@ -93,7 +91,7 @@
     color: inherit;
   }
   .footer {
-    margin: 12px 0 0;
+    margin: 12px 16px 0;
     text-align: center;
   }
   @media (max-width: 480px) {
