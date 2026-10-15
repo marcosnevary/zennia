@@ -52,30 +52,57 @@ export function sanitizeWords(raw: unknown): SanitizeResult {
 export interface MergeResult {
   words: Word[]
   added: number
+  /** Existing words that gained a new meaning. */
+  updated: number
   duplicates: number
 }
 
-/** Adds new words to the pool, skipping ones that already exist (same id or same word + hiragana). */
+const MEANING_SEPARATOR = '; '
+
+/** Appends `meaning` to `current` unless it is empty or already one of its parts. */
+function joinMeanings(current: string, meaning: string): string | null {
+  if (!meaning) return null
+  if (!current) return meaning
+  if (current.split(MEANING_SEPARATOR).includes(meaning)) return null
+  return current + MEANING_SEPARATOR + meaning
+}
+
+/**
+ * Adds new words to the pool. A word that already exists (same id or same word + hiragana) is not added again,
+ * but a different meaning is appended to the existing one, separated by "; ".
+ */
 export function mergeWords(current: Word[], incoming: Word[]): MergeResult {
-  const ids = new Set(current.map((w) => w.id))
-  const keys = new Set(current.map((w) => `${w.japanese}|${w.hiragana}`))
   const words = [...current]
+  const ids = new Set(current.map((w) => w.id))
+  const byKey = new Map<string, number>()
+  words.forEach((w, i) => byKey.set(`${w.japanese}|${w.hiragana}`, i))
   let added = 0
+  let updated = 0
   let duplicates = 0
 
   for (const w of incoming) {
     const key = `${w.japanese}|${w.hiragana}`
-    if (ids.has(w.id) || keys.has(key)) {
+    const at = byKey.get(key)
+    if (at !== undefined) {
+      const meaning = joinMeanings(words[at].meaning, w.meaning)
+      if (meaning === null) duplicates++
+      else {
+        words[at] = { ...words[at], meaning }
+        updated++
+      }
+      continue
+    }
+    if (ids.has(w.id)) {
       duplicates++
       continue
     }
     ids.add(w.id)
-    keys.add(key)
+    byKey.set(key, words.length)
     words.push(w)
     added++
   }
 
-  return { words, added, duplicates }
+  return { words, added, updated, duplicates }
 }
 
 export type SortKey = 'list' | 'japanese' | 'reading' | 'meaning' | 'status'

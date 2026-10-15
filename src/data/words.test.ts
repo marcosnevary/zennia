@@ -19,10 +19,21 @@ describe('sanitizeWords and mergeWords', () => {
     expect(c.words[0].disabled).toBe(true)
     expect(c.words[1].disabled).toBeUndefined()
   })
+  it('merge appends a new meaning to an existing word', () => {
+    const cur = sanitizeWords([{ id: '1', japanese: '犬', hiragana: 'いぬ', meaning: 'dog' }]).words
+    const r = mergeWords(cur, sanitizeWords([{ japanese: '犬', hiragana: 'いぬ', meaning: 'hound' }]).words)
+    expect(r.updated).toBe(1)
+    expect(r.words).toHaveLength(1)
+    expect(r.words[0].meaning).toBe('dog; hound')
+    expect(cur[0].meaning).toBe('dog')
+    const again = mergeWords(r.words, sanitizeWords([{ japanese: '犬', hiragana: 'いぬ', meaning: 'hound' }]).words)
+    expect(again.updated).toBe(0)
+    expect(again.duplicates).toBe(1)
+  })
   it('merge ignores duplicates', () => {
     const cur = sanitizeWords([{ id: '1', japanese: '犬', hiragana: 'いぬ', meaning: 'dog' }]).words
     const inc = sanitizeWords([
-      { id: '2', japanese: '犬', hiragana: 'いぬ', meaning: 'hound' },
+      { id: '2', japanese: '犬', hiragana: 'いぬ', meaning: 'dog' },
       { id: '3', japanese: '猫', hiragana: 'ねこ', meaning: 'cat' },
     ]).words
     const r = mergeWords(cur, inc)

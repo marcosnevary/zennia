@@ -161,7 +161,8 @@
       const skippedNote = skipped ? ` ${skipped} invalid item(s) ignored.` : ''
       const result = mergeWords(words, incoming)
       words = result.words
-      message = `${result.added} added, ${result.duplicates} already existed.${skippedNote}`
+      const updatedNote = result.updated ? `, ${result.updated} got a new meaning` : ''
+      message = `${result.added} added${updatedNote}, ${result.duplicates} already existed.${skippedNote}`
       resetForm()
     } catch (e) {
       error = e instanceof Error ? e.message : 'Could not import the file.'
