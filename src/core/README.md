@@ -7,7 +7,8 @@ Pure domain logic. It has no Svelte, no localStorage and no DOM, and it depends 
 | [`types.ts`](types.ts) | Shared types: `Word { id, japanese, hiragana, meaning }`, `Verdict`, `WordsFile`, `Tally`, `Stats`, `StatsFile`. |
 | [`romaji.ts`](romaji.ts) | Answer checking: `normalizeKana`, `checkAnswer`, `toDisplayRomaji`. |
 | [`kana.ts`](kana.ts) | Hiragana/katakana tables (`KANA_SECTIONS`), `kanaKey`, `symbolOf`, `acceptedReadings`, `buildKana`. |
-| `romaji.test.ts`, `kana.test.ts` | Tests for the two modules above. |
+| [`sheet.ts`](sheet.ts) | Layout of the printable writing sheet: `SHEET` (A4 measures in mm) and `sheetRow` (squares per character, repetitions per row: one reference, then tracing, then free writing). |
+| `romaji.test.ts`, `kana.test.ts`, `sheet.test.ts` | Tests for the modules above. |
 
 ## How checking works (`romaji.ts`)
 

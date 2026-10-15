@@ -7,5 +7,6 @@ Svelte 5 UI (runes only, no SvelteKit), grouped by feature. Components receive s
 | [`practice/`](practice) | Words, Kana | The two practice modes and the shared scoreboard. |
 | [`stats/`](stats) | Stats | Lifetime statistics view. |
 | [`manage/`](manage) | Settings | Word CRUD, import/export and the import help. |
+| [`print/`](print) | Settings (overlay) | Printable A4 writing sheet for the selected words. |
 
 Styling is scoped per component; global styles live in [`../app.css`](../app.css).
