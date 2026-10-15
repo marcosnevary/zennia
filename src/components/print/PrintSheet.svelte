@@ -90,6 +90,10 @@
   .row {
     display: flex;
     flex-wrap: wrap;
+    /* the leftover width is shared between the repetitions: first at the left edge, last at the right edge */
+    justify-content: space-between;
+    /* a hair narrower than the page area: a border exactly on its edge gets clipped when printing */
+    width: calc(100% - 0.5mm);
     gap: 2mm var(--gap);
     margin-bottom: 2mm;
   }
