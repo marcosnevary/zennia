@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { checkAnswer, toDisplayRomaji } from './romaji'
+import { drawWeight, pickWeighted } from './stats'
 import { mergeWords, sanitizeWords, sortWords } from './words'
 
 describe('checkAnswer: accepts spelling-system variations', () => {
@@ -115,5 +116,30 @@ describe('sortWords', () => {
     expect(ids(sortWords(list, 'status', 'asc'))).toBe('1243')
     expect(ids(sortWords(list, 'status', 'desc'))).toBe('3124')
     expect(ids(list)).toBe('1234')
+  })
+})
+
+describe('drawWeight and pickWeighted', () => {
+  it('weighs missed items above new ones, and new ones above mastered ones', () => {
+    const failing = drawWeight({ hits: 1, misses: 5 })
+    const unseen = drawWeight(undefined)
+    const mastered = drawWeight({ hits: 20, misses: 0 })
+    expect(failing).toBeGreaterThan(unseen)
+    expect(unseen).toBeGreaterThan(mastered)
+    expect(mastered).toBeGreaterThan(0)
+  })
+  it('a miss raises the weight', () => {
+    expect(drawWeight({ hits: 5, misses: 1 })).toBeGreaterThan(drawWeight({ hits: 6, misses: 0 }))
+  })
+  it('picks proportionally to the weights', () => {
+    const items = ['a', 'b']
+    const w = (x: string) => (x === 'a' ? 1 : 3)
+    expect(pickWeighted(items, w, () => 0)).toBe('a')
+    expect(pickWeighted(items, w, () => 0.24)).toBe('a')
+    expect(pickWeighted(items, w, () => 0.26)).toBe('b')
+    expect(pickWeighted(items, w, () => 0.999)).toBe('b')
+  })
+  it('returns null for an empty list', () => {
+    expect(pickWeighted([], () => 1)).toBeNull()
   })
 })

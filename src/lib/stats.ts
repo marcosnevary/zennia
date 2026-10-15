@@ -81,3 +81,31 @@ export function sortTallies(entries: [string, Tally][], sort: StatsSort): [strin
     (a, b) => score(a) - score(b) || attempts(b[1]) - attempts(a[1]) || a[0].localeCompare(b[0], 'ja'),
   )
 }
+
+/** Weight of an item that was never answered: seen more often than a mastered one, less than a failing one. */
+const UNSEEN_WEIGHT = 3
+const MIN_WEIGHT = 0.5
+const WEIGHT_RANGE = 4.5
+
+/**
+ * How likely an item is to be drawn, relative to the others. Uses a smoothed miss rate
+ * (one phantom miss and one phantom hit), so a single miss does not dominate and a long
+ * run of hits slowly pushes the item down without ever removing it. Range: 0.5 to 5.
+ */
+export function drawWeight(tally: Tally | undefined): number {
+  if (!tally || attempts(tally) === 0) return UNSEEN_WEIGHT
+  const missRate = (tally.misses + 1) / (attempts(tally) + 2)
+  return MIN_WEIGHT + WEIGHT_RANGE * missRate
+}
+
+/** Weighted random choice; `random` returns a number in [0, 1) and can be replaced in tests. */
+export function pickWeighted<T>(items: T[], weightOf: (item: T) => number, random: () => number = Math.random): T | null {
+  if (!items.length) return null
+  const weights = items.map((item) => Math.max(0, weightOf(item)))
+  let remaining = random() * weights.reduce((a, b) => a + b, 0)
+  for (let i = 0; i < items.length; i++) {
+    remaining -= weights[i]
+    if (remaining < 0) return items[i]
+  }
+  return items[items.length - 1]
+}

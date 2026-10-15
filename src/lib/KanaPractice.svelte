@@ -11,7 +11,7 @@
   } from './kana'
   import { checkAnswer, toDisplayRomaji } from './romaji'
   import Scoreboard from './Scoreboard.svelte'
-  import { recordKana } from './stats'
+  import { drawWeight, pickWeighted, recordKana } from './stats'
   import { loadKanaSelection, saveKanaSelection } from './storage'
   import type { Stats, Verdict } from './types'
 
@@ -64,9 +64,9 @@
   }
 
   function next(focusInput = true) {
-    // picks a random symbol, avoiding the previous one when there are others
+    // picks a symbol weighted by past mistakes (see drawWeight), avoiding the previous one when there are others
     const choices = pool.length > 1 ? pool.filter((k) => k.symbol !== lastSymbol) : pool
-    current = choices.length ? choices[Math.floor(Math.random() * choices.length)] : null
+    current = pickWeighted(choices, (k) => drawWeight(stats.kana[kanaKey(k.script, k.hiragana)]))
     lastSymbol = current?.symbol ?? null
     answer = ''
     verdict = null
