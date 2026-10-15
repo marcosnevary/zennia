@@ -80,6 +80,11 @@
   border-radius: 0;
 }
 
+html {
+  /* keep the centered layout from shifting when a tab needs scrolling */
+  scrollbar-gutter: stable;
+}
+
 body {
   margin: 0;
 }
