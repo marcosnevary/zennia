@@ -121,11 +121,11 @@
 {#if !attempts(wordTotal) && !attempts(kanaTotal)}
   <p class="muted">No statistics yet. Answer some words or kana in Practice and they will show up here.</p>
 {:else}
+  {@render summary(total)}
+
   <div class="toolbar">
     <button class="danger" onclick={reset}>Reset stats</button>
   </div>
-
-  {@render summary(total)}
 
   <h2>Practiced ({visibleRows.length === rows.size ? rows.size : `${visibleRows.length} of ${rows.size}`})</h2>
   <div class="toolbar">
@@ -202,7 +202,7 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 8px;
-    margin: 8px 0 16px;
+    margin: 24px 0 16px;
   }
   .tile {
     display: flex;
@@ -238,7 +238,7 @@
     margin: 16px 0 8px;
   }
   .toolbar:has(.danger) {
-    justify-content: flex-end;
+    justify-content: center;
   }
   h2 {
     margin: 24px 0 0;

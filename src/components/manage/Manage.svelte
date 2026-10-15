@@ -293,38 +293,34 @@
   {/if}
   <ul class="list">
     {#each visibleWords as word (word.id)}
-      <li class={word.disabled ? 'off' : 'on'}>
+      <li class:off={word.disabled}>
         <input
           type="checkbox"
           checked={selected.has(word.id)}
           onchange={() => toggleSelected(word.id)}
           aria-label={`Select ${word.japanese}`}
         />
-        <div class="info">
-          <span class="jp" lang="ja">{word.japanese}</span>
-          <span class="badge">{word.disabled ? '✕ Disabled' : '✓ Active'}</span>
-          <span class="muted" lang="ja">{word.hiragana} · {toDisplayRomaji(word.hiragana)}</span>
-          <span>{word.meaning}</span>
-        </div>
-        <div class="actions">
-          <button
-            class="icon"
-            onclick={() => toggle(word)}
-            aria-pressed={!word.disabled}
-            aria-label={word.disabled ? 'Enable' : 'Disable'}
-            title={word.disabled ? 'Enable' : 'Disable'}
-          >
-            {#if word.disabled}{@render eyeOffIcon()}{:else}{@render eyeIcon()}{/if}
-          </button>
-          <button class="icon" onclick={() => edit(word)} aria-label="Edit" title="Edit">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
-            </svg>
-          </button>
-          <button class="icon danger" onclick={() => remove(word)} aria-label="Delete" title="Delete">
-            {@render trashIcon()}
-          </button>
-        </div>
+        <span class="jp" lang="ja">{word.japanese}</span>
+        <span class="reading muted" lang="ja">{word.hiragana} · {toDisplayRomaji(word.hiragana)}</span>
+        <span class="meaning">{word.meaning}</span>
+        <span class="leader" aria-hidden="true"></span>
+        <button
+          class="icon"
+          onclick={() => toggle(word)}
+          aria-pressed={!word.disabled}
+          aria-label={word.disabled ? 'Enable' : 'Disable'}
+          title={word.disabled ? 'Enable' : 'Disable'}
+        >
+          {#if word.disabled}{@render eyeOffIcon()}{:else}{@render eyeIcon()}{/if}
+        </button>
+        <button class="icon" onclick={() => edit(word)} aria-label="Edit" title="Edit">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+          </svg>
+        </button>
+        <button class="icon danger" onclick={() => remove(word)} aria-label="Delete" title="Delete">
+          {@render trashIcon()}
+        </button>
       </li>
     {/each}
   </ul>
@@ -419,18 +415,33 @@
     list-style: none;
     margin: 0;
     padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 8px;
   }
   li {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     gap: 12px;
-    flex-wrap: wrap;
-    padding: 10px 12px;
-    background: var(--surface);
+    padding: 10px 0;
+  }
+  li.off .jp,
+  li.off .reading,
+  li.off .meaning {
+    opacity: 0.45;
+  }
+  /* row of small, widely spaced square dots between the word and the buttons, as in Stats */
+  .leader {
+    flex: 1;
+    min-width: 16px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--muted) 2px, transparent 2px) left center / 8px 2px repeat-x;
+  }
+  .reading {
+    font-size: 0.9rem;
+  }
+  .meaning {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .search {
     width: 100%;
@@ -472,35 +483,6 @@
     display: flex;
     gap: 6px;
     align-items: center;
-  }
-  li.on {
-    background: var(--on-bg);
-    box-shadow: inset 5px 0 0 var(--on);
-  }
-  li.off {
-    background: var(--off-bg);
-    box-shadow: inset 5px 0 0 var(--off);
-  }
-  .badge {
-    justify-self: start;
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-  li.on .badge {
-    color: var(--on);
-  }
-  li.off .badge {
-    color: var(--off);
-  }
-  .info {
-    flex: 1;
-    display: grid;
-    gap: 2px;
-  }
-  .actions {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
   }
   button.icon {
     display: inline-flex;
