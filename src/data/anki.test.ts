@@ -25,9 +25,13 @@ describe('importAnkiDeck', () => {
   it('accepts a row without a meaning', () => {
     expect(importAnkiDeck(`${header}犬\tいぬ\n`)).toMatchObject({ words: [{ japanese: '犬', hiragana: 'いぬ', meaning: '' }] })
   })
-  it('skips rows whose reading is missing or not kana, and repeated pairs', () => {
-    const text = `${header}漢字\t漢字\tkanji\n犬\t\tdog\n犬\tいぬ\tdog\n犬\tいぬ\tdog again\n`
+  it('skips rows whose reading is missing or not kana, and exact repeats', () => {
+    const text = `${header}漢字\t漢字\tkanji\n犬\t\tdog\n犬\tいぬ\tdog\n犬\tいぬ\tdog\n`
     expect(importAnkiDeck(text)).toMatchObject({ skipped: 3, words: [{ japanese: '犬' }] })
+  })
+  it('joins different meanings of the same word + reading', () => {
+    const text = `${header}銀行\tぎんこう\tbank\n銀行\tぎんこう\tbank\n銀行\tぎんこう\tfinancial institution\n`
+    expect(importAnkiDeck(text)).toMatchObject({ skipped: 1, words: [{ japanese: '銀行', meaning: 'bank; financial institution' }] })
   })
   it('rejects text that is not an Anki export', () => {
     expect(() => importAnkiDeck('just one column')).toThrow()
