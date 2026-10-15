@@ -58,7 +58,7 @@
     justify-content: space-between;
     gap: 12px;
     flex-wrap: wrap;
-    padding-top: 24px;
+    padding-top: 10px;
     padding-bottom: 16px;
     border-bottom: 2px solid var(--text);
   }
