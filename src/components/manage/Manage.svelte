@@ -304,7 +304,7 @@
             onchange={() => toggleSelected(word.id)}
             aria-label={`Select ${word.japanese}`}
           />
-          <button class="info" aria-label={`Edit ${word.japanese}`}>
+          <button class="info no-hover" aria-label={`Edit ${word.japanese}`}>
             <span class="jp" lang="ja">{word.japanese}</span>
             <span class="badge">{word.disabled ? '✕ Disabled' : '✓ Active'}</span>
             <span class="muted" lang="ja">{word.hiragana} · {toDisplayRomaji(word.hiragana)}</span>
@@ -469,12 +469,6 @@
     display: flex;
     gap: 6px;
     align-items: center;
-  }
-  li.on {
-    box-shadow: inset 5px 0 0 var(--on);
-  }
-  li.off {
-    box-shadow: inset 5px 0 0 var(--off);
   }
   .badge {
     justify-self: start;
