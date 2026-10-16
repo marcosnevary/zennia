@@ -1,19 +1,18 @@
 <script lang="ts">
   import {
     KANA_SECTIONS,
-    acceptedReadings,
-    buildKana,
     kanaKey,
     symbolOf,
     type Kana,
     type KanaScript,
     type KanaSection,
   } from '../../core/kana'
-  import { checkAnswer, toDisplayRomaji } from '../../core/romaji'
+  import { toDisplayRomaji } from '../../core/romaji'
   import Scoreboard from './Scoreboard.svelte'
-  import { drawWeight, pickWeighted, recordKana } from '../../data/stats'
+  import { kanaMode } from '../../data/practice-modes'
+  import { nextRound, resetScore, startSession, submit as submitAnswer } from '../../data/practice-session'
   import { loadKanaSelection, saveKanaSelection } from '../../data/storage'
-  import type { Stats, Verdict } from '../../core/types'
+  import type { Stats } from '../../core/types'
 
   let { stats = $bindable() }: { stats: Stats } = $props()
 
@@ -36,24 +35,11 @@
     saveKanaSelection($state.snapshot(selected))
   })
 
-  const pool = $derived(buildKana(selected))
+  const mode = $derived(kanaMode(selected, stats))
 
-  let current = $state<Kana | null>(null)
+  let session = $state(startSession<Kana>())
   let answer = $state('')
-  let verdict = $state<Verdict | null>(null)
   let inputEl = $state<HTMLInputElement>()
-  let lastSymbol: string | null = null
-  let hits = $state(0)
-  let total = $state(0)
-  let streak = $state(0)
-  let bestStreak = $state(0)
-
-  function resetSession() {
-    hits = 0
-    total = 0
-    streak = 0
-    bestStreak = 0
-  }
 
   function cellsOf(cells: (string | null)[]): string[] {
     return cells.filter((c): c is string => c !== null)
@@ -63,22 +49,16 @@
     return section.rows.flatMap((r) => cellsOf(r.cells).map((h) => kanaKey(script, h)))
   }
 
-  function next(focusInput = true) {
-    // picks a symbol weighted by past mistakes (see drawWeight), avoiding the previous one when there are others
-    const choices = pool.length > 1 ? pool.filter((k) => k.symbol !== lastSymbol) : pool
-    current = pickWeighted(choices, (k) => drawWeight(stats.kana[kanaKey(k.script, k.hiragana)]))
-    lastSymbol = current?.symbol ?? null
+  function draw() {
+    session = nextRound(session, mode)
     answer = ''
-    verdict = null
-    if (focusInput) queueMicrotask(() => inputEl?.focus({ preventScroll: true }))
   }
 
   // changing the selection starts a fresh round and score
   function setSelected(keys: string[]) {
     selected = keys
-    resetSession()
-    lastSymbol = null
-    next(false) // keep focus on the clicked cell so the page does not jump
+    session = nextRound(startSession<Kana>(), mode) // no focus change, so the page does not jump
+    answer = ''
   }
 
   function setKeys(keys: string[], on: boolean) {
@@ -93,21 +73,12 @@
 
   function submit(event: Event) {
     event.preventDefault()
-    if (!current) return
-    if (verdict) return next()
-    if (!answer.trim()) return
-    // single sounds have no vowel-length ambiguity: anything but a match is wrong
-    const ok = acceptedReadings(current.hiragana).some((h) => checkAnswer(answer, h) === 'correct')
-    verdict = ok ? 'correct' : 'incorrect'
-    total++
-    if (ok) {
-      hits++
-      streak++
-      bestStreak = Math.max(bestStreak, streak)
-    } else {
-      streak = 0
+    const advancing = session.verdict !== null
+    session = submitAnswer(session, answer, mode)
+    if (advancing) {
+      answer = ''
+      queueMicrotask(() => inputEl?.focus({ preventScroll: true }))
     }
-    recordKana(stats, current.script, current.hiragana, ok)
   }
 
   // Space works like Enter
@@ -115,12 +86,12 @@
     if (event.key === ' ') submit(event)
   }
 
-  next()
+  draw()
 </script>
 
-{#if current}
+{#if session.current}
   <section class="card">
-    <p class="symbol" lang="ja">{current.symbol}</p>
+    <p class="symbol" lang="ja">{session.current.symbol}</p>
 
     <form onsubmit={submit}>
       <input
@@ -128,24 +99,30 @@
         bind:this={inputEl}
         bind:value={answer}
         {onkeydown}
-        readonly={verdict !== null}
+        readonly={session.verdict !== null}
         placeholder="Type in romaji"
         autocomplete="off"
         autocapitalize="off"
         autocorrect="off"
         spellcheck="false"
       />
-      <button class="primary" type="submit">{verdict ? 'Next' : 'Check'}</button>
+      <button class="primary" type="submit">{session.verdict ? 'Next' : 'Check'}</button>
     </form>
 
-    {#if verdict}
-      <div class="result {verdict}" role="status">
-        <strong>{verdict === 'correct' ? 'Correct!' : 'Incorrect.'}</strong>
-        <p class="answer" lang="ja">{current.symbol} · {toDisplayRomaji(current.hiragana)}</p>
+    {#if session.verdict}
+      <div class="result {session.verdict}" role="status">
+        <strong>{session.verdict === 'correct' ? 'Correct!' : 'Incorrect.'}</strong>
+        <p class="answer" lang="ja">{session.current.symbol} · {toDisplayRomaji(session.current.hiragana)}</p>
       </div>
     {/if}
   </section>
-  <Scoreboard {hits} {total} {streak} {bestStreak} onreset={resetSession} />
+  <Scoreboard
+    hits={session.hits}
+    total={session.total}
+    streak={session.streak}
+    bestStreak={session.bestStreak}
+    onreset={() => (session = resetScore(session))}
+  />
 {:else}
   <p class="muted">Select at least one character below to practice.</p>
 {/if}
