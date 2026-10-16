@@ -137,6 +137,17 @@ export function defaultKanaSelection(): string[] {
   return basic.flatMap((r) => columnKeys('hiragana', r))
 }
 
+/** The selection with `keys` added (`on`) or removed; the given list is left untouched. */
+export function selectKeys(selected: string[], keys: string[], on: boolean): string[] {
+  const rest = selected.filter((k) => !keys.includes(k))
+  return on ? [...rest, ...keys] : rest
+}
+
+/** Clicking a group of keys selects them all, or clears them when all were already selected. */
+export function toggleKeys(selected: string[], keys: string[]): string[] {
+  return selectKeys(selected, keys, !keys.every((k) => selected.includes(k)))
+}
+
 /** Builds the practice pool from the selected keys (see `kanaKey`). */
 export function buildKana(selected: string[]): Kana[] {
   const chosen = new Set(selected)

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ALL_HIRAGANA, KANA_SECTIONS, acceptedReadings, buildKana, columnKeys, defaultKanaSelection, kanaKey, lineKeys, parseKanaKey, scriptKeys, sectionKeys } from './kana'
+import { ALL_HIRAGANA, KANA_SECTIONS, acceptedReadings, buildKana, columnKeys, defaultKanaSelection, kanaKey, lineKeys, parseKanaKey, scriptKeys, sectionKeys, selectKeys, toggleKeys } from './kana'
 import { checkAnswer, toDisplayRomaji } from './romaji'
 
 describe('parseKanaKey', () => {
@@ -119,5 +119,37 @@ describe('key lists', () => {
   it('every key is a kana the practice can draw', () => {
     const keys = [...scriptKeys('hiragana'), ...scriptKeys('katakana')]
     expect(buildKana(keys)).toHaveLength(keys.length)
+  })
+})
+
+describe('selectKeys', () => {
+  it('adds the keys without repeating the ones already selected', () => {
+    expect(selectKeys(['a', 'b'], ['b', 'c'], true).sort()).toEqual(['a', 'b', 'c'])
+  })
+
+  it('removes only the given keys when turned off', () => {
+    expect(selectKeys(['a', 'b', 'c'], ['b', 'x'], false)).toEqual(['a', 'c'])
+  })
+
+  it('does not change the list it was given', () => {
+    const selected = ['a']
+    selectKeys(selected, ['b'], true)
+    selectKeys(selected, ['a'], false)
+    expect(selected).toEqual(['a'])
+  })
+})
+
+describe('toggleKeys', () => {
+  it('selects the whole group when any key was missing', () => {
+    expect(toggleKeys(['a'], ['a', 'b', 'c']).sort()).toEqual(['a', 'b', 'c'])
+    expect(toggleKeys([], ['a']).sort()).toEqual(['a'])
+  })
+
+  it('clears the group when every key was already selected, keeping the rest', () => {
+    expect(toggleKeys(['a', 'b', 'z'], ['a', 'b'])).toEqual(['z'])
+  })
+
+  it('leaves the selection as it is for an empty group', () => {
+    expect(toggleKeys(['a'], [])).toEqual(['a'])
   })
 })
