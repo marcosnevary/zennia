@@ -51,6 +51,13 @@ export function sumTallies(tallies: Record<string, Tally>): Tally {
   )
 }
 
+/** Words and kana together. */
+export function totalTally(stats: Stats): Tally {
+  const words = sumTallies(stats.words)
+  const kana = sumTallies(stats.kana)
+  return { hits: words.hits + kana.hits, misses: words.misses + kana.misses }
+}
+
 export function attempts(tally: Tally): number {
   return tally.hits + tally.misses
 }
@@ -59,6 +66,12 @@ export function attempts(tally: Tally): number {
 export function accuracy(tally: Tally): number | null {
   const total = attempts(tally)
   return total ? tally.hits / total : null
+}
+
+/** How the list highlights a tally: high from 80%, low under 60%, neutral in between or without answers. */
+export function accuracyLevel(tally: Tally): 'high' | 'low' | '' {
+  const a = accuracy(tally)
+  return a === null ? '' : a >= 0.8 ? 'high' : a < 0.6 ? 'low' : ''
 }
 
 export function percent(value: number | null): string {

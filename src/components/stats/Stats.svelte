@@ -1,89 +1,37 @@
 <script lang="ts">
-  import { toRomaji } from 'wanakana'
-  import { symbolOf, type KanaScript } from '../../core/kana'
   import {
     emptyStats,
     STATS_SORT_OPTIONS,
     accuracy,
+    accuracyLevel,
     attempts,
     percent,
-    sortTallies,
-    sumTallies,
+    totalTally,
     type StatsSort,
     type StatsSortDirection,
   } from '../../data/stats'
+  import { buildRows, filterRows, type StatsKind } from '../../data/stats-rows'
   import type { Stats, Tally, Word } from '../../core/types'
 
   let { words, stats = $bindable() }: { words: Word[]; stats: Stats } = $props()
 
-  type Kind = 'words' | KanaScript
-  const KINDS: { id: Kind; label: string }[] = [
+  const KINDS: { id: StatsKind; label: string }[] = [
     { id: 'words', label: 'Words' },
     { id: 'hiragana', label: 'Hiragana' },
     { id: 'katakana', label: 'Katakana' },
   ]
-  type Row = { key: string; kind: Kind; symbol: string; reading: string; search: string; ja: boolean; tally: Tally }
 
   let query = $state('')
   let sort = $state<StatsSort>('misses')
   let direction = $state<StatsSortDirection>('desc')
   let showFilters = $state(false)
-  let kinds = $state<Record<Kind, boolean>>({ words: true, hiragana: true, katakana: true })
+  let kinds = $state<Record<StatsKind, boolean>>({ words: true, hiragana: true, katakana: true })
 
-  const byId = $derived(new Map(words.map((w) => [w.id, w])))
-  // stats of deleted words stay saved but are not listed; kana keys look like "katakana:か" (see kanaKey)
-  const rows = $derived.by(() => {
-    const all = new Map<string, Row>()
-    for (const [id, tally] of Object.entries(stats.words)) {
-      const word = byId.get(id)
-      if (!word) continue
-      all.set(`word:${id}`, {
-        key: `word:${id}`,
-        kind: 'words',
-        symbol: word.japanese,
-        reading: word.hiragana,
-        search: `${word.japanese} ${word.hiragana} ${toRomaji(word.hiragana)} ${word.meaning ?? ''}`.toLowerCase(),
-        ja: true,
-        tally,
-      })
-    }
-    for (const [key, tally] of Object.entries(stats.kana)) {
-      const script = KINDS.find((k) => k.id !== 'words' && key.startsWith(`${k.id}:`))
-      if (!script) continue
-      const hiragana = key.slice(script.id.length + 1)
-      const romaji = toRomaji(hiragana)
-      const symbol = symbolOf(script.id as KanaScript, hiragana)
-      all.set(key, {
-        key,
-        kind: script.id,
-        symbol,
-        reading: romaji,
-        search: `${symbol} ${hiragana} ${romaji}`.toLowerCase(),
-        ja: false,
-        tally,
-      })
-    }
-    return all
-  })
-  const visibleRows = $derived.by(() => {
-    const q = query.trim().toLowerCase()
-    const matches = [...rows.values()].filter((r) => kinds[r.kind] && (!q || r.search.includes(q)))
-    return sortTallies(matches.map((r) => [r.key, r.tally]), sort, direction).map(([key]) => rows.get(key)!)
-  })
+  const rows = $derived(buildRows(stats, words))
+  const visibleRows = $derived(filterRows(rows, { query, kinds, sort, direction }))
   const activeFilters = $derived(KINDS.filter((k) => !kinds[k.id]).length)
 
-  const wordTotal = $derived(sumTallies(stats.words))
-  const kanaTotal = $derived(sumTallies(stats.kana))
-  const total = $derived<Tally>({
-    hits: wordTotal.hits + kanaTotal.hits,
-    misses: wordTotal.misses + kanaTotal.misses,
-  })
-
-  /** blue when high, orange when poor, neutral in between or without answers (the percentage is always shown too) */
-  function level(tally: Tally): 'high' | 'low' | '' {
-    const a = accuracy(tally)
-    return a === null ? '' : a >= 0.8 ? 'high' : a < 0.6 ? 'low' : ''
-  }
+  const total = $derived(totalTally(stats))
 
   function reset() {
     if (confirm('Reset all statistics? This cannot be undone.')) stats = emptyStats()
@@ -118,7 +66,7 @@
   onkeydown={(e) => e.key === 'Escape' && (showFilters = false)}
 />
 
-{#if !attempts(wordTotal) && !attempts(kanaTotal)}
+{#if !attempts(total)}
   <p class="muted">No statistics yet. Answer some words or kana in Practice and they will show up here.</p>
 {:else}
   {@render summary(total)}
@@ -127,7 +75,7 @@
     <button class="danger" onclick={reset}>Reset stats</button>
   </div>
 
-  <h2>Practiced ({visibleRows.length === rows.size ? rows.size : `${visibleRows.length} of ${rows.size}`})</h2>
+  <h2>Practiced ({visibleRows.length === rows.length ? rows.length : `${visibleRows.length} of ${rows.length}`})</h2>
   <div class="toolbar">
     <input
       type="search"
@@ -191,7 +139,7 @@
           <span>✓{row.tally.hits}</span>
           <span>✗{row.tally.misses}</span>
         </span>
-        <span class="badge {level(row.tally)}">{percent(accuracy(row.tally))}</span>
+        <span class="badge {accuracyLevel(row.tally)}">{percent(accuracy(row.tally))}</span>
       </li>
     {/each}
   </ul>

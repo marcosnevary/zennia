@@ -82,6 +82,14 @@ export function kanaKey(script: KanaScript, hiragana: string): string {
   return `${script}:${hiragana}`
 }
 
+/** Undoes `kanaKey`; null for anything that is not a key of a known script. */
+export function parseKanaKey(key: string): { script: KanaScript; hiragana: string } | null {
+  for (const script of ['hiragana', 'katakana'] as const) {
+    if (key.startsWith(`${script}:`)) return { script, hiragana: key.slice(script.length + 1) }
+  }
+  return null
+}
+
 export function symbolOf(script: KanaScript, hiragana: string): string {
   return script === 'hiragana' ? hiragana : toKatakana(hiragana)
 }
