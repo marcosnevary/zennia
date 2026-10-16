@@ -1,4 +1,5 @@
 import { isKana } from 'wanakana'
+import { toDisplayRomaji } from '../core/romaji'
 import type { Word } from '../core/types'
 
 export function newId(): string {
@@ -29,6 +30,15 @@ export function makeWord({ japanese, hiragana, meaning }: WordFields): Word {
 /** The word with the form texts applied; the id and the enabled state stay. */
 export function updateWord(word: Word, { japanese, hiragana, meaning }: WordFields): Word {
   return { ...word, japanese: japanese.trim(), hiragana: hiragana.trim(), meaning: meaning.trim() }
+}
+
+/** The words matching the search in the word, the reading, its romaji or the meaning; everything for a blank search. */
+export function searchWords(words: Word[], query: string): Word[] {
+  const q = query.trim().toLowerCase()
+  if (!q) return words
+  return words.filter((w) =>
+    [w.japanese, w.hiragana, toDisplayRomaji(w.hiragana), w.meaning].some((field) => field.toLowerCase().includes(q)),
+  )
 }
 
 export interface SanitizeResult {

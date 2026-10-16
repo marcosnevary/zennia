@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { makeWord, mergeWords, sanitizeWords, sortWords, updateWord, validateWord } from './words'
+import { makeWord, mergeWords, sanitizeWords, searchWords, sortWords, updateWord, validateWord } from './words'
 
 describe('sanitizeWords and mergeWords', () => {
   it('accepts a list or an object with words and ignores invalid items', () => {
@@ -126,5 +126,30 @@ describe('makeWord and updateWord', () => {
       disabled: true,
     })
     expect(word.japanese).toBe('犬')
+  })
+})
+
+describe('searchWords', () => {
+  const word = (id: string, japanese: string, hiragana: string, meaning: string) =>
+    ({ id, japanese, hiragana, meaning, disabled: false })
+  const list = [word('1', '犬', 'いぬ', 'Dog'), word('2', '猫', 'ねこ', 'cat'), word('3', '食べる', 'たべる', 'to eat')]
+  const ids = (query: string) => searchWords(list, query).map((w) => w.id)
+
+  it('returns everything for an empty or blank search', () => {
+    expect(ids('')).toEqual(['1', '2', '3'])
+    expect(ids('   ')).toEqual(['1', '2', '3'])
+  })
+
+  it('matches the word, the reading, the romaji and the meaning', () => {
+    expect(ids('猫')).toEqual(['2'])
+    expect(ids('たべ')).toEqual(['3'])
+    expect(ids('inu')).toEqual(['1'])
+    expect(ids('eat')).toEqual(['3'])
+  })
+
+  it('ignores case and surrounding spaces, and keeps the list order', () => {
+    expect(ids('  DOG ')).toEqual(['1'])
+    expect(ids('a')).toEqual(['2', '3'])
+    expect(ids('nothing like this')).toEqual([])
   })
 })
