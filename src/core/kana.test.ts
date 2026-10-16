@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ALL_HIRAGANA, KANA_SECTIONS, acceptedReadings, buildKana, kanaKey, parseKanaKey } from './kana'
+import { ALL_HIRAGANA, KANA_SECTIONS, acceptedReadings, buildKana, columnKeys, defaultKanaSelection, kanaKey, lineKeys, parseKanaKey, scriptKeys, sectionKeys } from './kana'
 import { checkAnswer, toDisplayRomaji } from './romaji'
 
 describe('parseKanaKey', () => {
@@ -67,5 +67,57 @@ describe('buildKana', () => {
     expect(ok('du', 'づ')).toBe(true)
     expect(ok('zu', 'づ')).toBe(true)
     expect(ok('ka', 'ぢ')).toBe(false)
+  })
+})
+
+describe('key lists', () => {
+  const [main, combo] = KANA_SECTIONS
+
+  it('sectionKeys lists every cell of a section for one script, leaving out the empty cells', () => {
+    const keys = sectionKeys('hiragana', combo)
+    expect(keys).toHaveLength(36)
+    expect(keys.slice(0, 3)).toEqual(['hiragana:きゃ', 'hiragana:きゅ', 'hiragana:きょ'])
+    expect(sectionKeys('katakana', combo)[0]).toBe('katakana:きゃ')
+    // the grid has gaps (ya yu yo, wa wo, n), which are not kana
+    expect(sectionKeys('hiragana', main)).toHaveLength(71)
+    expect(sectionKeys('hiragana', main).every((k) => !k.endsWith(':null'))).toBe(true)
+  })
+
+  it('columnKeys lists the kana of one consonant row, without its gaps', () => {
+    const y = main.rows.find((r) => r.label === 'y')!
+    expect(columnKeys('hiragana', y)).toEqual(['hiragana:や', 'hiragana:ゆ', 'hiragana:よ'])
+    const w = main.rows.find((r) => r.label === 'w')!
+    expect(columnKeys('katakana', w)).toEqual(['katakana:わ', 'katakana:を'])
+  })
+
+  it('lineKeys lists the kana of one vowel across the consonants, skipping the gaps', () => {
+    // column 1 is "i": ya yu yo and wa wo leave holes in it
+    const i = lineKeys('hiragana', main, 1)
+    expect(i).toHaveLength(main.rows.length - 3)
+    expect(i.slice(0, 3)).toEqual(['hiragana:い', 'hiragana:き', 'hiragana:し'])
+    expect(i).not.toContain('hiragana:null')
+    expect(lineKeys('katakana', combo, 2)).toHaveLength(12)
+  })
+
+  it('scriptKeys joins every section of one script, without mixing in the other', () => {
+    const keys = scriptKeys('katakana')
+    expect(keys).toHaveLength(107)
+    expect(new Set(keys).size).toBe(107)
+    expect(keys.every((k) => k.startsWith('katakana:'))).toBe(true)
+  })
+
+  it('defaultKanaSelection is the basic hiragana, without dakuten, combinations or katakana', () => {
+    const keys = defaultKanaSelection()
+    expect(keys).toHaveLength(46)
+    expect(keys).toContain('hiragana:あ')
+    expect(keys).toContain('hiragana:ん')
+    expect(keys).not.toContain('hiragana:が')
+    expect(keys).not.toContain('hiragana:きゃ')
+    expect(keys.every((k) => k.startsWith('hiragana:'))).toBe(true)
+  })
+
+  it('every key is a kana the practice can draw', () => {
+    const keys = [...scriptKeys('hiragana'), ...scriptKeys('katakana')]
+    expect(buildKana(keys)).toHaveLength(keys.length)
   })
 })
