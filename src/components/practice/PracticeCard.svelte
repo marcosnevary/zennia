@@ -74,6 +74,11 @@
     display: flex;
     gap: 8px;
   }
+  /* fixed width, so the button does not resize when its label switches between Check and Next */
+  form button {
+    flex: none;
+    width: 6rem;
+  }
   /* the only bordered element: the answer field */
   form input {
     border: 2px solid var(--muted);
