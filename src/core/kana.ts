@@ -105,6 +105,49 @@ export function acceptedReadings(hiragana: string): string[] {
   return alias === hiragana ? [hiragana] : [hiragana, alias]
 }
 
+const cellsOf = (cells: (string | null)[]): string[] => cells.filter((c): c is string => c !== null)
+
+/** Keys of every kana of a section, for one script. */
+export function sectionKeys(script: KanaScript, section: KanaSection): string[] {
+  return section.rows.flatMap((r) => cellsOf(r.cells).map((h) => kanaKey(script, h)))
+}
+
+/** Keys of the kana of one row of the grid (one consonant, drawn as a column), for one script. */
+export function columnKeys(script: KanaScript, row: KanaRow): string[] {
+  return cellsOf(row.cells).map((h) => kanaKey(script, h))
+}
+
+/** Keys of the kana of one vowel line of a section (one entry of `columns`), across its rows, for one script. */
+export function lineKeys(script: KanaScript, section: KanaSection, index: number): string[] {
+  return section.rows
+    .map((r) => r.cells[index])
+    .filter((h): h is string => !!h)
+    .map((h) => kanaKey(script, h))
+}
+
+/** Keys of every kana of one script. */
+export function scriptKeys(script: KanaScript): string[] {
+  return KANA_SECTIONS.flatMap((s) => sectionKeys(script, s))
+}
+
+/** What is practiced the first time: the basic hiragana, everything before the dakuten block. */
+export function defaultKanaSelection(): string[] {
+  const [main] = KANA_SECTIONS
+  const basic = main.rows.slice(0, main.rows.findIndex((r) => r.gap))
+  return basic.flatMap((r) => columnKeys('hiragana', r))
+}
+
+/** The selection with `keys` added (`on`) or removed; the given list is left untouched. */
+export function selectKeys(selected: string[], keys: string[], on: boolean): string[] {
+  const rest = selected.filter((k) => !keys.includes(k))
+  return on ? [...rest, ...keys] : rest
+}
+
+/** Clicking a group of keys selects them all, or clears them when all were already selected. */
+export function toggleKeys(selected: string[], keys: string[]): string[] {
+  return selectKeys(selected, keys, !keys.every((k) => selected.includes(k)))
+}
+
 /** Builds the practice pool from the selected keys (see `kanaKey`). */
 export function buildKana(selected: string[]): Kana[] {
   const chosen = new Set(selected)
