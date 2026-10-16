@@ -60,7 +60,8 @@
 <style>
   .card {
     margin-top: 24px;
-    padding: 24px 16px;
+    /* the bottom padding plus the scoreboard's 12px margin gives the same 24px as above the result */
+    padding: 24px 16px 12px;
     background: var(--surface);
     text-align: center;
   }
@@ -88,7 +89,7 @@
     border-color: var(--accent);
   }
   .result {
-    margin-top: 16px;
+    margin-top: 24px;
     padding: 12px;
     text-align: left;
   }
