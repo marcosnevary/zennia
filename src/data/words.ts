@@ -1,7 +1,34 @@
+import { isKana } from 'wanakana'
 import type { Word } from '../core/types'
 
 export function newId(): string {
   return crypto.randomUUID()
+}
+
+/** The texts of the add / edit form, as typed. */
+export interface WordFields {
+  japanese: string
+  hiragana: string
+  meaning: string
+}
+
+/** The message to show for an invalid form, or '' when the word can be saved. */
+export function validateWord({ japanese, hiragana }: WordFields): string {
+  const j = japanese.trim()
+  const h = hiragana.trim()
+  if (!j || !h) return 'Fill in the Japanese word and the hiragana.'
+  if (!isKana(h)) return 'The hiragana field must contain only kana (hiragana, katakana or ー).'
+  return ''
+}
+
+/** A new enabled word from the form texts. */
+export function makeWord({ japanese, hiragana, meaning }: WordFields): Word {
+  return { id: newId(), japanese: japanese.trim(), hiragana: hiragana.trim(), meaning: meaning.trim(), disabled: false }
+}
+
+/** The word with the form texts applied; the id and the enabled state stay. */
+export function updateWord(word: Word, { japanese, hiragana, meaning }: WordFields): Word {
+  return { ...word, japanese: japanese.trim(), hiragana: hiragana.trim(), meaning: meaning.trim() }
 }
 
 export interface SanitizeResult {

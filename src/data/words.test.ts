@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { mergeWords, sanitizeWords, sortWords } from './words'
+import { makeWord, mergeWords, sanitizeWords, sortWords, updateWord, validateWord } from './words'
 
 describe('sanitizeWords and mergeWords', () => {
   it('accepts a list or an object with words and ignores invalid items', () => {
@@ -80,5 +80,51 @@ describe('sortWords', () => {
     expect(ids(sortWords(list, 'status', 'asc'))).toBe('1243')
     expect(ids(sortWords(list, 'status', 'desc'))).toBe('3124')
     expect(ids(list)).toBe('1234')
+  })
+})
+
+describe('validateWord', () => {
+  const fields = { japanese: '食べる', hiragana: 'たべる', meaning: '' }
+
+  it('accepts a word with a kana reading, with or without a meaning', () => {
+    expect(validateWord(fields)).toBe('')
+    expect(validateWord({ ...fields, meaning: 'to eat' })).toBe('')
+  })
+
+  it('asks for both the word and the reading, ignoring surrounding spaces', () => {
+    const message = 'Fill in the Japanese word and the hiragana.'
+    expect(validateWord({ ...fields, japanese: '' })).toBe(message)
+    expect(validateWord({ ...fields, hiragana: '' })).toBe(message)
+    expect(validateWord({ ...fields, japanese: '   ' })).toBe(message)
+  })
+
+  it('only takes kana as the reading: hiragana, katakana and the long vowel mark', () => {
+    const message = 'The hiragana field must contain only kana (hiragana, katakana or ー).'
+    expect(validateWord({ ...fields, hiragana: 'taberu' })).toBe(message)
+    expect(validateWord({ ...fields, hiragana: '食べる' })).toBe(message)
+    expect(validateWord({ ...fields, hiragana: ' コーヒー ' })).toBe('')
+  })
+})
+
+describe('makeWord and updateWord', () => {
+  const typed = { japanese: ' 食べる ', hiragana: ' たべる ', meaning: ' to eat ' }
+
+  it('makeWord trims the fields and starts the word enabled with a fresh id', () => {
+    const a = makeWord(typed)
+    expect(a).toMatchObject({ japanese: '食べる', hiragana: 'たべる', meaning: 'to eat', disabled: false })
+    expect(a.id).toBeTruthy()
+    expect(makeWord(typed).id).not.toBe(a.id)
+  })
+
+  it('updateWord replaces the texts but keeps the id and whether the word is disabled', () => {
+    const word = { ...makeWord({ japanese: '犬', hiragana: 'いぬ', meaning: 'dog' }), disabled: true }
+    expect(updateWord(word, typed)).toEqual({
+      id: word.id,
+      japanese: '食べる',
+      hiragana: 'たべる',
+      meaning: 'to eat',
+      disabled: true,
+    })
+    expect(word.japanese).toBe('犬')
   })
 })
