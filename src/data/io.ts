@@ -1,6 +1,11 @@
 import type { Word, WordsFile } from '../core/types'
 import { sanitizeWords, type SanitizeResult } from './words'
 
+/** Name of the exported file, with the date of the export. */
+export function exportFilename(date = new Date()): string {
+  return `zennia-words-${date.toISOString().slice(0, 10)}.json`
+}
+
 /** Serializes the pool to JSON (format with `version`, for future migrations). */
 export function exportJSON(words: Word[]): string {
   const data: WordsFile = { version: 1, exportedAt: new Date().toISOString(), words }

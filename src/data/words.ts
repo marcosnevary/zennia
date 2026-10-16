@@ -94,6 +94,13 @@ export interface MergeResult {
   duplicates: number
 }
 
+/** The message shown after importing: what was added, what got a new meaning and what was ignored. */
+export function importSummary({ added, updated, duplicates }: MergeResult, skipped: number): string {
+  const updatedNote = updated ? `, ${updated} got a new meaning` : ''
+  const skippedNote = skipped ? ` ${skipped} invalid item(s) ignored.` : ''
+  return `${added} added${updatedNote}, ${duplicates} already existed.${skippedNote}`
+}
+
 const MEANING_SEPARATOR = '; '
 
 /** Appends `meaning` to `current` unless it is empty or already one of its parts. */

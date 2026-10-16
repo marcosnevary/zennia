@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { makeWord, mergeWords, sanitizeWords, searchWords, sortWords, updateWord, validateWord } from './words'
+import { importSummary, makeWord, mergeWords, sanitizeWords, searchWords, sortWords, updateWord, validateWord } from './words'
 
 describe('sanitizeWords and mergeWords', () => {
   it('accepts a list or an object with words and ignores invalid items', () => {
@@ -151,5 +151,23 @@ describe('searchWords', () => {
     expect(ids('  DOG ')).toEqual(['1'])
     expect(ids('a')).toEqual(['2', '3'])
     expect(ids('nothing like this')).toEqual([])
+  })
+})
+
+describe('importSummary', () => {
+  it('counts what was added and what already existed', () => {
+    expect(importSummary({ words: [], added: 3, updated: 0, duplicates: 1 }, 0)).toBe('3 added, 1 already existed.')
+  })
+
+  it('mentions the words that got a new meaning', () => {
+    expect(importSummary({ words: [], added: 2, updated: 1, duplicates: 0 }, 0)).toBe(
+      '2 added, 1 got a new meaning, 0 already existed.',
+    )
+  })
+
+  it('mentions the invalid items that were ignored', () => {
+    expect(importSummary({ words: [], added: 0, updated: 0, duplicates: 2 }, 4)).toBe(
+      '0 added, 2 already existed. 4 invalid item(s) ignored.',
+    )
   })
 })
