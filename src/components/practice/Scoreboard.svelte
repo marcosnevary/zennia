@@ -11,6 +11,10 @@
 
   const misses = $derived(total - hits)
   const sessionAccuracy = $derived(accuracy({ hits, misses }))
+
+  function reset() {
+    if (confirm('Reset the session score?')) onreset()
+  }
 </script>
 
 <section class="scoreboard" aria-label="Session score">
@@ -37,7 +41,7 @@
 </section>
 
 <p class="footer">
-  <button onclick={onreset} disabled={!total}>Reset session</button>
+  <button onclick={reset} disabled={!total}>Reset session</button>
 </p>
 
 <style>
