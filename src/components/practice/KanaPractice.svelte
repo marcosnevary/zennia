@@ -8,6 +8,7 @@
     type KanaSection,
   } from '../../core/kana'
   import { toDisplayRomaji } from '../../core/romaji'
+  import PracticeCard from './PracticeCard.svelte'
   import Scoreboard from './Scoreboard.svelte'
   import { kanaMode } from '../../data/practice-modes'
   import { nextRound, resetScore, startSession, submit as submitAnswer } from '../../data/practice-session'
@@ -90,32 +91,15 @@
 </script>
 
 {#if session.current}
-  <section class="card">
-    <p class="symbol" lang="ja">{session.current.symbol}</p>
-
-    <form onsubmit={submit}>
-      <input
-        type="text"
-        bind:this={inputEl}
-        bind:value={answer}
-        {onkeydown}
-        readonly={session.verdict !== null}
-        placeholder="Type in romaji"
-        autocomplete="off"
-        autocapitalize="off"
-        autocorrect="off"
-        spellcheck="false"
-      />
-      <button class="primary" type="submit">{session.verdict ? 'Next' : 'Check'}</button>
-    </form>
-
-    {#if session.verdict}
-      <div class="result {session.verdict}" role="status">
-        <strong>{session.verdict === 'correct' ? 'Correct!' : 'Incorrect.'}</strong>
-        <p class="answer" lang="ja">{session.current.symbol} · {toDisplayRomaji(session.current.hiragana)}</p>
-      </div>
-    {/if}
-  </section>
+  <PracticeCard
+    prompt={session.current.symbol}
+    verdict={session.verdict}
+    reading="{session.current.symbol} · {toDisplayRomaji(session.current.hiragana)}"
+    bind:answer
+    bind:inputEl
+    onsubmit={submit}
+    {onkeydown}
+  />
   <Scoreboard
     hits={session.hits}
     total={session.total}
@@ -209,49 +193,6 @@
 </div>
 
 <style>
-  .card {
-    margin-top: 24px;
-    padding: 24px 16px;
-    background: var(--surface);
-    text-align: center;
-  }
-  .symbol {
-    font-family: var(--font-serif);
-    margin: 0 0 20px;
-    font-size: 4rem;
-    line-height: 1.2;
-  }
-  form {
-    display: flex;
-    gap: 8px;
-  }
-  /* the only bordered element: the answer field */
-  form input {
-    border: 2px solid var(--muted);
-  }
-  form input:focus-visible {
-    outline: none;
-    border-color: var(--accent);
-  }
-  .result {
-    margin-top: 16px;
-    padding: 12px;
-    text-align: left;
-  }
-  .result p {
-    margin: 4px 0 0;
-  }
-  .answer {
-    font-size: 1.2rem;
-  }
-  .correct {
-    background: var(--ok-bg);
-    color: var(--ok);
-  }
-  .incorrect {
-    background: var(--bad-bg);
-    color: var(--bad);
-  }
   .tables {
     display: flex;
     flex-direction: column;

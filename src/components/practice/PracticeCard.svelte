@@ -1,0 +1,108 @@
+<script lang="ts">
+  import type { Verdict } from '../../core/types'
+
+  let {
+    prompt,
+    verdict,
+    reading,
+    detail,
+    answer = $bindable(),
+    inputEl = $bindable(),
+    onsubmit,
+    onkeydown,
+  }: {
+    /** The word or symbol being asked */
+    prompt: string
+    verdict: Verdict | null
+    /** Shown with the verdict: the right answer */
+    reading: string
+    /** Optional extra line below the reading (the meaning of a word) */
+    detail?: string
+    answer: string
+    inputEl?: HTMLInputElement
+    onsubmit: (event: Event) => void
+    onkeydown: (event: KeyboardEvent) => void
+  } = $props()
+</script>
+
+<section class="card">
+  <p class="prompt" lang="ja">{prompt}</p>
+
+  <form {onsubmit}>
+    <input
+      type="text"
+      bind:this={inputEl}
+      bind:value={answer}
+      {onkeydown}
+      readonly={verdict !== null}
+      placeholder="Type in romaji"
+      autocomplete="off"
+      autocapitalize="off"
+      autocorrect="off"
+      spellcheck="false"
+    />
+    <button class="primary" type="submit">{verdict ? 'Next' : 'Check'}</button>
+  </form>
+
+  {#if verdict}
+    <div class="result {verdict}" role="status">
+      <strong>
+        {#if verdict === 'correct'}Correct!
+        {:else if verdict === 'almost'}Almost: only the length of a vowel differs.
+        {:else}Incorrect.{/if}
+      </strong>
+      <p class="answer" lang="ja">{reading}</p>
+      {#if detail !== undefined}<p>{detail}</p>{/if}
+    </div>
+  {/if}
+</section>
+
+<style>
+  .card {
+    margin-top: 24px;
+    padding: 24px 16px;
+    background: var(--surface);
+    text-align: center;
+  }
+  .prompt {
+    font-family: var(--font-serif);
+    margin: 0 0 20px;
+    font-size: 4rem;
+    line-height: 1.2;
+  }
+  form {
+    display: flex;
+    gap: 8px;
+  }
+  /* the only bordered element: the answer field */
+  form input {
+    border: 2px solid var(--muted);
+  }
+  form input:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .result {
+    margin-top: 16px;
+    padding: 12px;
+    text-align: left;
+  }
+  .result p {
+    margin: 4px 0 0;
+  }
+  .answer {
+    font-size: 1.2rem;
+  }
+  .correct {
+    background: var(--ok-bg);
+    color: var(--ok);
+  }
+  .almost {
+    background: var(--warn-bg);
+    color: var(--warn);
+  }
+  .incorrect {
+    background: var(--bad-bg);
+    color: var(--bad);
+  }
+</style>
