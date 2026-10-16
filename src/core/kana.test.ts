@@ -1,6 +1,19 @@
 import { describe, expect, it } from 'vitest'
-import { ALL_HIRAGANA, KANA_SECTIONS, acceptedReadings, buildKana, kanaKey } from './kana'
+import { ALL_HIRAGANA, KANA_SECTIONS, acceptedReadings, buildKana, kanaKey, parseKanaKey } from './kana'
 import { checkAnswer, toDisplayRomaji } from './romaji'
+
+describe('parseKanaKey', () => {
+  it('undoes kanaKey for both scripts', () => {
+    expect(parseKanaKey(kanaKey('hiragana', 'か'))).toEqual({ script: 'hiragana', hiragana: 'か' })
+    expect(parseKanaKey(kanaKey('katakana', 'きょ'))).toEqual({ script: 'katakana', hiragana: 'きょ' })
+  })
+
+  it('rejects keys of an unknown script or without the separator', () => {
+    expect(parseKanaKey('kanji:火')).toBeNull()
+    expect(parseKanaKey('hiragana')).toBeNull()
+    expect(parseKanaKey('か')).toBeNull()
+  })
+})
 
 describe('buildKana', () => {
   it('builds hiragana and katakana for the same sound', () => {

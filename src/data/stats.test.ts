@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { accuracy, drawWeight, emptyStats, pickWeighted, recordAnswer, recordKana, sanitizeStats, sortTallies } from './stats'
+import { accuracy, accuracyLevel, totalTally, drawWeight, emptyStats, pickWeighted, recordAnswer, recordKana, sanitizeStats, sortTallies } from './stats'
 import type { Word } from '../core/types'
 
 const word: Word = { id: 'w1', japanese: '食べる', hiragana: 'たべる', meaning: '' }
@@ -24,6 +24,30 @@ describe('recordKana', () => {
     expect(stats.kana['katakana:か']).toEqual({ hits: 0, misses: 1 })
     expect(stats.kana['hiragana:か']).toEqual({ hits: 2, misses: 0 })
     expect(stats.words).toEqual({})
+  })
+})
+
+describe('totalTally', () => {
+  it('adds the words and the kana together', () => {
+    const stats = emptyStats()
+    recordAnswer(stats, word, 'correct')
+    recordAnswer(stats, word, 'almost')
+    recordKana(stats, 'hiragana', 'か', true)
+    recordKana(stats, 'katakana', 'か', false)
+    expect(totalTally(stats)).toEqual({ hits: 2, misses: 2 })
+    expect(totalTally(emptyStats())).toEqual({ hits: 0, misses: 0 })
+  })
+})
+
+describe('accuracyLevel', () => {
+  it('is high from 80%, low under 60%, neutral in between', () => {
+    expect(accuracyLevel({ hits: 4, misses: 1 })).toBe('high')
+    expect(accuracyLevel({ hits: 3, misses: 2 })).toBe('')
+    expect(accuracyLevel({ hits: 3, misses: 1 })).toBe('')
+    expect(accuracyLevel({ hits: 1, misses: 1 })).toBe('low')
+  })
+  it('is neutral without answers', () => {
+    expect(accuracyLevel({ hits: 0, misses: 0 })).toBe('')
   })
 })
 
