@@ -6,65 +6,56 @@ const KEY = 'zennia:words'
 const STATS_KEY = 'zennia:stats'
 const KANA_KEY = 'zennia:kana-selection'
 
+/** Reads and parses what is saved under `key`; anything missing, unreadable or invalid gives `fallback`. */
+function load<T>(key: string, parse: (data: unknown) => T, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(key)
+    return raw ? parse(JSON.parse(raw)) : fallback
+  } catch {
+    return fallback
+  }
+}
+
+/** Saves `data` under `key`; a full or blocked storage is ignored and the app keeps working in memory. */
+function save(key: string, data: unknown): void {
+  try {
+    localStorage.setItem(key, JSON.stringify(data))
+  } catch {
+    // storage full or blocked
+  }
+}
+
 /**
  * Single point of access to the data. To replace localStorage with
- * IndexedDB or a backend, just rewrite these two functions.
+ * IndexedDB or a backend, just rewrite `load` and `save`.
  */
 export function loadWords(): Word[] {
-  try {
-    const raw = localStorage.getItem(KEY)
-    if (!raw) return []
-    return sanitizeWords(JSON.parse(raw)).words
-  } catch {
-    return []
-  }
+  return load(KEY, (data) => sanitizeWords(data).words, [])
 }
 
 export function saveWords(words: Word[]): void {
   const data: WordsFile = { version: 1, words }
-  try {
-    localStorage.setItem(KEY, JSON.stringify(data))
-  } catch {
-    // storage full or blocked: the app keeps working in memory
-  }
+  save(KEY, data)
 }
 
 export function loadStats(): Stats {
-  try {
-    const raw = localStorage.getItem(STATS_KEY)
-    if (!raw) return emptyStats()
-    return sanitizeStats((JSON.parse(raw) as { stats?: unknown }).stats)
-  } catch {
-    return emptyStats()
-  }
+  return load(STATS_KEY, (data) => sanitizeStats((data as { stats?: unknown }).stats), emptyStats())
 }
 
 export function saveStats(stats: Stats): void {
   const data: StatsFile = { version: 1, stats }
-  try {
-    localStorage.setItem(STATS_KEY, JSON.stringify(data))
-  } catch {
-    // storage full or blocked: the app keeps working in memory
-  }
+  save(STATS_KEY, data)
 }
 
 /** Saved kana selection (keys, see `kanaKey`), or null when nothing valid was saved. */
 export function loadKanaSelection(): string[] | null {
-  try {
-    const raw = localStorage.getItem(KANA_KEY)
-    if (!raw) return null
-    const data: unknown = JSON.parse(raw)
-    if (!Array.isArray(data)) return null
-    return data.filter((k): k is string => typeof k === 'string')
-  } catch {
-    return null
-  }
+  return load<string[] | null>(
+    KANA_KEY,
+    (data) => (Array.isArray(data) ? data.filter((k): k is string => typeof k === 'string') : null),
+    null,
+  )
 }
 
 export function saveKanaSelection(keys: string[]): void {
-  try {
-    localStorage.setItem(KANA_KEY, JSON.stringify(keys))
-  } catch {
-    // storage full or blocked: the app keeps working in memory
-  }
+  save(KANA_KEY, keys)
 }
