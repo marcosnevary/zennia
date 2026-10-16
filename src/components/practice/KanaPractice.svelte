@@ -1,11 +1,17 @@
 <script lang="ts">
   import {
     KANA_SECTIONS,
+    columnKeys,
+    defaultKanaSelection,
     kanaKey,
+    lineKeys,
+    scriptKeys,
+    sectionKeys,
+    selectKeys,
     symbolOf,
+    toggleKeys,
     type Kana,
     type KanaScript,
-    type KanaSection,
   } from '../../core/kana'
   import { toDisplayRomaji } from '../../core/romaji'
   import PracticeCard from './PracticeCard.svelte'
@@ -22,15 +28,8 @@
     { id: 'katakana', label: 'Katakana' },
   ]
 
-  const basic = KANA_SECTIONS[0]
-  // the basic set is everything before the dakuten block
-  const BASIC_ROWS = basic.rows.slice(0, basic.rows.findIndex((r) => r.gap))
-
   /** Keys (see `kanaKey`) of the characters included in practice; defaults to the basic hiragana, then remembers the last choice */
-  let selected = $state<string[]>(
-    loadKanaSelection() ??
-      BASIC_ROWS.flatMap((r) => cellsOf(r.cells).map((h) => kanaKey('hiragana', h))),
-  )
+  let selected = $state<string[]>(loadKanaSelection() ?? defaultKanaSelection())
 
   $effect(() => {
     saveKanaSelection($state.snapshot(selected))
@@ -41,14 +40,6 @@
   let session = $state(startSession<Kana>())
   let answer = $state('')
   let inputEl = $state<HTMLInputElement>()
-
-  function cellsOf(cells: (string | null)[]): string[] {
-    return cells.filter((c): c is string => c !== null)
-  }
-
-  function sectionKeys(script: KanaScript, section: KanaSection): string[] {
-    return section.rows.flatMap((r) => cellsOf(r.cells).map((h) => kanaKey(script, h)))
-  }
 
   function draw() {
     session = nextRound(session, mode)
@@ -62,14 +53,12 @@
     answer = ''
   }
 
-  function setKeys(keys: string[], on: boolean) {
-    const rest = selected.filter((k) => !keys.includes(k))
-    setSelected(on ? [...rest, ...keys] : rest)
+  function select(keys: string[], on: boolean) {
+    setSelected(selectKeys(selected, keys, on))
   }
 
-  /** Clicking a group of keys selects them all, or clears them when all were already selected. */
-  function toggleKeys(keys: string[]) {
-    setKeys(keys, !keys.every((k) => selected.includes(k)))
+  function toggle(keys: string[]) {
+    setSelected(toggleKeys(selected, keys))
   }
 
   function submit(event: Event) {
@@ -113,11 +102,11 @@
 
 <div class="tables">
   {#each SCRIPTS as script (script.id)}
-    {@const scriptKeys = KANA_SECTIONS.flatMap((s) => sectionKeys(script.id, s))}
+    {@const scriptSelected = scriptKeys(script.id).filter((k) => selected.includes(k)).length}
     <section class="script">
       <header>
         <h2>{script.label}</h2>
-        <span class="muted">{scriptKeys.filter((k) => selected.includes(k)).length} selected</span>
+        <span class="muted">{scriptSelected} selected</span>
       </header>
 
       {#each KANA_SECTIONS as section (section.id)}
@@ -125,8 +114,8 @@
         <div class="group">
           <div class="group-head">
             <h3>{section.title}</h3>
-            <button class="link" onclick={() => setKeys(keys, true)}>All</button>
-            <button class="link" onclick={() => setKeys(keys, false)}>None</button>
+            <button class="link" onclick={() => select(keys, true)}>All</button>
+            <button class="link" onclick={() => select(keys, false)}>None</button>
           </div>
           <!-- transposed: one column per consonant row, one row per vowel -->
           <div class="scroll">
@@ -135,12 +124,12 @@
                 <tr>
                   <th></th>
                   {#each section.rows as r, i (i)}
-                    {@const colKeys = cellsOf(r.cells).map((h) => kanaKey(script.id, h))}
+                    {@const colKeys = columnKeys(script.id, r)}
                     <th scope="col" class:gap={r.gap}>
                       <button
                         class="link"
                         title="Toggle the whole column"
-                        onclick={() => toggleKeys(colKeys)}
+                        onclick={() => toggle(colKeys)}
                       >
                         {r.label || '·'}
                       </button>
@@ -150,16 +139,13 @@
               </thead>
               <tbody>
                 {#each section.columns as col, c (col)}
-                  {@const lineKeys = section.rows
-                    .map((r) => r.cells[c])
-                    .filter((h): h is string => !!h)
-                    .map((h) => kanaKey(script.id, h))}
+                  {@const line = lineKeys(script.id, section, c)}
                   <tr>
                     <th scope="row">
                       <button
                         class="link"
                         title="Toggle the whole row"
-                        onclick={() => toggleKeys(lineKeys)}
+                        onclick={() => toggle(line)}
                       >
                         {col}
                       </button>
@@ -174,7 +160,7 @@
                             class:on={selected.includes(key)}
                             aria-pressed={selected.includes(key)}
                             lang="ja"
-                            onclick={() => toggleKeys([key])}
+                            onclick={() => toggle([key])}
                           >
                             {symbolOf(script.id, cell)}
                           </button>
