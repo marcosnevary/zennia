@@ -1,7 +1,44 @@
+import { isKana } from 'wanakana'
+import { toDisplayRomaji } from '../core/romaji'
 import type { Word } from '../core/types'
 
 export function newId(): string {
   return crypto.randomUUID()
+}
+
+/** The texts of the add / edit form, as typed. */
+export interface WordFields {
+  japanese: string
+  hiragana: string
+  meaning: string
+}
+
+/** The message to show for an invalid form, or '' when the word can be saved. */
+export function validateWord({ japanese, hiragana }: WordFields): string {
+  const j = japanese.trim()
+  const h = hiragana.trim()
+  if (!j || !h) return 'Fill in the Japanese word and the hiragana.'
+  if (!isKana(h)) return 'The hiragana field must contain only kana (hiragana, katakana or ー).'
+  return ''
+}
+
+/** A new enabled word from the form texts. */
+export function makeWord({ japanese, hiragana, meaning }: WordFields): Word {
+  return { id: newId(), japanese: japanese.trim(), hiragana: hiragana.trim(), meaning: meaning.trim(), disabled: false }
+}
+
+/** The word with the form texts applied; the id and the enabled state stay. */
+export function updateWord(word: Word, { japanese, hiragana, meaning }: WordFields): Word {
+  return { ...word, japanese: japanese.trim(), hiragana: hiragana.trim(), meaning: meaning.trim() }
+}
+
+/** The words matching the search in the word, the reading, its romaji or the meaning; everything for a blank search. */
+export function searchWords(words: Word[], query: string): Word[] {
+  const q = query.trim().toLowerCase()
+  if (!q) return words
+  return words.filter((w) =>
+    [w.japanese, w.hiragana, toDisplayRomaji(w.hiragana), w.meaning].some((field) => field.toLowerCase().includes(q)),
+  )
 }
 
 export interface SanitizeResult {
@@ -43,7 +80,7 @@ export function sanitizeWords(raw: unknown): SanitizeResult {
     let id = typeof o.id === 'string' && o.id ? o.id : newId()
     if (seenIds.has(id)) id = newId()
     seenIds.add(id)
-    words.push(o.disabled === true ? { id, japanese, hiragana, meaning, disabled: true } : { id, japanese, hiragana, meaning })
+    words.push({ id, japanese, hiragana, meaning, disabled: o.disabled === true })
   }
 
   return { words, skipped }
@@ -55,6 +92,13 @@ export interface MergeResult {
   /** Existing words that gained a new meaning. */
   updated: number
   duplicates: number
+}
+
+/** The message shown after importing: what was added, what got a new meaning and what was ignored. */
+export function importSummary({ added, updated, duplicates }: MergeResult, skipped: number): string {
+  const updatedNote = updated ? `, ${updated} got a new meaning` : ''
+  const skippedNote = skipped ? ` ${skipped} invalid item(s) ignored.` : ''
+  return `${added} added${updatedNote}, ${duplicates} already existed.${skippedNote}`
 }
 
 const MEANING_SEPARATOR = '; '

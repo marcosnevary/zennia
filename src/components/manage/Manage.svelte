@@ -1,11 +1,22 @@
 <script lang="ts">
   import Help from './Help.svelte'
-  import { isKana } from 'wanakana'
   import { importAnkiDeck } from '../../data/anki'
-  import { downloadText, exportJSON, importJSON } from '../../data/io'
+  import { downloadText, exportFilename, exportJSON, importJSON } from '../../data/io'
   import { toDisplayRomaji } from '../../core/romaji'
   import type { Word } from '../../core/types'
-  import { mergeWords, newId, SORT_OPTIONS, sortWords, type SanitizeResult, type SortDirection, type SortKey } from '../../data/words'
+  import {
+    importSummary,
+    makeWord,
+    mergeWords,
+    searchWords,
+    SORT_OPTIONS,
+    sortWords,
+    updateWord,
+    validateWord,
+    type SanitizeResult,
+    type SortDirection,
+    type SortKey,
+  } from '../../data/words'
 
   let { words = $bindable(), onprint }: { words: Word[]; onprint: (words: Word[]) => void } = $props()
 
@@ -29,19 +40,12 @@
     error = ''
   }
 
-  function validate(j: string, h: string): string {
-    if (!j || !h) return 'Fill in the Japanese word and the hiragana.'
-    if (!isKana(h)) return 'The hiragana field must contain only kana (hiragana, katakana or ー).'
-    return ''
-  }
-
   function save(event: Event) {
     event.preventDefault()
-    const j = japanese.trim()
-    const h = hiragana.trim()
-    error = validate(j, h)
+    const fields = { japanese, hiragana, meaning }
+    error = validateWord(fields)
     if (error) return
-    words = [{ id: newId(), japanese: j, hiragana: h, meaning: meaning.trim() }, ...words]
+    words = [makeWord(fields), ...words]
     message = 'Word added.'
     resetForm()
     japaneseEl?.focus()
@@ -59,11 +63,10 @@
 
   function saveEdit(event: Event) {
     event.preventDefault()
-    const j = editJapanese.trim()
-    const h = editHiragana.trim()
-    editError = validate(j, h)
+    const fields = { japanese: editJapanese, hiragana: editHiragana, meaning: editMeaning }
+    editError = validateWord(fields)
     if (editError) return
-    words = words.map((w) => (w.id === editingId ? { ...w, japanese: j, hiragana: h, meaning: editMeaning.trim() } : w))
+    words = words.map((w) => (w.id === editingId ? updateWord(w, fields) : w))
     message = 'Word updated.'
     dialogEl?.close()
   }
@@ -89,15 +92,7 @@
   let query = $state('')
   let sortKey = $state<SortKey>('list')
   let sortDirection = $state<SortDirection>('asc')
-  const visibleWords = $derived.by(() => {
-    const q = query.trim().toLowerCase()
-    const matches = !q
-      ? words
-      : words.filter((w) =>
-          [w.japanese, w.hiragana, toDisplayRomaji(w.hiragana), w.meaning].some((field) => field.toLowerCase().includes(q)),
-        )
-    return sortWords(matches, sortKey, sortDirection)
-  })
+  const visibleWords = $derived(sortWords(searchWords(words, query), sortKey, sortDirection))
   const selectedWords = $derived(words.filter((w) => selected.has(w.id)))
   const allSelected = $derived(visibleWords.length > 0 && visibleWords.every((w) => selected.has(w.id)))
 
@@ -119,11 +114,7 @@
 
   function setSelectedDisabled(disabled: boolean) {
     const count = selectedWords.length
-    words = words.map((w) => {
-      if (!selected.has(w.id)) return w
-      const { disabled: _, ...rest } = w
-      return disabled ? { ...rest, disabled: true } : rest
-    })
+    words = words.map((w) => (selected.has(w.id) ? { ...w, disabled } : w))
     message = `${count} word(s) ${disabled ? 'disabled' : 'enabled'}.`
     selected = new Set()
   }
@@ -137,8 +128,7 @@
   }
 
   function exportWords() {
-    const date = new Date().toISOString().slice(0, 10)
-    downloadText(`zennia-words-${date}.json`, exportJSON(selectedWords))
+    downloadText(exportFilename(), exportJSON(selectedWords))
     message = `${selectedWords.length} selected word(s) exported.`
   }
 
@@ -158,11 +148,9 @@
     error = ''
     try {
       const { words: incoming, skipped } = parse(await file.text())
-      const skippedNote = skipped ? ` ${skipped} invalid item(s) ignored.` : ''
       const result = mergeWords(words, incoming)
       words = result.words
-      const updatedNote = result.updated ? `, ${result.updated} got a new meaning` : ''
-      message = `${result.added} added${updatedNote}, ${result.duplicates} already existed.${skippedNote}`
+      message = importSummary(result, skipped)
       resetForm()
     } catch (e) {
       error = e instanceof Error ? e.message : 'Could not import the file.'
