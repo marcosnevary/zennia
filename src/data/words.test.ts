@@ -17,7 +17,14 @@ describe('sanitizeWords and mergeWords', () => {
       { japanese: '猫', hiragana: 'ねこ', disabled: 'yes' },
     ])
     expect(c.words[0].disabled).toBe(true)
-    expect(c.words[1].disabled).toBeUndefined()
+    expect(c.words[1].disabled).toBe(false)
+  })
+  it('always stores disabled as a boolean, false when it was missing', () => {
+    const { words } = sanitizeWords([
+      { japanese: '犬', hiragana: 'いぬ' },
+      { japanese: '猫', hiragana: 'ねこ', disabled: false },
+    ])
+    expect(words.map((w) => w.disabled)).toEqual([false, false])
   })
   it('merge appends a new meaning to an existing word', () => {
     const cur = sanitizeWords([{ id: '1', japanese: '犬', hiragana: 'いぬ', meaning: 'dog' }]).words
@@ -44,8 +51,13 @@ describe('sanitizeWords and mergeWords', () => {
 })
 
 describe('sortWords', () => {
-  const w = (id: string, japanese: string, hiragana: string, meaning = '', disabled?: boolean) =>
-    disabled ? { id, japanese, hiragana, meaning, disabled } : { id, japanese, hiragana, meaning }
+  const w = (id: string, japanese: string, hiragana: string, meaning = '', disabled = false) => ({
+    id,
+    japanese,
+    hiragana,
+    meaning,
+    disabled,
+  })
   const list = [w('1', '犬', 'いぬ', 'dog'), w('2', '猫', 'ねこ', ''), w('3', '赤', 'あか', 'red', true), w('4', '木', 'き', 'tree')]
   const ids = (xs: { id: string }[]) => xs.map((x) => x.id).join('')
 

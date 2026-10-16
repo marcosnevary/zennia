@@ -41,7 +41,7 @@
     const h = hiragana.trim()
     error = validate(j, h)
     if (error) return
-    words = [{ id: newId(), japanese: j, hiragana: h, meaning: meaning.trim() }, ...words]
+    words = [{ id: newId(), japanese: j, hiragana: h, meaning: meaning.trim(), disabled: false }, ...words]
     message = 'Word added.'
     resetForm()
     japaneseEl?.focus()
@@ -119,11 +119,7 @@
 
   function setSelectedDisabled(disabled: boolean) {
     const count = selectedWords.length
-    words = words.map((w) => {
-      if (!selected.has(w.id)) return w
-      const { disabled: _, ...rest } = w
-      return disabled ? { ...rest, disabled: true } : rest
-    })
+    words = words.map((w) => (selected.has(w.id) ? { ...w, disabled } : w))
     message = `${count} word(s) ${disabled ? 'disabled' : 'enabled'}.`
     selected = new Set()
   }
