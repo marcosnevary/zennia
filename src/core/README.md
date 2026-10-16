@@ -4,9 +4,9 @@ Pure domain logic. It has no Svelte, no localStorage and no DOM, and it depends 
 
 | File | Contents |
 | --- | --- |
-| [`types.ts`](types.ts) | Shared types: `Word { id, japanese, hiragana, meaning }`, `Verdict`, `WordsFile`, `Tally`, `Stats`, `StatsFile`. |
+| [`types.ts`](types.ts) | Shared types: `Word { id, japanese, hiragana, meaning, disabled }`, `Verdict`, `WordsFile`, `Tally`, `Stats`, `StatsFile`. |
 | [`romaji.ts`](romaji.ts) | Answer checking: `normalizeKana`, `checkAnswer`, `toDisplayRomaji`. |
-| [`kana.ts`](kana.ts) | Hiragana/katakana tables (`KANA_SECTIONS`), `kanaKey`, `symbolOf`, `acceptedReadings`, `buildKana`. |
+| [`kana.ts`](kana.ts) | Hiragana/katakana tables (`KANA_SECTIONS`), `kanaKey` / `parseKanaKey`, `symbolOf`, `acceptedReadings`, `buildKana`, the key lists of the grid (`sectionKeys`, `columnKeys`, `lineKeys`, `scriptKeys`), `defaultKanaSelection` and the selection rules (`selectKeys`, `toggleKeys`). |
 | [`sheet.ts`](sheet.ts) | Layout of the printable writing sheet: `SHEET` (A4 measures in mm) and `sheetRow` (squares per character; large rows hold one reference, then tracing, then free writing, followed by one row of small squares, half the side, to trace and write). |
 | `romaji.test.ts`, `kana.test.ts`, `sheet.test.ts` | Tests for the modules above. |
 
