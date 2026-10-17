@@ -162,26 +162,24 @@
     message = `Tag "${tag}" removed from all words.`
   }
 
-  // tags on the selected words, from a dialog opened by the tag button
-  let bulkTag = $state('')
-  let bulkTagError = $state('')
+  // tags on the selected words, from a dialog opened by the tag button; a tag counts as on only when
+  // every selected word has it, and each change applies to the whole selection straight away
   let tagDialogEl = $state<HTMLDialogElement>()
+  const commonTags = $derived(tags.filter((t) => selectedWords.length > 0 && selectedWords.every((w) => w.tags.some((x) => sameTag(x, t)))))
 
-  function openTagDialog() {
-    bulkTag = ''
-    bulkTagError = ''
-    tagDialogEl?.showModal()
+  // tags seen while the dialog is open stay listed after being taken off, so × only deselects them
+  let dialogTags = $state<string[]>([])
+  const dialogChoices = $derived(cleanTags([...tags, ...dialogTags]))
+
+  function setCommonTags(next: string[]) {
+    dialogTags = cleanTags([...dialogTags, ...next])
+    for (const tag of next) if (!commonTags.some((t) => sameTag(t, tag))) words = addTag(words, selected, tag)
+    for (const tag of commonTags) if (!next.some((t) => sameTag(t, tag))) words = removeTag(words, selected, tag)
   }
 
-  function tagSelected(action: 'add' | 'remove') {
-    bulkTagError = validateTag(bulkTag)
-    if (bulkTagError) return
-    const tag = bulkTag.trim()
-    const count = selectedWords.length
-    words = action === 'add' ? addTag(words, selected, tag) : removeTag(words, selected, tag)
-    message = `Tag "${tag}" ${action === 'add' ? 'added to' : 'removed from'} ${count} word(s).`
-    bulkTag = ''
-    tagDialogEl?.close()
+  function openTagDialog() {
+    dialogTags = [...tags]
+    tagDialogEl?.showModal()
   }
 
   function toggleSelected(id: string) {
@@ -270,21 +268,13 @@
 </dialog>
 
 <dialog bind:this={tagDialogEl} use:closeOnBackdrop aria-label="Tag selected words">
-  <form class="form" onsubmit={(e) => { e.preventDefault(); tagSelected('add') }}>
+  <div class="form">
     <h2>Tag {selectedWords.length} selected word(s)</h2>
-    <input type="text" list="bulk-tag-options" placeholder="Tag name" aria-label="Tag name" bind:value={bulkTag} oninput={() => (bulkTagError = '')} />
-    <datalist id="bulk-tag-options">
-      {#each tags as tag (tag)}
-        <option value={tag}></option>
-      {/each}
-    </datalist>
-    {#if bulkTagError}<p class="error" role="alert">{bulkTagError}</p>{/if}
+    <TagInput bind:tags={() => commonTags, setCommonTags} suggestions={dialogChoices} />
     <div class="row">
-      <button class="primary" type="submit">Add tag</button>
-      <button type="button" onclick={() => tagSelected('remove')}>Remove tag</button>
-      <button type="button" onclick={() => tagDialogEl?.close()}>Cancel</button>
+      <button class="primary" type="button" onclick={() => tagDialogEl?.close()}>Done</button>
     </div>
-  </form>
+  </div>
 </dialog>
 
 {#if error}<p class="error" role="alert">{error}</p>{/if}
