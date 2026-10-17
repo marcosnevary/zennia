@@ -32,5 +32,6 @@ export interface Stats {
 
 export interface StatsFile {
   version: 1
+  exportedAt?: string
   stats: Stats
 }
