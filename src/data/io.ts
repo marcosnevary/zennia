@@ -14,7 +14,7 @@ export function statsExportFilename(date = new Date()): string {
 
 /** Serializes the pool to JSON (format with `version`, for future migrations). */
 export function exportJSON(words: Word[]): string {
-  const data: WordsFile = { version: 1, exportedAt: new Date().toISOString(), words }
+  const data: WordsFile = { version: 2, exportedAt: new Date().toISOString(), words }
   return JSON.stringify(data, null, 2)
 }
 

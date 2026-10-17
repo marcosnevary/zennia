@@ -1,11 +1,7 @@
 <script lang="ts">
-  let helpEl = $state<HTMLDialogElement>()
+  import { closeOnBackdrop } from './dialog'
 
-  function onDialogClick(event: MouseEvent) {
-    // clicks on the backdrop target the <dialog> itself
-    const dialog = event.currentTarget as HTMLDialogElement
-    if (event.target === dialog) dialog.close()
-  }
+  let helpEl = $state<HTMLDialogElement>()
 </script>
 
 <button class="help-btn" onclick={() => helpEl?.showModal()} aria-label="How import and export work" title="How import and export work">
@@ -15,7 +11,7 @@
   </svg>
 </button>
 
-<dialog class="help" bind:this={helpEl} onclick={onDialogClick} aria-label="Help: import and export">
+<dialog class="help" bind:this={helpEl} use:closeOnBackdrop aria-label="Help: import and export">
   <h2>Import and export</h2>
 
   <h3>Export JSON</h3>
