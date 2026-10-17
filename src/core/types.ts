@@ -8,6 +8,8 @@ export interface Word {
   meaning: string
   /** When true the word is excluded from practice. Always stored, `false` for an enabled word. */
   disabled: boolean
+  /** When the word was last enabled (ms since epoch); missing for words enabled before this was tracked. */
+  activatedAt?: number
   /** Free-text labels to organize the word list. Always stored, empty when the word has none. */
   tags: string[]
 }

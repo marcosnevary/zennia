@@ -51,7 +51,13 @@ export function cleanTags(tags: unknown[]): string[] {
 
 /** A new enabled word from the form texts. */
 export function makeWord({ japanese, hiragana, meaning, tags }: WordFields): Word {
-  return { id: newId(), japanese: japanese.trim(), hiragana: hiragana.trim(), meaning: meaning.trim(), disabled: false, tags: cleanTags(tags) }
+  return { id: newId(), japanese: japanese.trim(), hiragana: hiragana.trim(), meaning: meaning.trim(), disabled: false, activatedAt: Date.now(), tags: cleanTags(tags) }
+}
+
+/** The word enabled or disabled; enabling a disabled word stamps the time, which orders the status sort. */
+export function setDisabled(word: Word, disabled: boolean, now = Date.now()): Word {
+  if (!disabled && word.disabled) return { ...word, disabled, activatedAt: now }
+  return { ...word, disabled }
 }
 
 /** The word with the form texts applied; the id and the enabled state stay. */
@@ -108,7 +114,9 @@ export function sanitizeWords(raw: unknown): SanitizeResult {
     if (seenIds.has(id)) id = newId()
     seenIds.add(id)
     const tags = Array.isArray(o.tags) ? cleanTags(o.tags) : []
-    words.push({ id, japanese, hiragana, meaning, disabled: o.disabled === true, tags })
+    const word: Word = { id, japanese, hiragana, meaning, disabled: o.disabled === true, tags }
+    if (typeof o.activatedAt === 'number' && Number.isFinite(o.activatedAt)) word.activatedAt = o.activatedAt
+    words.push(word)
   }
 
   return { words, skipped }
@@ -246,8 +254,8 @@ const collator = new Intl.Collator('ja')
 
 /**
  * Returns a sorted copy of the list. `list` keeps the stored order (newest additions first)
- * `status` puts active words first when ascending. Ties keep the stored order, and
- * the direction only flips the criterion, not the tie-break.
+ * `status` puts active words first when ascending, oldest activation first (undated words count as oldest). Remaining ties keep the stored order
+ * (the direction flips the criterion, including the activation order, but not that tie-break).
  */
 export function sortWords(words: Word[], key: SortKey, direction: SortDirection): Word[] {
   if (key === 'list') return direction === 'asc' ? [...words] : [...words].reverse()
@@ -263,7 +271,7 @@ export function sortWords(words: Word[], key: SortKey, direction: SortDirection)
         if (!a.meaning || !b.meaning) return sign * (Number(!a.meaning) - Number(!b.meaning))
         return collator.compare(a.meaning, b.meaning)
       case 'status':
-        return Number(!!a.disabled) - Number(!!b.disabled)
+        return Number(!!a.disabled) - Number(!!b.disabled) || (a.disabled ? 0 : (a.activatedAt ?? 0) - (b.activatedAt ?? 0))
     }
   }
   return [...words].sort((a, b) => sign * compare(a, b) || 0)
