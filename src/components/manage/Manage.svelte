@@ -21,6 +21,7 @@
     sameTag,
     searchWords,
     SORT_OPTIONS,
+    setDisabled,
     sortWords,
     updateWord,
     validateTag,
@@ -94,7 +95,7 @@
   }
 
   function toggle(word: Word) {
-    words = words.map((w) => (w.id === word.id ? { ...w, disabled: !w.disabled } : w))
+    words = words.map((w) => (w.id === word.id ? setDisabled(w, !w.disabled) : w))
   }
 
   // selection (ids that no longer exist are ignored)
@@ -195,7 +196,7 @@
 
   function setSelectedDisabled(disabled: boolean) {
     const count = selectedWords.length
-    words = words.map((w) => (selected.has(w.id) ? { ...w, disabled } : w))
+    words = words.map((w) => (selected.has(w.id) ? setDisabled(w, disabled) : w))
     message = `${count} word(s) ${disabled ? 'disabled' : 'enabled'}.`
     selected = new Set()
   }
