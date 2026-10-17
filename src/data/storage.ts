@@ -1,10 +1,12 @@
 import { emptyStats, sanitizeStats } from './stats'
 import type { Stats, StatsFile, Word, WordsFile } from '../core/types'
+import type { WordsFocus } from './practice-modes'
 import { sanitizeWords } from './words'
 
 const KEY = 'zennia:words'
 const STATS_KEY = 'zennia:stats'
 const KANA_KEY = 'zennia:kana-selection'
+const FOCUS_KEY = 'zennia:words-focus'
 
 /** Reads and parses what is saved under `key`; anything missing, unreadable or invalid gives `fallback`. */
 function load<T>(key: string, parse: (data: unknown) => T, fallback: T): T {
@@ -58,4 +60,17 @@ export function loadKanaSelection(): string[] | null {
 
 export function saveKanaSelection(keys: string[]): void {
   save(KANA_KEY, keys)
+}
+
+/** Saved focus of the word practice; the reading when nothing valid was saved. */
+export function loadWordsFocus(): WordsFocus {
+  return load<WordsFocus>(
+    FOCUS_KEY,
+    (data) => (data === 'meaning' || data === 'both' ? data : 'reading'),
+    'reading',
+  )
+}
+
+export function saveWordsFocus(focus: WordsFocus): void {
+  save(FOCUS_KEY, focus)
 }

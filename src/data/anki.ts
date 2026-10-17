@@ -85,7 +85,7 @@ function stripHtml(html: string): string {
 /**
  * Converts an Anki "Notes in Plain Text" export (tab-separated) into words.
  * The first three columns must be the word, its hiragana reading and the meaning; any other column is ignored.
- * Rows whose reading isn't pure kana, and exact repeats, are counted in `skipped`.
+ * Rows whose reading isn't pure kana or that have no meaning, and exact repeats, are counted in `skipped`.
  * Rows with the same word + reading but different meanings become one word with the meanings joined by "; ".
  */
 export function importAnkiDeck(text: string): SanitizeResult {
@@ -106,7 +106,7 @@ export function importAnkiDeck(text: string): SanitizeResult {
     candidates.push({ japanese, hiragana, meaning: stripHtml(meaning) })
   }
 
-  const result = sanitizeWords(candidates)
+  const result = sanitizeWords(candidates, { requireMeaning: true })
   const unique = mergeWords([], result.words)
   return { words: unique.words, skipped: skipped + result.skipped + unique.duplicates }
 }
