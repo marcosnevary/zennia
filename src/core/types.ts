@@ -8,13 +8,16 @@ export interface Word {
   meaning: string
   /** When true the word is excluded from practice. Always stored, `false` for an enabled word. */
   disabled: boolean
+  /** Free-text labels to organize the word list. Always stored, empty when the word has none. */
+  tags: string[]
 }
 
 export type Verdict = 'correct' | 'almost' | 'incorrect'
 
 /** Format of the export file and of localStorage */
 export interface WordsFile {
-  version: 1
+  /** 2 added `tags` to each word; version 1 files are still read, their words get no tags. */
+  version: 2
   exportedAt?: string
   words: Word[]
 }

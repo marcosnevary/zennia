@@ -31,7 +31,7 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-const word: Word = { id: 'w1', japanese: '食べる', hiragana: 'たべる', meaning: 'to eat', disabled: false }
+const word: Word = { id: 'w1', japanese: '食べる', hiragana: 'たべる', meaning: 'to eat', disabled: false, tags: [] }
 const stats: Stats = { words: { w1: { hits: 2, misses: 1 } }, kana: { 'hiragana:か': { hits: 1, misses: 0 } } }
 
 describe('words', () => {
@@ -42,7 +42,7 @@ describe('words', () => {
 
   it('saves under zennia:words in the versioned format', () => {
     saveWords([word])
-    expect(JSON.parse(store.data.get('zennia:words')!)).toEqual({ version: 1, words: [word] })
+    expect(JSON.parse(store.data.get('zennia:words')!)).toEqual({ version: 2, words: [word] })
   })
 
   it('is empty when nothing was saved or the saved text is not valid', () => {
@@ -55,6 +55,11 @@ describe('words', () => {
 
   it('cleans what it reads, dropping items without a word or reading', () => {
     store.data.set('zennia:words', JSON.stringify({ version: 1, words: [word, { japanese: '', hiragana: '' }] }))
+    expect(loadWords()).toEqual([word])
+  })
+
+  it('still reads a version 1 file saved before tags existed, with no tags', () => {
+    store.data.set('zennia:words', JSON.stringify({ version: 1, words: [{ id: 'w1', japanese: '食べる', hiragana: 'たべる', meaning: 'to eat' }] }))
     expect(loadWords()).toEqual([word])
   })
 
