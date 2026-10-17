@@ -12,6 +12,7 @@ import {
   renameTag,
   sanitizeWords,
   searchWords,
+  setDisabled,
   sortWords,
   tagHue,
   updateWord,
@@ -100,6 +101,43 @@ describe('sortWords', () => {
     expect(ids(sortWords(list, 'status', 'desc'))).toBe('3124')
     expect(ids(list)).toBe('1234')
   })
+
+  it('orders active words by when they were activated, oldest first, with undated ones oldest', () => {
+    const dated = [
+      { ...w('1', '犬', 'いぬ'), activatedAt: 300 },
+      { ...w('2', '猫', 'ねこ'), activatedAt: 100 },
+      w('3', '赤', 'あか', '', true),
+      w('4', '木', 'き'),
+      { ...w('5', '山', 'やま'), activatedAt: 200 },
+    ]
+    expect(ids(sortWords(dated, 'status', 'asc'))).toBe('42513')
+    expect(ids(sortWords(dated, 'status', 'desc'))).toBe('31524')
+  })
+})
+
+describe('sanitizeWords activatedAt', () => {
+  it('keeps a numeric activatedAt and drops anything else', () => {
+    const { words } = sanitizeWords([
+      { id: '1', japanese: '犬', hiragana: 'いぬ', activatedAt: 42 },
+      { id: '2', japanese: '猫', hiragana: 'ねこ', activatedAt: 'x' },
+    ])
+    expect(words[0].activatedAt).toBe(42)
+    expect(words[1]).not.toHaveProperty('activatedAt')
+  })
+})
+
+describe('setDisabled', () => {
+  const base = { id: '1', japanese: '犬', hiragana: 'いぬ', meaning: '', disabled: true, tags: [] }
+
+  it('stamps the activation time when a word is enabled', () => {
+    expect(setDisabled(base, false, 500)).toMatchObject({ disabled: false, activatedAt: 500 })
+  })
+
+  it('keeps the activation time when a word is already enabled or gets disabled', () => {
+    const on = { ...base, disabled: false, activatedAt: 100 }
+    expect(setDisabled(on, false, 500).activatedAt).toBe(100)
+    expect(setDisabled(on, true, 500)).toMatchObject({ disabled: true, activatedAt: 100 })
+  })
 })
 
 describe('validateWord', () => {
@@ -133,6 +171,7 @@ describe('makeWord and updateWord', () => {
     expect(a).toMatchObject({ japanese: '食べる', hiragana: 'たべる', meaning: 'to eat', disabled: false })
     expect(a.id).toBeTruthy()
     expect(makeWord(typed).id).not.toBe(a.id)
+    expect(a.activatedAt).toBeGreaterThan(0)
   })
 
   it('updateWord replaces the texts but keeps the id and whether the word is disabled', () => {
@@ -143,6 +182,7 @@ describe('makeWord and updateWord', () => {
       hiragana: 'たべる',
       meaning: 'to eat',
       disabled: true,
+      activatedAt: word.activatedAt,
       tags: [],
     })
     expect(word.japanese).toBe('犬')
