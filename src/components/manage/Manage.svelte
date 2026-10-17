@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { closeOnBackdrop } from './dialog'
   import Help from './Help.svelte'
   import TagChip from './TagChip.svelte'
   import TagInput from './TagInput.svelte'
@@ -84,12 +85,6 @@
     words = words.map((w) => (w.id === editingId ? updateWord(w, fields) : w))
     message = 'Word updated.'
     dialogEl?.close()
-  }
-
-  function onDialogClick(event: MouseEvent) {
-    // clicks on the backdrop target the <dialog> itself
-    const dialog = event.currentTarget as HTMLDialogElement
-    if (event.target === dialog) dialog.close()
   }
 
   function remove(word: Word) {
@@ -257,7 +252,7 @@
   </div>
 </form>
 
-<dialog bind:this={dialogEl} onclose={() => (editingId = null)} onclick={onDialogClick} aria-label="Edit word">
+<dialog bind:this={dialogEl} onclose={() => (editingId = null)} use:closeOnBackdrop aria-label="Edit word">
   <form class="form" onsubmit={saveEdit}>
     <h2>Edit word</h2>
     <input type="text" lang="ja" placeholder="Japanese (e.g. 食べる)" bind:value={editJapanese} />
@@ -274,7 +269,7 @@
   </form>
 </dialog>
 
-<dialog bind:this={tagDialogEl} onclick={onDialogClick} aria-label="Tag selected words">
+<dialog bind:this={tagDialogEl} use:closeOnBackdrop aria-label="Tag selected words">
   <form class="form" onsubmit={(e) => { e.preventDefault(); tagSelected('add') }}>
     <h2>Tag {selectedWords.length} selected word(s)</h2>
     <input type="text" list="bulk-tag-options" placeholder="Tag name" aria-label="Tag name" bind:value={bulkTag} oninput={() => (bulkTagError = '')} />
