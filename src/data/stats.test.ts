@@ -94,6 +94,10 @@ describe('drawWeight and pickWeighted', () => {
     expect(mostlyMissed).toBeGreaterThan(fewRight)
     expect(fewRight).toBeGreaterThan(provenRight)
   })
+  it('weighs an always-missed item with few answers above one with many', () => {
+    expect(drawWeight({ hits: 0, misses: 2 })).toBeGreaterThan(drawWeight({ hits: 0, misses: 10 }))
+    expect(drawWeight({ hits: 0, misses: 1 })).toBeGreaterThan(drawWeight({ hits: 0, misses: 2 }))
+  })
   it('weighs an always-missed item about 10 times a proven one', () => {
     expect(drawWeight({ hits: 0, misses: 2 }) / drawWeight({ hits: 7, misses: 0 })).toBeGreaterThanOrEqual(9)
   })
