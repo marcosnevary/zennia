@@ -6,8 +6,13 @@
     verdict,
     reading,
     detail,
+    note,
+    askReading = true,
+    askMeaning = false,
     answer = $bindable(),
     inputEl = $bindable(),
+    meaningAnswer = $bindable(''),
+    meaningEl = $bindable(),
     onsubmit,
     onkeydown,
   }: {
@@ -18,8 +23,16 @@
     reading: string
     /** Optional extra line below the reading (the meaning of a word) */
     detail?: string
+    /** Optional line with the outcome of each part of the answer, shown with the verdict */
+    note?: string
+    /** Whether the romaji field is shown */
+    askReading?: boolean
+    /** Whether the meaning field is shown */
+    askMeaning?: boolean
     answer: string
     inputEl?: HTMLInputElement
+    meaningAnswer?: string
+    meaningEl?: HTMLInputElement
     onsubmit: (event: Event) => void
     onkeydown: (event: KeyboardEvent) => void
   } = $props()
@@ -29,18 +42,35 @@
   <p class="prompt" lang="ja">{prompt}</p>
 
   <form {onsubmit}>
-    <input
-      type="text"
-      bind:this={inputEl}
-      bind:value={answer}
-      {onkeydown}
-      readonly={verdict !== null}
-      placeholder="Type in romaji"
-      autocomplete="off"
-      autocapitalize="off"
-      autocorrect="off"
-      spellcheck="false"
-    />
+    <div class="fields">
+      {#if askReading}
+        <input
+          type="text"
+          bind:this={inputEl}
+          bind:value={answer}
+          {onkeydown}
+          readonly={verdict !== null}
+          placeholder="Type in romaji"
+          autocomplete="off"
+          autocapitalize="off"
+          autocorrect="off"
+          spellcheck="false"
+        />
+      {/if}
+      {#if askMeaning}
+        <input
+          type="text"
+          bind:this={meaningEl}
+          bind:value={meaningAnswer}
+          readonly={verdict !== null}
+          placeholder="Type the meaning"
+          autocomplete="off"
+          autocapitalize="off"
+          autocorrect="off"
+          spellcheck="false"
+        />
+      {/if}
+    </div>
     <button class="primary" type="submit">{verdict ? 'Next' : 'Check'}</button>
   </form>
 
@@ -53,6 +83,7 @@
       </strong>
       <p class="answer" lang="ja">{reading}</p>
       {#if detail !== undefined}<p>{detail}</p>{/if}
+      {#if note}<p>{note}</p>{/if}
     </div>
   {/if}
 </section>
@@ -75,6 +106,13 @@
     display: flex;
     gap: 8px;
   }
+  .fields {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
   /* fixed width, so the button does not resize when its label switches between Check and Next */
   form button {
     flex: none;
@@ -82,6 +120,7 @@
   }
   /* the only bordered element: the answer field */
   form input {
+    width: 100%;
     border: 2px solid var(--muted);
   }
   form input:focus-visible {

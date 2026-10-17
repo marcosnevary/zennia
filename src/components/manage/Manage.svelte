@@ -16,6 +16,7 @@
     importSummary,
     makeWord,
     mergeWords,
+    needsMeaning,
     removeTag,
     renameTag,
     sameTag,
@@ -437,7 +438,11 @@
         />
         <span class="jp" lang="ja">{word.japanese}</span>
         <span class="reading muted" lang="ja">{word.hiragana} · {toDisplayRomaji(word.hiragana)}</span>
-        <span class="meaning">{word.meaning}</span>
+        {#if needsMeaning(word)}
+          <span class="meaning missing" title="Add a meaning to practice this word by meaning">needs meaning</span>
+        {:else}
+          <span class="meaning">{word.meaning}</span>
+        {/if}
         {#each word.tags as tag (tag)}<TagChip {tag} onclick={() => filterByTag(tag)} />{/each}
         <span class="leader" aria-hidden="true"></span>
         <button
@@ -572,6 +577,10 @@
   }
   .reading {
     font-size: 0.9rem;
+  }
+  .meaning.missing {
+    color: var(--warn);
+    font-style: italic;
   }
   .meaning {
     min-width: 0;

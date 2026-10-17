@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { loadKanaSelection, loadStats, loadWords, saveKanaSelection, saveStats, saveWords } from './storage'
+import { loadKanaSelection, loadStats, loadWords, loadWordsFocus, saveKanaSelection, saveWordsFocus, saveStats, saveWords } from './storage'
 import { emptyStats } from './stats'
 import type { Stats, Word } from '../core/types'
 
@@ -117,5 +117,27 @@ describe('kana selection', () => {
     expect(loadKanaSelection()).toBeNull()
     store.failures.write = true
     expect(() => saveKanaSelection(['hiragana:か'])).not.toThrow()
+  })
+})
+
+describe('words focus', () => {
+  it('defaults to the reading when nothing valid is saved', () => {
+    expect(loadWordsFocus()).toBe('reading')
+    store.data.set('zennia:words-focus', JSON.stringify('nonsense'))
+    expect(loadWordsFocus()).toBe('reading')
+    store.data.set('zennia:words-focus', '{broken')
+    expect(loadWordsFocus()).toBe('reading')
+  })
+
+  it('round-trips the saved focus', () => {
+    saveWordsFocus('both')
+    expect(loadWordsFocus()).toBe('both')
+    saveWordsFocus('meaning')
+    expect(loadWordsFocus()).toBe('meaning')
+  })
+
+  it('ignores a blocked storage', () => {
+    store.failures.write = true
+    expect(() => saveWordsFocus('both')).not.toThrow()
   })
 })
