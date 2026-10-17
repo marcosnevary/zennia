@@ -1,17 +1,28 @@
 <script lang="ts">
   import Help from './Help.svelte'
+  import TagChip from './TagChip.svelte'
+  import TagInput from './TagInput.svelte'
   import { importAnkiDeck } from '../../data/anki'
   import { downloadText, exportFilename, exportJSON, importJSON } from '../../data/io'
   import { toDisplayRomaji } from '../../core/romaji'
   import type { Word } from '../../core/types'
   import {
+    addTag,
+    allTags,
+    cleanTags,
+    deleteTag,
+    filterByTags,
     importSummary,
     makeWord,
     mergeWords,
+    removeTag,
+    renameTag,
+    sameTag,
     searchWords,
     SORT_OPTIONS,
     sortWords,
     updateWord,
+    validateTag,
     validateWord,
     type SanitizeResult,
     type SortDirection,
@@ -23,10 +34,12 @@
   let japanese = $state('')
   let hiragana = $state('')
   let meaning = $state('')
+  let newTags = $state<string[]>([])
   let editingId = $state<string | null>(null)
   let editJapanese = $state('')
   let editHiragana = $state('')
   let editMeaning = $state('')
+  let editTags = $state<string[]>([])
   let editError = $state('')
   let dialogEl = $state<HTMLDialogElement>()
   let error = $state('')
@@ -37,12 +50,13 @@
     japanese = ''
     hiragana = ''
     meaning = ''
+    newTags = []
     error = ''
   }
 
   function save(event: Event) {
     event.preventDefault()
-    const fields = { japanese, hiragana, meaning }
+    const fields = { japanese, hiragana, meaning, tags: newTags }
     error = validateWord(fields)
     if (error) return
     words = [makeWord(fields), ...words]
@@ -56,6 +70,7 @@
     editJapanese = word.japanese
     editHiragana = word.hiragana
     editMeaning = word.meaning
+    editTags = [...word.tags]
     editError = ''
     message = ''
     dialogEl?.showModal()
@@ -63,7 +78,7 @@
 
   function saveEdit(event: Event) {
     event.preventDefault()
-    const fields = { japanese: editJapanese, hiragana: editHiragana, meaning: editMeaning }
+    const fields = { japanese: editJapanese, hiragana: editHiragana, meaning: editMeaning, tags: editTags }
     editError = validateWord(fields)
     if (editError) return
     words = words.map((w) => (w.id === editingId ? updateWord(w, fields) : w))
@@ -92,13 +107,86 @@
   let query = $state('')
   let sortKey = $state<SortKey>('list')
   let sortDirection = $state<SortDirection>('asc')
-  const visibleWords = $derived(sortWords(searchWords(words, query), sortKey, sortDirection))
+  // the tag filter: only tags still in use count, so deleting the last word with a tag drops it from the filter
+  const tags = $derived(allTags(words))
+  let activeTags = $state<string[]>([])
+  const filterTags = $derived(activeTags.filter((a) => tags.some((t) => sameTag(t, a))))
+  const visibleWords = $derived(sortWords(searchWords(filterByTags(words, filterTags), query), sortKey, sortDirection))
   const selectedWords = $derived(words.filter((w) => selected.has(w.id)))
   const allSelected = $derived(visibleWords.length > 0 && visibleWords.every((w) => selected.has(w.id)))
 
   // bulk actions only ever touch what the user can see, so changing the filter clears the selection
   function onSearch() {
     selected = new Set()
+  }
+
+  function toggleFilterTag(tag: string) {
+    activeTags = filterTags.some((t) => sameTag(t, tag)) ? filterTags.filter((t) => !sameTag(t, tag)) : [...filterTags, tag]
+    selected = new Set()
+  }
+
+  // clicking a tag on a word narrows the list to it (it never undoes: the active filter has the X)
+  function filterByTag(tag: string) {
+    if (!filterTags.some((t) => sameTag(t, tag))) toggleFilterTag(tag)
+  }
+
+  // renaming a tag, inline in the Tags section
+  let renaming = $state<string | null>(null)
+  let renameDraft = $state('')
+  let renameError = $state('')
+
+  function startRename(tag: string) {
+    renaming = tag
+    renameDraft = tag
+    renameError = ''
+  }
+
+  function confirmRename(event: Event) {
+    event.preventDefault()
+    if (renaming === null) return
+    renameError = validateTag(renameDraft)
+    if (renameError) return
+    const from = renaming
+    const to = renameDraft.trim()
+    const merges = !sameTag(from, to) && tags.some((t) => sameTag(t, to))
+    if (merges && !confirm(`"${to}" already exists. Merge "${from}" into it?`)) return
+    words = renameTag(words, from, to)
+    // a merge keeps the spelling already in use, so read the final name back from the pool
+    const name = allTags(words).find((t) => sameTag(t, to)) ?? to
+    activeTags = cleanTags(filterTags.map((t) => (sameTag(t, from) ? name : t)))
+    message = merges ? `Merged "${from}" into "${name}".` : `Renamed "${from}" to "${name}".`
+    renaming = null
+  }
+
+  function deleteTagEverywhere(tag: string) {
+    if (!confirm(`Remove the tag "${tag}" from all words?`)) return
+    words = deleteTag(words, tag)
+    // the list may grow if the tag was filtering it, so the selection must not outlive it
+    activeTags = activeTags.filter((t) => !sameTag(t, tag))
+    selected = new Set()
+    message = `Tag "${tag}" removed from all words.`
+  }
+
+  // tags on the selected words, from a dialog opened by the tag button
+  let bulkTag = $state('')
+  let bulkTagError = $state('')
+  let tagDialogEl = $state<HTMLDialogElement>()
+
+  function openTagDialog() {
+    bulkTag = ''
+    bulkTagError = ''
+    tagDialogEl?.showModal()
+  }
+
+  function tagSelected(action: 'add' | 'remove') {
+    bulkTagError = validateTag(bulkTag)
+    if (bulkTagError) return
+    const tag = bulkTag.trim()
+    const count = selectedWords.length
+    words = action === 'add' ? addTag(words, selected, tag) : removeTag(words, selected, tag)
+    message = `Tag "${tag}" ${action === 'add' ? 'added to' : 'removed from'} ${count} word(s).`
+    bulkTag = ''
+    tagDialogEl?.close()
   }
 
   function toggleSelected(id: string) {
@@ -163,6 +251,7 @@
   <input type="text" lang="ja" placeholder="Japanese (e.g. 食べる)" bind:value={japanese} bind:this={japaneseEl} />
   <input type="text" lang="ja" placeholder="Hiragana (e.g. たべる)" bind:value={hiragana} />
   <input type="text" placeholder="Meaning (e.g. to eat)" bind:value={meaning} />
+  <TagInput bind:tags={newTags} suggestions={tags} />
   <div class="row wide">
     <button class="primary" type="submit">Add</button>
   </div>
@@ -174,10 +263,31 @@
     <input type="text" lang="ja" placeholder="Japanese (e.g. 食べる)" bind:value={editJapanese} />
     <input type="text" lang="ja" placeholder="Hiragana (e.g. たべる)" bind:value={editHiragana} />
     <input type="text" placeholder="Meaning (e.g. to eat)" bind:value={editMeaning} />
+    {#key editingId}
+      <TagInput bind:tags={editTags} suggestions={tags} />
+    {/key}
     {#if editError}<p class="error" role="alert">{editError}</p>{/if}
     <div class="row">
       <button class="primary" type="submit">Save</button>
       <button type="button" onclick={() => dialogEl?.close()}>Cancel</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog bind:this={tagDialogEl} onclick={onDialogClick} aria-label="Tag selected words">
+  <form class="form" onsubmit={(e) => { e.preventDefault(); tagSelected('add') }}>
+    <h2>Tag {selectedWords.length} selected word(s)</h2>
+    <input type="text" list="bulk-tag-options" placeholder="Tag name" aria-label="Tag name" bind:value={bulkTag} oninput={() => (bulkTagError = '')} />
+    <datalist id="bulk-tag-options">
+      {#each tags as tag (tag)}
+        <option value={tag}></option>
+      {/each}
+    </datalist>
+    {#if bulkTagError}<p class="error" role="alert">{bulkTagError}</p>{/if}
+    <div class="row">
+      <button class="primary" type="submit">Add tag</button>
+      <button type="button" onclick={() => tagSelected('remove')}>Remove tag</button>
+      <button type="button" onclick={() => tagDialogEl?.close()}>Cancel</button>
     </div>
   </form>
 </dialog>
@@ -224,6 +334,38 @@
   </svg>
 {/snippet}
 
+<h2>Tags ({tags.length})</h2>
+{#if tags.length === 0}
+  <p class="muted">No tags yet. Add them when you add or edit a word, or with the tag button on selected words.</p>
+{:else}
+  <ul class="list">
+    {#each tags as tag (tag)}
+      <li>
+        {#if renaming !== null && sameTag(renaming, tag)}
+          <form class="tag-rename" onsubmit={confirmRename}>
+            <input type="text" aria-label={`New name for ${tag}`} bind:value={renameDraft} oninput={() => (renameError = '')} />
+            <button class="primary" type="submit">Save</button>
+            <button type="button" onclick={() => (renaming = null)}>Cancel</button>
+          </form>
+        {:else}
+          <TagChip {tag} />
+          <span class="muted">{filterByTags(words, [tag]).length} word(s)</span>
+          <span class="leader" aria-hidden="true"></span>
+          <button class="icon" onclick={() => startRename(tag)} aria-label={`Rename tag ${tag}`} title="Rename tag">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+            </svg>
+          </button>
+          <button class="icon danger" onclick={() => deleteTagEverywhere(tag)} aria-label={`Remove tag ${tag} from all words`} title="Remove tag from all words">
+            {@render trashIcon()}
+          </button>
+        {/if}
+      </li>
+    {/each}
+  </ul>
+  {#if renaming !== null && renameError}<p class="error" role="alert">{renameError}</p>{/if}
+{/if}
+
 <h2>Words ({visibleWords.length === words.length ? words.length : `${visibleWords.length} of ${words.length}`})</h2>
 {#if words.length === 0}
   <p class="muted">No words yet.</p>
@@ -245,6 +387,14 @@
       </select>
     </div>
   </div>
+  {#if filterTags.length > 0}
+    <div class="active-filter" role="group" aria-label="Active tag filter">
+      <span class="muted">Tagged:</span>
+      {#each filterTags as tag (tag)}
+        <TagChip {tag} onremove={() => toggleFilterTag(tag)} />
+      {/each}
+    </div>
+  {/if}
   <div class="row bulk">
     <label class="check">
       <input type="checkbox" checked={allSelected} onchange={toggleSelectAll} />
@@ -255,6 +405,11 @@
       <button class="icon" onclick={() => onprint(selectedWords)} aria-label="Print writing sheet" title="Print writing sheet">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M7 9V3h10v6M7 17H4v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6h-3M7 14h10v7H7z" />
+        </svg>
+      </button>
+      <button class="icon" onclick={openTagDialog} aria-label="Tag selected" title="Tag selected">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9zM8 8h.01" />
         </svg>
       </button>
       <button class="icon" onclick={() => setSelectedDisabled(false)} aria-label="Enable selected" title="Enable selected">
@@ -283,7 +438,7 @@
     </button>
   </div>
   {#if visibleWords.length === 0}
-    <p class="muted">No words match your search.</p>
+    <p class="muted">No words match your search or tag filter.</p>
   {/if}
   <ul class="list">
     {#each visibleWords as word (word.id)}
@@ -297,6 +452,7 @@
         <span class="jp" lang="ja">{word.japanese}</span>
         <span class="reading muted" lang="ja">{word.hiragana} · {toDisplayRomaji(word.hiragana)}</span>
         <span class="meaning">{word.meaning}</span>
+        {#each word.tags as tag (tag)}<TagChip {tag} onclick={() => filterByTag(tag)} />{/each}
         <span class="leader" aria-hidden="true"></span>
         <button
           class="icon"
@@ -493,5 +649,22 @@
   }
   .jp {
     font-size: 1.3rem;
+  }
+  .active-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .tag-rename {
+    display: flex;
+    flex: 1;
+    gap: 6px;
+    align-items: center;
+  }
+  .tag-rename input {
+    flex: 1;
+    min-width: 0;
   }
 </style>
