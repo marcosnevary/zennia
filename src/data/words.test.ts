@@ -8,6 +8,7 @@ import {
   importSummary,
   makeWord,
   mergeWords,
+  needsMeaning,
   removeTag,
   renameTag,
   sanitizeWords,
@@ -141,11 +142,16 @@ describe('setDisabled', () => {
 })
 
 describe('validateWord', () => {
-  const fields = { japanese: '食べる', hiragana: 'たべる', meaning: '', tags: [] }
+  const fields = { japanese: '食べる', hiragana: 'たべる', meaning: 'to eat', tags: [] }
 
-  it('accepts a word with a kana reading, with or without a meaning', () => {
+  it('accepts a word with a kana reading and a meaning', () => {
     expect(validateWord(fields)).toBe('')
-    expect(validateWord({ ...fields, meaning: 'to eat' })).toBe('')
+  })
+
+  it('asks for a meaning, ignoring surrounding spaces', () => {
+    const message = 'Fill in the meaning.'
+    expect(validateWord({ ...fields, meaning: '' })).toBe(message)
+    expect(validateWord({ ...fields, meaning: '   ' })).toBe(message)
   })
 
   it('asks for both the word and the reading, ignoring surrounding spaces', () => {
@@ -341,5 +347,26 @@ describe('tagHue', () => {
       expect(h).toBeLessThan(360)
     }
     expect(new Set(hues).size).toBeGreaterThan(3)
+  })
+})
+
+describe('required meaning', () => {
+  const noMeaning = { id: 'a', japanese: '犬', hiragana: 'いぬ' }
+  const withMeaning = { id: 'b', japanese: '猫', hiragana: 'ねこ', meaning: 'cat' }
+
+  it('sanitizeWords keeps words without a meaning by default, so saved words are not lost', () => {
+    expect(sanitizeWords([noMeaning, withMeaning]).words.map((w) => w.id)).toEqual(['a', 'b'])
+  })
+
+  it('sanitizeWords can reject new entries without a meaning, counting them as skipped', () => {
+    const r = sanitizeWords([noMeaning, { ...withMeaning, id: 'c', meaning: '  ' }, withMeaning], { requireMeaning: true })
+    expect(r.words.map((w) => w.id)).toEqual(['b'])
+    expect(r.skipped).toBe(2)
+  })
+
+  it('needsMeaning flags words saved without one', () => {
+    const [a, b] = sanitizeWords([noMeaning, withMeaning]).words
+    expect(needsMeaning(a)).toBe(true)
+    expect(needsMeaning(b)).toBe(false)
   })
 })

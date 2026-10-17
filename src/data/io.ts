@@ -28,7 +28,7 @@ function parseJSON(text: string): unknown {
 
 /** Reads an exported JSON (or a plain list of words) and validates each item. */
 export function importJSON(text: string): SanitizeResult {
-  return sanitizeWords(parseJSON(text))
+  return sanitizeWords(parseJSON(text), { requireMeaning: true })
 }
 
 /** Serializes the stats to JSON (a `StatsFile`, the format kept in localStorage plus `exportedAt`). */

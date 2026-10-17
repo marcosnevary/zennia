@@ -15,12 +15,18 @@ export interface WordFields {
 }
 
 /** The message to show for an invalid form, or '' when the word can be saved. */
-export function validateWord({ japanese, hiragana }: WordFields): string {
+export function validateWord({ japanese, hiragana, meaning }: WordFields): string {
   const j = japanese.trim()
   const h = hiragana.trim()
   if (!j || !h) return 'Fill in the Japanese word and the hiragana.'
   if (!isKana(h)) return 'The hiragana field must contain only kana (hiragana, katakana or ー).'
+  if (!meaning.trim()) return 'Fill in the meaning.'
   return ''
+}
+
+/** Whether the word was saved before the meaning became required and still has none. */
+export function needsMeaning(word: Word): boolean {
+  return !word.meaning.trim()
 }
 
 export const MAX_TAG_LENGTH = 30
@@ -82,9 +88,10 @@ export interface SanitizeResult {
 /**
  * Validates external data (localStorage or an imported file).
  * Accepts a list of words or an object { words: [...] }.
- * Items without `japanese` or `hiragana` are ignored and counted in `skipped`.
+ * Items without `japanese` or `hiragana` are ignored and counted in `skipped`, and so are
+ * items without a meaning when `requireMeaning` is set (new entries; words already saved keep theirs empty).
  */
-export function sanitizeWords(raw: unknown): SanitizeResult {
+export function sanitizeWords(raw: unknown, { requireMeaning = false } = {}): SanitizeResult {
   const list = Array.isArray(raw)
     ? raw
     : raw && typeof raw === 'object' && Array.isArray((raw as { words?: unknown }).words)
@@ -106,7 +113,7 @@ export function sanitizeWords(raw: unknown): SanitizeResult {
     const japanese = typeof o.japanese === 'string' ? o.japanese.trim() : ''
     const hiragana = typeof o.hiragana === 'string' ? o.hiragana.trim() : ''
     const meaning = typeof o.meaning === 'string' ? o.meaning.trim() : ''
-    if (!japanese || !hiragana) {
+    if (!japanese || !hiragana || (requireMeaning && !meaning)) {
       skipped++
       continue
     }
