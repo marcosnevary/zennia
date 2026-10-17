@@ -24,9 +24,9 @@
   <h3>Import JSON</h3>
   <p>
     Loads a file created by <strong>Export JSON</strong>. A plain list of words also works, where each item has
-    <code>japanese</code>, <code>hiragana</code> and optionally <code>meaning</code>. Imported words are
+    <code>japanese</code>, <code>hiragana</code> and <code>meaning</code>. Imported words are
     <strong>added</strong> to your current list, nothing is replaced or deleted. Words you already have (same word and
-    reading) are skipped, and invalid items are ignored.
+    reading) are skipped, and invalid items, including words without a meaning, are ignored.
   </p>
 
   <h3>Import Anki deck (.txt)</h3>
@@ -37,7 +37,7 @@
   <p>
     The first three columns of the file must be, in this order, the <strong>Japanese word</strong>, its
     <strong>hiragana</strong> reading and the <strong>meaning</strong>. Any other column is ignored. Rows without a valid
-    hiragana reading, and repeated word + reading pairs, are skipped; the summary tells you how many.
+    hiragana reading or without a meaning, and repeated word + reading pairs, are skipped; the summary tells you how many.
   </p>
 
   <div class="row">

@@ -22,8 +22,8 @@ describe('importAnkiDeck', () => {
       { japanese: '生きる', hiragana: 'いきる', meaning: 'to live to exist' },
     ])
   })
-  it('accepts a row without a meaning', () => {
-    expect(importAnkiDeck(`${header}犬\tいぬ\n`)).toMatchObject({ words: [{ japanese: '犬', hiragana: 'いぬ', meaning: '' }] })
+  it('skips a row without a meaning', () => {
+    expect(importAnkiDeck(`${header}犬\tいぬ\n猫\tねこ\tcat\n`)).toMatchObject({ skipped: 1, words: [{ japanese: '猫', meaning: 'cat' }] })
   })
   it('skips rows whose reading is missing or not kana, and exact repeats', () => {
     const text = `${header}漢字\t漢字\tkanji\n犬\t\tdog\n犬\tいぬ\tdog\n犬\tいぬ\tdog\n`

@@ -75,4 +75,11 @@ describe('words file', () => {
     const text = JSON.stringify({ version: 1, words: [{ id: 'a', japanese: '犬', hiragana: 'いぬ', meaning: 'dog' }] })
     expect(importJSON(text).words).toEqual([{ ...word, tags: [] }])
   })
+
+  it('skips words without a meaning', () => {
+    const text = JSON.stringify([{ japanese: '犬', hiragana: 'いぬ' }, { japanese: '猫', hiragana: 'ねこ', meaning: 'cat' }])
+    const r = importJSON(text)
+    expect(r.words.map((w) => w.japanese)).toEqual(['猫'])
+    expect(r.skipped).toBe(1)
+  })
 })
