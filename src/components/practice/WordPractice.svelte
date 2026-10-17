@@ -3,7 +3,7 @@
   import PracticeCard from './PracticeCard.svelte'
   import Scoreboard from './Scoreboard.svelte'
   import { checkParts, joinAnswers, wordsMode, type WordsFocus } from '../../data/practice-modes'
-  import { nextRound, resetScore, startSession, submit as submitAnswer } from '../../data/practice-session'
+  import { drawOdds, nextRound, resetScore, startSession, submit as submitAnswer } from '../../data/practice-session'
   import { loadWordsFocus, saveWordsFocus } from '../../data/storage'
   import type { Stats, Word } from '../../core/types'
 
@@ -21,6 +21,9 @@
   const askMeaning = $derived(focus !== 'reading')
 
   let session = $state(startSession<Word>())
+  const odds = $derived(
+    drawOdds(session, mode).map(({ item, chance }) => ({ label: `${item.japanese} · ${item.hiragana}`, chance })),
+  )
   let answer = $state('')
   let meaningAnswer = $state('')
   let inputEl = $state<HTMLInputElement>()
@@ -121,6 +124,7 @@
     total={session.total}
     streak={session.streak}
     bestStreak={session.bestStreak}
+    {odds}
     onreset={() => (session = resetScore(session))}
   />
 {/if}

@@ -17,7 +17,7 @@
   import PracticeCard from './PracticeCard.svelte'
   import Scoreboard from './Scoreboard.svelte'
   import { kanaMode } from '../../data/practice-modes'
-  import { nextRound, resetScore, startSession, submit as submitAnswer } from '../../data/practice-session'
+  import { drawOdds, nextRound, resetScore, startSession, submit as submitAnswer } from '../../data/practice-session'
   import { loadKanaSelection, saveKanaSelection } from '../../data/storage'
   import type { Stats } from '../../core/types'
 
@@ -38,6 +38,7 @@
   const mode = $derived(kanaMode(selected, stats))
 
   let session = $state(startSession<Kana>())
+  const odds = $derived(drawOdds(session, mode).map(({ item, chance }) => ({ label: item.symbol, chance })))
   let answer = $state('')
   let inputEl = $state<HTMLInputElement>()
 
@@ -94,6 +95,7 @@
     total={session.total}
     streak={session.streak}
     bestStreak={session.bestStreak}
+    {odds}
     onreset={() => (session = resetScore(session))}
   />
 {:else}
