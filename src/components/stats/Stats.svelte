@@ -10,6 +10,7 @@
     type StatsSort,
     type StatsSortDirection,
   } from '../../data/stats'
+  import { downloadText, exportStatsJSON, importStatsJSON, statsExportFilename } from '../../data/io'
   import { buildRows, filterRows, type StatsKind } from '../../data/stats-rows'
   import type { Stats, Tally, Word } from '../../core/types'
 
@@ -32,6 +33,32 @@
   const activeFilters = $derived(KINDS.filter((k) => !kinds[k.id]).length)
 
   const total = $derived(totalTally(stats))
+
+  let message = $state('')
+  let error = $state('')
+
+  function exportStats() {
+    downloadText(statsExportFilename(), exportStatsJSON(stats))
+    message = 'Statistics exported.'
+    error = ''
+  }
+
+  async function importStats(event: Event) {
+    const input = event.currentTarget as HTMLInputElement
+    const file = input.files?.[0]
+    input.value = ''
+    if (!file) return
+    message = ''
+    error = ''
+    try {
+      const incoming = importStatsJSON(await file.text())
+      if (attempts(total) && !confirm('Importing replaces your current statistics. Continue?')) return
+      stats = incoming
+      message = 'Statistics imported.'
+    } catch (e) {
+      error = e instanceof Error ? e.message : 'Could not import the file.'
+    }
+  }
 
   function reset() {
     if (confirm('Reset all statistics? This cannot be undone.')) stats = emptyStats()
@@ -66,14 +93,26 @@
   onkeydown={(e) => e.key === 'Escape' && (showFilters = false)}
 />
 
+{#snippet transfer()}
+  <div class="toolbar center">
+    <button onclick={exportStats} disabled={!attempts(total)}>Export stats</button>
+    <label class="file">
+      Import stats
+      <input type="file" accept="application/json,.json" onchange={importStats} hidden />
+    </label>
+    {#if attempts(total)}<button class="danger" onclick={reset}>Reset stats</button>{/if}
+  </div>
+  {#if error}<p class="error" role="alert">{error}</p>{/if}
+  {#if message}<p class="muted" role="status">{message}</p>{/if}
+{/snippet}
+
 {#if !attempts(total)}
   <p class="muted">No statistics yet. Answer some words or kana in Practice and they will show up here.</p>
+  {@render transfer()}
 {:else}
   {@render summary(total)}
 
-  <div class="toolbar">
-    <button class="danger" onclick={reset}>Reset stats</button>
-  </div>
+  {@render transfer()}
 
   <h2>Practiced ({visibleRows.length === rows.length ? rows.length : `${visibleRows.length} of ${rows.length}`})</h2>
   <div class="toolbar">
@@ -185,8 +224,11 @@
     gap: 8px;
     margin: 16px 0 8px;
   }
-  .toolbar:has(.danger) {
+  .toolbar.center {
     justify-content: center;
+  }
+  .error {
+    color: var(--bad);
   }
   h2 {
     margin: 24px 0 0;
