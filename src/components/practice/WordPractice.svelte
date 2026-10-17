@@ -128,7 +128,10 @@
 <style>
   .focus {
     display: flex;
+    justify-content: center;
     gap: 8px;
     margin-top: 16px;
+    /* pulls the card up, which has 24px above itself */
+    margin-bottom: -24px;
   }
 </style>
