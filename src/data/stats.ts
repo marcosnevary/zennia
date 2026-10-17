@@ -107,18 +107,20 @@ export function sortTallies(
 const MIN_WEIGHT = 0.5
 const MAX_WEIGHT = 5
 
-/** How much a lack of answers adds to the priority: 1 answer adds half of it, 7 answers an eighth. */
-const SAMPLE_SHARE = 0.3
+/** Share of the priority that comes from having few answers; the rest is the miss rate. */
+const SAMPLE_SHARE = 0.06
 
 /**
- * How likely an item is to be drawn, relative to the others. The priority (0 to 1) is the miss rate
- * plus a bonus that shrinks with the number of answers, so low accuracy comes first, then few answers.
- * A never-answered item has the top priority, tying with items that are always missed. The weight
- * grows exponentially from 0.5 to 5 (10 times between the extremes) and no item ever drops to zero.
+ * How likely an item is to be drawn, relative to the others. The priority (0 to 1) blends the miss
+ * rate with how few answers the item has (1 divided by the answers), so low accuracy comes first,
+ * then few answers, and even always-missed items rank by how little they were answered. A
+ * never-answered item has the top priority. The weight grows exponentially from 0.5 to 5 (10 times
+ * between the extremes) and no item ever drops to zero.
  */
 export function drawWeight(tally: Tally | undefined): number {
   const n = tally ? attempts(tally) : 0
-  const priority = tally && n > 0 ? Math.min(1, tally.misses / n + SAMPLE_SHARE / (1 + n)) : 1
+  if (!tally || n === 0) return MAX_WEIGHT
+  const priority = (1 - SAMPLE_SHARE) * (tally.misses / n) + SAMPLE_SHARE / n
   return MIN_WEIGHT * (MAX_WEIGHT / MIN_WEIGHT) ** priority
 }
 
