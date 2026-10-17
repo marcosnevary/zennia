@@ -104,34 +104,22 @@ export function sortTallies(
   )
 }
 
-/** Weight of an item that was never answered: above the ceiling of any answered one, so everything gets seen. */
-const UNSEEN_WEIGHT = 6
 const MIN_WEIGHT = 0.5
-const WEIGHT_RANGE = 4.5
+const MAX_WEIGHT = 5
 
-/** How much to distrust a small sample: z-score of the Wilson interval (1.64 is a 90% one-sided bound). */
-const CONFIDENCE_Z = 1.64
-
-/** Upper bound of the miss rate that the sample still makes plausible (Wilson score interval). */
-function missRateUpperBound(misses: number, n: number): number {
-  const z2 = CONFIDENCE_Z * CONFIDENCE_Z
-  const p = misses / n
-  const center = p + z2 / (2 * n)
-  const spread = CONFIDENCE_Z * Math.sqrt((p * (1 - p)) / n + z2 / (4 * n * n))
-  return Math.min(1, (center + spread) / (1 + z2 / n))
-}
+/** How much a lack of answers adds to the priority: 1 answer adds half of it, 7 answers an eighth. */
+const SAMPLE_SHARE = 0.3
 
 /**
- * How likely an item is to be drawn, relative to the others. Never-answered items come first.
- * For the rest, the weight (0.5 to 5) follows the highest miss rate the history still allows,
- * not the observed one: with few answers that bound is high, so an item that is 1 for 1 keeps
- * coming back until enough answers back its accuracy, and then it fades on its own. Misses raise
- * the weight and hits lower it, but no answered item ever drops to zero.
+ * How likely an item is to be drawn, relative to the others. The priority (0 to 1) is the miss rate
+ * plus a bonus that shrinks with the number of answers, so low accuracy comes first, then few answers.
+ * A never-answered item has the top priority, tying with items that are always missed. The weight
+ * grows exponentially from 0.5 to 5 (10 times between the extremes) and no item ever drops to zero.
  */
 export function drawWeight(tally: Tally | undefined): number {
   const n = tally ? attempts(tally) : 0
-  if (!tally || n === 0) return UNSEEN_WEIGHT
-  return MIN_WEIGHT + WEIGHT_RANGE * missRateUpperBound(tally.misses, n)
+  const priority = tally && n > 0 ? Math.min(1, tally.misses / n + SAMPLE_SHARE / (1 + n)) : 1
+  return MIN_WEIGHT * (MAX_WEIGHT / MIN_WEIGHT) ** priority
 }
 
 /** Weighted random choice; `random` returns a number in [0, 1) and can be replaced in tests. */
