@@ -9,6 +9,7 @@ const word = (id: string, extra: Partial<Word> = {}): Word => ({
   hiragana: 'たべる',
   meaning: 'To eat',
   disabled: false,
+  tags: [],
   ...extra,
 })
 

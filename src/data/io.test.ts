@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { exportFilename, exportStatsJSON, importStatsJSON, statsExportFilename } from './io'
+import { exportFilename, exportJSON, exportStatsJSON, importJSON, importStatsJSON, statsExportFilename } from './io'
 
 describe('exportFilename', () => {
   it('names the file after the date of the export', () => {
@@ -59,5 +59,20 @@ describe('exportStatsJSON', () => {
     const text = exportStatsJSON(stats)
     expect(JSON.parse(text).version).toBe(1)
     expect(importStatsJSON(text)).toEqual(stats)
+  })
+})
+
+describe('words file', () => {
+  const word = { id: 'a', japanese: '犬', hiragana: 'いぬ', meaning: 'dog', disabled: false, tags: ['Pets'] }
+
+  it('exports version 2 with the tags and imports them back', () => {
+    const text = exportJSON([word])
+    expect(JSON.parse(text).version).toBe(2)
+    expect(importJSON(text).words).toEqual([word])
+  })
+
+  it('imports a version 1 file, whose words have no tags', () => {
+    const text = JSON.stringify({ version: 1, words: [{ id: 'a', japanese: '犬', hiragana: 'いぬ', meaning: 'dog' }] })
+    expect(importJSON(text).words).toEqual([{ ...word, tags: [] }])
   })
 })
