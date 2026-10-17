@@ -34,7 +34,7 @@ export function loadWords(): Word[] {
 }
 
 export function saveWords(words: Word[]): void {
-  const data: WordsFile = { version: 1, words }
+  const data: WordsFile = { version: 2, words }
   save(KEY, data)
 }
 

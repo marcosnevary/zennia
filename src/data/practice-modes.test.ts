@@ -4,7 +4,7 @@ import { emptyStats } from './stats'
 import { kanaKey } from '../core/kana'
 import type { Word } from '../core/types'
 
-const word = (id: string, extra: Partial<Word> = {}): Word => ({ id, japanese: id, hiragana: 'おう', meaning: '', disabled: false, ...extra })
+const word = (id: string, extra: Partial<Word> = {}): Word => ({ id, japanese: id, hiragana: 'おう', meaning: '', disabled: false, tags: [], ...extra })
 
 describe('wordsMode', () => {
   it('draws only enabled words', () => {

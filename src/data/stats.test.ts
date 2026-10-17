@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { accuracy, accuracyLevel, totalTally, drawWeight, emptyStats, pickWeighted, recordAnswer, recordKana, sanitizeStats, sortTallies } from './stats'
 import type { Word } from '../core/types'
 
-const word: Word = { id: 'w1', japanese: '食べる', hiragana: 'たべる', meaning: '', disabled: false }
+const word: Word = { id: 'w1', japanese: '食べる', hiragana: 'たべる', meaning: '', disabled: false, tags: [] }
 
 describe('recordAnswer', () => {
   it('counts only the word, never the kana inside it', () => {
