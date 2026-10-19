@@ -6,8 +6,19 @@
     total,
     streak,
     bestStreak,
+    odds,
     onreset,
-  }: { hits: number; total: number; streak: number; bestStreak: number; onreset: () => void } = $props()
+  }: {
+    hits: number
+    total: number
+    streak: number
+    bestStreak: number
+    /** Chance (0 to 1) of each item being drawn next, in the order to list them. */
+    odds: { label: string; chance: number }[]
+    onreset: () => void
+  } = $props()
+
+  let showOdds = $state(false)
 
   const misses = $derived(total - hits)
   const sessionAccuracy = $derived(accuracy({ hits, misses }))
@@ -42,7 +53,20 @@
 
 <p class="footer">
   <button onclick={reset} disabled={!total}>Reset session</button>
+  <button aria-expanded={showOdds} onclick={() => (showOdds = !showOdds)}>{showOdds ? 'Hide chances' : 'Show chances'}</button>
 </p>
+
+{#if showOdds}
+  <ul class="odds" aria-label="Chance of each item being next">
+    {#each odds as o, i (i)}
+      <li>
+        <span class="odds-label" lang="ja">{o.label}</span>
+        <span class="odds-bar"><span style:width="{o.chance * 100}%"></span></span>
+        <span class="odds-chance">{(o.chance * 100).toFixed(1)}%</span>
+      </li>
+    {/each}
+  </ul>
+{/if}
 
 <style>
   .scoreboard {
@@ -76,6 +100,35 @@
   .footer {
     margin: 12px 16px 0;
     text-align: center;
+  }
+  .odds {
+    list-style: none;
+    max-height: 320px;
+    overflow-y: auto;
+    margin: 12px 16px 0;
+    padding: 8px;
+    background: var(--surface);
+    border: 2px solid var(--text);
+  }
+  .odds li {
+    display: grid;
+    grid-template-columns: minmax(80px, 40%) 1fr 56px;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+  }
+  .odds-bar {
+    height: 8px;
+    background: color-mix(in srgb, var(--text) 12%, transparent);
+  }
+  .odds-bar span {
+    display: block;
+    height: 100%;
+    background: var(--text);
+  }
+  .odds-chance {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
   }
   @media (max-width: 480px) {
     .scoreboard {
