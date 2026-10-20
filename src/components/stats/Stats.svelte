@@ -23,7 +23,7 @@
   ]
 
   let query = $state('')
-  let sort = $state<StatsSort>('misses')
+  let sort = $state<StatsSort>('accuracy')
   let direction = $state<StatsSortDirection>('desc')
   let showFilters = $state(false)
   let kinds = $state<Record<StatsKind, boolean>>({ words: true, hiragana: true, katakana: true })
