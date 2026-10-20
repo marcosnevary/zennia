@@ -254,7 +254,7 @@ export const SORT_OPTIONS: { key: SortKey; label: string }[] = [
   { key: 'japanese', label: 'Word' },
   { key: 'reading', label: 'Reading' },
   { key: 'meaning', label: 'Meaning' },
-  { key: 'status', label: 'Status (active first)' },
+  { key: 'status', label: 'Status' },
 ]
 
 const collator = new Intl.Collator('ja')
