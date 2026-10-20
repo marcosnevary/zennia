@@ -102,7 +102,7 @@
   // selection (ids that no longer exist are ignored)
   let selected = $state<Set<string>>(new Set())
   let query = $state('')
-  let sortKey = $state<SortKey>('list')
+  let sortKey = $state<SortKey>('status')
   let sortDirection = $state<SortDirection>('asc')
   // the tag filter: only tags still in use count, so deleting the last word with a tag drops it from the filter
   const tags = $derived(allTags(words))
