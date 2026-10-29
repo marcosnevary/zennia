@@ -52,27 +52,27 @@
   font-family: var(--font-ui);
   color: var(--text);
   background: var(--bg);
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #111111;
-    --surface: #111111;
-    --text: #f2f2f2;
-    --muted: #a3a3a3;
-    --accent: #60a5fa;
-    --accent-text: #1c1917;
-    --ok: #86efac;
-    --ok-bg: #14532d;
-    --warn: #fde047;
-    --warn-bg: #422006;
-    --bad: #fca5a5;
-    --bad-bg: #450a0a;
-    --on: #7ec4f0;
-    --on-bg: #0c2d48;
-    --off: #f4a261;
-    --off-bg: #4a2a0a;
-  }
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #111111;
+  --surface: #111111;
+  --text: #f2f2f2;
+  --muted: #a3a3a3;
+  --accent: #60a5fa;
+  --accent-text: #1c1917;
+  --ok: #86efac;
+  --ok-bg: #14532d;
+  --warn: #fde047;
+  --warn-bg: #422006;
+  --bad: #fca5a5;
+  --bad-bg: #450a0a;
+  --on: #7ec4f0;
+  --on-bg: #0c2d48;
+  --off: #f4a261;
+  --off-bg: #4a2a0a;
 }
 
 * {

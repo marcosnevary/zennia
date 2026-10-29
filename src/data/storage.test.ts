@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { loadKanaSelection, loadStats, loadWords, loadWordsFocus, saveKanaSelection, saveWordsFocus, saveStats, saveWords } from './storage'
+import { loadKanaSelection, loadStats, loadTheme, loadWords, loadWordsFocus, saveKanaSelection, saveWordsFocus, saveStats, saveTheme, saveWords } from './storage'
 import { emptyStats } from './stats'
 import type { Stats, Word } from '../core/types'
 
@@ -139,5 +139,31 @@ describe('words focus', () => {
   it('ignores a blocked storage', () => {
     store.failures.write = true
     expect(() => saveWordsFocus('both')).not.toThrow()
+  })
+})
+
+describe('theme', () => {
+  it('follows the system when nothing valid is saved', () => {
+    expect(loadTheme()).toBe('system')
+    store.data.set('zennia:theme', JSON.stringify('nonsense'))
+    expect(loadTheme()).toBe('system')
+    store.data.set('zennia:theme', '{broken')
+    expect(loadTheme()).toBe('system')
+  })
+
+  it('round-trips the saved theme', () => {
+    saveTheme('dark')
+    expect(loadTheme()).toBe('dark')
+    saveTheme('light')
+    expect(loadTheme()).toBe('light')
+    saveTheme('system')
+    expect(loadTheme()).toBe('system')
+  })
+
+  it('ignores a blocked storage', () => {
+    store.failures.write = true
+    expect(() => saveTheme('dark')).not.toThrow()
+    store.failures.read = true
+    expect(loadTheme()).toBe('system')
   })
 })

@@ -4,11 +4,13 @@
   import Manage from './components/manage/Manage.svelte'
   import StatsView from './components/stats/Stats.svelte'
   import PrintSheet from './components/print/PrintSheet.svelte'
-  import { loadStats, loadWords, saveStats, saveWords } from './data/storage'
+  import { loadStats, loadTheme, loadWords, saveStats, saveTheme, saveWords } from './data/storage'
+  import { resolveTheme } from './data/theme'
   import type { Stats, Word } from './core/types'
 
   let words = $state<Word[]>(loadWords())
   let stats = $state<Stats>(loadStats())
+  let theme = $state(loadTheme())
   let tab = $state<'words' | 'kana' | 'stats' | 'manage'>('kana')
   // words of the writing sheet being printed; it renders hidden and only shows up in the print dialog
   let sheetWords = $state<Word[] | null>(null)
@@ -16,6 +18,19 @@
   // saves on every change to the pool (snapshot reads the whole list, including nested edits)
   $effect(() => {
     saveWords($state.snapshot(words) as Word[])
+  })
+
+  $effect(() => {
+    saveTheme(theme)
+    const query = window.matchMedia('(prefers-color-scheme: dark)')
+    const apply = () => {
+      const resolved = resolveTheme(theme, query.matches)
+      document.documentElement.dataset.theme = resolved
+      document.querySelector<HTMLLinkElement>('link[rel="icon"]')!.href = resolved === 'dark' ? '/favicon-dark.png' : '/favicon.png'
+    }
+    apply()
+    query.addEventListener('change', apply)
+    return () => query.removeEventListener('change', apply)
   })
 
   $effect(() => {
@@ -42,7 +57,7 @@
   {:else if tab === 'stats'}
     <StatsView {words} bind:stats />
   {:else}
-    <Manage bind:words onprint={(selected) => (sheetWords = selected)} />
+    <Manage bind:words bind:theme onprint={(selected) => (sheetWords = selected)} />
   {/if}
 </main>
 </div>
