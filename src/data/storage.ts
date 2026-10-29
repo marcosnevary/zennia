@@ -1,12 +1,14 @@
 import { emptyStats, sanitizeStats } from './stats'
 import type { Stats, StatsFile, Word, WordsFile } from '../core/types'
 import type { WordsFocus } from './practice-modes'
+import type { ThemePreference } from './theme'
 import { sanitizeWords } from './words'
 
 const KEY = 'zennia:words'
 const STATS_KEY = 'zennia:stats'
 const KANA_KEY = 'zennia:kana-selection'
 const FOCUS_KEY = 'zennia:words-focus'
+const THEME_KEY = 'zennia:theme'
 
 /** Reads and parses what is saved under `key`; anything missing, unreadable or invalid gives `fallback`. */
 function load<T>(key: string, parse: (data: unknown) => T, fallback: T): T {
@@ -73,4 +75,17 @@ export function loadWordsFocus(): WordsFocus {
 
 export function saveWordsFocus(focus: WordsFocus): void {
   save(FOCUS_KEY, focus)
+}
+
+/** Saved theme preference; follows the system when nothing valid was saved. */
+export function loadTheme(): ThemePreference {
+  return load<ThemePreference>(
+    THEME_KEY,
+    (data) => (data === 'light' || data === 'dark' ? data : 'system'),
+    'system',
+  )
+}
+
+export function saveTheme(theme: ThemePreference): void {
+  save(THEME_KEY, theme)
 }
