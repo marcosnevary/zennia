@@ -56,10 +56,10 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #141210;
-    --surface: #292524;
-    --text: #f5f5f4;
-    --muted: #a8a29e;
+    --bg: #111111;
+    --surface: #111111;
+    --text: #f2f2f2;
+    --muted: #a3a3a3;
     --accent: #60a5fa;
     --accent-text: #1c1917;
     --ok: #86efac;

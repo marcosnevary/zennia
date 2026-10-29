@@ -268,6 +268,16 @@
     background: var(--text);
     --lift-shadow: color-mix(in srgb, var(--text) 55%, black);
   }
+  @media (prefers-color-scheme: dark) {
+    .cell.on:hover {
+      --lift-shadow: #0062a3;
+    }
+    .cell:not(.on):hover {
+      color: var(--text);
+      background: #2a2a2a;
+      --lift-shadow: #3d3d3d;
+    }
+  }
   .link {
     padding: 0 2px;
     font-size: 0.8rem;
