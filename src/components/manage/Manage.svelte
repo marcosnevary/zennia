@@ -6,6 +6,7 @@
   import { importAnkiDeck } from '../../data/anki'
   import { downloadText, exportFilename, exportJSON, importJSON } from '../../data/io'
   import { toDisplayRomaji } from '../../core/romaji'
+  import { THEMES, type ThemePreference } from '../../data/theme'
   import type { Word } from '../../core/types'
   import {
     addTag,
@@ -32,7 +33,11 @@
     type SortKey,
   } from '../../data/words'
 
-  let { words = $bindable(), onprint }: { words: Word[]; onprint: (words: Word[]) => void } = $props()
+  let {
+    words = $bindable(),
+    theme = $bindable(),
+    onprint,
+  }: { words: Word[]; theme: ThemePreference; onprint: (words: Word[]) => void } = $props()
 
   let japanese = $state('')
   let hiragana = $state('')
@@ -240,6 +245,13 @@
     }
   }
 </script>
+
+<h2>Theme</h2>
+<div class="row wide" role="group" aria-label="Theme">
+  {#each THEMES as t (t.id)}
+    <button class:primary={theme === t.id} aria-pressed={theme === t.id} onclick={() => (theme = t.id)}>{t.label}</button>
+  {/each}
+</div>
 
 <h2>New word</h2>
 <form class="form" onsubmit={save}>
