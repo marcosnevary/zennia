@@ -9,6 +9,7 @@
   import { toDisplayRomaji } from '../../core/romaji'
   import { THEMES, type ThemePreference } from '../../data/theme'
   import type { Word } from '../../core/types'
+  import { getApp } from '../../state.svelte'
   import {
     addTag,
     allTags,
@@ -17,7 +18,6 @@
     filterByTags,
     importSummary,
     makeWord,
-    mergeWords,
     needsMeaning,
     removeTag,
     renameTag,
@@ -34,11 +34,9 @@
     type SortKey,
   } from '../../data/words'
 
-  let {
-    words = $bindable(),
-    theme = $bindable(),
-    onprint,
-  }: { words: Word[]; theme: ThemePreference; onprint: (words: Word[]) => void } = $props()
+  const app = getApp()
+  const words = $derived(app.words)
+  const theme = $derived(app.settings.theme)
 
   let japanese = $state('')
   let hiragana = $state('')
@@ -68,7 +66,7 @@
     const fields = { japanese, hiragana, meaning, tags: newTags }
     error = validateWord(fields)
     if (error) return
-    words = [makeWord(fields), ...words]
+    app.setWords([makeWord(fields), ...words])
     message = 'Word added.'
     resetForm()
     japaneseEl?.focus()
@@ -90,19 +88,19 @@
     const fields = { japanese: editJapanese, hiragana: editHiragana, meaning: editMeaning, tags: editTags }
     editError = validateWord(fields)
     if (editError) return
-    words = words.map((w) => (w.id === editingId ? updateWord(w, fields) : w))
+    app.setWords(words.map((w) => (w.id === editingId ? updateWord(w, fields) : w)))
     message = 'Word updated.'
     dialogEl?.close()
   }
 
   function remove(word: Word) {
     if (!confirm(`Delete "${word.japanese}"?`)) return
-    words = words.filter((w) => w.id !== word.id)
+    app.setWords(words.filter((w) => w.id !== word.id))
     message = 'Word deleted.'
   }
 
   function toggle(word: Word) {
-    words = words.map((w) => (w.id === word.id ? setDisabled(w, !w.disabled) : w))
+    app.setWords(words.map((w) => (w.id === word.id ? setDisabled(w, !w.disabled) : w)))
   }
 
   // selection (ids that no longer exist are ignored)
@@ -153,7 +151,7 @@
     const to = renameDraft.trim()
     const merges = !sameTag(from, to) && tags.some((t) => sameTag(t, to))
     if (merges && !confirm(`"${to}" already exists. Merge "${from}" into it?`)) return
-    words = renameTag(words, from, to)
+    app.setWords(renameTag(words, from, to))
     // a merge keeps the spelling already in use, so read the final name back from the pool
     const name = allTags(words).find((t) => sameTag(t, to)) ?? to
     activeTags = cleanTags(filterTags.map((t) => (sameTag(t, from) ? name : t)))
@@ -163,7 +161,7 @@
 
   function deleteTagEverywhere(tag: string) {
     if (!confirm(`Remove the tag "${tag}" from all words?`)) return
-    words = deleteTag(words, tag)
+    app.setWords(deleteTag(words, tag))
     // the list may grow if the tag was filtering it, so the selection must not outlive it
     activeTags = activeTags.filter((t) => !sameTag(t, tag))
     selected = new Set()
@@ -181,8 +179,8 @@
 
   function setCommonTags(next: string[]) {
     dialogTags = cleanTags([...dialogTags, ...next])
-    for (const tag of next) if (!commonTags.some((t) => sameTag(t, tag))) words = addTag(words, selected, tag)
-    for (const tag of commonTags) if (!next.some((t) => sameTag(t, tag))) words = removeTag(words, selected, tag)
+    for (const tag of next) if (!commonTags.some((t) => sameTag(t, tag))) app.setWords(addTag(words, selected, tag))
+    for (const tag of commonTags) if (!next.some((t) => sameTag(t, tag))) app.setWords(removeTag(words, selected, tag))
   }
 
   function openTagDialog() {
@@ -203,7 +201,7 @@
 
   function setSelectedDisabled(disabled: boolean) {
     const count = selectedWords.length
-    words = words.map((w) => (selected.has(w.id) ? setDisabled(w, disabled) : w))
+    app.setWords(words.map((w) => (selected.has(w.id) ? setDisabled(w, disabled) : w)))
     message = `${count} word(s) ${disabled ? 'disabled' : 'enabled'}.`
     selected = new Set()
   }
@@ -211,7 +209,7 @@
   function removeSelected() {
     const count = selectedWords.length
     if (!confirm(`Delete ${count} selected word(s)?`)) return
-    words = words.filter((w) => !selected.has(w.id))
+    app.setWords(words.filter((w) => !selected.has(w.id)))
     message = `${count} word(s) deleted.`
     selected = new Set()
   }
@@ -237,8 +235,7 @@
     error = ''
     try {
       const { words: incoming, skipped } = parse(await file.text())
-      const result = mergeWords(words, incoming)
-      words = result.words
+      const result = app.importWords(incoming)
       message = importSummary(result, skipped)
       resetForm()
     } catch (e) {
@@ -257,7 +254,7 @@
 
   function chooseTheme(next: ThemePreference) {
     previousTheme = theme
-    theme = next
+    app.setTheme(next)
   }
 </script>
 
@@ -424,7 +421,7 @@
     <span class="text-muted">{selectedWords.length} selected</span>
     <!-- keeps the space reserved so the layout does not shift when a selection appears -->
     <div class="ml-auto flex gap-2" class:invisible={selectedWords.length === 0}>
-      <button class={ICON} onclick={() => onprint(selectedWords)} aria-label="Print writing sheet" title="Print writing sheet">
+      <button class={ICON} onclick={() => (app.sheetWords = selectedWords)} aria-label="Print writing sheet" title="Print writing sheet">
         <Icon>
           <path d="M7 9V3h10v6M7 17H4v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6h-3M7 14h10v7H7z" />
         </Icon>

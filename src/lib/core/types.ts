@@ -10,13 +10,15 @@ export interface Word {
   disabled: boolean
   /** When the word was last enabled (ms since epoch); missing for words enabled before this was tracked. */
   activatedAt?: number
+  /** When the word was added (ms since epoch); the list shows the newest first. Missing for words not stored yet. */
+  createdAt?: number
   /** Free-text labels to organize the word list. Always stored, empty when the word has none. */
   tags: string[]
 }
 
 export type Verdict = 'correct' | 'almost' | 'incorrect'
 
-/** Format of the export file and of localStorage */
+/** Format of the export file */
 export interface WordsFile {
   /** 2 added `tags` to each word; version 1 files are still read, their words get no tags. */
   version: 2

@@ -189,6 +189,7 @@ describe('makeWord and updateWord', () => {
       meaning: 'to eat',
       disabled: true,
       activatedAt: word.activatedAt,
+      createdAt: word.createdAt,
       tags: [],
     })
     expect(word.japanese).toBe('犬')

@@ -18,8 +18,7 @@
   import Scoreboard from './Scoreboard.svelte'
   import { kanaMode } from '../../data/practice-modes'
   import { drawOdds, nextRound, resetScore, startSession, submit as submitAnswer } from '../../data/practice-session'
-  import { loadKanaSelection, saveKanaSelection } from '../../data/storage'
-  import type { Stats } from '../../core/types'
+  import { getApp } from '../../state.svelte'
 
   const LINK = 'no-hover bg-transparent px-0.5 py-0 text-[0.8rem] text-muted underline'
 
@@ -32,7 +31,7 @@
       : `${base} bg-transparent text-muted hover:bg-ink hover:text-page hover:[--lift-shadow:color-mix(in_srgb,var(--text)_55%,black)] dark:hover:bg-[#2a2a2a] dark:hover:text-ink dark:hover:[--lift-shadow:#3d3d3d]`
   }
 
-  let { stats = $bindable() }: { stats: Stats } = $props()
+  const app = getApp()
 
   const SCRIPTS: { id: KanaScript; label: string }[] = [
     { id: 'hiragana', label: 'Hiragana' },
@@ -40,13 +39,9 @@
   ]
 
   /** Keys (see `kanaKey`) of the characters included in practice; defaults to the basic hiragana, then remembers the last choice */
-  let selected = $state<string[]>(loadKanaSelection() ?? defaultKanaSelection())
+  let selected = $state<string[]>(app.settings.kanaSelection ?? defaultKanaSelection())
 
-  $effect(() => {
-    saveKanaSelection($state.snapshot(selected))
-  })
-
-  const mode = $derived(kanaMode(selected, stats))
+  const mode = $derived(kanaMode(selected, app.stats, app.recorder))
 
   let session = $state(startSession<Kana>())
   const odds = $derived(drawOdds(session, mode).map(({ item, chance }) => ({ label: item.symbol, chance })))
@@ -61,6 +56,7 @@
   // changing the selection starts a fresh round and score
   function setSelected(keys: string[]) {
     selected = keys
+    app.setKanaSelection(keys)
     session = nextRound(startSession<Kana>(), mode) // no focus change, so the page does not jump
     answer = ''
   }

@@ -1,14 +1,18 @@
 <script lang="ts">
   import '../app.css'
+  import { onMount } from 'svelte'
   import { asset, resolve } from '$app/paths'
   import { page } from '$app/state'
   import PrintSheet from '#lib/components/print/PrintSheet.svelte'
-  import type { Stats, Word } from '#lib/core/types.ts'
-  import { saveStats, saveTheme, saveWords } from '#lib/data/storage.ts'
+  import { getDb } from '#lib/data/db/client.ts'
+  import { createRepo } from '#lib/data/db/repo.ts'
   import { resolveTheme } from '#lib/data/theme.ts'
-  import { app } from '#lib/state.svelte.ts'
+  import { App, setApp } from '#lib/state.svelte.ts'
 
   let { children } = $props()
+
+  const app = setApp(new App(createRepo(getDb)))
+  onMount(() => app.init())
 
   const tabs = [
     { path: '/kana', label: 'Kana' },
@@ -17,23 +21,13 @@
     { path: '/manage', label: 'Settings' },
   ] as const
 
-  // saves on every change to the pool (snapshot reads the whole list, including nested edits)
   $effect(() => {
-    saveWords($state.snapshot(app.words) as Word[])
-  })
-
-  $effect(() => {
-    saveStats($state.snapshot(app.stats) as Stats)
-  })
-
-  $effect(() => {
-    saveTheme(app.theme)
     const query = window.matchMedia('(prefers-color-scheme: dark)')
     // browsers evaluate prefers-color-scheme as light while the print dialog is open, which would flip the "system" theme
     let printing = false
     const apply = () => {
       if (printing) return
-      const resolved = resolveTheme(app.theme, query.matches)
+      const resolved = resolveTheme(app.settings.theme, query.matches)
       const root = document.documentElement
       if (root.dataset.theme !== resolved) {
         // hundreds of buttons would animate their colors at once and freeze the page
@@ -71,7 +65,20 @@
   </header>
 
   <main>
-    {@render children()}
+    {#if app.status === 'ready'}
+      {#if app.error}
+        <p class="my-4 text-bad" role="alert">
+          {app.error}
+          <button onclick={() => app.clearError()}>Dismiss</button>
+        </p>
+      {/if}
+      {@render children()}
+    {:else if app.status === 'failed'}
+      <p class="my-4 text-bad" role="alert">Could not load your data: {app.error}</p>
+      <button onclick={() => app.init()}>Try again</button>
+    {:else}
+      <p class="my-4 text-muted" role="status">Loading…</p>
+    {/if}
   </main>
 </div>
 

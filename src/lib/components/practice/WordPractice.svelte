@@ -4,10 +4,13 @@
   import Scoreboard from './Scoreboard.svelte'
   import { checkParts, joinAnswers, wordsMode, type WordsFocus } from '../../data/practice-modes'
   import { drawOdds, nextRound, resetScore, startSession, submit as submitAnswer } from '../../data/practice-session'
-  import { loadWordsFocus, saveWordsFocus } from '../../data/storage'
-  import type { Stats, Word } from '../../core/types'
+  import { getApp } from '../../state.svelte'
+  import type { Word } from '../../core/types'
 
-  let { words, stats = $bindable(), onmanage }: { words: Word[]; stats: Stats; onmanage: () => void } = $props()
+  let { onmanage }: { onmanage: () => void } = $props()
+
+  const app = getApp()
+  const words = $derived(app.words)
 
   const FOCUSES: { id: WordsFocus; label: string }[] = [
     { id: 'reading', label: 'Romaji' },
@@ -15,8 +18,8 @@
     { id: 'both', label: 'Both' },
   ]
 
-  let focus = $state<WordsFocus>(loadWordsFocus())
-  const mode = $derived(wordsMode(words, stats, focus))
+  let focus = $state<WordsFocus>(app.settings.wordsFocus)
+  const mode = $derived(wordsMode(words, app.stats, focus, app.recorder))
   const askReading = $derived(focus !== 'meaning')
   const askMeaning = $derived(focus !== 'reading')
 
@@ -48,7 +51,7 @@
   function chooseFocus(next: WordsFocus) {
     if (next === focus) return
     focus = next
-    saveWordsFocus(next)
+    app.setWordsFocus(next)
     answer = ''
     meaningAnswer = ''
     session = startSession<Word>()

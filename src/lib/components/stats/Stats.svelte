@@ -12,13 +12,16 @@
   } from '../../data/stats'
   import { downloadText, exportStatsJSON, importStatsJSON, statsExportFilename } from '../../data/io'
   import { buildRows, filterRows, type StatsKind } from '../../data/stats-rows'
-  import type { Stats, Tally, Word } from '../../core/types'
+  import type { Tally } from '../../core/types'
+  import { getApp } from '../../state.svelte'
   import Icon from '../Icon.svelte'
   import StatTile from '../StatTile.svelte'
 
   const LEVEL_STYLES = { high: 'text-on', low: 'text-off', '': '' }
 
-  let { words, stats = $bindable() }: { words: Word[]; stats: Stats } = $props()
+  const app = getApp()
+  const words = $derived(app.words)
+  const stats = $derived(app.stats)
 
   const KINDS: { id: StatsKind; label: string }[] = [
     { id: 'words', label: 'Words' },
@@ -57,7 +60,7 @@
     try {
       const incoming = importStatsJSON(await file.text())
       if (attempts(total) && !confirm('Importing replaces your current statistics. Continue?')) return
-      stats = incoming
+      app.replaceStats(incoming)
       message = 'Statistics imported.'
     } catch (e) {
       error = e instanceof Error ? e.message : 'Could not import the file.'
@@ -65,7 +68,7 @@
   }
 
   function reset() {
-    if (confirm('Reset all statistics? This cannot be undone.')) stats = emptyStats()
+    if (confirm('Reset all statistics? This cannot be undone.')) app.replaceStats(emptyStats())
   }
 </script>
 
