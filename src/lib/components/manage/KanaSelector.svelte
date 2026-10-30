@@ -4,7 +4,6 @@
     columnKeys,
     kanaKey,
     lineKeys,
-    scriptKeys,
     sectionKeys,
     selectKeys,
     symbolOf,
@@ -38,20 +37,16 @@
   }
 </script>
 
-<div class="flex flex-col gap-4">
+<div class="flex flex-col">
   {#each SCRIPTS as script (script.id)}
-    {@const scriptSelected = scriptKeys(script.id).filter((k) => selected.includes(k)).length}
-    <section class="bg-surface p-3">
-      <header class="flex flex-col items-start gap-0.5 pb-3">
-        <h3 class="m-0 text-[1.1rem] font-bold">{script.label}</h3>
-        <span class="text-[0.85rem] text-muted">{scriptSelected} selected</span>
-      </header>
+    <section>
+      <h2 class="section-title">{script.label}</h2>
 
       {#each KANA_SECTIONS as section (section.id)}
         {@const keys = sectionKeys(script.id, section)}
         <div class="mt-4">
           <div class="flex items-center justify-start gap-2">
-            <h4 class="flex-1 text-[0.9rem] font-bold text-muted">{section.title}</h4>
+            <h3 class="m-0 flex-1 text-[0.9rem] font-bold text-muted">{section.title}</h3>
             <button class={LINK} onclick={() => select(keys, true)}>All</button>
             <button class={LINK} onclick={() => select(keys, false)}>None</button>
           </div>
