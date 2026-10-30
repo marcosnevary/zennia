@@ -13,6 +13,7 @@
   import { downloadText, exportStatsJSON, importStatsJSON, statsExportFilename } from '../../data/io'
   import { buildRows, filterRows, type StatsKind } from '../../data/stats-rows'
   import type { Stats, Tally, Word } from '../../core/types'
+  import Icon from '../Icon.svelte'
   import StatTile from '../StatTile.svelte'
 
   const LEVEL_STYLES = { high: 'text-on', low: 'text-off', '': '' }
@@ -146,13 +147,13 @@
         aria-label={direction === 'asc' ? 'Ascending' : 'Descending'}
         title={direction === 'asc' ? 'Ascending (click to reverse)' : 'Descending (click to reverse)'}
       >
-        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <Icon>
           {#if direction === 'asc'}
             <path d="M12 19V5M5 12l7-7 7 7" />
           {:else}
             <path d="M12 5v14M5 12l7 7 7-7" />
           {/if}
-        </svg>
+        </Icon>
       </button>
     </div>
   </div>

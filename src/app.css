@@ -116,7 +116,8 @@
 /* custom chevron so the arrow keeps its distance from the border */
 @utility chevron {
   appearance: none;
-  padding: 0 36px 0 10px;
+  padding-right: 36px;
+  padding-left: 10px;
   background-image:
     linear-gradient(45deg, transparent 50%, var(--text) 50%), linear-gradient(135deg, var(--text) 50%, transparent 50%);
   background-position:
@@ -130,6 +131,13 @@
 @utility dot-leader {
   height: 2px;
   background: linear-gradient(90deg, var(--muted) 2px, transparent 2px) left center / 8px 2px repeat-x;
+}
+
+/* section titles get a divider underneath */
+@utility section-title {
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+  border-bottom: 2px solid var(--text);
 }
 
 @layer base {
@@ -177,8 +185,13 @@
     /* preflight zeroes the margin and border that centered the dialog and framed it */
     margin: auto;
     border: 3px solid;
+    padding: 16px;
     background: var(--bg);
     color: inherit;
+  }
+
+  dialog::backdrop {
+    background: rgb(0 0 0 / 0.5);
   }
 }
 
@@ -202,7 +215,7 @@
       color 0.12s ease;
   }
 
-  button:hover:not(:disabled, .link, .help-btn, .toggle, .no-hover),
+  button:hover:not(:disabled, .no-hover),
   .file:hover,
   .tab:hover {
     transform: translate(calc(var(--lift) * -1), calc(var(--lift) * -1));
@@ -218,7 +231,7 @@
 
   /* the block moves away from the cursor, so without this the hover is lost near the bottom-right edge and it flickers;
      this extends the hit area back over the spot the button just left */
-  button:hover:not(:disabled, .link, .help-btn, .toggle, .no-hover)::after,
+  button:hover:not(:disabled, .no-hover)::after,
   .file:hover::after,
   .tab:hover::after {
     content: '';
@@ -226,7 +239,7 @@
     inset: 0 calc(var(--lift) * -1) calc(var(--lift) * -1) 0;
   }
 
-  button:active:not(:disabled, .link, .help-btn, .toggle, .no-hover),
+  button:active:not(:disabled, .no-hover),
   .file:active,
   .tab:active {
     transform: none;
@@ -268,9 +281,5 @@
     .tab {
       transition: none;
     }
-  }
-
-  .muted {
-    color: var(--muted);
   }
 }

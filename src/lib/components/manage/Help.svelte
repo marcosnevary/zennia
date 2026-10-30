@@ -1,17 +1,18 @@
 <script lang="ts">
+  import Icon from '../Icon.svelte'
   import { closeOnBackdrop } from './dialog'
 
   let helpEl = $state<HTMLDialogElement>()
 </script>
 
 <button class="no-hover inline-flex bg-transparent p-0.5 text-muted opacity-60 hover:opacity-100 focus-visible:opacity-100" onclick={() => helpEl?.showModal()} aria-label="How import and export work" title="How import and export work">
-  <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <Icon class="size-4">
     <circle cx="12" cy="12" r="9" />
     <path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17h.01" />
-  </svg>
+  </Icon>
 </button>
 
-<dialog class="w-[min(560px,calc(100vw-32px))] p-4 backdrop:bg-black/50" bind:this={helpEl} use:closeOnBackdrop aria-label="Help: import and export">
+<dialog class="w-[min(560px,calc(100vw-32px))]" bind:this={helpEl} use:closeOnBackdrop aria-label="Help: import and export">
   <h2 class="mt-0">Import and export</h2>
 
   <h3 class="mt-4 mb-1 text-[1.17em] font-bold">Export JSON</h3>
