@@ -199,7 +199,7 @@
 
   dialog::backdrop {
     background: rgb(0 0 0 / 0.5);
-    backdrop-filter: blur(2px);
+    backdrop-filter: blur(6px);
   }
 }
 
