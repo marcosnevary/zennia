@@ -1,16 +1,24 @@
 # Architecture
 
-SvelteKit static SPA (see [ADR 1](adr/0001-sveltekit.md)). There is no backend: everything is stored in `localStorage`.
+SvelteKit static SPA (see [ADR 1](adr/0001-sveltekit.md)). There is no server of our own: the browser talks directly to Supabase, which stores the data ([ADR 3](adr/0003-supabase.md)).
 
 ## Layout
 
 - `src/routes/`: one folder per tab, plus the shell in `+layout.svelte`.
 - `src/lib/core/`: pure logic (kana tables, answer checking, meaning matching, writing sheet).
-- `src/lib/data/`: data model, sanitizing, import/export and `localStorage` access (`storage.ts` is the only place that touches it).
+- `src/lib/data/`: data model, sanitizing and import/export.
+- `src/lib/data/db/`: database access: the Supabase client (`client.ts`), the `Repo` that reads and writes the rows (`repo.ts`, `rows.ts`) and the one-time import of the old `localStorage` data (`legacy.ts`).
+- `supabase/migrations/`: the database schema.
 - `src/lib/components/`: Svelte components, grouped by feature.
-- `src/lib/state.svelte.ts`: shared state, persisted by `src/routes/+layout.svelte`.
+- `src/lib/state.svelte.ts`: `App`, the shared data and the actions that change it. The layout creates it and components get it with `getApp()`.
 - `src/app.css`: Tailwind setup, theme variables and the shared button, field and dialog styles ([ADR 2](adr/0002-tailwind.md)).
 - `static/`: fonts, favicons and `strokes.json` (KanjiVG, built by `scripts/build-strokes.mjs`).
+
+## Setup
+
+1. Create a Supabase project and turn on **Anonymous sign-ins** (Authentication > Sign In / Providers).
+2. Run `supabase/migrations/0001_init.sql` in the SQL editor (or with the Supabase CLI).
+3. Copy `.env.example` to `.env` and fill in the project URL and anon key. Set the same variables in Vercel.
 
 ## Commands
 
