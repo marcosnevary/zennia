@@ -4,7 +4,7 @@ Date: 2026-10-30
 
 ## Status
 
-Accepted. Changes the routes of [ADR 1](0001-sveltekit.md).
+Accepted. Changes the routes of [ADR 1](0001-sveltekit.md). The practice scope and the Customize dialog were replaced by [ADR 6](0006-practice-follows-manage.md).
 
 ## Context
 

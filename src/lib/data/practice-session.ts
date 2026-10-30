@@ -51,11 +51,6 @@ export function drawOdds<T>(session: Session<T>, mode: PracticeMode<T>): { item:
     .sort((a, b) => b.chance - a.chance)
 }
 
-/** Clears the score, keeping the item currently on screen. */
-export function resetScore<T>(session: Session<T>): Session<T> {
-  return { ...session, hits: 0, total: 0, streak: 0, bestStreak: 0 }
-}
-
 /** Checks the answer for the current item and updates the score. */
 export function submit<T>(
   session: Session<T>,

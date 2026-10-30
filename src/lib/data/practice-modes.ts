@@ -105,3 +105,16 @@ export function kanaMode(selected: string[], stats: Stats, recorder: Recorder = 
     record: (k, verdict) => recorder.kana(k.script, k.hiragana, verdict === 'correct'),
   }
 }
+
+/** What a pool holds, like "12 words · 46 hiragana"; empty parts are left out. */
+export function describePool(pool: PracticeItem[]): string {
+  const words = pool.filter((item) => item.kind === 'word').length
+  const kana = (script: KanaScript) => pool.filter((item) => item.kind === 'kana' && item.kana.script === script).length
+  return [
+    words && `${words} ${words === 1 ? 'word' : 'words'}`,
+    kana('hiragana') && `${kana('hiragana')} hiragana`,
+    kana('katakana') && `${kana('katakana')} katakana`,
+  ]
+    .filter(Boolean)
+    .join(' · ')
+}
