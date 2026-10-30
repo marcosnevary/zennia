@@ -1,9 +1,9 @@
-import { svelte } from '@sveltejs/vite-plugin-svelte'
+import adapter from '@sveltejs/adapter-static'
+import { sveltekit } from '@sveltejs/kit/vite'
 import { configDefaults, defineConfig } from 'vitest/config'
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [svelte()],
+  plugins: [sveltekit({ adapter: adapter({ fallback: 'index.html' }) })],
   test: {
     // old git worktrees live under .claude/worktrees and carry their own copies of the tests
     exclude: [...configDefaults.exclude, '.claude/**'],

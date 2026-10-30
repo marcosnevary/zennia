@@ -110,7 +110,8 @@ input[type='text'] {
 }
 
 input[type='text']:focus-visible,
-button:focus-visible {
+button:focus-visible,
+.tab:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -118,7 +119,8 @@ button:focus-visible {
 /* flat blocks with square corners and no borders; hovering lifts them toward the top-left */
 button,
 select,
-.file {
+.file,
+.tab {
   --lift: 4px;
   position: relative;
   --lift-shadow: color-mix(in srgb, var(--accent) 55%, black);
@@ -134,7 +136,8 @@ select,
 }
 
 button:hover:not(:disabled, .link, .help-btn, .toggle, .no-hover),
-.file:hover {
+.file:hover,
+.tab:hover {
   transform: translate(calc(var(--lift) * -1), calc(var(--lift) * -1));
   /* stacked steps fill the diagonal, so the block looks extruded and stays connected to where it was */
   box-shadow:
@@ -149,19 +152,22 @@ button:hover:not(:disabled, .link, .help-btn, .toggle, .no-hover),
 /* the block moves away from the cursor, so without this the hover is lost near the bottom-right edge and it flickers;
    this extends the hit area back over the spot the button just left */
 button:hover:not(:disabled, .link, .help-btn, .toggle, .no-hover)::after,
-.file:hover::after {
+.file:hover::after,
+.tab:hover::after {
   content: '';
   position: absolute;
   inset: 0 calc(var(--lift) * -1) calc(var(--lift) * -1) 0;
 }
 
 button:active:not(:disabled, .link, .help-btn, .toggle, .no-hover),
-.file:active {
+.file:active,
+.tab:active {
   transform: none;
   box-shadow: none;
 }
 
-button.primary {
+button.primary,
+.tab[aria-current='page'] {
   background: var(--accent);
   color: var(--accent-text);
   font-weight: 600;
@@ -177,6 +183,13 @@ button.danger:hover:not(:disabled) {
   --lift-shadow: color-mix(in srgb, var(--bad) 55%, black);
 }
 
+a.tab {
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+}
+
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -184,7 +197,8 @@ button:disabled {
 
 @media (prefers-reduced-motion: reduce) {
   button,
-  .file {
+  .file,
+  .tab {
     transition: none;
   }
 }

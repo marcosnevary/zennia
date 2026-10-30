@@ -2,23 +2,23 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/png" href="%sveltekit.assets%/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>zennia</title>
-    <!-- sets the theme before first paint so a saved choice does not flash the other one; mirrors resolveTheme in src/data/theme.ts -->
+    <!-- sets the theme before first paint so a saved choice does not flash the other one; mirrors resolveTheme in src/lib/data/theme.ts -->
     <script>
       try {
         var saved = JSON.parse(localStorage.getItem('zennia:theme'))
         var dark = saved === 'dark' || (saved !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)
         document.documentElement.dataset.theme = dark ? 'dark' : 'light'
-        document.querySelector('link[rel="icon"]').href = dark ? '/favicon-dark.png' : '/favicon.png'
+        document.querySelector('link[rel="icon"]').href = dark ? '%sveltekit.assets%/favicon-dark.png' : '%sveltekit.assets%/favicon.png'
       } catch (e) {
         document.documentElement.dataset.theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
       }
     </script>
+    %sveltekit.head%
   </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
+  <body data-sveltekit-preload-data="hover">
+    <div style="display: contents">%sveltekit.body%</div>
   </body>
 </html>

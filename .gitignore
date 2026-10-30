@@ -6,3 +6,5 @@ dist
 .env.*
 .vercel
 .claude
+.svelte-kit
+build
