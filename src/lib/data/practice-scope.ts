@@ -21,11 +21,9 @@ export function scopeIncludesTag(scope: PracticeScope | null, tag: string): bool
   return scope === null || scope.tags.some((t) => sameTag(t, tag))
 }
 
-/** The enabled words that match any chosen tag, or have no tags when untagged words are included. */
+/** The words that have any chosen tag, or no tags when untagged words are included. */
 export function scopedWords(words: Word[], scope: PracticeScope | null): Word[] {
-  return words.filter(
-    (w) => !w.disabled && (w.tags.length === 0 ? scopeIncludesUntagged(scope) : w.tags.some((t) => scopeIncludesTag(scope, t))),
-  )
+  return words.filter((w) => (w.tags.length === 0 ? scopeIncludesUntagged(scope) : w.tags.some((t) => scopeIncludesTag(scope, t))))
 }
 
 export function scopedKanaSelection(selected: string[], scope: PracticeScope | null): string[] {

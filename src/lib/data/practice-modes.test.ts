@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { checkParts, joinAnswers, kanaMode, wordsMode } from './practice-modes'
+import { checkParts, joinAnswers, kanaMode, mixedMode, wordsMode } from './practice-modes'
 import { emptyStats } from './stats'
 import { kanaKey } from '../core/kana'
 import type { Word } from '../core/types'
@@ -93,5 +93,37 @@ describe('kanaMode', () => {
     mode.record(mode.pool[1], 'correct')
     expect(stats.kana['katakana:お']).toEqual({ hits: 1, misses: 0 })
     expect(stats.kana['hiragana:お']).toBeUndefined()
+  })
+})
+
+describe('mixedMode', () => {
+  const kana = [kanaKey('hiragana', 'お')]
+
+  it('draws the words and the kana together, with keys that cannot collide', () => {
+    const mode = mixedMode([word('お')], kana, emptyStats())
+    expect(mode.pool.map((item) => item.kind)).toEqual(['word', 'kana'])
+    expect(mode.pool.map(mode.keyOf)).toEqual(['word:お', 'kana:お'])
+  })
+
+  it('checks each item by its own rules', () => {
+    const mode = mixedMode([word('a', { hiragana: 'おばさん' })], kana, emptyStats())
+    const [w, k] = mode.pool
+    expect(mode.check('obaasan', w)).toBe('almost')
+    expect(mode.check('o', k)).toBe('correct')
+    expect(mode.check('oo', k)).toBe('incorrect')
+  })
+
+  it('records words and kana in their own stats', () => {
+    const stats = emptyStats()
+    const mode = mixedMode([word('a')], kana, stats)
+    mode.record(mode.pool[0], 'correct')
+    mode.record(mode.pool[1], 'incorrect')
+    expect(stats.words.a).toEqual({ hits: 1, misses: 0 })
+    expect(stats.kana['hiragana:お']).toEqual({ hits: 0, misses: 1 })
+  })
+
+  it('leaves out the words that need a meaning when the meaning is practiced', () => {
+    const mode = mixedMode([word('a')], kana, emptyStats(), 'meaning')
+    expect(mode.pool.map((item) => item.kind)).toEqual(['kana'])
   })
 })

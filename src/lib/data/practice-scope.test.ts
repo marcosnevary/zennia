@@ -11,10 +11,9 @@ describe('scopedWords', () => {
   const verb = word('verb', { tags: ['verbs'] })
   const both = word('both', { tags: ['food', 'verbs'] })
   const bare = word('bare')
-  const off = word('off', { tags: ['food'], disabled: true })
-  const words = [food, verb, both, bare, off]
+  const words = [food, verb, both, bare]
 
-  it('includes every enabled word when the scope is null', () => {
+  it('includes every word when the scope is null', () => {
     expect(scopedWords(words, null)).toEqual([food, verb, both, bare])
   })
 
