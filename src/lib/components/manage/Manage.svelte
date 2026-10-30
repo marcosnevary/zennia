@@ -1,13 +1,10 @@
 <script lang="ts">
   import Icon from '../Icon.svelte'
   import { closeOnBackdrop } from './dialog'
-  import Help from './Help.svelte'
   import KanaSelector from './KanaSelector.svelte'
   import Pagination from './Pagination.svelte'
   import TagChip from './TagChip.svelte'
   import TagInput from './TagInput.svelte'
-  import { importAnkiDeck } from '../../data/anki'
-  import { downloadText, exportFilename, exportJSON, importJSON } from '../../data/io'
   import { toDisplayRomaji } from '../../core/romaji'
   import { defaultKanaSelection } from '../../core/kana'
   import type { Word } from '../../core/types'
@@ -18,7 +15,6 @@
     cleanTags,
     deleteTag,
     filterByTags,
-    importSummary,
     makeWord,
     needsMeaning,
     paginate,
@@ -32,7 +28,6 @@
     updateWord,
     validateTag,
     validateWord,
-    type SanitizeResult,
     type SortDirection,
     type SortKey,
   } from '../../data/words'
@@ -223,35 +218,6 @@
     selected = new Set()
   }
 
-  function exportWords() {
-    downloadText(exportFilename(), exportJSON(selectedWords))
-    message = `${selectedWords.length} selected word(s) exported.`
-  }
-
-  function importFile(event: Event) {
-    return runImport(event, importJSON)
-  }
-
-  function importAnki(event: Event) {
-    return runImport(event, importAnkiDeck)
-  }
-
-  async function runImport(event: Event, parse: (text: string) => SanitizeResult) {
-    const input = event.currentTarget as HTMLInputElement
-    const file = input.files?.[0]
-    input.value = ''
-    if (!file) return
-    error = ''
-    try {
-      const { words: incoming, skipped } = parse(await file.text())
-      const result = app.importWords(incoming)
-      message = importSummary(result, skipped)
-      resetForm()
-    } catch (e) {
-      error = e instanceof Error ? e.message : 'Could not import the file.'
-    }
-  }
-
   const ROW = 'flex flex-wrap items-center gap-2'
   // buttons share the whole row evenly
   const WIDE = `${ROW} *:flex-1 *:text-center`
@@ -302,30 +268,6 @@
 
 {#if error}<p class="my-4 text-bad" role="alert">{error}</p>{/if}
 {#if message}<p class="my-4 text-muted" role="status">{message}</p>{/if}
-
-{#if section === 'words'}
-<div class="mt-6 mb-3 flex items-center gap-1.5 pb-2">
-  <h2 class="m-0">Import and export</h2>
-  <Help />
-</div>
-<div class={WIDE}>
-  <button
-    onclick={exportWords}
-    disabled={selectedWords.length === 0}
-    title={selectedWords.length === 0 ? 'Select words in the list to export them' : undefined}
-  >
-    Export JSON{selectedWords.length > 0 ? ` (${selectedWords.length})` : ''}
-  </button>
-  <label class="file">
-    Import JSON
-    <input type="file" accept="application/json,.json" onchange={importFile} hidden />
-  </label>
-  <label class="file" title="Anki: Export → Notes in Plain Text. Columns: word, hiragana, meaning">
-    Import Anki deck (.txt)
-    <input type="file" accept="text/plain,.txt,.tsv" onchange={importAnki} hidden />
-  </label>
-</div>
-{/if}
 
 {#snippet eyeIcon()}
   <Icon>

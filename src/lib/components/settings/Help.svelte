@@ -1,6 +1,6 @@
 <script lang="ts">
   import Icon from '../Icon.svelte'
-  import { closeOnBackdrop } from './dialog'
+  import { closeOnBackdrop } from '../manage/dialog'
 
   let helpEl = $state<HTMLDialogElement>()
 </script>
