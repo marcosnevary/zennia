@@ -43,7 +43,7 @@
 <div class="grid gap-1.5">
   <input
     type="text"
-    class="border-2 border-muted focus-visible:border-accent focus-visible:outline-none"
+    class="field"
     placeholder="New tag (type it and press Enter)"
     bind:value={draft}
     oninput={() => (error = '')}

@@ -103,6 +103,16 @@
   --off-bg: #4a2a0a;
 }
 
+/* the answer fields are the only bordered inputs */
+@utility field {
+  border: 2px solid var(--muted);
+
+  &:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+  }
+}
+
 @layer base {
   * {
     box-sizing: border-box;

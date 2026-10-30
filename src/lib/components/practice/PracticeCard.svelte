@@ -1,6 +1,12 @@
 <script lang="ts">
   import type { Verdict } from '../../core/types'
 
+  const VERDICT_STYLES: Record<Verdict, string> = {
+    correct: 'bg-ok-bg text-ok',
+    almost: 'bg-warn-bg text-warn',
+    incorrect: 'bg-bad-bg text-bad',
+  }
+
   let {
     prompt,
     verdict,
@@ -38,14 +44,16 @@
   } = $props()
 </script>
 
-<section class="card">
-  <p class="prompt" lang="ja">{prompt}</p>
+<!-- the bottom padding plus the scoreboard's 12px margin gives the same 24px as above the result -->
+<section class="mt-6 bg-surface px-4 pt-6 pb-3 text-center">
+  <p class="mb-5 font-serif text-[4rem] leading-[1.2]" lang="ja">{prompt}</p>
 
-  <form {onsubmit}>
-    <div class="fields">
+  <form class="flex gap-2" {onsubmit}>
+    <div class="flex min-w-0 flex-1 flex-col gap-2">
       {#if askReading}
         <input
           type="text"
+          class="field"
           bind:this={inputEl}
           bind:value={answer}
           {onkeydown}
@@ -60,6 +68,7 @@
       {#if askMeaning}
         <input
           type="text"
+          class="field"
           bind:this={meaningEl}
           bind:value={meaningAnswer}
           readonly={verdict !== null}
@@ -71,83 +80,20 @@
         />
       {/if}
     </div>
-    <button class="primary" type="submit">{verdict ? 'Next' : 'Check'}</button>
+    <!-- fixed width, so the button does not resize when its label switches between Check and Next -->
+    <button class="primary w-24 flex-none" type="submit">{verdict ? 'Next' : 'Check'}</button>
   </form>
 
   {#if verdict}
-    <div class="result {verdict}" role="status">
+    <div class="mt-6 p-3 text-left {VERDICT_STYLES[verdict]}" role="status">
       <strong>
         {#if verdict === 'correct'}Correct!
         {:else if verdict === 'almost'}Almost: only the length of a vowel differs.
         {:else}Incorrect.{/if}
       </strong>
-      <p class="answer" lang="ja">{reading}</p>
-      {#if detail !== undefined}<p>{detail}</p>{/if}
-      {#if note}<p>{note}</p>{/if}
+      <p class="mt-1 text-[1.2rem]" lang="ja">{reading}</p>
+      {#if detail !== undefined}<p class="mt-1">{detail}</p>{/if}
+      {#if note}<p class="mt-1">{note}</p>{/if}
     </div>
   {/if}
 </section>
-
-<style>
-  .card {
-    margin-top: 24px;
-    /* the bottom padding plus the scoreboard's 12px margin gives the same 24px as above the result */
-    padding: 24px 16px 12px;
-    background: var(--surface);
-    text-align: center;
-  }
-  .prompt {
-    font-family: var(--font-serif);
-    margin: 0 0 20px;
-    font-size: 4rem;
-    line-height: 1.2;
-  }
-  form {
-    display: flex;
-    gap: 8px;
-  }
-  .fields {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  /* fixed width, so the button does not resize when its label switches between Check and Next */
-  form button {
-    flex: none;
-    width: 6rem;
-  }
-  /* the only bordered element: the answer field */
-  form input {
-    width: 100%;
-    border: 2px solid var(--muted);
-  }
-  form input:focus-visible {
-    outline: none;
-    border-color: var(--accent);
-  }
-  .result {
-    margin-top: 24px;
-    padding: 12px;
-    text-align: left;
-  }
-  .result p {
-    margin: 4px 0 0;
-  }
-  .answer {
-    font-size: 1.2rem;
-  }
-  .correct {
-    background: var(--ok-bg);
-    color: var(--ok);
-  }
-  .almost {
-    background: var(--warn-bg);
-    color: var(--warn);
-  }
-  .incorrect {
-    background: var(--bad-bg);
-    color: var(--bad);
-  }
-</style>
