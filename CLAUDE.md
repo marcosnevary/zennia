@@ -1,8 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-Personal web app (in English) for practicing Japanese vocabulary: it shows a word, the user types the reading in romaji, and the app checks it. Svelte 5 + Vite + TypeScript + wanakana, data only in localStorage (no backend).
+Web app for practicing Japanese vocabulary: it shows a word, the user types the reading in romaji, and the app checks it. Svelte 5 + Vite + TypeScript + wanakana, data only in localStorage (no backend).
 
 ## Commands
 
@@ -18,7 +16,7 @@ No linter is configured. Tests live next to the module they cover (`*.test.ts` i
 
 ## Documentation
 
-Read [docs/](docs/README.md) before changing a module: [architecture](docs/architecture.md), [core](docs/core.md), [data](docs/data.md) and [components](docs/components/README.md). Domain terms are in [GLOSSARY.md](GLOSSARY.md).
+The previous docs were removed ahead of the SvelteKit and database migration and will be rewritten afterwards. Domain terms are in [GLOSSARY.md](GLOSSARY.md).
 
 ## Rules to know before touching code
 
@@ -31,7 +29,6 @@ Read [docs/](docs/README.md) before changing a module: [architecture](docs/archi
 ## Conventions
 
 - Svelte 5: always use runes (`$state`, `$derived`, `$effect`), not Svelte 4 syntax. No SvelteKit.
-- The interface is provisional (simple, scoped CSS); functionality is the priority.
 - Deploy planned on Vercel (Vite detected automatically). localStorage is per domain, so changing the URL requires exporting/importing the JSON.
 - After making a change, make sure `npm run dev` is running (start it in the background if not) **from the directory where the change was made**, so that a worktree serves its own code rather than `main`'s. Vite picks the next free port when 5173 is taken, so report the URL it prints. The user tests changes in the browser.
 - Before making any change, sync with `main` to avoid conflicts: run `git pull` (on `main`), or on a feature branch/worktree run `git fetch origin` and merge `origin/main` into it.
