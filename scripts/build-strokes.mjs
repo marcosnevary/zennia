@@ -1,4 +1,4 @@
-// Builds public/strokes.json from an extracted KanjiVG release (https://kanjivg.tagaini.net, CC BY-SA 3.0).
+// Builds static/strokes.json from an extracted KanjiVG release (https://kanjivg.tagaini.net, CC BY-SA 3.0).
 // Usage: node scripts/build-strokes.mjs <dir with the kanji/*.svg files>
 // Output: { "あ": { "s": ["<path d>", ...], "n": [[x, y], ...] } } where s[i] is stroke i + 1 and n[i] its number position.
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -25,5 +25,5 @@ for (const file of readdirSync(dir).sort()) {
   out[String.fromCodePoint(parseInt(match[1], 16))] = { s, n }
 }
 
-writeFileSync(new URL('../public/strokes.json', import.meta.url), JSON.stringify(out))
+writeFileSync(new URL('../static/strokes.json', import.meta.url), JSON.stringify(out))
 console.log(`${Object.keys(out).length} characters`)
