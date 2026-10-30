@@ -2,34 +2,21 @@
   import { resolve } from '$app/paths'
   import { defaultKanaSelection, type KanaScript } from '../../core/kana'
   import { toDisplayRomaji } from '../../core/romaji'
+  import Icon from '../Icon.svelte'
   import PracticeCard from './PracticeCard.svelte'
+  import PracticeOptions from './PracticeOptions.svelte'
   import Scoreboard from './Scoreboard.svelte'
   import { checkParts, joinAnswers, mixedMode, type PracticeItem, type WordsFocus } from '../../data/practice-modes'
-  import {
-    resolveScope,
-    scopedKanaSelection,
-    scopedWords,
-    scopeIncludesScript,
-    scopeIncludesTag,
-    scopeIncludesUntagged,
-    type PracticeScope,
-  } from '../../data/practice-scope'
+  import { resolveScope, scopedKanaSelection, scopedWords, scopeSummary, type PracticeScope } from '../../data/practice-scope'
   import { drawOdds, nextRound, resetScore, startSession, submit as submitAnswer } from '../../data/practice-session'
   import { allTags, sameTag } from '../../data/words'
   import { getApp } from '../../state.svelte'
 
   const app = getApp()
 
-  const SCRIPTS: { id: KanaScript; label: string }[] = [
-    { id: 'hiragana', label: 'Hiragana' },
-    { id: 'katakana', label: 'Katakana' },
-  ]
+  const FOCUS_LABELS: Record<WordsFocus, string> = { reading: 'Romaji', meaning: 'Meaning', both: 'Both' }
 
-  const FOCUSES: { id: WordsFocus; label: string }[] = [
-    { id: 'reading', label: 'Romaji' },
-    { id: 'meaning', label: 'Meaning' },
-    { id: 'both', label: 'Both' },
-  ]
+  let options = $state<PracticeOptions>()
 
   const scope = $derived(app.settings.practiceScope)
   const tags = $derived(allTags(app.words))
@@ -37,6 +24,7 @@
   const words = $derived(scopedWords(app.words, scope))
 
   let focus = $state<WordsFocus>(app.settings.wordsFocus)
+  const summary = $derived(`${scopeSummary(scope, tags)} · Words: ${FOCUS_LABELS[focus]}`)
   const mode = $derived(mixedMode(words, kanaSelection, app.stats, focus, app.recorder))
 
   let session = $state(startSession<PracticeItem>())
@@ -144,31 +132,32 @@
   draw()
 </script>
 
-{#snippet chip(label: string, on: boolean, onclick: () => void)}
-  <button class:primary={on} aria-pressed={on} {onclick}>{label}</button>
-{/snippet}
+<PracticeOptions
+  bind:this={options}
+  {scope}
+  {tags}
+  {focus}
+  ontogglescript={toggleScript}
+  ontoggletag={toggleTag}
+  ontoggleuntagged={toggleUntagged}
+  onchoosefocus={chooseFocus}
+/>
 
-<div class="mt-4 flex flex-col gap-2">
-  <div class="flex flex-wrap justify-center gap-2" role="group" aria-label="What to practice">
-    {#each SCRIPTS as s (s.id)}
-      {@render chip(s.label, scopeIncludesScript(scope, s.id), () => toggleScript(s.id))}
-    {/each}
-    {#each tags as tag (tag)}
-      {@render chip(tag, scopeIncludesTag(scope, tag), () => toggleTag(tag))}
-    {/each}
-    {@render chip('Untagged', scopeIncludesUntagged(scope), toggleUntagged)}
-  </div>
-  <div class="flex flex-wrap items-center justify-center gap-2" role="group" aria-label="How to answer words">
-    <span class="text-[0.85rem] text-muted">Words:</span>
-    {#each FOCUSES as f (f.id)}
-      {@render chip(f.label, focus === f.id, () => chooseFocus(f.id))}
-    {/each}
-  </div>
+<div class="mt-4 flex items-center justify-center gap-3">
+  <span class="min-w-0 truncate text-[0.9rem] text-muted">{summary}</span>
+  <button class="inline-flex items-center gap-1.5" onclick={() => options?.open()}>
+    <Icon>
+      <path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6" />
+    </Icon>
+    Customize
+  </button>
 </div>
 
 {#if !current}
   <p class="my-4 text-muted">
-    Nothing to practice with this selection. Choose something above, or <a href={resolve('/manage')}>manage your words and kana</a>.
+    Nothing to practice with this selection.
+    <button onclick={() => options?.open()}>Customize</button>
+    or <a href={resolve('/manage')}>manage your words and kana</a>.
   </p>
 {:else}
   <PracticeCard
