@@ -46,15 +46,18 @@ describe('settings', () => {
   })
 
   it('falls back to the defaults for values it does not know', () => {
-    expect(settingsFromRow({ theme: 'blue', words_focus: 'x', kana_selection: ['hiragana:あ'] })).toEqual({
+    expect(settingsFromRow({ theme: 'blue', words_focus: 'x', kana_selection: ['hiragana:あ'], practice_scope: null })).toEqual({
       theme: 'system',
       wordsFocus: 'reading',
       kanaSelection: ['hiragana:あ'],
+      practiceScope: null,
     })
   })
 
   it('writes only the fields that changed', () => {
     expect(settingsToRow({ wordsFocus: 'both' })).toEqual({ words_focus: 'both' })
     expect(settingsToRow({ kanaSelection: null })).toEqual({ kana_selection: null })
+    const practiceScope = { scripts: ['hiragana' as const], tags: ['food'], untagged: false }
+    expect(settingsToRow({ practiceScope })).toEqual({ practice_scope: practiceScope })
   })
 })
