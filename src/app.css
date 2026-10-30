@@ -1,3 +1,34 @@
+@import 'tailwindcss';
+
+/* dark mode follows the data-theme attribute (set from the saved choice or the system), not the media query */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* the colors are CSS variables that data-theme redefines, so utilities like bg-surface switch themes by themselves */
+@theme inline {
+  --color-page: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--accent-text);
+  --color-ok: var(--ok);
+  --color-ok-bg: var(--ok-bg);
+  --color-warn: var(--warn);
+  --color-warn-bg: var(--warn-bg);
+  --color-bad: var(--bad);
+  --color-bad-bg: var(--bad-bg);
+  --color-on: var(--on);
+  --color-on-bg: var(--on-bg);
+  --color-off: var(--off);
+  --color-off-bg: var(--off-bg);
+}
+
+@theme {
+  --font-ui: system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', sans-serif;
+  /* Libron for content; the Japanese fallbacks are serif to match */
+  --font-serif: 'Libron', Georgia, 'Hiragino Mincho ProN', 'Noto Serif JP', 'Yu Mincho', serif;
+}
+
 /* Libron (SIL OFL), https://github.com/nicoverbruggen/libron */
 @font-face {
   font-family: 'Libron';
@@ -46,9 +77,6 @@
   --on-bg: #e3f1fb;
   --off: #a84300;
   --off-bg: #fdeee0;
-  --font-ui: system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', sans-serif;
-  /* Libron for content; the Japanese fallbacks are serif to match */
-  --font-serif: 'Libron', Georgia, 'Hiragino Mincho ProN', 'Noto Serif JP', 'Yu Mincho', serif;
   font-family: var(--font-ui);
   color: var(--text);
   background: var(--bg);
@@ -75,134 +103,145 @@
   --off-bg: #4a2a0a;
 }
 
-* {
-  box-sizing: border-box;
-  border-radius: 0;
-}
+@layer base {
+  * {
+    box-sizing: border-box;
+    border-radius: 0;
+  }
 
-html {
-  /* keep the centered layout from shifting when a tab needs scrolling */
-  scrollbar-gutter: stable;
-}
+  html {
+    /* keep the centered layout from shifting when a tab needs scrolling */
+    scrollbar-gutter: stable;
+  }
 
-body {
-  margin: 0;
-}
+  body {
+    margin: 0;
+  }
 
-button,
-input,
-select {
-  font: inherit;
-  color: inherit;
-}
-
-input[type='text'] {
-  width: 100%;
-  padding: 10px 12px;
-  background: var(--surface);
-  border: none;
-}
-
-input[type='text']:focus-visible,
-button:focus-visible,
-.tab:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-/* flat blocks with square corners and no borders; hovering lifts them toward the top-left */
-button,
-select,
-.file,
-.tab {
-  --lift: 4px;
-  position: relative;
-  --lift-shadow: color-mix(in srgb, var(--accent) 55%, black);
-  padding: 9px 14px;
-  background: var(--surface);
-  border: none;
-  cursor: pointer;
-  transition:
-    transform 0.12s ease,
-    box-shadow 0.12s ease,
-    background-color 0.12s ease,
-    color 0.12s ease;
-}
-
-button:hover:not(:disabled, .link, .help-btn, .toggle, .no-hover),
-.file:hover,
-.tab:hover {
-  transform: translate(calc(var(--lift) * -1), calc(var(--lift) * -1));
-  /* stacked steps fill the diagonal, so the block looks extruded and stays connected to where it was */
-  box-shadow:
-    calc(var(--lift) * 0.25) calc(var(--lift) * 0.25) 0 var(--lift-shadow),
-    calc(var(--lift) * 0.5) calc(var(--lift) * 0.5) 0 var(--lift-shadow),
-    calc(var(--lift) * 0.75) calc(var(--lift) * 0.75) 0 var(--lift-shadow),
-    var(--lift) var(--lift) 0 var(--lift-shadow);
-  background: var(--accent);
-  color: var(--accent-text);
-}
-
-/* the block moves away from the cursor, so without this the hover is lost near the bottom-right edge and it flickers;
-   this extends the hit area back over the spot the button just left */
-button:hover:not(:disabled, .link, .help-btn, .toggle, .no-hover)::after,
-.file:hover::after,
-.tab:hover::after {
-  content: '';
-  position: absolute;
-  inset: 0 calc(var(--lift) * -1) calc(var(--lift) * -1) 0;
-}
-
-button:active:not(:disabled, .link, .help-btn, .toggle, .no-hover),
-.file:active,
-.tab:active {
-  transform: none;
-  box-shadow: none;
-}
-
-button.primary,
-.tab[aria-current='page'] {
-  background: var(--accent);
-  color: var(--accent-text);
-  font-weight: 600;
-}
-
-button.danger {
-  color: var(--bad);
-}
-
-button.danger:hover:not(:disabled) {
-  background: var(--bad);
-  color: var(--surface);
-  --lift-shadow: color-mix(in srgb, var(--bad) 55%, black);
-}
-
-a.tab {
-  display: inline-block;
-  text-align: center;
-  text-decoration: none;
-  color: inherit;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-@media (prefers-reduced-motion: reduce) {
   button,
-  .file,
-  .tab {
-    transition: none;
+  input,
+  select {
+    font: inherit;
+    color: inherit;
+  }
+
+  input[type='text'] {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--surface);
+  }
+
+  input[type='text']:focus-visible,
+  button:focus-visible,
+  .tab:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  h2 {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    margin: 24px 0 8px;
+  }
+
+  dialog {
+    /* preflight zeroes the margin and border that centered the dialog and framed it */
+    margin: auto;
+    border: 3px solid;
+    background: var(--bg);
+    color: inherit;
   }
 }
 
-h2 {
-  font-family: var(--font-serif);
-  font-size: 1.1rem;
-  margin: 24px 0 8px;
-}
+/* the lift effect belongs to the components layer so a utility on an element can override any part of it */
+@layer components {
+  /* flat blocks with square corners and no borders; hovering lifts them toward the top-left */
+  button,
+  select,
+  .file,
+  .tab {
+    --lift: 4px;
+    position: relative;
+    --lift-shadow: color-mix(in srgb, var(--accent) 55%, black);
+    padding: 9px 14px;
+    background: var(--surface);
+    cursor: pointer;
+    transition:
+      transform 0.12s ease,
+      box-shadow 0.12s ease,
+      background-color 0.12s ease,
+      color 0.12s ease;
+  }
 
-.muted {
-  color: var(--muted);
+  button:hover:not(:disabled, .link, .help-btn, .toggle, .no-hover),
+  .file:hover,
+  .tab:hover {
+    transform: translate(calc(var(--lift) * -1), calc(var(--lift) * -1));
+    /* stacked steps fill the diagonal, so the block looks extruded and stays connected to where it was */
+    box-shadow:
+      calc(var(--lift) * 0.25) calc(var(--lift) * 0.25) 0 var(--lift-shadow),
+      calc(var(--lift) * 0.5) calc(var(--lift) * 0.5) 0 var(--lift-shadow),
+      calc(var(--lift) * 0.75) calc(var(--lift) * 0.75) 0 var(--lift-shadow),
+      var(--lift) var(--lift) 0 var(--lift-shadow);
+    background: var(--accent);
+    color: var(--accent-text);
+  }
+
+  /* the block moves away from the cursor, so without this the hover is lost near the bottom-right edge and it flickers;
+     this extends the hit area back over the spot the button just left */
+  button:hover:not(:disabled, .link, .help-btn, .toggle, .no-hover)::after,
+  .file:hover::after,
+  .tab:hover::after {
+    content: '';
+    position: absolute;
+    inset: 0 calc(var(--lift) * -1) calc(var(--lift) * -1) 0;
+  }
+
+  button:active:not(:disabled, .link, .help-btn, .toggle, .no-hover),
+  .file:active,
+  .tab:active {
+    transform: none;
+    box-shadow: none;
+  }
+
+  button.primary,
+  .tab[aria-current='page'] {
+    background: var(--accent);
+    color: var(--accent-text);
+    font-weight: 600;
+  }
+
+  button.danger {
+    color: var(--bad);
+  }
+
+  button.danger:hover:not(:disabled) {
+    background: var(--bad);
+    color: var(--surface);
+    --lift-shadow: color-mix(in srgb, var(--bad) 55%, black);
+  }
+
+  a.tab {
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    button,
+    .file,
+    .tab {
+      transition: none;
+    }
+  }
+
+  .muted {
+    color: var(--muted);
+  }
 }

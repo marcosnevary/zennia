@@ -40,18 +40,19 @@
   }
 </script>
 
-<div class="tag-input">
+<div class="grid gap-1.5">
   <input
     type="text"
+    class="border-2 border-muted focus-visible:border-accent focus-visible:outline-none"
     placeholder="New tag (type it and press Enter)"
     bind:value={draft}
     oninput={() => (error = '')}
     onkeydown={onKeydown}
     onblur={commit}
   />
-  {#if error}<p class="error" role="alert">{error}</p>{/if}
+  {#if error}<p class="text-bad" role="alert">{error}</p>{/if}
   {#if choices.length > 0}
-    <ul class="choices" aria-label="Tags: + adds one to the word, × removes it">
+    <ul class="flex flex-wrap gap-1.5" aria-label="Tags: + adds one to the word, × removes it">
       {#each choices as tag (tag)}
         <li>
           {#if has(tag)}
@@ -64,29 +65,3 @@
     </ul>
   {/if}
 </div>
-
-<style>
-  .tag-input {
-    display: grid;
-    gap: 6px;
-  }
-  .choices {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  input[type='text'] {
-    border: 2px solid var(--muted);
-  }
-  input[type='text']:focus-visible {
-    outline: none;
-    border-color: var(--accent);
-  }
-  .error {
-    margin: 0;
-    color: var(--bad);
-  }
-</style>

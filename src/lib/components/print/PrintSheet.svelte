@@ -155,9 +155,6 @@
     :global(body) {
       background: #fff;
     }
-    :global(.app) {
-      display: none;
-    }
   }
   @page {
     size: A4 portrait;
