@@ -36,9 +36,3 @@ export interface Stats {
   words: Record<string, Tally>
   kana: Record<string, Tally>
 }
-
-export interface StatsFile {
-  version: 1
-  exportedAt?: string
-  stats: Stats
-}
