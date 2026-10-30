@@ -19,7 +19,7 @@ Practice was split into a kana screen and a words screen, and the page called Se
 - **Settings** only has the account ([ADR 4](0004-google-login.md)) and the theme.
 - `mixedMode` (`src/lib/data/practice-modes.ts`) composes `wordsMode` and `kanaMode`, so each item is weighted, checked and recorded by its own rules. Kana still never count as "almost". Item keys are prefixed (`word:`, `kana:`) so an id can never collide with a symbol.
 - The words focus (romaji, meaning or both) stays in Practice and only applies to words; a kana is always answered by its reading.
-- The scope and the focus are chosen in a "Customize" dialog opened from Practice, which shows a one-line summary of the choice. The button is not called Settings, since that is a tab.
+- The scope and the focus are chosen in a "Customize" dialog, opened by a button next to Reset session under the score. The button is not called Settings, since that is a tab.
 
 ## Consequences
 

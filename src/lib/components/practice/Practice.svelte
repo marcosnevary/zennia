@@ -2,19 +2,16 @@
   import { resolve } from '$app/paths'
   import { defaultKanaSelection, type KanaScript } from '../../core/kana'
   import { toDisplayRomaji } from '../../core/romaji'
-  import Icon from '../Icon.svelte'
   import PracticeCard from './PracticeCard.svelte'
   import PracticeOptions from './PracticeOptions.svelte'
   import Scoreboard from './Scoreboard.svelte'
   import { checkParts, joinAnswers, mixedMode, type PracticeItem, type WordsFocus } from '../../data/practice-modes'
-  import { resolveScope, scopedKanaSelection, scopedWords, scopeSummary, type PracticeScope } from '../../data/practice-scope'
+  import { resolveScope, scopedKanaSelection, scopedWords, type PracticeScope } from '../../data/practice-scope'
   import { drawOdds, nextRound, resetScore, startSession, submit as submitAnswer } from '../../data/practice-session'
   import { allTags, sameTag } from '../../data/words'
   import { getApp } from '../../state.svelte'
 
   const app = getApp()
-
-  const FOCUS_LABELS: Record<WordsFocus, string> = { reading: 'Romaji', meaning: 'Meaning', both: 'Both' }
 
   let options = $state<PracticeOptions>()
 
@@ -24,7 +21,6 @@
   const words = $derived(scopedWords(app.words, scope))
 
   let focus = $state<WordsFocus>(app.settings.wordsFocus)
-  const summary = $derived(`${scopeSummary(scope, tags)} · Words: ${FOCUS_LABELS[focus]}`)
   const mode = $derived(mixedMode(words, kanaSelection, app.stats, focus, app.recorder))
 
   let session = $state(startSession<PracticeItem>())
@@ -143,16 +139,6 @@
   onchoosefocus={chooseFocus}
 />
 
-<div class="mt-4 flex items-center justify-center gap-3">
-  <span class="min-w-0 truncate text-[0.9rem] text-muted">{summary}</span>
-  <button class="inline-flex items-center gap-1.5" onclick={() => options?.open()}>
-    <Icon>
-      <path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6" />
-    </Icon>
-    Customize
-  </button>
-</div>
-
 {#if !current}
   <p class="my-4 text-muted">
     Nothing to practice with this selection.
@@ -184,5 +170,9 @@
     bestStreak={session.bestStreak}
     {odds}
     onreset={() => (session = resetScore(session))}
-  />
+  >
+    {#snippet actions()}
+      <button onclick={() => options?.open()}>Customize</button>
+    {/snippet}
+  </Scoreboard>
 {/if}

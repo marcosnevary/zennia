@@ -38,21 +38,6 @@ export function resolveScope(scope: PracticeScope | null, allTags: string[]): Pr
   return scope ?? { scripts: ['hiragana', 'katakana'], tags: allTags, untagged: true }
 }
 
-const SCRIPT_LABELS: Record<KanaScript, string> = { hiragana: 'Hiragana', katakana: 'Katakana' }
-
-/** A short description of what the scope includes, e.g. "Hiragana · 2 tags · Untagged". */
-export function scopeSummary(scope: PracticeScope | null, allTags: string[]): string {
-  const { scripts, tags, untagged } = resolveScope(scope, allTags)
-  const chosenTags = allTags.filter((t) => tags.some((x) => sameTag(x, t)))
-  if (scripts.length === 2 && chosenTags.length === allTags.length && untagged) return 'Everything'
-  const parts = [
-    ...(['hiragana', 'katakana'] as const).filter((s) => scripts.includes(s)).map((s) => SCRIPT_LABELS[s]),
-    ...(chosenTags.length ? [`${chosenTags.length} ${chosenTags.length === 1 ? 'tag' : 'tags'}`] : []),
-    ...(untagged ? ['Untagged'] : []),
-  ]
-  return parts.length ? parts.join(' · ') : 'Nothing selected'
-}
-
 /** The scope without the tags that no word has anymore. */
 export function pruneScopeTags(scope: PracticeScope | null, allTags: string[]): PracticeScope | null {
   if (scope === null) return null
