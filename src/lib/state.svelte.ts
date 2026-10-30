@@ -2,6 +2,7 @@ import { getContext, setContext } from 'svelte'
 import { kanaKey, type KanaScript } from './core/kana'
 import type { Stats, Verdict, Word } from './core/types'
 import { clearLegacy, readLegacy } from './data/db/legacy'
+import type { Account } from './data/db/client'
 import type { Repo, Stored } from './data/db/repo'
 import type { Recorder, WordsFocus } from './data/practice-modes'
 import { DEFAULT_SETTINGS, type Settings } from './data/settings'
@@ -28,6 +29,9 @@ export class App {
   settings = $state<Settings>({ ...DEFAULT_SETTINGS, theme: readThemeCache() })
   status = $state<'loading' | 'ready' | 'failed'>('loading')
   error = $state('')
+  account = $state<Account>({ anonymous: true, email: null })
+  // Google sent the user back because that account already has data; waits for them to choose
+  conflict = $state(false)
   // words of the writing sheet being printed; it renders hidden and only shows up in the print dialog
   sheetWords = $state<Word[] | null>(null)
 
@@ -49,6 +53,14 @@ export class App {
     try {
       let stored = await this.#repo.load()
       const isNew = stored.words.length === 0 && !attempts(totalTally(stored.stats))
+      this.account = await this.#repo.account()
+      if (this.#repo.takeLinkConflict()) {
+        if (isNew) {
+          await this.#repo.signInToAccount()
+          return
+        }
+        this.conflict = true
+      }
       const legacy = isNew ? readLegacy() : null
       if (legacy) {
         await this.#repo.upsertWords(legacy.words)
@@ -63,6 +75,36 @@ export class App {
       this.error = messageOf(e)
       this.status = 'failed'
     }
+  }
+
+  async signIn(): Promise<void> {
+    try {
+      await this.#repo.linkAccount()
+    } catch (e) {
+      this.error = `Could not sign in: ${messageOf(e)}`
+    }
+  }
+
+  /** Answers the conflict: discarding signs in to the existing account, keeping stays anonymous. */
+  async resolveConflict(discard: boolean): Promise<void> {
+    this.conflict = false
+    if (!discard) return
+    try {
+      await this.#repo.signInToAccount()
+    } catch (e) {
+      this.error = `Could not sign in: ${messageOf(e)}`
+    }
+  }
+
+  async signOut(): Promise<void> {
+    await this.flush()
+    try {
+      await this.#repo.signOut()
+    } catch (e) {
+      this.error = `Could not sign out: ${messageOf(e)}`
+      return
+    }
+    await this.init()
   }
 
   /** Resolves when every change made so far has been written. */

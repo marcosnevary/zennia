@@ -18,7 +18,8 @@ SvelteKit static SPA (see [ADR 1](adr/0001-sveltekit.md)). There is no server of
 
 1. Create a Supabase project and turn on **Anonymous sign-ins** (Authentication > Sign In / Providers).
 2. Run `supabase/migrations/0001_init.sql` in the SQL editor (or with the Supabase CLI).
-3. Copy `.env.example` to `.env` and fill in the project URL and anon key. Set the same variables in Vercel.
+3. For login ([ADR 4](adr/0004-google-login.md)): create a Google OAuth client with the redirect URI `https://<project>.supabase.co/auth/v1/callback`, enable the **Google** provider and **Allow manual linking** in Supabase, and add `http://localhost:5173` and the Vercel URL to Authentication > URL Configuration > Redirect URLs.
+4. Copy `.env.example` to `.env` and fill in the project URL and anon key. Set the same variables in Vercel.
 
 ## Commands
 

@@ -16,7 +16,7 @@ const word = (id: string, createdAt: number, extra: Partial<Word> = {}): Word =>
   ...extra,
 })
 
-function fakeRepo(stored: Partial<Stored> = {}) {
+function fakeRepo(stored: Partial<Stored> = {}, conflict = false) {
   let current: Stored = { words: [], stats: emptyStats(), settings: { ...DEFAULT_SETTINGS }, ...stored }
   const calls: string[] = []
   const repo: Repo = {
@@ -36,12 +36,23 @@ function fakeRepo(stored: Partial<Stored> = {}) {
     saveSettings: vi.fn(async (patch) => {
       calls.push(`settings ${JSON.stringify(patch)}`)
     }),
+    account: vi.fn(async () => ({ anonymous: true, email: null })),
+    linkAccount: vi.fn(async () => {
+      calls.push('link')
+    }),
+    signInToAccount: vi.fn(async () => {
+      calls.push('signin')
+    }),
+    signOut: vi.fn(async () => {
+      calls.push('signout')
+    }),
+    takeLinkConflict: vi.fn(() => conflict),
   }
   return { repo, calls, setStored: (next: Stored) => (current = next) }
 }
 
-async function ready(stored?: Partial<Stored>) {
-  const fake = fakeRepo(stored)
+async function ready(stored?: Partial<Stored>, conflict = false) {
+  const fake = fakeRepo(stored, conflict)
   const app = new App(fake.repo)
   await app.init()
   return { app, ...fake }
@@ -166,5 +177,35 @@ describe('legacy localStorage import', () => {
     const { calls } = await ready({ words: [word('z', 1)] })
     expect(calls).toEqual([])
     expect(store.has('zennia:words')).toBe(true)
+  })
+
+  describe('login', () => {
+    it('asks before discarding the data of a browser that already has some', async () => {
+      const { app, calls } = await ready({ words: [word('a', 1)] }, true)
+      expect(app.conflict).toBe(true)
+      expect(calls).toEqual([])
+      await app.resolveConflict(true)
+      expect(calls).toEqual(['signin'])
+    })
+
+    it('keeps the data when the user declines', async () => {
+      const { app, calls } = await ready({ words: [word('a', 1)] }, true)
+      await app.resolveConflict(false)
+      expect(app.conflict).toBe(false)
+      expect(calls).toEqual([])
+    })
+
+    it('signs in to the existing account at once when the browser has no data', async () => {
+      const { app, calls } = await ready({}, true)
+      expect(app.conflict).toBe(false)
+      expect(calls).toEqual(['signin'])
+    })
+
+    it('reloads the data after signing out', async () => {
+      const { app, calls, repo } = await ready({ words: [word('a', 1)] })
+      await app.signOut()
+      expect(calls).toEqual(['signout'])
+      expect(repo.load).toHaveBeenCalledTimes(2)
+    })
   })
 })

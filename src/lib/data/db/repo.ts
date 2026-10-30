@@ -1,6 +1,6 @@
 import type { Stats, Word } from '../../core/types'
 import type { Settings } from '../settings'
-import { openSession, type Db } from './client'
+import { getAccount, linkGoogle, openSession, signInGoogle, signOut, takeLinkConflict, type Account, type Db } from './client'
 import {
   settingsFromRow,
   settingsToRow,
@@ -29,6 +29,15 @@ export interface Repo {
   recordAnswer(kind: 'word' | 'kana', key: string, hit: boolean): Promise<void>
   replaceStats(stats: Stats): Promise<void>
   saveSettings(patch: Partial<Settings>): Promise<void>
+  account(): Promise<Account>
+  /** Goes to Google to attach it to the current user; the page is left. */
+  linkAccount(): Promise<void>
+  /** Goes to Google to sign in to the user that owns the account, leaving the current user's data behind. */
+  signInToAccount(): Promise<void>
+  /** Signs out; the next load starts a new anonymous user. */
+  signOut(): Promise<void>
+  /** True once when Google sent the user back because that account already belongs to another user. */
+  takeLinkConflict(): boolean
 }
 
 const PAGE = 1000
@@ -126,5 +135,28 @@ export function createRepo(getDb: () => Db): Repo {
       const { db, userId } = await open()
       unwrap(await db.from('settings').upsert({ user_id: userId, ...settingsToRow(patch) }))
     },
+
+    async account() {
+      const { db } = await open()
+      return getAccount(db)
+    },
+
+    async linkAccount() {
+      const { db } = await open()
+      await linkGoogle(db)
+    },
+
+    async signInToAccount() {
+      const { db } = await open()
+      await signInGoogle(db)
+    },
+
+    async signOut() {
+      const { db } = await open()
+      await signOut(db)
+      opened = undefined
+    },
+
+    takeLinkConflict,
   }
 }
