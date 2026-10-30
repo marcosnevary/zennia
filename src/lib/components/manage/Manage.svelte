@@ -226,18 +226,6 @@
 </script>
 
 <div>
-{#if section === 'words'}
-<h2 class="section-title">New word</h2>
-<form class="grid gap-2" onsubmit={save}>
-  <input type="text" class="field" lang="ja" placeholder="Japanese (e.g. 食べる)" bind:value={japanese} bind:this={japaneseEl} />
-  <input type="text" class="field" lang="ja" placeholder="Hiragana (e.g. たべる)" bind:value={hiragana} />
-  <input type="text" class="field" placeholder="Meaning (e.g. to eat)" bind:value={meaning} />
-  <TagInput bind:tags={newTags} suggestions={tags} />
-  <div class={WIDE}>
-    <button class="action" type="submit">Add</button>
-  </div>
-</form>
-{/if}
 
 <dialog class="w-[min(420px,calc(100vw-32px))]" bind:this={dialogEl} onclose={() => (editingId = null)} use:closeOnBackdrop aria-label="Edit word">
   <form class="grid gap-2" onsubmit={saveEdit}>
@@ -287,6 +275,19 @@
 {/snippet}
 
 {#if section === 'words'}
+<div class="grid items-start gap-x-8 gap-y-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]">
+<div>
+<h2 class="section-title">New word</h2>
+<form class="grid gap-2" onsubmit={save}>
+  <input type="text" class="field" lang="ja" placeholder="Japanese (e.g. 食べる)" bind:value={japanese} bind:this={japaneseEl} />
+  <input type="text" class="field" lang="ja" placeholder="Hiragana (e.g. たべる)" bind:value={hiragana} />
+  <input type="text" class="field" placeholder="Meaning (e.g. to eat)" bind:value={meaning} />
+  <TagInput bind:tags={newTags} suggestions={tags} />
+  <div class={WIDE}>
+    <button class="action" type="submit">Add</button>
+  </div>
+</form>
+
 <h2 class="section-title">Tags ({tags.length})</h2>
 {#if tags.length === 0}
   <p class="my-4 text-muted">No tags yet. Add them when you add or edit a word, or with the tag button on selected words.</p>
@@ -318,7 +319,8 @@
   </ul>
   {#if renaming !== null && renameError}<p class="my-4 text-bad" role="alert">{renameError}</p>{/if}
 {/if}
-
+</div>
+<div>
 <h2 class="section-title">Words ({visibleWords.length === words.length ? words.length : `${visibleWords.length} of ${words.length}`})</h2>
 {#if words.length === 0}
   <p class="my-4 text-muted">No words yet.</p>
@@ -326,7 +328,7 @@
   <div class="mb-2 flex flex-wrap items-center gap-2">
     <input
       type="search"
-      class="field min-w-50 flex-1 appearance-none bg-surface px-3 py-2.5"
+      class="field min-w-50 flex-1 appearance-none bg-surface py-2.5"
       placeholder="Search by word, reading, romaji or meaning"
       aria-label="Search words"
       bind:value={query}
@@ -437,6 +439,8 @@
   </ul>
   <Pagination page={current.page} pageCount={current.pageCount} onchange={(n) => (pageNumber = n)} />
 {/if}
+</div>
+</div>
 {/if}
 
 {#if section === 'kana'}

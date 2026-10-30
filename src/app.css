@@ -9,6 +9,7 @@
   --color-surface: var(--surface);
   --color-ink: var(--text);
   --color-muted: var(--muted);
+  --color-line: var(--border);
   --color-accent: var(--accent);
   --color-on-accent: var(--accent-text);
   --color-ok: var(--ok);
@@ -64,6 +65,7 @@
   --surface: #ffffff;
   --text: #1c1917;
   --muted: #78716c;
+  --border: #000000;
   --accent: #3f3f46;
   --accent-text: #ffffff;
   --action: #0062a3;
@@ -91,6 +93,7 @@
   --surface: #111111;
   --text: #f2f2f2;
   --muted: #a3a3a3;
+  --border: #a3a3a3;
   --accent: #d4d4d8;
   --accent-text: #1c1917;
   --action: #7ec4f0;
@@ -109,7 +112,13 @@
 
 /* the answer fields are the only bordered inputs */
 @utility field {
-  border: 2px solid var(--muted);
+  border: 2px solid var(--border);
+
+  /* typed fields only have the bottom border; selects keep the full one */
+  &:is(input) {
+    border-width: 0 0 2px;
+    padding-left: 0;
+  }
 
   &:focus-visible {
     outline: none;
