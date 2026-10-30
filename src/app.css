@@ -62,7 +62,6 @@
 :root {
   --bg: #ffffff;
   --surface: #ffffff;
-  --raised: #ffffff;
   --text: #1c1917;
   --muted: #78716c;
   --accent: #3f3f46;
@@ -88,7 +87,6 @@
   color-scheme: dark;
   --bg: #111111;
   --surface: #111111;
-  --raised: #111111;
   --text: #f2f2f2;
   --muted: #a3a3a3;
   --accent: #d4d4d8;
@@ -188,7 +186,7 @@
     margin: auto;
     border: 0;
     padding: 24px;
-    background: var(--raised);
+    background: var(--bg);
     color: inherit;
     box-shadow: 0 12px 40px rgb(0 0 0 / 0.2);
   }
