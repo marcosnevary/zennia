@@ -1,7 +1,7 @@
 ---
 name: Task
 about: Feature, improvement or chore
-labels: ["task"]
+labels: ["enhancement"]
 ---
 
 ## What is the context?
