@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Snippet } from 'svelte'
   import { accuracy, percent } from '../../data/stats'
   import StatTile from '../StatTile.svelte'
 
@@ -9,6 +10,7 @@
     bestStreak,
     odds,
     onreset,
+    actions,
   }: {
     hits: number
     total: number
@@ -17,6 +19,8 @@
     /** Chance (0 to 1) of each item being drawn next, in the order to list them. */
     odds: { label: string; chance: number }[]
     onreset: () => void
+    /** Extra buttons, shown after the built-in ones. */
+    actions?: Snippet
   } = $props()
 
   let showOdds = $state(false)
@@ -41,6 +45,7 @@
 <p class="mx-4 mt-3 text-center">
   <button onclick={reset} disabled={!total}>Reset session</button>
   <button aria-expanded={showOdds} onclick={() => (showOdds = !showOdds)}>{showOdds ? 'Hide chances' : 'Show chances'}</button>
+  {@render actions?.()}
 </p>
 
 {#if showOdds}

@@ -2,12 +2,13 @@
   import Icon from '../Icon.svelte'
   import { closeOnBackdrop } from './dialog'
   import Help from './Help.svelte'
+  import KanaSelector from './KanaSelector.svelte'
   import TagChip from './TagChip.svelte'
   import TagInput from './TagInput.svelte'
   import { importAnkiDeck } from '../../data/anki'
   import { downloadText, exportFilename, exportJSON, importJSON } from '../../data/io'
   import { toDisplayRomaji } from '../../core/romaji'
-  import { THEMES, type ThemePreference } from '../../data/theme'
+  import { defaultKanaSelection } from '../../core/kana'
   import type { Word } from '../../core/types'
   import { getApp } from '../../state.svelte'
   import {
@@ -36,7 +37,6 @@
 
   const app = getApp()
   const words = $derived(app.words)
-  const theme = $derived(app.settings.theme)
 
   let japanese = $state('')
   let hiragana = $state('')
@@ -248,41 +248,7 @@
   const WIDE = `${ROW} *:flex-1 *:text-center`
   const ICON = 'inline-flex p-1.5'
   const DIM = 'opacity-45'
-
-  // only the buttons that change state animate on a theme switch; the third one would fade its background alone
-  let previousTheme = $state<ThemePreference>()
-
-  function chooseTheme(next: ThemePreference) {
-    previousTheme = theme
-    app.setTheme(next)
-  }
 </script>
-
-<h2 class="section-title">Account</h2>
-{#if app.account.anonymous}
-  <p class="my-2 text-muted">Your data lives in this browser only. Sign in to keep it and use it on other devices.</p>
-  <div class={WIDE}>
-    <button class="primary" onclick={() => app.signIn()}>Sign in with Google</button>
-  </div>
-{:else}
-  <p class="my-2">Signed in as {app.account.email}.</p>
-  <div class={WIDE}>
-    <button onclick={() => confirm('Sign out? This browser will start empty until you sign in again.') && app.signOut()}>Sign out</button>
-  </div>
-{/if}
-
-<h2 class="section-title">Theme</h2>
-<div class={WIDE} role="group" aria-label="Theme">
-  {#each THEMES as t (t.id)}
-    <button
-      class="duration-300"
-      data-animate={t.id === theme || t.id === previousTheme ? '' : undefined}
-      class:primary={theme === t.id}
-      aria-pressed={theme === t.id}
-      onclick={() => chooseTheme(t.id)}
-    >{t.label}</button>
-  {/each}
-</div>
 
 <h2 class="section-title">New word</h2>
 <form class="grid gap-2" onsubmit={save}>
@@ -510,3 +476,7 @@
     {/each}
   </ul>
 {/if}
+
+<h2 class="section-title">Kana</h2>
+<p class="mb-3 text-muted">The characters Practice draws. Choose Hiragana or Katakana in Practice itself.</p>
+<KanaSelector selected={app.settings.kanaSelection ?? defaultKanaSelection()} onchange={(keys) => app.setKanaSelection(keys)} />

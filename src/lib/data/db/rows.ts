@@ -1,5 +1,6 @@
 import type { KanaScript } from '../../core/kana'
 import type { Stats, Tally, Word } from '../../core/types'
+import type { PracticeScope } from '../practice-scope'
 import { DEFAULT_SETTINGS, type Settings } from '../settings'
 
 export interface WordRow {
@@ -26,6 +27,7 @@ export interface SettingsRow {
   theme: string
   words_focus: string
   kana_selection: string[] | null
+  practice_scope: PracticeScope | null
 }
 
 export function wordFromRow(row: WordRow): Word {
@@ -79,6 +81,7 @@ export function settingsFromRow(row: SettingsRow | null): Settings {
     theme: row.theme === 'light' || row.theme === 'dark' ? row.theme : 'system',
     wordsFocus: row.words_focus === 'meaning' || row.words_focus === 'both' ? row.words_focus : 'reading',
     kanaSelection: row.kana_selection,
+    practiceScope: row.practice_scope,
   }
 }
 
@@ -87,5 +90,6 @@ export function settingsToRow(patch: Partial<Settings>): Partial<SettingsRow> {
   if (patch.theme !== undefined) row.theme = patch.theme
   if (patch.wordsFocus !== undefined) row.words_focus = patch.wordsFocus
   if (patch.kanaSelection !== undefined) row.kana_selection = patch.kanaSelection
+  if (patch.practiceScope !== undefined) row.practice_scope = patch.practiceScope
   return row
 }

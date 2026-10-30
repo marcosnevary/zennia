@@ -69,6 +69,31 @@ export function wordsMode(
   }
 }
 
+/** An item of a mixed practice: a word or a kana. */
+export type PracticeItem = { kind: 'word'; word: Word } | { kind: 'kana'; kana: Kana }
+
+/** Words and kana drawn together; each item is weighted, checked and recorded by its own mode. */
+export function mixedMode(
+  words: Word[],
+  selected: string[],
+  stats: Stats,
+  focus: WordsFocus = 'reading',
+  recorder: Recorder = statsRecorder(stats),
+): PracticeMode<PracticeItem> {
+  const wordMode = wordsMode(words, stats, focus, recorder)
+  const kana = kanaMode(selected, stats, recorder)
+  return {
+    pool: [
+      ...wordMode.pool.map((word): PracticeItem => ({ kind: 'word', word })),
+      ...kana.pool.map((k): PracticeItem => ({ kind: 'kana', kana: k })),
+    ],
+    keyOf: (item) => (item.kind === 'word' ? `word:${wordMode.keyOf(item.word)}` : `kana:${kana.keyOf(item.kana)}`),
+    weightOf: (item) => (item.kind === 'word' ? wordMode.weightOf(item.word) : kana.weightOf(item.kana)),
+    check: (answer, item) => (item.kind === 'word' ? wordMode.check(answer, item.word) : kana.check(answer, item.kana)),
+    record: (item, verdict) => (item.kind === 'word' ? wordMode.record(item.word, verdict) : kana.record(item.kana, verdict)),
+  }
+}
+
 /** Kana practice over the selected keys (see `kanaKey`). Single sounds have no vowel-length ambiguity, so anything but a match is wrong. */
 export function kanaMode(selected: string[], stats: Stats, recorder: Recorder = statsRecorder(stats)): PracticeMode<Kana> {
   return {

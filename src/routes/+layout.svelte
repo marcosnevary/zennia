@@ -15,10 +15,10 @@
   onMount(() => app.init())
 
   const tabs = [
-    { path: '/kana', label: 'Kana' },
-    { path: '/words', label: 'Words' },
+    { path: '/practice', label: 'Practice' },
+    { path: '/manage', label: 'Manage' },
     { path: '/stats', label: 'Stats' },
-    { path: '/manage', label: 'Settings' },
+    { path: '/settings', label: 'Settings' },
   ] as const
 
   $effect(() => {
