@@ -64,7 +64,7 @@
   --surface: #ffffff;
   --text: #1c1917;
   --muted: #78716c;
-  --accent: #1d6fe0;
+  --accent: #3f3f46;
   --accent-text: #ffffff;
   --ok: #15803d;
   --ok-bg: #dcfce7;
@@ -89,7 +89,7 @@
   --surface: #111111;
   --text: #f2f2f2;
   --muted: #a3a3a3;
-  --accent: #60a5fa;
+  --accent: #d4d4d8;
   --accent-text: #1c1917;
   --ok: #86efac;
   --ok-bg: #14532d;
@@ -147,6 +147,7 @@
   html {
     /* keep the centered layout from shifting when a tab needs scrolling */
     scrollbar-gutter: stable;
+    text-transform: lowercase;
   }
 
   body {
@@ -158,6 +159,7 @@
   select {
     font: inherit;
     color: inherit;
+    text-transform: inherit;
   }
 
   input[type='text'] {
@@ -203,17 +205,43 @@
     padding: 9px 14px;
     background: var(--surface);
     cursor: pointer;
+    transition:
+      background-color 90ms ease,
+      color 90ms ease;
+  }
+
+  button,
+  .file,
+  .tab {
+    font-family: var(--font-serif);
   }
 
   button.primary,
   .tab[aria-current='page'] {
     background: var(--accent);
     color: var(--accent-text);
-    font-weight: 600;
   }
 
   button.danger {
     color: var(--bad);
+  }
+
+  button:not(:disabled):hover,
+  select:hover,
+  .file:hover,
+  .tab:hover {
+    background: var(--accent);
+    color: var(--accent-text);
+  }
+
+  button.primary:not(:disabled):hover,
+  .tab[aria-current='page']:hover {
+    background: color-mix(in srgb, var(--accent) 80%, var(--text));
+  }
+
+  button.danger:not(:disabled):hover {
+    background: var(--bad);
+    color: var(--surface);
   }
 
   a.tab {
