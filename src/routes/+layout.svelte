@@ -21,7 +21,6 @@
 
   const manageSections = [
     { path: '/manage/words', label: 'Words' },
-    { path: '/manage/tags', label: 'Tags' },
     { path: '/manage/kana', label: 'Kana' },
   ] as const
 

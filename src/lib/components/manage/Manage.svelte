@@ -55,7 +55,7 @@
   let message = $state('')
   let japaneseEl = $state<HTMLInputElement>()
 
-  let { section }: { section: 'words' | 'tags' | 'kana' } = $props()
+  let { section }: { section: 'words' | 'kana' } = $props()
 
   function resetForm() {
     japanese = ''
@@ -344,7 +344,7 @@
   </Icon>
 {/snippet}
 
-{#if section === 'tags'}
+{#if section === 'words'}
 <h2 class="section-title">Tags ({tags.length})</h2>
 {#if tags.length === 0}
   <p class="my-4 text-muted">No tags yet. Add them when you add or edit a word, or with the tag button on selected words.</p>
@@ -376,9 +376,7 @@
   </ul>
   {#if renaming !== null && renameError}<p class="my-4 text-bad" role="alert">{renameError}</p>{/if}
 {/if}
-{/if}
 
-{#if section === 'words'}
 <h2 class="section-title">Words ({visibleWords.length === words.length ? words.length : `${visibleWords.length} of ${words.length}`})</h2>
 {#if words.length === 0}
   <p class="my-4 text-muted">No words yet.</p>
