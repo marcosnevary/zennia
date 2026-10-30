@@ -20,15 +20,14 @@
   import { drawOdds, nextRound, resetScore, startSession, submit as submitAnswer } from '../../data/practice-session'
   import { getApp } from '../../state.svelte'
 
-  const LINK = 'no-hover bg-transparent px-0.5 py-0 text-[0.8rem] text-muted underline'
+  const LINK = 'bg-transparent px-0.5 py-0 text-[0.8rem] text-muted underline'
 
-  // same size for every cell, single or double kana; selected cells keep their light blue while lifting on hover,
-  // unselected ones hover black and white
+  // same size for every cell, single or double kana
   function cellClass(on: boolean): string {
-    const base = 'h-10 w-13 [--lift:2px] p-0 text-[1.2rem] whitespace-nowrap'
+    const base = 'h-10 w-13 p-0 text-[1.2rem] whitespace-nowrap'
     return on
-      ? `${base} bg-on-bg text-on hover:bg-on-bg hover:text-on hover:[--lift-shadow:var(--on)] dark:hover:[--lift-shadow:#0062a3]`
-      : `${base} bg-transparent text-muted hover:bg-ink hover:text-page hover:[--lift-shadow:color-mix(in_srgb,var(--text)_55%,black)] dark:hover:bg-[#2a2a2a] dark:hover:text-ink dark:hover:[--lift-shadow:#3d3d3d]`
+      ? `${base} bg-on-bg text-on`
+      : `${base} bg-transparent text-muted`
   }
 
   const app = getApp()

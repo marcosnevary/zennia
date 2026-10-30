@@ -5,7 +5,7 @@
   let helpEl = $state<HTMLDialogElement>()
 </script>
 
-<button class="no-hover inline-flex bg-transparent p-0.5 text-muted opacity-60 hover:opacity-100 focus-visible:opacity-100" onclick={() => helpEl?.showModal()} aria-label="How import and export work" title="How import and export work">
+<button class="inline-flex bg-transparent p-0.5 text-muted opacity-60 focus-visible:opacity-100" onclick={() => helpEl?.showModal()} aria-label="How import and export work" title="How import and export work">
   <Icon class="size-4">
     <circle cx="12" cy="12" r="9" />
     <path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17h.01" />
