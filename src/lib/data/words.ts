@@ -284,7 +284,7 @@ export function sortWords(words: Word[], key: SortKey, direction: SortDirection)
   return [...words].sort((a, b) => sign * compare(a, b) || 0)
 }
 
-export const PAGE_SIZE = 25
+export const PAGE_SIZE = 12
 
 export interface Page<T> {
   items: T[]
