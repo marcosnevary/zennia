@@ -9,6 +9,7 @@ import {
   makeWord,
   mergeWords,
   needsMeaning,
+  pageEntries,
   paginate,
   removeTag,
   renameTag,
@@ -395,5 +396,25 @@ describe('paginate', () => {
 
   it('gives an empty list a single empty page', () => {
     expect(paginate([], 4)).toEqual({ items: [], page: 1, pageCount: 1 })
+  })
+})
+
+describe('pageEntries', () => {
+  it('lists every page when they fit', () => {
+    expect(pageEntries(2, 5)).toEqual([1, 2, 3, 4, 5])
+  })
+
+  it('always has the same number of entries, wherever the current page is', () => {
+    for (let page = 1; page <= 20; page++) expect(pageEntries(page, 20)).toHaveLength(7)
+  })
+
+  it('puts the gaps on the side away from the current page', () => {
+    expect(pageEntries(1, 20)).toEqual([1, 2, 3, 4, 5, 'gap', 20])
+    expect(pageEntries(10, 20)).toEqual([1, 'gap', 9, 10, 11, 'gap', 20])
+    expect(pageEntries(20, 20)).toEqual([1, 'gap', 16, 17, 18, 19, 20])
+  })
+
+  it('always includes the current page', () => {
+    for (let page = 1; page <= 20; page++) expect(pageEntries(page, 20)).toContain(page)
   })
 })
