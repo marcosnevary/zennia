@@ -2,4 +2,4 @@
   import Manage from '#lib/components/manage/Manage.svelte'
 </script>
 
-<Manage />
+<Manage section="kana" />
