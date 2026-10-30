@@ -31,7 +31,7 @@ export function importJSON(text: string): SanitizeResult {
   return sanitizeWords(parseJSON(text), { requireMeaning: true })
 }
 
-/** Serializes the stats to JSON (a `StatsFile`, the format kept in localStorage plus `exportedAt`). */
+/** Serializes the stats to JSON (a `StatsFile`, the same shape as the database stats plus `exportedAt`). */
 export function exportStatsJSON(stats: Stats): string {
   const data: StatsFile = { version: 1, exportedAt: new Date().toISOString(), stats }
   return JSON.stringify(data, null, 2)

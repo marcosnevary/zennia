@@ -57,7 +57,7 @@ export function cleanTags(tags: unknown[]): string[] {
 
 /** A new enabled word from the form texts. */
 export function makeWord({ japanese, hiragana, meaning, tags }: WordFields): Word {
-  return { id: newId(), japanese: japanese.trim(), hiragana: hiragana.trim(), meaning: meaning.trim(), disabled: false, activatedAt: Date.now(), tags: cleanTags(tags) }
+  return { id: newId(), japanese: japanese.trim(), hiragana: hiragana.trim(), meaning: meaning.trim(), disabled: false, activatedAt: Date.now(), createdAt: Date.now(), tags: cleanTags(tags) }
 }
 
 /** The word enabled or disabled; enabling a disabled word stamps the time, which orders the status sort. */
@@ -86,7 +86,7 @@ export interface SanitizeResult {
 }
 
 /**
- * Validates external data (localStorage or an imported file).
+ * Validates external data (an imported file or the old localStorage data).
  * Accepts a list of words or an object { words: [...] }.
  * Items without `japanese` or `hiragana` are ignored and counted in `skipped`, and so are
  * items without a meaning when `requireMeaning` is set (new entries; words already saved keep theirs empty).
