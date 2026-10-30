@@ -8,3 +8,4 @@ dist
 .claude
 .svelte-kit
 build
+!.env.example

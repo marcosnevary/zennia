@@ -25,6 +25,7 @@
     "vitest": "^5.0.4"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
     "wanakana": "^5.3.1"
   },
   "imports": {
