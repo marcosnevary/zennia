@@ -521,7 +521,6 @@
 {/if}
 
 {#if section === 'kana'}
-<p class="mt-4 text-muted">The characters Practice draws. Choose Hiragana or Katakana in Practice itself.</p>
 <KanaSelector selected={app.settings.kanaSelection ?? defaultKanaSelection()} onchange={(keys) => app.setKanaSelection(keys)} />
 {/if}
 </div>
