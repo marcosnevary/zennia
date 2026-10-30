@@ -1,0 +1,12 @@
+# components/practice
+
+The two practice modes (Words and Kana tabs) and the card and scoreboard they share. The flow itself (draw, check, score) is in [`data/practice-session.ts`](../../src/data/practice-session.ts); these components only hold the typed answer, the input focus and the session state.
+
+| File | Contents |
+| --- | --- |
+| [`WordPractice.svelte`](../../src/components/practice/WordPractice.svelte) | Shows a saved word; a Romaji / Meaning / Both selector (the *focus*, saved with `saveWordsFocus`; changing it starts a fresh session) decides whether the user types the reading, the meaning or both, and `wordsMode` judges it. Runs a session over `wordsMode` (a wrong answer is a wrong word; the kana inside it are not counted). Receives `words` and `bind:stats`. |
+| [`KanaPractice.svelte`](../../src/components/practice/KanaPractice.svelte) | Hiragana/katakana symbol practice. Symbols come from `core/kana`, are defined in hiragana and checked with `checkAnswer` (`almost` is shown as incorrect). Runs a session over `kanaMode`; the grid selection rules are in `core/kana` and the chosen selection is saved via `saveKanaSelection`. |
+| [`PracticeCard.svelte`](../../src/components/practice/PracticeCard.svelte) | The card both modes render: the prompt, the answer field (plus a meaning field when asked) with the Check / Next button (fixed width), and the verdict box. |
+| [`Scoreboard.svelte`](../../src/components/practice/Scoreboard.svelte) | Session tiles shown below the practice card: correct, wrong, accuracy, streak and total answered, plus a reset button that asks for confirmation and a Show chances button that lists the chance of each item being drawn next (`drawOdds`). |
+
+Uses: `core/romaji`, `core/kana`, `data/practice-session`, `data/practice-modes`, `data/stats`, `data/storage`.

@@ -4,11 +4,11 @@ Pure domain logic. It has no Svelte, no localStorage and no DOM, and it depends 
 
 | File | Contents |
 | --- | --- |
-| [`types.ts`](types.ts) | Shared types: `Word { id, japanese, hiragana, meaning, disabled, activatedAt?, tags }`, `Verdict`, `WordsFile`, `Tally`, `Stats`, `StatsFile`. |
-| [`romaji.ts`](romaji.ts) | Answer checking: `normalizeKana`, `checkAnswer`, `toDisplayRomaji`. |
-| [`meaning.ts`](meaning.ts) | `checkMeaning`: the typed text is the saved meaning, ignoring case, punctuation and extra spaces; any option separated by `;` or `,` is accepted. |
-| [`kana.ts`](kana.ts) | Hiragana/katakana tables (`KANA_SECTIONS`), `kanaKey` / `parseKanaKey`, `symbolOf`, `acceptedReadings`, `buildKana`, the key lists of the grid (`sectionKeys`, `columnKeys`, `lineKeys`, `scriptKeys`), `defaultKanaSelection` and the selection rules (`selectKeys`, `toggleKeys`). |
-| [`sheet.ts`](sheet.ts) | Layout of the printable writing sheet: `SHEET` (A4 measures in mm) and `sheetRow` (squares per character; large rows hold one reference, then tracing, then free writing, followed by one row of small squares, half the side, to trace and write). |
+| [`types.ts`](../src/core/types.ts) | Shared types: `Word { id, japanese, hiragana, meaning, disabled, activatedAt?, tags }`, `Verdict`, `WordsFile`, `Tally`, `Stats`, `StatsFile`. |
+| [`romaji.ts`](../src/core/romaji.ts) | Answer checking: `normalizeKana`, `checkAnswer`, `toDisplayRomaji`. |
+| [`meaning.ts`](../src/core/meaning.ts) | `checkMeaning`: the typed text is the saved meaning, ignoring case, punctuation and extra spaces; any option separated by `;` or `,` is accepted. |
+| [`kana.ts`](../src/core/kana.ts) | Hiragana/katakana tables (`KANA_SECTIONS`), `kanaKey` / `parseKanaKey`, `symbolOf`, `acceptedReadings`, `buildKana`, the key lists of the grid (`sectionKeys`, `columnKeys`, `lineKeys`, `scriptKeys`), `defaultKanaSelection` and the selection rules (`selectKeys`, `toggleKeys`). |
+| [`sheet.ts`](../src/core/sheet.ts) | Layout of the printable writing sheet: `SHEET` (A4 measures in mm) and `sheetRow` (squares per character; large rows hold one reference, then tracing, then free writing, followed by one row of small squares, half the side, to trace and write). |
 | `romaji.test.ts`, `meaning.test.ts`, `kana.test.ts`, `sheet.test.ts` | Tests for the modules above. |
 
 ## How checking works (`romaji.ts`)
