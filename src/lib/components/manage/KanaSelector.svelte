@@ -2,7 +2,6 @@
   import {
     KANA_SECTIONS,
     columnKeys,
-    defaultKanaSelection,
     kanaKey,
     lineKeys,
     scriptKeys,
@@ -10,15 +9,10 @@
     selectKeys,
     symbolOf,
     toggleKeys,
-    type Kana,
     type KanaScript,
   } from '../../core/kana'
-  import { toDisplayRomaji } from '../../core/romaji'
-  import PracticeCard from './PracticeCard.svelte'
-  import Scoreboard from './Scoreboard.svelte'
-  import { kanaMode } from '../../data/practice-modes'
-  import { drawOdds, nextRound, resetScore, startSession, submit as submitAnswer } from '../../data/practice-session'
-  import { getApp } from '../../state.svelte'
+
+  let { selected, onchange }: { selected: string[]; onchange: (keys: string[]) => void } = $props()
 
   const LINK = 'bg-transparent px-0.5 py-0 text-[0.8rem] text-muted underline'
 
@@ -30,90 +24,26 @@
       : `${base} bg-transparent text-muted`
   }
 
-  const app = getApp()
-
   const SCRIPTS: { id: KanaScript; label: string }[] = [
     { id: 'hiragana', label: 'Hiragana' },
     { id: 'katakana', label: 'Katakana' },
   ]
 
-  /** Keys (see `kanaKey`) of the characters included in practice; defaults to the basic hiragana, then remembers the last choice */
-  let selected = $state<string[]>(app.settings.kanaSelection ?? defaultKanaSelection())
-
-  const mode = $derived(kanaMode(selected, app.stats, app.recorder))
-
-  let session = $state(startSession<Kana>())
-  const odds = $derived(drawOdds(session, mode).map(({ item, chance }) => ({ label: item.symbol, chance })))
-  let answer = $state('')
-  let inputEl = $state<HTMLInputElement>()
-
-  function draw() {
-    session = nextRound(session, mode)
-    answer = ''
-  }
-
-  // changing the selection starts a fresh round and score
-  function setSelected(keys: string[]) {
-    selected = keys
-    app.setKanaSelection(keys)
-    session = nextRound(startSession<Kana>(), mode) // no focus change, so the page does not jump
-    answer = ''
-  }
-
   function select(keys: string[], on: boolean) {
-    setSelected(selectKeys(selected, keys, on))
+    onchange(selectKeys(selected, keys, on))
   }
 
   function toggle(keys: string[]) {
-    setSelected(toggleKeys(selected, keys))
+    onchange(toggleKeys(selected, keys))
   }
-
-  function submit(event: Event) {
-    event.preventDefault()
-    const advancing = session.verdict !== null
-    session = submitAnswer(session, answer, mode)
-    if (advancing) {
-      answer = ''
-      queueMicrotask(() => inputEl?.focus({ preventScroll: true }))
-    }
-  }
-
-  // Space works like Enter
-  function onkeydown(event: KeyboardEvent) {
-    if (event.key === ' ') submit(event)
-  }
-
-  draw()
 </script>
 
-{#if session.current}
-  <PracticeCard
-    prompt={session.current.symbol}
-    verdict={session.verdict}
-    reading="{session.current.symbol} · {toDisplayRomaji(session.current.hiragana)}"
-    bind:answer
-    bind:inputEl
-    onsubmit={submit}
-    {onkeydown}
-  />
-  <Scoreboard
-    hits={session.hits}
-    total={session.total}
-    streak={session.streak}
-    bestStreak={session.bestStreak}
-    {odds}
-    onreset={() => (session = resetScore(session))}
-  />
-{:else}
-  <p class="my-4 text-muted">Select at least one character below to practice.</p>
-{/if}
-
-<div class="mt-6 flex flex-col gap-4">
+<div class="flex flex-col gap-4">
   {#each SCRIPTS as script (script.id)}
     {@const scriptSelected = scriptKeys(script.id).filter((k) => selected.includes(k)).length}
     <section class="bg-surface p-3">
       <header class="flex flex-col items-start gap-0.5 pb-3">
-        <h2 class="m-0">{script.label}</h2>
+        <h3 class="m-0 text-[1.1rem] font-bold">{script.label}</h3>
         <span class="text-[0.85rem] text-muted">{scriptSelected} selected</span>
       </header>
 
@@ -121,7 +51,7 @@
         {@const keys = sectionKeys(script.id, section)}
         <div class="mt-4">
           <div class="flex items-center justify-start gap-2">
-            <h3 class="flex-1 text-[0.9rem] font-bold text-muted">{section.title}</h3>
+            <h4 class="flex-1 text-[0.9rem] font-bold text-muted">{section.title}</h4>
             <button class={LINK} onclick={() => select(keys, true)}>All</button>
             <button class={LINK} onclick={() => select(keys, false)}>None</button>
           </div>
