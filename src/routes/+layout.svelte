@@ -71,7 +71,7 @@
   onkeydown={(e) => e.key === 'Escape' && (manageOpen = false)}
 />
 
-<div class="mx-auto max-w-260 p-4 print:hidden">
+<div class="mx-auto max-w-360 p-4 print:hidden">
   <header class="flex flex-wrap items-center justify-between gap-3 pt-2.5 pb-4">
     <h1 class="font-serif text-[2.6rem] leading-none font-bold">zennia</h1>
     <nav class="flex gap-2">
