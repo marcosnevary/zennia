@@ -1,5 +1,6 @@
 <script lang="ts">
   import { accuracy, percent } from '../../data/stats'
+  import StatTile from '../StatTile.svelte'
 
   let {
     hits,
@@ -30,26 +31,11 @@
 
 <!-- same 16px inset as the card's padding, so it lines up with the input and the Check button -->
 <section class="mx-4 mt-3 grid grid-cols-3 gap-2 min-[481px]:grid-cols-5" aria-label="Session score">
-  <div class="flex flex-col items-center border-2 border-ink bg-surface px-1.5 py-2.5 text-ink">
-    <span class="font-serif text-[1.8rem] leading-[1.1] font-bold tabular-nums">{hits}</span>
-    <span class="text-center text-[0.8rem]">Correct</span>
-  </div>
-  <div class="flex flex-col items-center border-2 border-ink bg-surface px-1.5 py-2.5 text-ink">
-    <span class="font-serif text-[1.8rem] leading-[1.1] font-bold tabular-nums">{misses}</span>
-    <span class="text-center text-[0.8rem]">Wrong</span>
-  </div>
-  <div class="flex flex-col items-center border-2 border-ink bg-surface px-1.5 py-2.5 text-ink">
-    <span class="font-serif text-[1.8rem] leading-[1.1] font-bold tabular-nums">{percent(sessionAccuracy)}</span>
-    <span class="text-center text-[0.8rem]">Accuracy</span>
-  </div>
-  <div class="flex flex-col items-center border-2 border-ink bg-surface px-1.5 py-2.5 text-ink">
-    <span class="font-serif text-[1.8rem] leading-[1.1] font-bold tabular-nums">{streak}</span>
-    <span class="text-center text-[0.8rem]">Streak (best {bestStreak})</span>
-  </div>
-  <div class="flex flex-col items-center border-2 border-ink bg-surface px-1.5 py-2.5 text-ink">
-    <span class="font-serif text-[1.8rem] leading-[1.1] font-bold tabular-nums">{total}</span>
-    <span class="text-center text-[0.8rem]">Total</span>
-  </div>
+  <StatTile value={hits} label="Correct" />
+  <StatTile value={misses} label="Wrong" />
+  <StatTile value={percent(sessionAccuracy)} label="Accuracy" />
+  <StatTile value={streak} label="Streak (best {bestStreak})" />
+  <StatTile value={total} label="Total" />
 </section>
 
 <p class="mx-4 mt-3 text-center">

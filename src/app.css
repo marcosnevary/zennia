@@ -113,6 +113,25 @@
   }
 }
 
+/* custom chevron so the arrow keeps its distance from the border */
+@utility chevron {
+  appearance: none;
+  padding: 0 36px 0 10px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--text) 50%), linear-gradient(135deg, var(--text) 50%, transparent 50%);
+  background-position:
+    calc(100% - 19px) 50%,
+    calc(100% - 13px) 50%;
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+}
+
+/* row of small, widely spaced square dots */
+@utility dot-leader {
+  height: 2px;
+  background: linear-gradient(90deg, var(--muted) 2px, transparent 2px) left center / 8px 2px repeat-x;
+}
+
 @layer base {
   * {
     box-sizing: border-box;
