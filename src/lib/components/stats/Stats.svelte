@@ -1,6 +1,5 @@
 <script lang="ts">
   import {
-    emptyStats,
     STATS_SORT_OPTIONS,
     accuracy,
     accuracyLevel,
@@ -10,7 +9,6 @@
     type StatsSort,
     type StatsSortDirection,
   } from '../../data/stats'
-  import { downloadText, exportStatsJSON, importStatsJSON, statsExportFilename } from '../../data/io'
   import { buildRows, filterRows, type StatsKind } from '../../data/stats-rows'
   import type { Tally } from '../../core/types'
   import { getApp } from '../../state.svelte'
@@ -40,36 +38,6 @@
   const activeFilters = $derived(KINDS.filter((k) => !kinds[k.id]).length)
 
   const total = $derived(totalTally(stats))
-
-  let message = $state('')
-  let error = $state('')
-
-  function exportStats() {
-    downloadText(statsExportFilename(), exportStatsJSON(stats))
-    message = 'Statistics exported.'
-    error = ''
-  }
-
-  async function importStats(event: Event) {
-    const input = event.currentTarget as HTMLInputElement
-    const file = input.files?.[0]
-    input.value = ''
-    if (!file) return
-    message = ''
-    error = ''
-    try {
-      const incoming = importStatsJSON(await file.text())
-      if (attempts(total) && !confirm('Importing replaces your current statistics. Continue?')) return
-      app.replaceStats(incoming)
-      message = 'Statistics imported.'
-    } catch (e) {
-      error = e instanceof Error ? e.message : 'Could not import the file.'
-    }
-  }
-
-  function reset() {
-    if (confirm('Reset all statistics? This cannot be undone.')) app.replaceStats(emptyStats())
-  }
 </script>
 
 {#snippet summary(tally: Tally)}
@@ -88,26 +56,10 @@
   onkeydown={(e) => e.key === 'Escape' && (showFilters = false)}
 />
 
-{#snippet transfer()}
-  <div class="mt-4 mb-2 flex flex-wrap items-center justify-center gap-2">
-    <button onclick={exportStats} disabled={!attempts(total)}>Export stats</button>
-    <label class="file">
-      Import stats
-      <input type="file" accept="application/json,.json" onchange={importStats} hidden />
-    </label>
-    {#if attempts(total)}<button class="danger" onclick={reset}>Reset stats</button>{/if}
-  </div>
-  {#if error}<p class="my-4 text-bad" role="alert">{error}</p>{/if}
-  {#if message}<p class="my-4 text-muted" role="status">{message}</p>{/if}
-{/snippet}
-
 {#if !attempts(total)}
   <p class="my-4 text-muted">No statistics yet. Answer some words or kana in Practice and they will show up here.</p>
-  {@render transfer()}
 {:else}
   {@render summary(total)}
-
-  {@render transfer()}
 
   <h2 class="mb-0">Practiced ({visibleRows.length === rows.length ? rows.length : `${visibleRows.length} of ${rows.length}`})</h2>
   <div class="mt-4 mb-2 flex flex-wrap items-center gap-2">

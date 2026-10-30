@@ -1,15 +1,9 @@
-import type { Stats, StatsFile, Word, WordsFile } from '../core/types'
-import { attempts, sanitizeStats, totalTally } from './stats'
+import type { Word, WordsFile } from '../core/types'
 import { sanitizeWords, type SanitizeResult } from './words'
 
 /** Name of the exported file, with the date of the export. */
 export function exportFilename(date = new Date()): string {
   return `zennia-words-${date.toISOString().slice(0, 10)}.json`
-}
-
-/** Name of the exported stats file, with the date of the export. */
-export function statsExportFilename(date = new Date()): string {
-  return `zennia-stats-${date.toISOString().slice(0, 10)}.json`
 }
 
 /** Serializes the pool to JSON (format with `version`, for future migrations). */
@@ -29,19 +23,6 @@ function parseJSON(text: string): unknown {
 /** Reads an exported JSON (or a plain list of words) and validates each item. */
 export function importJSON(text: string): SanitizeResult {
   return sanitizeWords(parseJSON(text), { requireMeaning: true })
-}
-
-/** Serializes the stats to JSON (a `StatsFile`, the same shape as the database stats plus `exportedAt`). */
-export function exportStatsJSON(stats: Stats): string {
-  const data: StatsFile = { version: 1, exportedAt: new Date().toISOString(), stats }
-  return JSON.stringify(data, null, 2)
-}
-
-/** Reads an exported stats JSON and validates every tally. A file without a single valid tally is rejected, since importing it would only wipe the current stats. */
-export function importStatsJSON(text: string): Stats {
-  const stats = sanitizeStats((parseJSON(text) as { stats?: unknown } | null)?.stats)
-  if (!attempts(totalTally(stats))) throw new Error('The file has no statistics.')
-  return stats
 }
 
 /** Downloads a text as a file through the browser. */
