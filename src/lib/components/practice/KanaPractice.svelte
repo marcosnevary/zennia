@@ -112,7 +112,7 @@
   {#each SCRIPTS as script (script.id)}
     {@const scriptSelected = scriptKeys(script.id).filter((k) => selected.includes(k)).length}
     <section class="bg-surface p-3">
-      <header class="flex flex-col items-start gap-0.5 border-b-2 border-ink pb-3">
+      <header class="flex flex-col items-start gap-0.5 pb-3">
         <h2 class="m-0">{script.label}</h2>
         <span class="text-[0.85rem] text-muted">{scriptSelected} selected</span>
       </header>
