@@ -4,7 +4,7 @@ Date: 2026-10-30
 
 ## Status
 
-Accepted
+Accepted. The routes were changed by [ADR 5](0005-unified-practice.md).
 
 ## Context
 
