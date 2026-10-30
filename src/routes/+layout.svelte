@@ -60,6 +60,11 @@
 {/if}
 
 <style>
+  .app {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 16px;
+  }
   header {
     display: flex;
     align-items: center;

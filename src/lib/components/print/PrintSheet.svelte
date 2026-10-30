@@ -155,12 +155,7 @@
     :global(body) {
       background: #fff;
     }
-    /* the page margins come from @page, so the app container must not add its own */
-    :global(body #app) {
-      max-width: none;
-      padding: 0;
-    }
-    :global(body #app > .app) {
+    :global(.app) {
       display: none;
     }
   }

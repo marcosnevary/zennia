@@ -89,12 +89,6 @@ body {
   margin: 0;
 }
 
-#app {
-  max-width: 1040px;
-  margin: 0 auto;
-  padding: 16px;
-}
-
 button,
 input,
 select {
