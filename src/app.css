@@ -133,11 +133,9 @@
   background: linear-gradient(90deg, var(--muted) 2px, transparent 2px) left center / 8px 2px repeat-x;
 }
 
-/* section titles get a divider underneath */
 @utility section-title {
   padding-bottom: 8px;
   margin-bottom: 12px;
-  border-bottom: 2px solid var(--text);
 }
 
 @layer base {

@@ -325,8 +325,7 @@
 {#if error}<p class="my-4 text-bad" role="alert">{error}</p>{/if}
 {#if message}<p class="my-4 text-muted" role="status">{message}</p>{/if}
 
-<!-- the wrapper carries the divider because the title has a help icon -->
-<div class="mt-6 mb-3 flex items-center gap-1.5 border-b-2 border-ink pb-2">
+<div class="mt-6 mb-3 flex items-center gap-1.5 pb-2">
   <h2 class="m-0">Import and export</h2>
   <Help />
 </div>

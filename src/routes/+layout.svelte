@@ -55,7 +55,7 @@
 </script>
 
 <div class="mx-auto max-w-260 p-4 print:hidden">
-  <header class="flex flex-wrap items-center justify-between gap-3 border-b-2 border-ink pt-2.5 pb-4">
+  <header class="flex flex-wrap items-center justify-between gap-3 pt-2.5 pb-4">
     <h1 class="font-serif text-[1.8rem] font-bold">zennia</h1>
     <nav class="flex gap-2">
       {#each tabs as { path, label } (path)}
