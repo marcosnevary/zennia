@@ -34,7 +34,13 @@
     const apply = () => {
       if (printing) return
       const resolved = resolveTheme(app.theme, query.matches)
-      document.documentElement.dataset.theme = resolved
+      const root = document.documentElement
+      if (root.dataset.theme !== resolved) {
+        // hundreds of buttons would animate their colors at once and freeze the page
+        root.dataset.themeSwitching = ''
+        requestAnimationFrame(() => requestAnimationFrame(() => delete root.dataset.themeSwitching))
+      }
+      root.dataset.theme = resolved
       document.querySelector<HTMLLinkElement>('link[rel="icon"]')!.href = asset(resolved === 'dark' ? 'favicon-dark.png' : 'favicon.png')
     }
     const startPrinting = () => (printing = true)
