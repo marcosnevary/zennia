@@ -29,14 +29,28 @@
   $effect(() => {
     saveTheme(app.theme)
     const query = window.matchMedia('(prefers-color-scheme: dark)')
+    // browsers evaluate prefers-color-scheme as light while the print dialog is open, which would flip the "system" theme
+    let printing = false
     const apply = () => {
+      if (printing) return
       const resolved = resolveTheme(app.theme, query.matches)
       document.documentElement.dataset.theme = resolved
       document.querySelector<HTMLLinkElement>('link[rel="icon"]')!.href = asset(resolved === 'dark' ? 'favicon-dark.png' : 'favicon.png')
     }
+    const startPrinting = () => (printing = true)
+    const stopPrinting = () => {
+      printing = false
+      apply()
+    }
     apply()
     query.addEventListener('change', apply)
-    return () => query.removeEventListener('change', apply)
+    window.addEventListener('beforeprint', startPrinting)
+    window.addEventListener('afterprint', stopPrinting)
+    return () => {
+      query.removeEventListener('change', apply)
+      window.removeEventListener('beforeprint', startPrinting)
+      window.removeEventListener('afterprint', stopPrinting)
+    }
   })
 </script>
 
