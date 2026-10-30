@@ -289,7 +289,7 @@
   <input type="text" class="field" placeholder="Meaning (e.g. to eat)" bind:value={meaning} />
   <TagInput bind:tags={newTags} suggestions={tags} />
   <div class={WIDE}>
-    <button class="primary" type="submit">Add</button>
+    <button class="action" type="submit">Add</button>
   </div>
 </form>
 {/if}
@@ -305,7 +305,7 @@
     {/key}
     {#if editError}<p class="my-4 text-bad" role="alert">{editError}</p>{/if}
     <div class={ROW}>
-      <button class="primary" type="submit">Save</button>
+      <button class="action" type="submit">Save</button>
       <button type="button" onclick={() => dialogEl?.close()}>Cancel</button>
     </div>
   </form>
@@ -316,7 +316,7 @@
     <h2 class="mt-0 mb-2">Tag {selectedWords.length} selected word(s)</h2>
     <TagInput bind:tags={() => commonTags, setCommonTags} suggestions={dialogChoices} />
     <div class={ROW}>
-      <button class="primary" type="button" onclick={() => tagDialogEl?.close()}>Done</button>
+      <button class="action" type="button" onclick={() => tagDialogEl?.close()}>Done</button>
     </div>
   </div>
 </dialog>
@@ -376,7 +376,7 @@
         {#if renaming !== null && sameTag(renaming, tag)}
           <form class="flex flex-1 items-center gap-1.5" onsubmit={confirmRename}>
             <input type="text" class="field min-w-0 flex-1" aria-label={`New name for ${tag}`} bind:value={renameDraft} oninput={() => (renameError = '')} />
-            <button class="primary" type="submit">Save</button>
+            <button class="action" type="submit">Save</button>
             <button type="button" onclick={() => (renaming = null)}>Cancel</button>
           </form>
         {:else}

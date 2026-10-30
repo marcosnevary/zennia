@@ -133,6 +133,8 @@
   {scope}
   {tags}
   {focus}
+  wordCount={words.length}
+  kanaCount={kanaSelection.length}
   ontogglescript={toggleScript}
   ontoggletag={toggleTag}
   ontoggleuntagged={toggleUntagged}

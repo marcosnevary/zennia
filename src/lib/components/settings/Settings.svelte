@@ -20,7 +20,7 @@
 {#if app.account.anonymous}
   <p class="my-2 text-muted">Your data lives in this browser only. Sign in to keep it and use it on other devices.</p>
   <div class={WIDE}>
-    <button class="primary" onclick={() => app.signIn()}>Sign in with Google</button>
+    <button class="action" onclick={() => app.signIn()}>Sign in with Google</button>
   </div>
 {:else}
   <p class="my-2">Signed in as {app.account.email}.</p>

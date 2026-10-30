@@ -42,6 +42,6 @@
   </p>
 
   <div class="flex gap-2">
-    <button class="primary" type="button" onclick={() => helpEl?.close()}>Close</button>
+    <button class="action" type="button" onclick={() => helpEl?.close()}>Close</button>
   </div>
 </dialog>
