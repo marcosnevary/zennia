@@ -251,12 +251,26 @@
   const WIDE = `${ROW} *:flex-1 *:text-center`
   const ICON = 'inline-flex p-1.5'
   const DIM = 'opacity-45'
+
+  // only the buttons that change state animate on a theme switch; the third one would fade its background alone
+  let previousTheme = $state<ThemePreference>()
+
+  function chooseTheme(next: ThemePreference) {
+    previousTheme = theme
+    theme = next
+  }
 </script>
 
 <h2 class="section-title">Theme</h2>
 <div class={WIDE} role="group" aria-label="Theme">
   {#each THEMES as t (t.id)}
-    <button class="duration-300" data-animate class:primary={theme === t.id} aria-pressed={theme === t.id} onclick={() => (theme = t.id)}>{t.label}</button>
+    <button
+      class="duration-300"
+      data-animate={t.id === theme || t.id === previousTheme ? '' : undefined}
+      class:primary={theme === t.id}
+      aria-pressed={theme === t.id}
+      onclick={() => chooseTheme(t.id)}
+    >{t.label}</button>
   {/each}
 </div>
 
