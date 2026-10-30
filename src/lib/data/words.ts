@@ -283,3 +283,18 @@ export function sortWords(words: Word[], key: SortKey, direction: SortDirection)
   }
   return [...words].sort((a, b) => sign * compare(a, b) || 0)
 }
+
+export const PAGE_SIZE = 25
+
+export interface Page<T> {
+  items: T[]
+  page: number
+  pageCount: number
+}
+
+/** One page of the list, 1-based; a page out of range is clamped to the nearest one, and an empty list has one empty page. */
+export function paginate<T>(items: T[], page: number, size = PAGE_SIZE): Page<T> {
+  const pageCount = Math.max(1, Math.ceil(items.length / size))
+  const current = Math.min(Math.max(1, page), pageCount)
+  return { items: items.slice((current - 1) * size, current * size), page: current, pageCount }
+}

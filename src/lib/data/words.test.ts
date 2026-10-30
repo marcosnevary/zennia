@@ -9,6 +9,7 @@ import {
   makeWord,
   mergeWords,
   needsMeaning,
+  paginate,
   removeTag,
   renameTag,
   sanitizeWords,
@@ -369,5 +370,30 @@ describe('required meaning', () => {
     const [a, b] = sanitizeWords([noMeaning, withMeaning]).words
     expect(needsMeaning(a)).toBe(true)
     expect(needsMeaning(b)).toBe(false)
+  })
+})
+
+describe('paginate', () => {
+  const items = Array.from({ length: 60 }, (_, i) => i)
+
+  it('returns the slice of the requested page', () => {
+    expect(paginate(items, 2, 25)).toEqual({ items: items.slice(25, 50), page: 2, pageCount: 3 })
+  })
+
+  it('has a shorter last page', () => {
+    expect(paginate(items, 3, 25).items).toHaveLength(10)
+  })
+
+  it('does not add an empty page when the size divides the length', () => {
+    expect(paginate(items.slice(0, 50), 1, 25).pageCount).toBe(2)
+  })
+
+  it('clamps a page out of range', () => {
+    expect(paginate(items, 99, 25).page).toBe(3)
+    expect(paginate(items, 0, 25).page).toBe(1)
+  })
+
+  it('gives an empty list a single empty page', () => {
+    expect(paginate([], 4)).toEqual({ items: [], page: 1, pageCount: 1 })
   })
 })

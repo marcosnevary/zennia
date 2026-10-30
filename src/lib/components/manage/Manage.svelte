@@ -3,6 +3,7 @@
   import { closeOnBackdrop } from './dialog'
   import Help from './Help.svelte'
   import KanaSelector from './KanaSelector.svelte'
+  import Pagination from './Pagination.svelte'
   import TagChip from './TagChip.svelte'
   import TagInput from './TagInput.svelte'
   import { importAnkiDeck } from '../../data/anki'
@@ -20,6 +21,7 @@
     importSummary,
     makeWord,
     needsMeaning,
+    paginate,
     removeTag,
     renameTag,
     sameTag,
@@ -52,6 +54,13 @@
   let error = $state('')
   let message = $state('')
   let japaneseEl = $state<HTMLInputElement>()
+
+  const SECTIONS = [
+    { id: 'words', label: 'Words' },
+    { id: 'tags', label: 'Tags' },
+    { id: 'kana', label: 'Kana' },
+  ] as const
+  let section = $state<(typeof SECTIONS)[number]['id']>('words')
 
   function resetForm() {
     japanese = ''
@@ -113,17 +122,21 @@
   let activeTags = $state<string[]>([])
   const filterTags = $derived(activeTags.filter((a) => tags.some((t) => sameTag(t, a))))
   const visibleWords = $derived(sortWords(searchWords(filterByTags(words, filterTags), query), sortKey, sortDirection))
+  let pageNumber = $state(1)
+  const current = $derived(paginate(visibleWords, pageNumber))
   const selectedWords = $derived(words.filter((w) => selected.has(w.id)))
   const allSelected = $derived(visibleWords.length > 0 && visibleWords.every((w) => selected.has(w.id)))
 
   // bulk actions only ever touch what the user can see, so changing the filter clears the selection
   function onSearch() {
     selected = new Set()
+    pageNumber = 1
   }
 
   function toggleFilterTag(tag: string) {
     activeTags = filterTags.some((t) => sameTag(t, tag)) ? filterTags.filter((t) => !sameTag(t, tag)) : [...filterTags, tag]
     selected = new Set()
+    pageNumber = 1
   }
 
   // clicking a tag on a word narrows the list to it (it never undoes: the active filter has the X)
@@ -165,6 +178,7 @@
     // the list may grow if the tag was filtering it, so the selection must not outlive it
     activeTags = activeTags.filter((t) => !sameTag(t, tag))
     selected = new Set()
+    pageNumber = 1
     message = `Tag "${tag}" removed from all words.`
   }
 
@@ -250,6 +264,24 @@
   const DIM = 'opacity-45'
 </script>
 
+<div class="flex gap-2" role="tablist" aria-label="Manage sections">
+  {#each SECTIONS as { id, label } (id)}
+    <button
+      class="w-[6.5em]"
+      class:primary={section === id}
+      role="tab"
+      id={`manage-tab-${id}`}
+      aria-selected={section === id}
+      aria-controls="manage-panel"
+      onclick={() => (section = id)}
+    >
+      {label}
+    </button>
+  {/each}
+</div>
+
+<div id="manage-panel" role="tabpanel" aria-labelledby={`manage-tab-${section}`}>
+{#if section === 'words'}
 <h2 class="section-title">New word</h2>
 <form class="grid gap-2" onsubmit={save}>
   <input type="text" class="field" lang="ja" placeholder="Japanese (e.g. 食べる)" bind:value={japanese} bind:this={japaneseEl} />
@@ -260,6 +292,7 @@
     <button class="primary" type="submit">Add</button>
   </div>
 </form>
+{/if}
 
 <dialog class="w-[min(420px,calc(100vw-32px))]" bind:this={dialogEl} onclose={() => (editingId = null)} use:closeOnBackdrop aria-label="Edit word">
   <form class="grid gap-2" onsubmit={saveEdit}>
@@ -291,6 +324,7 @@
 {#if error}<p class="my-4 text-bad" role="alert">{error}</p>{/if}
 {#if message}<p class="my-4 text-muted" role="status">{message}</p>{/if}
 
+{#if section === 'words'}
 <div class="mt-6 mb-3 flex items-center gap-1.5 pb-2">
   <h2 class="m-0">Import and export</h2>
   <Help />
@@ -312,6 +346,7 @@
     <input type="file" accept="text/plain,.txt,.tsv" onchange={importAnki} hidden />
   </label>
 </div>
+{/if}
 
 {#snippet eyeIcon()}
   <Icon>
@@ -330,6 +365,7 @@
   </Icon>
 {/snippet}
 
+{#if section === 'tags'}
 <h2 class="section-title">Tags ({tags.length})</h2>
 {#if tags.length === 0}
   <p class="my-4 text-muted">No tags yet. Add them when you add or edit a word, or with the tag button on selected words.</p>
@@ -361,7 +397,9 @@
   </ul>
   {#if renaming !== null && renameError}<p class="my-4 text-bad" role="alert">{renameError}</p>{/if}
 {/if}
+{/if}
 
+{#if section === 'words'}
 <h2 class="section-title">Words ({visibleWords.length === words.length ? words.length : `${visibleWords.length} of ${words.length}`})</h2>
 {#if words.length === 0}
   <p class="my-4 text-muted">No words yet.</p>
@@ -376,7 +414,7 @@
       oninput={onSearch}
     />
     <div class="flex items-center gap-2">
-      <select class="field chevron bg-surface" bind:value={sortKey} aria-label="Sort by">
+      <select class="field chevron bg-surface" bind:value={sortKey} onchange={() => (pageNumber = 1)} aria-label="Sort by">
         {#each SORT_OPTIONS as option (option.key)}
           <option value={option.key}>{option.label}</option>
         {/each}
@@ -394,7 +432,7 @@
   <div class="{ROW} mb-2">
     <label class="flex items-center gap-1.5">
       <input type="checkbox" checked={allSelected} onchange={toggleSelectAll} />
-      Select all
+      Select all {visibleWords.length} {visibleWords.length === words.length ? 'words' : 'results'}
     </label>
     <span class="text-muted">{selectedWords.length} selected</span>
     <!-- keeps the space reserved so the layout does not shift when a selection appears -->
@@ -421,7 +459,10 @@
     </div>
     <button
       class={ICON}
-      onclick={() => (sortDirection = sortDirection === 'asc' ? 'desc' : 'asc')}
+      onclick={() => {
+        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'
+        pageNumber = 1
+      }}
       aria-label={sortDirection === 'asc' ? 'Ascending' : 'Descending'}
       title={sortDirection === 'asc' ? 'Ascending (click to reverse)' : 'Descending (click to reverse)'}
     >
@@ -438,7 +479,7 @@
     <p class="my-4 text-muted">No words match your search or tag filter.</p>
   {/if}
   <ul>
-    {#each visibleWords as word (word.id)}
+    {#each current.items as word (word.id)}
       <li class="flex items-center gap-3 py-2.5">
         <input
           type="checkbox"
@@ -475,8 +516,13 @@
       </li>
     {/each}
   </ul>
+  <Pagination page={current.page} pageCount={current.pageCount} onchange={(n) => (pageNumber = n)} />
+{/if}
 {/if}
 
+{#if section === 'kana'}
 <h2 class="section-title">Kana</h2>
 <p class="mb-3 text-muted">The characters Practice draws. Choose Hiragana or Katakana in Practice itself.</p>
 <KanaSelector selected={app.settings.kanaSelection ?? defaultKanaSelection()} onchange={(keys) => app.setKanaSelection(keys)} />
+{/if}
+</div>
