@@ -55,12 +55,7 @@
   let message = $state('')
   let japaneseEl = $state<HTMLInputElement>()
 
-  const SECTIONS = [
-    { id: 'words', label: 'Words' },
-    { id: 'tags', label: 'Tags' },
-    { id: 'kana', label: 'Kana' },
-  ] as const
-  let section = $state<(typeof SECTIONS)[number]['id']>('words')
+  let { section }: { section: 'words' | 'tags' | 'kana' } = $props()
 
   function resetForm() {
     japanese = ''
@@ -264,23 +259,7 @@
   const DIM = 'opacity-45'
 </script>
 
-<div class="flex gap-2" role="tablist" aria-label="Manage sections">
-  {#each SECTIONS as { id, label } (id)}
-    <button
-      class="w-[6.5em]"
-      class:primary={section === id}
-      role="tab"
-      id={`manage-tab-${id}`}
-      aria-selected={section === id}
-      aria-controls="manage-panel"
-      onclick={() => (section = id)}
-    >
-      {label}
-    </button>
-  {/each}
-</div>
-
-<div id="manage-panel" role="tabpanel" aria-labelledby={`manage-tab-${section}`}>
+<div>
 {#if section === 'words'}
 <h2 class="section-title">New word</h2>
 <form class="grid gap-2" onsubmit={save}>

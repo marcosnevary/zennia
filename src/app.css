@@ -166,6 +166,12 @@
     text-transform: inherit;
   }
 
+  /* the open list takes the select's color, which is white on hover */
+  option {
+    background: var(--surface);
+    color: var(--text);
+  }
+
   input[type='text'] {
     width: 100%;
     padding: 10px 12px;
@@ -217,7 +223,8 @@
     cursor: pointer;
     transition:
       background-color 90ms ease,
-      color 90ms ease;
+      color 90ms ease,
+      box-shadow 90ms ease;
   }
 
   button,
@@ -262,6 +269,25 @@
   button.danger:not(:disabled):hover {
     background: var(--bad);
     color: var(--surface);
+  }
+
+  /* raised above the neighbors, whose backgrounds would otherwise cover the shadow */
+  .tab[aria-current='page'],
+  .tab[aria-expanded='true'],
+  .tab:hover {
+    z-index: 1;
+    box-shadow: 0 4px 14px rgb(0 0 0 / 0.18);
+  }
+
+  .tab[aria-expanded='true'],
+  .tab:hover {
+    z-index: 2;
+  }
+
+  :root[data-theme='dark'] .tab[aria-current='page'],
+  :root[data-theme='dark'] .tab[aria-expanded='true'],
+  :root[data-theme='dark'] .tab:hover {
+    box-shadow: 0 4px 14px rgb(0 0 0 / 0.6);
   }
 
   a.tab {

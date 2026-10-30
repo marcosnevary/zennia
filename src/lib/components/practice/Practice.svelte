@@ -1,27 +1,18 @@
 <script lang="ts">
   import { resolve } from '$app/paths'
-  import { defaultKanaSelection, type KanaScript } from '../../core/kana'
+  import { defaultKanaSelection } from '../../core/kana'
   import { toDisplayRomaji } from '../../core/romaji'
   import PracticeCard from './PracticeCard.svelte'
-  import PracticeOptions from './PracticeOptions.svelte'
   import Scoreboard from './Scoreboard.svelte'
-  import { checkParts, joinAnswers, mixedMode, type PracticeItem, type WordsFocus } from '../../data/practice-modes'
-  import { resolveScope, scopedKanaSelection, scopedWords, type PracticeScope } from '../../data/practice-scope'
-  import { drawOdds, nextRound, resetScore, startSession, submit as submitAnswer } from '../../data/practice-session'
-  import { allTags, sameTag } from '../../data/words'
+  import { checkParts, describePool, joinAnswers, mixedMode, type PracticeItem } from '../../data/practice-modes'
+  import { drawOdds, nextRound, startSession, submit as submitAnswer } from '../../data/practice-session'
   import { getApp } from '../../state.svelte'
 
   const app = getApp()
 
-  let options = $state<PracticeOptions>()
-
-  const scope = $derived(app.settings.practiceScope)
-  const tags = $derived(allTags(app.words))
-  const kanaSelection = $derived(scopedKanaSelection(app.settings.kanaSelection ?? defaultKanaSelection(), scope))
-  const words = $derived(scopedWords(app.words, scope))
-
-  let focus = $state<WordsFocus>(app.settings.wordsFocus)
-  const mode = $derived(mixedMode(words, kanaSelection, app.stats, focus, app.recorder))
+  const kanaSelection = $derived(app.settings.kanaSelection ?? defaultKanaSelection())
+  const focus = $derived(app.settings.wordsFocus)
+  const mode = $derived(mixedMode(app.words, kanaSelection, app.stats, focus, app.recorder))
 
   let session = $state(startSession<PracticeItem>())
   const odds = $derived(
@@ -60,44 +51,6 @@
     queueMicrotask(() => (askReading ? inputEl : meaningEl)?.focus({ preventScroll: true }))
   }
 
-  /** A fresh round and score, for when what is practiced changes. */
-  function restart() {
-    answer = ''
-    meaningAnswer = ''
-    session = nextRound(startSession<PracticeItem>(), mode)
-  }
-
-  function chooseFocus(next: WordsFocus) {
-    if (next === focus) return
-    focus = next
-    app.setWordsFocus(next)
-    restart()
-    focusField()
-  }
-
-  function changeScope(change: (scope: PracticeScope) => PracticeScope) {
-    app.setPracticeScope(change(resolveScope(scope, tags)))
-    restart()
-  }
-
-  function toggleScript(script: KanaScript) {
-    changeScope((s) => ({
-      ...s,
-      scripts: s.scripts.includes(script) ? s.scripts.filter((x) => x !== script) : [...s.scripts, script],
-    }))
-  }
-
-  function toggleTag(tag: string) {
-    changeScope((s) => ({
-      ...s,
-      tags: s.tags.some((t) => sameTag(t, tag)) ? s.tags.filter((t) => !sameTag(t, tag)) : [...s.tags, tag],
-    }))
-  }
-
-  function toggleUntagged() {
-    changeScope((s) => ({ ...s, untagged: !s.untagged }))
-  }
-
   function submit(event: Event) {
     event.preventDefault()
     const advancing = session.verdict !== null
@@ -128,24 +81,9 @@
   draw()
 </script>
 
-<PracticeOptions
-  bind:this={options}
-  {scope}
-  {tags}
-  {focus}
-  wordCount={words.length}
-  kanaCount={kanaSelection.length}
-  ontogglescript={toggleScript}
-  ontoggletag={toggleTag}
-  ontoggleuntagged={toggleUntagged}
-  onchoosefocus={chooseFocus}
-/>
-
 {#if !current}
   <p class="my-4 text-muted">
-    Nothing to practice with this selection.
-    <button onclick={() => options?.open()}>Customize</button>
-    or <a href={resolve('/manage')}>manage your words and kana</a>.
+    Nothing to practice. Select kana or activate words in <a href={resolve('/manage')}>Manage</a>.
   </p>
 {:else}
   <PracticeCard
@@ -165,16 +103,7 @@
     onsubmit={submit}
     {onkeydown}
   />
-  <Scoreboard
-    hits={session.hits}
-    total={session.total}
-    streak={session.streak}
-    bestStreak={session.bestStreak}
-    {odds}
-    onreset={() => (session = resetScore(session))}
-  >
-    {#snippet actions()}
-      <button onclick={() => options?.open()}>Customize</button>
-    {/snippet}
-  </Scoreboard>
+  <Scoreboard hits={session.hits} total={session.total} streak={session.streak} bestStreak={session.bestStreak} />
+  <!-- same 16px inset as the score above -->
+  <p class="mx-4 mt-3 text-center text-[0.9rem] text-muted">Practicing {describePool(mode.pool)}</p>
 {/if}

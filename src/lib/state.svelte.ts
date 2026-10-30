@@ -5,11 +5,10 @@ import { clearLegacy, readLegacy } from './data/db/legacy'
 import type { Account } from './data/db/client'
 import type { Repo, Stored } from './data/db/repo'
 import type { Recorder, WordsFocus } from './data/practice-modes'
-import { pruneScopeTags, type PracticeScope } from './data/practice-scope'
 import { DEFAULT_SETTINGS, type Settings } from './data/settings'
 import { attempts, emptyStats, recordAnswer, recordKana, totalTally } from './data/stats'
 import { readThemeCache, writeThemeCache, type ThemePreference } from './data/theme'
-import { allTags, mergeWords, type MergeResult } from './data/words'
+import { mergeWords, type MergeResult } from './data/words'
 
 function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : 'Unknown error.'
@@ -130,9 +129,6 @@ export class App {
 
     this.words = words
     for (const id of removed) delete this.stats.words[id]
-    const scope: PracticeScope | null = $state.snapshot(this.settings.practiceScope)
-    const pruned = pruneScopeTags(scope, allTags(words))
-    if (pruned !== scope) this.#setSettings({ practiceScope: pruned })
     this.#persist(async () => {
       if (changed.length) await this.#repo.upsertWords(changed)
       if (removed.length) await this.#repo.deleteWords(removed)
@@ -178,10 +174,6 @@ export class App {
 
   setKanaSelection(kanaSelection: string[]): void {
     this.#setSettings({ kanaSelection: [...kanaSelection] })
-  }
-
-  setPracticeScope(practiceScope: PracticeScope): void {
-    this.#setSettings({ practiceScope: { ...practiceScope, scripts: [...practiceScope.scripts], tags: [...practiceScope.tags] } })
   }
 
   #setSettings(patch: Partial<Settings>): void {

@@ -123,23 +123,6 @@ describe('App', () => {
     expect(calls).toEqual(['settings {"wordsFocus":"both"}', 'settings {"kanaSelection":["hiragana:あ"]}'])
   })
 
-  it('saves the practice scope and drops tags that no word has anymore', async () => {
-    const { app, calls } = await ready({ words: [word('a', 1, { tags: ['food'] }), word('b', 2, { tags: ['verbs'] })] })
-    app.setPracticeScope({ scripts: ['hiragana'], tags: ['food', 'verbs'], untagged: false })
-    app.setWords(app.words.filter((w) => w.id !== 'b'))
-    await app.flush()
-    expect(app.settings.practiceScope).toEqual({ scripts: ['hiragana'], tags: ['food'], untagged: false })
-    expect(calls).toContain('settings ' + JSON.stringify({ practiceScope: { scripts: ['hiragana'], tags: ['food'], untagged: false } }))
-  })
-
-  it('leaves the everything scope alone when words change', async () => {
-    const { app, calls } = await ready({ words: [word('a', 1)] })
-    app.setWords([])
-    await app.flush()
-    expect(app.settings.practiceScope).toBeNull()
-    expect(calls.some((c) => c.startsWith('settings'))).toBe(false)
-  })
-
   it('reads the data back when a write fails', async () => {
     const { app, repo, setStored } = await ready({ words: [word('a', 1)] })
     vi.mocked(repo.upsertWords).mockRejectedValueOnce(new Error('denied'))
@@ -174,7 +157,7 @@ describe('legacy localStorage import', () => {
   it('uploads the old data once and removes it', async () => {
     saveLegacy()
     const { app, calls } = await ready()
-    expect(calls).toEqual(['upsert a,b', 'stats a|', 'settings ' + JSON.stringify({ theme: 'system', wordsFocus: 'both', kanaSelection: null, practiceScope: null })])
+    expect(calls).toEqual(['upsert a,b', 'stats a|', 'settings ' + JSON.stringify({ theme: 'system', wordsFocus: 'both', kanaSelection: null })])
     expect(store.has('zennia:words')).toBe(false)
     expect(store.has('zennia:stats')).toBe(false)
     expect(app.status).toBe('ready')

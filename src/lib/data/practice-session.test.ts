@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { drawOdds, nextRound, resetScore, startSession, submit, type PracticeMode } from './practice-session'
+import { drawOdds, nextRound, startSession, submit, type PracticeMode } from './practice-session'
 import type { Verdict } from '../core/types'
 
 type Item = { id: string }
@@ -35,21 +35,6 @@ describe('nextRound', () => {
   it('has no current item when the pool is empty', () => {
     const { mode } = fakeMode([])
     expect(nextRound(startSession<Item>(), mode).current).toBeNull()
-  })
-})
-
-describe('resetScore', () => {
-  it('clears the score but keeps the item on screen', () => {
-    const { mode } = fakeMode(['a'])
-    const session = submit(nextRound(startSession<Item>(), mode), 'x', mode)
-    expect(resetScore(session)).toMatchObject({
-      current: { id: 'a' },
-      verdict: 'correct',
-      hits: 0,
-      total: 0,
-      streak: 0,
-      bestStreak: 0,
-    })
   })
 })
 

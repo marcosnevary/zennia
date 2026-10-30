@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { Snippet } from 'svelte'
   import { accuracy, percent } from '../../data/stats'
   import StatTile from '../StatTile.svelte'
 
@@ -8,29 +7,15 @@
     total,
     streak,
     bestStreak,
-    odds,
-    onreset,
-    actions,
   }: {
     hits: number
     total: number
     streak: number
     bestStreak: number
-    /** Chance (0 to 1) of each item being drawn next, in the order to list them. */
-    odds: { label: string; chance: number }[]
-    onreset: () => void
-    /** Extra buttons, shown after the built-in ones. */
-    actions?: Snippet
   } = $props()
-
-  let showOdds = $state(false)
 
   const misses = $derived(total - hits)
   const sessionAccuracy = $derived(accuracy({ hits, misses }))
-
-  function reset() {
-    if (confirm('Reset the session score?')) onreset()
-  }
 </script>
 
 <!-- same 16px inset as the card's padding, so it lines up with the input and the Check button -->
@@ -41,21 +26,3 @@
   <StatTile value={streak} label="Streak (best {bestStreak})" />
   <StatTile value={total} label="Total" />
 </section>
-
-<p class="mx-4 mt-3 text-center">
-  <button onclick={reset} disabled={!total}>Reset session</button>
-  <button aria-expanded={showOdds} onclick={() => (showOdds = !showOdds)}>{showOdds ? 'Hide chances' : 'Show chances'}</button>
-  {@render actions?.()}
-</p>
-
-{#if showOdds}
-  <ul class="mx-4 mt-3 max-h-80 overflow-y-auto border-2 border-ink bg-surface p-2" aria-label="Chance of each item being next">
-    {#each odds as o, i (i)}
-      <li class="grid grid-cols-[minmax(80px,40%)_1fr_56px] items-center gap-2 py-0.5">
-        <span lang="ja">{o.label}</span>
-        <span class="h-2 bg-ink/12"><span class="block h-full bg-ink" style:width="{o.chance * 100}%"></span></span>
-        <span class="text-right tabular-nums">{(o.chance * 100).toFixed(1)}%</span>
-      </li>
-    {/each}
-  </ul>
-{/if}

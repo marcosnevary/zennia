@@ -1,9 +1,16 @@
 <script lang="ts">
+  import type { WordsFocus } from '../../data/practice-modes'
   import { THEMES, type ThemePreference } from '../../data/theme'
   import { getApp } from '../../state.svelte'
 
   const app = getApp()
   const theme = $derived(app.settings.theme)
+
+  const FOCUSES: { id: WordsFocus; label: string }[] = [
+    { id: 'reading', label: 'Romaji' },
+    { id: 'meaning', label: 'Meaning' },
+    { id: 'both', label: 'Both' },
+  ]
 
   const WIDE = 'flex flex-wrap items-center gap-2 *:flex-1 *:text-center'
 
@@ -41,3 +48,16 @@
     >{t.label}</button>
   {/each}
 </div>
+
+<h2 class="section-title">Answer words by</h2>
+<p class="my-2 text-muted">How words are answered in Practice: by romaji, by meaning, or both. Kana are always answered by romaji.</p>
+<select
+  class="field chevron bg-surface py-[7px]"
+  value={app.settings.wordsFocus}
+  onchange={(e) => app.setWordsFocus(e.currentTarget.value as WordsFocus)}
+  aria-label="Answer words by"
+>
+  {#each FOCUSES as f (f.id)}
+    <option value={f.id}>{f.label}</option>
+  {/each}
+</select>
