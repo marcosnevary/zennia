@@ -86,14 +86,15 @@
   draw()
 </script>
 
-<div class="focus" role="group" aria-label="What to practice">
+<!-- the negative margin pulls the card up, which has 24px above itself -->
+<div class="mt-4 -mb-6 flex justify-center gap-2" role="group" aria-label="What to practice">
   {#each FOCUSES as f (f.id)}
     <button class:primary={focus === f.id} aria-pressed={focus === f.id} onclick={() => chooseFocus(f.id)}>{f.label}</button>
   {/each}
 </div>
 
 {#if !session.current}
-  <p class="muted">
+  <p class="my-4 text-muted">
     {#if !words.length}
       No words saved yet.
     {:else if words.some((w) => !w.disabled)}
@@ -128,14 +129,3 @@
     onreset={() => (session = resetScore(session))}
   />
 {/if}
-
-<style>
-  .focus {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 16px;
-    /* pulls the card up, which has 24px above itself */
-    margin-bottom: -24px;
-  }
-</style>

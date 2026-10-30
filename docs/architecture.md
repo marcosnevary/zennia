@@ -9,6 +9,7 @@ SvelteKit static SPA (see [ADR 1](adr/0001-sveltekit.md)). There is no backend: 
 - `src/lib/data/`: data model, sanitizing, import/export and `localStorage` access (`storage.ts` is the only place that touches it).
 - `src/lib/components/`: Svelte components, grouped by feature.
 - `src/lib/state.svelte.ts`: shared state, persisted by `src/routes/+layout.svelte`.
+- `src/app.css`: Tailwind setup, theme variables and the shared button, field and dialog styles ([ADR 2](adr/0002-tailwind.md)).
 - `static/`: fonts, favicons and `strokes.json` (KanjiVG, built by `scripts/build-strokes.mjs`).
 
 ## Commands

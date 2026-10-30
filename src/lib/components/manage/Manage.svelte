@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Icon from '../Icon.svelte'
   import { closeOnBackdrop } from './dialog'
   import Help from './Help.svelte'
   import TagChip from './TagChip.svelte'
@@ -244,61 +245,82 @@
       error = e instanceof Error ? e.message : 'Could not import the file.'
     }
   }
+
+  const ROW = 'flex flex-wrap items-center gap-2'
+  // buttons share the whole row evenly
+  const WIDE = `${ROW} *:flex-1 *:text-center`
+  const ICON = 'inline-flex p-1.5'
+  const DIM = 'opacity-45'
+
+  // only the buttons that change state animate on a theme switch; the third one would fade its background alone
+  let previousTheme = $state<ThemePreference>()
+
+  function chooseTheme(next: ThemePreference) {
+    previousTheme = theme
+    theme = next
+  }
 </script>
 
-<h2>Theme</h2>
-<div class="row wide" role="group" aria-label="Theme">
+<h2 class="section-title">Theme</h2>
+<div class={WIDE} role="group" aria-label="Theme">
   {#each THEMES as t (t.id)}
-    <button class:primary={theme === t.id} aria-pressed={theme === t.id} onclick={() => (theme = t.id)}>{t.label}</button>
+    <button
+      class="duration-300"
+      data-animate={t.id === theme || t.id === previousTheme ? '' : undefined}
+      class:primary={theme === t.id}
+      aria-pressed={theme === t.id}
+      onclick={() => chooseTheme(t.id)}
+    >{t.label}</button>
   {/each}
 </div>
 
-<h2>New word</h2>
-<form class="form" onsubmit={save}>
-  <input type="text" lang="ja" placeholder="Japanese (e.g. 食べる)" bind:value={japanese} bind:this={japaneseEl} />
-  <input type="text" lang="ja" placeholder="Hiragana (e.g. たべる)" bind:value={hiragana} />
-  <input type="text" placeholder="Meaning (e.g. to eat)" bind:value={meaning} />
+<h2 class="section-title">New word</h2>
+<form class="grid gap-2" onsubmit={save}>
+  <input type="text" class="field" lang="ja" placeholder="Japanese (e.g. 食べる)" bind:value={japanese} bind:this={japaneseEl} />
+  <input type="text" class="field" lang="ja" placeholder="Hiragana (e.g. たべる)" bind:value={hiragana} />
+  <input type="text" class="field" placeholder="Meaning (e.g. to eat)" bind:value={meaning} />
   <TagInput bind:tags={newTags} suggestions={tags} />
-  <div class="row wide">
+  <div class={WIDE}>
     <button class="primary" type="submit">Add</button>
   </div>
 </form>
 
-<dialog bind:this={dialogEl} onclose={() => (editingId = null)} use:closeOnBackdrop aria-label="Edit word">
-  <form class="form" onsubmit={saveEdit}>
-    <h2>Edit word</h2>
-    <input type="text" lang="ja" placeholder="Japanese (e.g. 食べる)" bind:value={editJapanese} />
-    <input type="text" lang="ja" placeholder="Hiragana (e.g. たべる)" bind:value={editHiragana} />
-    <input type="text" placeholder="Meaning (e.g. to eat)" bind:value={editMeaning} />
+<dialog class="w-[min(420px,calc(100vw-32px))]" bind:this={dialogEl} onclose={() => (editingId = null)} use:closeOnBackdrop aria-label="Edit word">
+  <form class="grid gap-2" onsubmit={saveEdit}>
+    <h2 class="mt-0 mb-2">Edit word</h2>
+    <input type="text" class="field" lang="ja" placeholder="Japanese (e.g. 食べる)" bind:value={editJapanese} />
+    <input type="text" class="field" lang="ja" placeholder="Hiragana (e.g. たべる)" bind:value={editHiragana} />
+    <input type="text" class="field" placeholder="Meaning (e.g. to eat)" bind:value={editMeaning} />
     {#key editingId}
       <TagInput bind:tags={editTags} suggestions={tags} />
     {/key}
-    {#if editError}<p class="error" role="alert">{editError}</p>{/if}
-    <div class="row">
+    {#if editError}<p class="my-4 text-bad" role="alert">{editError}</p>{/if}
+    <div class={ROW}>
       <button class="primary" type="submit">Save</button>
       <button type="button" onclick={() => dialogEl?.close()}>Cancel</button>
     </div>
   </form>
 </dialog>
 
-<dialog bind:this={tagDialogEl} use:closeOnBackdrop aria-label="Tag selected words">
-  <div class="form">
-    <h2>Tag {selectedWords.length} selected word(s)</h2>
+<dialog class="w-[min(420px,calc(100vw-32px))]" bind:this={tagDialogEl} use:closeOnBackdrop aria-label="Tag selected words">
+  <div class="grid gap-2">
+    <h2 class="mt-0 mb-2">Tag {selectedWords.length} selected word(s)</h2>
     <TagInput bind:tags={() => commonTags, setCommonTags} suggestions={dialogChoices} />
-    <div class="row">
+    <div class={ROW}>
       <button class="primary" type="button" onclick={() => tagDialogEl?.close()}>Done</button>
     </div>
   </div>
 </dialog>
 
-{#if error}<p class="error" role="alert">{error}</p>{/if}
-{#if message}<p class="muted" role="status">{message}</p>{/if}
+{#if error}<p class="my-4 text-bad" role="alert">{error}</p>{/if}
+{#if message}<p class="my-4 text-muted" role="status">{message}</p>{/if}
 
-<div class="heading">
-  <h2>Import and export</h2>
+<!-- the wrapper carries the divider because the title has a help icon -->
+<div class="mt-6 mb-3 flex items-center gap-1.5 border-b-2 border-ink pb-2">
+  <h2 class="m-0">Import and export</h2>
   <Help />
 </div>
-<div class="row wide">
+<div class={WIDE}>
   <button
     onclick={exportWords}
     disabled={selectedWords.length === 0}
@@ -317,69 +339,69 @@
 </div>
 
 {#snippet eyeIcon()}
-  <svg viewBox="0 0 24 24" aria-hidden="true">
+  <Icon>
     <path d="M2 12c1.5-3.5 5-7 10-7s8.5 3.5 10 7c-1.5 3.5-5 7-10 7S3.5 15.5 2 12z" />
     <circle cx="12" cy="12" r="3" />
-  </svg>
+  </Icon>
 {/snippet}
 {#snippet eyeOffIcon()}
-  <svg viewBox="0 0 24 24" aria-hidden="true">
+  <Icon>
     <path d="M3 3l18 18M10.6 5.1A9.7 9.7 0 0 1 12 5c5 0 8.5 3.5 10 7a14 14 0 0 1-3 4.2M6.6 6.6A14 14 0 0 0 2 12c1.5 3.5 5 7 10 7a9.8 9.8 0 0 0 4.4-1M9.9 9.9a3 3 0 0 0 4.2 4.2" />
-  </svg>
+  </Icon>
 {/snippet}
 {#snippet trashIcon()}
-  <svg viewBox="0 0 24 24" aria-hidden="true">
+  <Icon>
     <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v5M14 11v5" />
-  </svg>
+  </Icon>
 {/snippet}
 
-<h2>Tags ({tags.length})</h2>
+<h2 class="section-title">Tags ({tags.length})</h2>
 {#if tags.length === 0}
-  <p class="muted">No tags yet. Add them when you add or edit a word, or with the tag button on selected words.</p>
+  <p class="my-4 text-muted">No tags yet. Add them when you add or edit a word, or with the tag button on selected words.</p>
 {:else}
-  <ul class="list">
+  <ul>
     {#each tags as tag (tag)}
-      <li>
+      <li class="flex items-center gap-3 py-2.5">
         {#if renaming !== null && sameTag(renaming, tag)}
-          <form class="tag-rename" onsubmit={confirmRename}>
-            <input type="text" aria-label={`New name for ${tag}`} bind:value={renameDraft} oninput={() => (renameError = '')} />
+          <form class="flex flex-1 items-center gap-1.5" onsubmit={confirmRename}>
+            <input type="text" class="field min-w-0 flex-1" aria-label={`New name for ${tag}`} bind:value={renameDraft} oninput={() => (renameError = '')} />
             <button class="primary" type="submit">Save</button>
             <button type="button" onclick={() => (renaming = null)}>Cancel</button>
           </form>
         {:else}
           <TagChip {tag} />
-          <span class="muted">{filterByTags(words, [tag]).length} word(s)</span>
-          <span class="leader" aria-hidden="true"></span>
-          <button class="icon" onclick={() => startRename(tag)} aria-label={`Rename tag ${tag}`} title="Rename tag">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
+          <span class="text-muted">{filterByTags(words, [tag]).length} word(s)</span>
+          <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
+          <button class={ICON} onclick={() => startRename(tag)} aria-label={`Rename tag ${tag}`} title="Rename tag">
+            <Icon>
               <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
-            </svg>
+            </Icon>
           </button>
-          <button class="icon danger" onclick={() => deleteTagEverywhere(tag)} aria-label={`Remove tag ${tag} from all words`} title="Remove tag from all words">
+          <button class="danger {ICON}" onclick={() => deleteTagEverywhere(tag)} aria-label={`Remove tag ${tag} from all words`} title="Remove tag from all words">
             {@render trashIcon()}
           </button>
         {/if}
       </li>
     {/each}
   </ul>
-  {#if renaming !== null && renameError}<p class="error" role="alert">{renameError}</p>{/if}
+  {#if renaming !== null && renameError}<p class="my-4 text-bad" role="alert">{renameError}</p>{/if}
 {/if}
 
-<h2>Words ({visibleWords.length === words.length ? words.length : `${visibleWords.length} of ${words.length}`})</h2>
+<h2 class="section-title">Words ({visibleWords.length === words.length ? words.length : `${visibleWords.length} of ${words.length}`})</h2>
 {#if words.length === 0}
-  <p class="muted">No words yet.</p>
+  <p class="my-4 text-muted">No words yet.</p>
 {:else}
-  <div class="toolbar">
+  <div class="mb-2 flex flex-wrap items-center gap-2">
     <input
       type="search"
-      class="search"
+      class="field min-w-50 flex-1 appearance-none bg-surface px-3 py-2.5"
       placeholder="Search by word, reading, romaji or meaning"
       aria-label="Search words"
       bind:value={query}
       oninput={onSearch}
     />
-    <div class="sort">
-      <select bind:value={sortKey} aria-label="Sort by">
+    <div class="flex items-center gap-2">
+      <select class="field chevron bg-surface" bind:value={sortKey} aria-label="Sort by">
         {#each SORT_OPTIONS as option (option.key)}
           <option value={option.key}>{option.label}</option>
         {/each}
@@ -387,78 +409,79 @@
     </div>
   </div>
   {#if filterTags.length > 0}
-    <div class="active-filter" role="group" aria-label="Active tag filter">
-      <span class="muted">Tagged:</span>
+    <div class="mb-2 flex flex-wrap items-center gap-1.5" role="group" aria-label="Active tag filter">
+      <span class="text-muted">Tagged:</span>
       {#each filterTags as tag (tag)}
         <TagChip {tag} onremove={() => toggleFilterTag(tag)} />
       {/each}
     </div>
   {/if}
-  <div class="row bulk">
-    <label class="check">
+  <div class="{ROW} mb-2">
+    <label class="flex items-center gap-1.5">
       <input type="checkbox" checked={allSelected} onchange={toggleSelectAll} />
       Select all
     </label>
-    <span class="muted">{selectedWords.length} selected</span>
-    <div class="bulk-actions" class:hidden={selectedWords.length === 0}>
-      <button class="icon" onclick={() => onprint(selectedWords)} aria-label="Print writing sheet" title="Print writing sheet">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
+    <span class="text-muted">{selectedWords.length} selected</span>
+    <!-- keeps the space reserved so the layout does not shift when a selection appears -->
+    <div class="ml-auto flex gap-2" class:invisible={selectedWords.length === 0}>
+      <button class={ICON} onclick={() => onprint(selectedWords)} aria-label="Print writing sheet" title="Print writing sheet">
+        <Icon>
           <path d="M7 9V3h10v6M7 17H4v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6h-3M7 14h10v7H7z" />
-        </svg>
+        </Icon>
       </button>
-      <button class="icon" onclick={openTagDialog} aria-label="Tag selected" title="Tag selected">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
+      <button class={ICON} onclick={openTagDialog} aria-label="Tag selected" title="Tag selected">
+        <Icon>
           <path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9zM8 8h.01" />
-        </svg>
+        </Icon>
       </button>
-      <button class="icon" onclick={() => setSelectedDisabled(false)} aria-label="Enable selected" title="Enable selected">
+      <button class={ICON} onclick={() => setSelectedDisabled(false)} aria-label="Enable selected" title="Enable selected">
         {@render eyeIcon()}
       </button>
-      <button class="icon" onclick={() => setSelectedDisabled(true)} aria-label="Disable selected" title="Disable selected">
+      <button class={ICON} onclick={() => setSelectedDisabled(true)} aria-label="Disable selected" title="Disable selected">
         {@render eyeOffIcon()}
       </button>
-      <button class="icon danger" onclick={removeSelected} aria-label="Delete selected" title="Delete selected">
+      <button class="danger {ICON}" onclick={removeSelected} aria-label="Delete selected" title="Delete selected">
         {@render trashIcon()}
       </button>
     </div>
     <button
-      class="icon no-hover"
+      class="no-hover {ICON}"
       onclick={() => (sortDirection = sortDirection === 'asc' ? 'desc' : 'asc')}
       aria-label={sortDirection === 'asc' ? 'Ascending' : 'Descending'}
       title={sortDirection === 'asc' ? 'Ascending (click to reverse)' : 'Descending (click to reverse)'}
     >
-      <svg viewBox="0 0 24 24" aria-hidden="true">
+      <Icon>
         {#if sortDirection === 'asc'}
           <path d="M12 19V5M5 12l7-7 7 7" />
         {:else}
           <path d="M12 5v14M5 12l7 7 7-7" />
         {/if}
-      </svg>
+      </Icon>
     </button>
   </div>
   {#if visibleWords.length === 0}
-    <p class="muted">No words match your search or tag filter.</p>
+    <p class="my-4 text-muted">No words match your search or tag filter.</p>
   {/if}
-  <ul class="list">
+  <ul>
     {#each visibleWords as word (word.id)}
-      <li class:off={word.disabled}>
+      <li class="flex items-center gap-3 py-2.5">
         <input
           type="checkbox"
           checked={selected.has(word.id)}
           onchange={() => toggleSelected(word.id)}
           aria-label={`Select ${word.japanese}`}
         />
-        <span class="jp" lang="ja">{word.japanese}</span>
-        <span class="reading muted" lang="ja">{word.hiragana} · {toDisplayRomaji(word.hiragana)}</span>
+        <span class={["text-[1.3rem]", word.disabled && DIM]} lang="ja">{word.japanese}</span>
+        <span class={["text-[0.9rem] text-muted", word.disabled && DIM]} lang="ja">{word.hiragana} · {toDisplayRomaji(word.hiragana)}</span>
         {#if needsMeaning(word)}
-          <span class="meaning missing" title="Add a meaning to practice this word by meaning">needs meaning</span>
+          <span class={["min-w-0 truncate text-warn italic", word.disabled && DIM]} title="Add a meaning to practice this word by meaning">needs meaning</span>
         {:else}
-          <span class="meaning">{word.meaning}</span>
+          <span class={["min-w-0 truncate", word.disabled && DIM]}>{word.meaning}</span>
         {/if}
         {#each word.tags as tag (tag)}<TagChip {tag} onclick={() => filterByTag(tag)} />{/each}
-        <span class="leader" aria-hidden="true"></span>
+        <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
         <button
-          class="icon"
+          class={ICON}
           onclick={() => toggle(word)}
           aria-pressed={!word.disabled}
           aria-label={word.disabled ? 'Enable' : 'Disable'}
@@ -466,212 +489,15 @@
         >
           {#if word.disabled}{@render eyeOffIcon()}{:else}{@render eyeIcon()}{/if}
         </button>
-        <button class="icon" onclick={() => edit(word)} aria-label="Edit" title="Edit">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
+        <button class={ICON} onclick={() => edit(word)} aria-label="Edit" title="Edit">
+          <Icon>
             <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
-          </svg>
+          </Icon>
         </button>
-        <button class="icon danger" onclick={() => remove(word)} aria-label="Delete" title="Delete">
+        <button class="danger {ICON}" onclick={() => remove(word)} aria-label="Delete" title="Delete">
           {@render trashIcon()}
         </button>
       </li>
     {/each}
   </ul>
 {/if}
-
-<style>
-  .form {
-    display: grid;
-    gap: 8px;
-  }
-  /* section titles get a divider underneath; the heading wrapper carries it when the title has a help icon */
-  h2 {
-    padding-bottom: 8px;
-    margin-bottom: 12px;
-    border-bottom: 2px solid var(--text);
-  }
-  .heading {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin: 24px 0 12px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid var(--text);
-  }
-  .heading h2,
-  dialog h2 {
-    padding: 0;
-    border: none;
-  }
-  .heading h2 {
-    margin: 0;
-  }
-  dialog h2 {
-    margin-bottom: 8px;
-  }
-  /* buttons share the whole row evenly */
-  .wide > * {
-    flex: 1;
-    text-align: center;
-  }
-  .row {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-  select {
-    /* custom chevron so the arrow keeps its distance from the border */
-    padding: 9px 36px 9px 10px;
-    appearance: none;
-    background-color: var(--surface);
-    background-image:
-      linear-gradient(45deg, transparent 50%, var(--text) 50%),
-      linear-gradient(135deg, var(--text) 50%, transparent 50%);
-    background-position:
-      calc(100% - 19px) 50%,
-      calc(100% - 13px) 50%;
-    background-size: 6px 6px;
-    background-repeat: no-repeat;
-  }
-  dialog {
-    width: min(420px, calc(100vw - 32px));
-    padding: 16px;
-    background: var(--bg, var(--surface));
-    color: inherit;
-  }
-  dialog::backdrop {
-    background: rgb(0 0 0 / 0.5);
-  }
-  dialog h2 {
-    margin-top: 0;
-  }
-  /* every field in Settings gets the same square border; focus recolors it instead of stacking an outline */
-  input[type='text'],
-  .search,
-  select {
-    border: 2px solid var(--muted);
-  }
-  .search {
-    appearance: none;
-  }
-  input[type='text']:focus-visible,
-  .search:focus-visible,
-  select:focus-visible {
-    outline: none;
-    border-color: var(--accent);
-  }
-  .error {
-    color: var(--bad);
-  }
-  .list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-  li {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 0;
-  }
-  li.off .jp,
-  li.off .reading,
-  li.off .meaning {
-    opacity: 0.45;
-  }
-  /* row of small, widely spaced square dots between the word and the buttons, as in Stats */
-  .leader {
-    flex: 1;
-    min-width: 16px;
-    height: 2px;
-    background: linear-gradient(90deg, var(--muted) 2px, transparent 2px) left center / 8px 2px repeat-x;
-  }
-  .reading {
-    font-size: 0.9rem;
-  }
-  .meaning.missing {
-    color: var(--warn);
-    font-style: italic;
-  }
-  .meaning {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .search {
-    width: 100%;
-    padding: 10px 12px;
-    margin-bottom: 8px;
-    background: var(--surface);
-  }
-  .toolbar {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-  .toolbar .search {
-    flex: 1;
-    min-width: 200px;
-    width: auto;
-    margin-bottom: 0;
-  }
-  .sort {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-  .bulk {
-    margin-bottom: 8px;
-  }
-  .bulk-actions {
-    display: flex;
-    gap: 8px;
-    margin-left: auto;
-  }
-  /* keeps the space reserved so the layout does not shift when a selection appears */
-  .bulk-actions.hidden {
-    visibility: hidden;
-  }
-  .check {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-  }
-  button.icon {
-    display: inline-flex;
-    padding: 6px;
-  }
-  button.icon svg {
-    width: 20px;
-    height: 20px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-  .jp {
-    font-size: 1.3rem;
-  }
-  .active-filter {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-  .tag-rename {
-    display: flex;
-    flex: 1;
-    gap: 6px;
-    align-items: center;
-  }
-  .tag-rename input {
-    flex: 1;
-    min-width: 0;
-  }
-</style>

@@ -34,7 +34,13 @@
     const apply = () => {
       if (printing) return
       const resolved = resolveTheme(app.theme, query.matches)
-      document.documentElement.dataset.theme = resolved
+      const root = document.documentElement
+      if (root.dataset.theme !== resolved) {
+        // hundreds of buttons would animate their colors at once and freeze the page
+        root.dataset.themeSwitching = ''
+        requestAnimationFrame(() => requestAnimationFrame(() => delete root.dataset.themeSwitching))
+      }
+      root.dataset.theme = resolved
       document.querySelector<HTMLLinkElement>('link[rel="icon"]')!.href = asset(resolved === 'dark' ? 'favicon-dark.png' : 'favicon.png')
     }
     const startPrinting = () => (printing = true)
@@ -54,12 +60,12 @@
   })
 </script>
 
-<div class="app">
-  <header>
-    <h1>zennia</h1>
-    <nav>
+<div class="mx-auto max-w-260 p-4 print:hidden">
+  <header class="flex flex-wrap items-center justify-between gap-3 border-b-2 border-ink pt-2.5 pb-4">
+    <h1 class="font-serif text-[1.8rem] font-bold">zennia</h1>
+    <nav class="flex gap-2">
       {#each tabs as { path, label } (path)}
-        <a class="tab" href={resolve(path)} aria-current={page.url.pathname === resolve(path) ? 'page' : undefined}>{label}</a>
+        <a class="tab w-[6.5em]" href={resolve(path)} aria-current={page.url.pathname === resolve(path) ? 'page' : undefined}>{label}</a>
       {/each}
     </nav>
   </header>
@@ -72,35 +78,3 @@
 {#if app.sheetWords}
   <PrintSheet words={app.sheetWords} onclose={() => (app.sheetWords = null)} />
 {/if}
-
-<style>
-  .app {
-    max-width: 1040px;
-    margin: 0 auto;
-    padding: 16px;
-  }
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-    padding-top: 10px;
-    padding-bottom: 16px;
-    border-bottom: 2px solid var(--text);
-  }
-  h1 {
-    font-family: 'Libron', Georgia, serif;
-    font-weight: 700;
-    font-size: 1.8rem;
-    margin: 0;
-  }
-  nav {
-    display: flex;
-    gap: 8px;
-  }
-  nav a {
-    /* fixed width so the bold active tab does not resize the bar */
-    width: 6.5em;
-  }
-</style>

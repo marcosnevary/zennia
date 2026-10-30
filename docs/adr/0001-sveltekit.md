@@ -19,7 +19,7 @@ All data lives in `localStorage` and the app has no backend, so server rendering
 - Shared state (words, stats, theme, the writing sheet being printed) lives in `src/lib/state.svelte.ts`. `src/routes/+layout.svelte` persists it.
 - Code lives under `src/lib/` and is imported with the `#lib/*` subpath import, which replaces the deprecated `$lib` alias in SvelteKit 3.
 - Deploy to Vercel. `vercel.json` rewrites unknown paths to `index.html` so deep links work.
-- Tailwind CSS is adopted in a later, separate change and can coexist with the scoped component CSS during the transition.
+- Tailwind CSS was adopted in a later, separate change ([ADR 2](0002-tailwind.md)).
 
 ## Consequences
 

@@ -21,6 +21,17 @@
   import { loadKanaSelection, saveKanaSelection } from '../../data/storage'
   import type { Stats } from '../../core/types'
 
+  const LINK = 'no-hover bg-transparent px-0.5 py-0 text-[0.8rem] text-muted underline'
+
+  // same size for every cell, single or double kana; selected cells keep their light blue while lifting on hover,
+  // unselected ones hover black and white
+  function cellClass(on: boolean): string {
+    const base = 'h-10 w-13 [--lift:2px] p-0 text-[1.2rem] whitespace-nowrap'
+    return on
+      ? `${base} bg-on-bg text-on hover:bg-on-bg hover:text-on hover:[--lift-shadow:var(--on)] dark:hover:[--lift-shadow:#0062a3]`
+      : `${base} bg-transparent text-muted hover:bg-ink hover:text-page hover:[--lift-shadow:color-mix(in_srgb,var(--text)_55%,black)] dark:hover:bg-[#2a2a2a] dark:hover:text-ink dark:hover:[--lift-shadow:#3d3d3d]`
+  }
+
   let { stats = $bindable() }: { stats: Stats } = $props()
 
   const SCRIPTS: { id: KanaScript; label: string }[] = [
@@ -99,37 +110,37 @@
     onreset={() => (session = resetScore(session))}
   />
 {:else}
-  <p class="muted">Select at least one character below to practice.</p>
+  <p class="my-4 text-muted">Select at least one character below to practice.</p>
 {/if}
 
-<div class="tables">
+<div class="mt-6 flex flex-col gap-4">
   {#each SCRIPTS as script (script.id)}
     {@const scriptSelected = scriptKeys(script.id).filter((k) => selected.includes(k)).length}
-    <section class="script">
-      <header>
-        <h2>{script.label}</h2>
-        <span class="muted">{scriptSelected} selected</span>
+    <section class="bg-surface p-3">
+      <header class="flex flex-col items-start gap-0.5 border-b-2 border-ink pb-3">
+        <h2 class="m-0">{script.label}</h2>
+        <span class="text-[0.85rem] text-muted">{scriptSelected} selected</span>
       </header>
 
       {#each KANA_SECTIONS as section (section.id)}
         {@const keys = sectionKeys(script.id, section)}
-        <div class="group">
-          <div class="group-head">
-            <h3>{section.title}</h3>
-            <button class="link" onclick={() => select(keys, true)}>All</button>
-            <button class="link" onclick={() => select(keys, false)}>None</button>
+        <div class="mt-4">
+          <div class="flex items-center justify-start gap-2">
+            <h3 class="flex-1 text-[0.9rem] font-bold text-muted">{section.title}</h3>
+            <button class={LINK} onclick={() => select(keys, true)}>All</button>
+            <button class={LINK} onclick={() => select(keys, false)}>None</button>
           </div>
           <!-- transposed: one column per consonant row, one row per vowel -->
-          <div class="scroll">
-            <table>
+          <div class="overflow-x-auto">
+            <table class="mx-auto mt-1 border-separate border-spacing-1">
               <thead>
                 <tr>
                   <th></th>
                   {#each section.rows as r, i (i)}
                     {@const colKeys = columnKeys(script.id, r)}
-                    <th scope="col" class:gap={r.gap}>
+                    <th scope="col" class="text-[0.8rem] font-normal text-muted" class:pl-5={r.gap}>
                       <button
-                        class="link"
+                        class={LINK}
                         title="Toggle the whole column"
                         onclick={() => toggle(colKeys)}
                       >
@@ -143,9 +154,9 @@
                 {#each section.columns as col, c (col)}
                   {@const line = lineKeys(script.id, section, c)}
                   <tr>
-                    <th scope="row">
+                    <th scope="row" class="text-[0.8rem] font-normal text-muted">
                       <button
-                        class="link"
+                        class={LINK}
                         title="Toggle the whole row"
                         onclick={() => toggle(line)}
                       >
@@ -154,12 +165,11 @@
                     </th>
                     {#each section.rows as r, i (i)}
                       {@const cell = r.cells[c]}
-                      <td class:gap={r.gap}>
+                      <td class:pl-5={r.gap}>
                         {#if cell}
                           {@const key = kanaKey(script.id, cell)}
                           <button
-                            class="cell"
-                            class:on={selected.includes(key)}
+                            class={cellClass(selected.includes(key))}
                             aria-pressed={selected.includes(key)}
                             lang="ja"
                             onclick={() => toggle([key])}
@@ -179,110 +189,3 @@
     </section>
   {/each}
 </div>
-
-<style>
-  .tables {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-top: 24px;
-  }
-  .scroll {
-    overflow-x: auto;
-  }
-  .script {
-    padding: 12px;
-    background: var(--surface);
-  }
-  .script > header {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid var(--text);
-  }
-  .script > header span {
-    font-size: 0.85rem;
-  }
-  h2 {
-    margin: 0;
-    font-size: 1.1rem;
-  }
-  h3 {
-    flex: 1;
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--muted);
-  }
-  .group {
-    margin-top: 16px;
-  }
-  .group-head {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 8px;
-  }
-  table {
-    margin: 4px auto 0;
-    border-collapse: separate;
-    border-spacing: 4px;
-  }
-  th {
-    font-weight: normal;
-    font-size: 0.8rem;
-    color: var(--muted);
-  }
-  td {
-    padding: 0;
-  }
-  th.gap,
-  td.gap {
-    padding-left: 20px;
-  }
-  .cell {
-    /* same size for every cell, single or double kana */
-    --lift: 2px;
-    width: 52px;
-    height: 40px;
-    padding: 0;
-    white-space: nowrap;
-    font-size: 1.2rem;
-    color: var(--muted);
-    background: transparent;
-    cursor: pointer;
-  }
-  .cell.on {
-    color: var(--on);
-    background: var(--on-bg);
-  }
-  /* selected cells keep their light blue while lifting on hover; unselected ones hover black and white */
-  .cell.on:hover {
-    color: var(--on);
-    background: var(--on-bg);
-    --lift-shadow: var(--on);
-  }
-  .cell:not(.on):hover {
-    color: var(--bg);
-    background: var(--text);
-    --lift-shadow: color-mix(in srgb, var(--text) 55%, black);
-  }
-  :global(:root[data-theme='dark']) .cell.on:hover {
-    --lift-shadow: #0062a3;
-  }
-  :global(:root[data-theme='dark']) .cell:not(.on):hover {
-    color: var(--text);
-    background: #2a2a2a;
-    --lift-shadow: #3d3d3d;
-  }
-  .link {
-    padding: 0 2px;
-    font-size: 0.8rem;
-    color: var(--muted);
-    background: none;
-    border: none;
-    text-decoration: underline;
-    cursor: pointer;
-  }
-</style>
