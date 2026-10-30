@@ -45,7 +45,7 @@
 </script>
 
 {#snippet chip(label: string, on: boolean, onclick: () => void)}
-  <button class:primary={on} aria-pressed={on} {onclick}>{on ? '✓ ' : ''}{label}</button>
+  <button class:primary={on} aria-pressed={on} {onclick}>{label}</button>
 {/snippet}
 
 <dialog class="w-[min(420px,calc(100vw-32px))]" bind:this={dialogEl} use:closeOnBackdrop aria-label="Customize practice">
