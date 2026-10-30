@@ -66,6 +66,8 @@
   --muted: #78716c;
   --accent: #3f3f46;
   --accent-text: #ffffff;
+  --action: #0062a3;
+  --action-text: #ffffff;
   --ok: #15803d;
   --ok-bg: #dcfce7;
   --warn: #a16207;
@@ -91,6 +93,8 @@
   --muted: #a3a3a3;
   --accent: #d4d4d8;
   --accent-text: #1c1917;
+  --action: #7ec4f0;
+  --action-text: #111111;
   --ok: #86efac;
   --ok-bg: #14532d;
   --warn: #fde047;
@@ -228,6 +232,11 @@
     color: var(--accent-text);
   }
 
+  button.action {
+    background: var(--action);
+    color: var(--action-text);
+  }
+
   button.danger {
     color: var(--bad);
   }
@@ -243,6 +252,11 @@
   button.primary:not(:disabled):hover,
   .tab[aria-current='page']:hover {
     background: color-mix(in srgb, var(--accent) 80%, var(--text));
+  }
+
+  button.action:not(:disabled):hover {
+    background: color-mix(in srgb, var(--action) 80%, var(--text));
+    color: var(--action-text);
   }
 
   button.danger:not(:disabled):hover {

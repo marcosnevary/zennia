@@ -81,7 +81,7 @@
       {/if}
     </div>
     <!-- fixed width, so the button does not resize when its label switches between Check and Next -->
-    <button class="primary w-24 flex-none" type="submit">{verdict ? 'Next' : 'Check'}</button>
+    <button class="action w-24 flex-none" type="submit">{verdict ? 'Next' : 'Check'}</button>
   </form>
 
   {#if verdict}

@@ -80,7 +80,7 @@
       <p class="m-0 text-[0.9rem] text-muted" aria-live="polite">
         {wordCount} {wordCount === 1 ? 'word' : 'words'} · {kanaCount} kana
       </p>
-      <button class="primary" type="button" onclick={() => dialogEl?.close()}>Done</button>
+      <button class="action" type="button" onclick={() => dialogEl?.close()}>Done</button>
     </div>
   </div>
 </dialog>

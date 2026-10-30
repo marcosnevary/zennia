@@ -76,7 +76,7 @@
         <div class="my-4" role="alert">
           <p class="mb-2">This Google account already has data. Signing in discards the data in this browser.</p>
           <div class="flex gap-2">
-            <button class="primary" onclick={() => app.resolveConflict(true)}>Sign in and discard</button>
+            <button class="action" onclick={() => app.resolveConflict(true)}>Sign in and discard</button>
             <button onclick={() => app.resolveConflict(false)}>Keep my data</button>
           </div>
         </div>
