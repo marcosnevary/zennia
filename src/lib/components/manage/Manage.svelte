@@ -256,7 +256,7 @@
 <h2 class="section-title">Theme</h2>
 <div class={WIDE} role="group" aria-label="Theme">
   {#each THEMES as t (t.id)}
-    <button class:primary={theme === t.id} aria-pressed={theme === t.id} onclick={() => (theme = t.id)}>{t.label}</button>
+    <button class="duration-300" data-animate class:primary={theme === t.id} aria-pressed={theme === t.id} onclick={() => (theme = t.id)}>{t.label}</button>
   {/each}
 </div>
 
