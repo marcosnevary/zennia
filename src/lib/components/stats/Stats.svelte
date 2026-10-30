@@ -65,7 +65,7 @@
   <div class="mt-4 mb-2 flex flex-wrap items-center gap-2">
     <input
       type="search"
-      class="field h-11 min-w-50 flex-1 appearance-none bg-surface px-3"
+      class="field h-11 min-w-50 flex-1 appearance-none bg-surface"
       placeholder="Search by word, reading, romaji or meaning"
       aria-label="Search stats"
       bind:value={query}
@@ -80,7 +80,7 @@
         Filters{activeFilters ? ` (${activeFilters})` : ''}
       </button>
       {#if showFilters}
-        <div class="absolute top-[calc(100%+4px)] left-0 z-10 flex min-w-40 flex-col gap-2.5 border-2 border-muted bg-surface p-3" role="group" aria-label="Filters">
+        <div class="absolute top-[calc(100%+4px)] left-0 z-10 flex min-w-40 flex-col gap-2.5 border-2 border-line bg-surface p-3" role="group" aria-label="Filters">
           {#each KINDS as kind (kind.id)}
             <label class="flex items-center gap-1.5">
               <input type="checkbox" bind:checked={kinds[kind.id]} />
