@@ -14,7 +14,7 @@ Styling was plain CSS: global rules in `src/app.css` plus a scoped `<style>` blo
 
 - Use Tailwind CSS v4 through `@tailwindcss/vite`.
 - The theme colors stay CSS variables in `:root`, redefined by `:root[data-theme='dark']`. `@theme inline` exposes them as utilities (`bg-surface`, `text-ink`, `text-muted`, ...), so a theme switch needs no `dark:` variants. A `dark:` variant is still available for one-off cases and follows the same `data-theme` attribute.
-- The block-lift effect of buttons, tabs and file labels lives in `@layer components` in `src/app.css`, so a utility on an element can override any part of it. `no-hover` opts a button out.
+- The base look of buttons, tabs and file labels lives in `@layer components` in `src/app.css`, so a utility on an element can override any part of it. None of them react to hover.
 - Patterns used in several places are `@utility` rules in `src/app.css` (`field`, `chevron`, `dot-leader`, `section-title`) or components (`StatTile`, `Icon`).
 - `PrintSheet.svelte` keeps its scoped `<style>`: it is print-only, sized in millimeters, and relies on `@page`.
 

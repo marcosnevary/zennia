@@ -455,7 +455,7 @@
       </button>
     </div>
     <button
-      class="no-hover {ICON}"
+      class={ICON}
       onclick={() => (sortDirection = sortDirection === 'asc' ? 'desc' : 'asc')}
       aria-label={sortDirection === 'asc' ? 'Ascending' : 'Descending'}
       title={sortDirection === 'asc' ? 'Ascending (click to reverse)' : 'Descending (click to reverse)'}

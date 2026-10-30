@@ -2,7 +2,6 @@
   import { tagHue } from '../../data/words'
 
   // `onclick` makes the chip a button; `onadd` / `onremove` put a + / X button beside it. With none it is plain text.
-  // None of them react to hover.
   let { tag, onclick, onadd, onremove }: { tag: string; onclick?: () => void; onadd?: () => void; onremove?: () => void } = $props()
 
   const nameClass = $derived(`bg-transparent py-px pl-2 ${onadd || onremove ? 'pr-1' : 'pr-2'}`)
@@ -14,13 +13,13 @@
   style:--hue={tagHue(tag)}
 >
   {#if onclick}
-    <button type="button" class="no-hover {nameClass}" {onclick}>{tag}</button>
+    <button type="button" class={nameClass} {onclick}>{tag}</button>
   {:else}
     <span class={nameClass}>{tag}</span>
   {/if}
   {#if onadd}
-    <button type="button" class="no-hover bg-transparent py-px pr-1.5 pl-0.5" onclick={onadd} aria-label={`Add tag ${tag}`}>+</button>
+    <button type="button" class="bg-transparent py-px pr-1.5 pl-0.5" onclick={onadd} aria-label={`Add tag ${tag}`}>+</button>
   {:else if onremove}
-    <button type="button" class="no-hover bg-transparent py-px pr-1.5 pl-0.5" onclick={onremove} aria-label={`Remove tag ${tag}`}>×</button>
+    <button type="button" class="bg-transparent py-px pr-1.5 pl-0.5" onclick={onremove} aria-label={`Remove tag ${tag}`}>×</button>
   {/if}
 </span>

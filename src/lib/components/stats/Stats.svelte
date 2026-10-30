@@ -120,7 +120,7 @@
     />
     <div class="relative">
       <button
-        class="no-hover field chevron h-11 w-33 bg-surface text-left"
+        class="field chevron h-11 w-33 bg-surface text-left"
         onclick={() => (showFilters = !showFilters)}
         aria-expanded={showFilters}
         aria-haspopup="true"
@@ -145,7 +145,7 @@
         {/each}
       </select>
       <button
-        class="no-hover inline-flex p-1.5"
+        class="inline-flex p-1.5"
         onclick={() => (direction = direction === 'asc' ? 'desc' : 'asc')}
         aria-label={direction === 'asc' ? 'Ascending' : 'Descending'}
         title={direction === 'asc' ? 'Ascending (click to reverse)' : 'Descending (click to reverse)'}

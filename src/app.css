@@ -195,55 +195,16 @@
   }
 }
 
-/* the lift effect belongs to the components layer so a utility on an element can override any part of it */
 @layer components {
-  /* flat blocks with square corners and no borders; hovering lifts them toward the top-left */
+  /* flat blocks with square corners and no borders */
   button,
   select,
   .file,
   .tab {
-    --lift: 4px;
     position: relative;
-    --lift-shadow: color-mix(in srgb, var(--accent) 55%, black);
     padding: 9px 14px;
     background: var(--surface);
     cursor: pointer;
-    transition:
-      transform 0.12s ease,
-      box-shadow 0.12s ease,
-      background-color 0.12s ease,
-      color 0.12s ease;
-  }
-
-  button:hover:not(:disabled, .no-hover),
-  .file:hover,
-  .tab:hover {
-    transform: translate(calc(var(--lift) * -1), calc(var(--lift) * -1));
-    /* stacked steps fill the diagonal, so the block looks extruded and stays connected to where it was */
-    box-shadow:
-      calc(var(--lift) * 0.25) calc(var(--lift) * 0.25) 0 var(--lift-shadow),
-      calc(var(--lift) * 0.5) calc(var(--lift) * 0.5) 0 var(--lift-shadow),
-      calc(var(--lift) * 0.75) calc(var(--lift) * 0.75) 0 var(--lift-shadow),
-      var(--lift) var(--lift) 0 var(--lift-shadow);
-    background: var(--accent);
-    color: var(--accent-text);
-  }
-
-  /* the block moves away from the cursor, so without this the hover is lost near the bottom-right edge and it flickers;
-     this extends the hit area back over the spot the button just left */
-  button:hover:not(:disabled, .no-hover)::after,
-  .file:hover::after,
-  .tab:hover::after {
-    content: '';
-    position: absolute;
-    inset: 0 calc(var(--lift) * -1) calc(var(--lift) * -1) 0;
-  }
-
-  button:active:not(:disabled, .no-hover),
-  .file:active,
-  .tab:active {
-    transform: none;
-    box-shadow: none;
   }
 
   button.primary,
@@ -257,12 +218,6 @@
     color: var(--bad);
   }
 
-  button.danger:hover:not(:disabled) {
-    background: var(--bad);
-    color: var(--surface);
-    --lift-shadow: color-mix(in srgb, var(--bad) 55%, black);
-  }
-
   a.tab {
     display: inline-block;
     text-align: center;
@@ -273,14 +228,6 @@
   button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    button,
-    .file,
-    .tab {
-      transition: none;
-    }
   }
 }
 
