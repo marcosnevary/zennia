@@ -129,7 +129,7 @@
   border: 2px solid var(--border);
 
   /* typed fields only have the bottom border; selects keep the full one */
-  &:is(input) {
+  &:is(input, textarea) {
     border-width: 0 0 2px;
     padding-left: 0;
   }
@@ -156,6 +156,12 @@
     calc(100% - 13px) 50%;
   background-size: 6px 6px;
   background-repeat: no-repeat;
+}
+
+/* lists that scroll inside a dialog or field: a thin, faded bar in the muted colour, so it follows the theme */
+@utility thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--muted) 50%, transparent) transparent;
 }
 
 /* row of small, widely spaced square dots */
@@ -187,6 +193,7 @@
 
   button,
   input,
+  textarea,
   select {
     font: inherit;
     color: inherit;
@@ -198,13 +205,15 @@
     color: var(--text);
   }
 
-  input[type='text'] {
+  input[type='text'],
+  textarea {
     width: 100%;
     padding: 10px 12px;
     background: var(--surface);
   }
 
   input[type='text']:focus-visible,
+  textarea:focus-visible,
   button:focus-visible,
   .tab:focus-visible {
     outline: 2px solid var(--accent);

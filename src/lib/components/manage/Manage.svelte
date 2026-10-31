@@ -3,6 +3,7 @@
   import { closeOnBackdrop } from './dialog'
   import KanaSelector from './KanaSelector.svelte'
   import Pagination from '../Pagination.svelte'
+  import RomajiWordsDialog from './RomajiWordsDialog.svelte'
   import TagChip from './TagChip.svelte'
   import TagInput from './TagInput.svelte'
   import TagsDialog from './TagsDialog.svelte'
@@ -131,6 +132,7 @@
   }
 
   let tagsDialog = $state<TagsDialog>()
+  let romajiDialog = $state<RomajiWordsDialog>()
 
   function renameTagEverywhere(from: string, to: string) {
     app.setWords(renameTag(words, from, to))
@@ -236,6 +238,8 @@
   ondelete={deleteTagEverywhere}
 />
 
+<RomajiWordsDialog bind:this={romajiDialog} {tags} />
+
 {#snippet fieldError(message: string | undefined)}
   {#if message}<p class="text-bad" role="alert">{message}</p>{/if}
 {/snippet}
@@ -277,6 +281,9 @@
     <button class="action" type="submit">Add</button>
   </div>
 </form>
+<div class="mt-2 {WIDE}">
+  <button type="button" class="field font-ui" onclick={() => romajiDialog?.open()}>Add from romaji</button>
+</div>
 </div>
 <div>
 <h2 class="section-title">Words ({visibleWords.length === words.length ? words.length : `${visibleWords.length} of ${words.length}`})</h2>
