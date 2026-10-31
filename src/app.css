@@ -159,10 +159,10 @@
 }
 
 /* row of small, widely spaced square dots */
-/* lists that scroll inside a dialog or field: a thin bar in the muted colour, so it follows the theme */
+/* lists that scroll inside a dialog or field: a thin, faded bar in the muted colour, so it follows the theme */
 @utility thin-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: var(--muted) transparent;
+  scrollbar-color: color-mix(in srgb, var(--muted) 50%, transparent) transparent;
 }
 
 @utility dot-leader {
