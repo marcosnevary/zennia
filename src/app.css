@@ -233,9 +233,6 @@
     padding: 9px 14px;
     background: var(--surface);
     cursor: pointer;
-    transition:
-      background-color 90ms ease,
-      color 90ms ease;
   }
 
   button,
@@ -298,10 +295,4 @@
     opacity: 0.5;
     cursor: not-allowed;
   }
-}
-
-:root[data-theme-switching] *,
-:root[data-theme-switching] ::before,
-:root[data-theme-switching] ::after {
-  transition: none !important;
 }
