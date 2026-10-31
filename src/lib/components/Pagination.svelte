@@ -1,8 +1,8 @@
 <script lang="ts">
-  import Icon from '../Icon.svelte'
-  import { pageEntries } from '../../data/words'
+  import Icon from './Icon.svelte'
+  import { pageEntries } from '../data/pagination'
 
-  let { page, pageCount, onchange }: { page: number; pageCount: number; onchange: (page: number) => void } = $props()
+  let { page, pageCount, label, onchange }: { page: number; pageCount: number; label: string; onchange: (page: number) => void } = $props()
 
   // one size for every control, so the row does not grow or shrink between pages
   const CELL = 'inline-flex h-9 w-10 items-center justify-center p-0'
@@ -10,7 +10,7 @@
 </script>
 
 {#if pageCount > 1}
-  <nav class="mt-3 flex flex-wrap items-center justify-center gap-1.5" aria-label="Word pages">
+  <nav class="mt-3 flex flex-wrap items-center justify-center gap-1.5" aria-label={label}>
     <button class={CELL} onclick={() => onchange(1)} disabled={page === 1} aria-label="First page" title="First page">
       <Icon><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5" /></Icon>
     </button>
