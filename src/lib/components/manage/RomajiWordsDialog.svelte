@@ -73,7 +73,7 @@
   const DIM = 'opacity-45'
 </script>
 
-<dialog class="w-[min(640px,calc(100vw-32px))]" bind:this={dialogEl} use:closeOnBackdrop aria-label="Add from romaji">
+<dialog class="w-[min(720px,calc(100vw-32px))]" bind:this={dialogEl} use:closeOnBackdrop aria-label="Add from romaji">
   <div class="grid gap-2">
     <h2 class="mt-0 mb-2">Add from romaji</h2>
     {#if rows.length === 0}
@@ -102,11 +102,13 @@
           <li class="flex items-center gap-3 py-2.5">
             <input type="checkbox" bind:checked={row.selected} disabled={!candidate} aria-label={`Add ${row.item.romaji}`} />
             {#if candidate}
-              <span class={['text-[1.3rem]', warn, !row.selected && DIM]} lang="ja">{candidate.japanese}</span>
-              <span class={['text-[0.9rem]', warn || 'text-muted', !row.selected && DIM]} lang="ja">{candidate.hiragana} · {toDisplayRomaji(candidate.hiragana)}</span>
+              <span class={['min-w-0 truncate text-[1.3rem]', warn, !row.selected && DIM]} lang="ja">{candidate.japanese}</span>
+              <span class={['min-w-0 truncate text-[0.9rem]', warn || 'text-muted', !row.selected && DIM]} lang="ja">{candidate.hiragana} · {toDisplayRomaji(candidate.hiragana)}</span>
               <span class={['min-w-0 truncate', warn, !row.selected && DIM]}>{candidate.meaning}</span>
               {#if warn}<span class="sr-only">(vowel length differs from what you typed)</span>{/if}
-              {#each batchTags as tag (tag)}<TagChip {tag} />{/each}
+              {#if batchTags.length}
+                <span class="flex min-w-0 gap-1.5 overflow-hidden">{#each batchTags as tag (tag)}<TagChip {tag} />{/each}</span>
+              {/if}
               {#if row.candidates.length > 1}
                 <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
                 <!-- an invisible native select covers the chevron, so the list that opens is the native one -->
@@ -120,7 +122,7 @@
                 </span>
               {/if}
             {:else}
-              <span class="text-[1.3rem] text-bad">{row.item.romaji}</span>
+              <span class="min-w-0 truncate text-[0.9rem] text-bad">{row.item.romaji}</span>
               <span class="sr-only">(not found)</span>
             {/if}
           </li>
@@ -137,7 +139,7 @@
         </ul>
       {/if}
       <p class="text-[0.85rem] text-muted">Dictionary data: JMdict (EDRDG), CC BY-SA 4.0.</p>
-      <div class="flex flex-wrap items-center gap-2">
+      <div class="flex flex-wrap items-center justify-end gap-2">
         <button class="action" type="button" onclick={add} disabled={chosen.length === 0}>Add {chosen.length} word(s)</button>
         <button type="button" onclick={() => (rows = [])}>Back</button>
       </div>
