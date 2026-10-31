@@ -28,6 +28,20 @@
   --font-ui: system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', sans-serif;
   /* Libron for content; the Japanese fallbacks are serif to match */
   --font-serif: 'Libron', Georgia, 'Hiragino Mincho ProN', 'Noto Serif JP', 'Yu Mincho', serif;
+
+  /* each kana of the loading animation holds its 20% slot of the cycle and fades into the next one */
+  --animate-kana: kana 2.5s ease-in-out infinite;
+  @keyframes kana {
+    0%,
+    28%,
+    100% {
+      opacity: 0;
+    }
+    8%,
+    20% {
+      opacity: 1;
+    }
+  }
 }
 
 /* Libron (SIL OFL), https://github.com/nicoverbruggen/libron */

@@ -3,6 +3,7 @@
   import { onMount } from 'svelte'
   import { asset, resolve } from '$app/paths'
   import { page } from '$app/state'
+  import Loading from '#lib/components/Loading.svelte'
   import PrintSheet from '#lib/components/print/PrintSheet.svelte'
   import { getDb } from '#lib/data/db/client.ts'
   import { createRepo } from '#lib/data/db/repo.ts'
@@ -81,7 +82,7 @@
       <p class="mt-6 mb-4 text-bad" role="alert">Could not load your data: {app.error}</p>
       <button onclick={() => app.init()}>Try again</button>
     {:else}
-      <p class="mt-6 mb-4 text-muted" role="status">Loading…</p>
+      <Loading />
     {/if}
   </main>
 </div>
