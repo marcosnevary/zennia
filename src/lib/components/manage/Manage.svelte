@@ -293,10 +293,7 @@
       oninput={onSearch}
     />
     <div class="flex items-center gap-2">
-      <button class="field inline-flex items-center gap-1.5 font-ui" onclick={() => tagsDialog?.open()}>
-        {@render tagIcon()}
-        Tags
-      </button>
+      <button class="field font-ui" onclick={() => tagsDialog?.open()}>Tags</button>
       <select class="field chevron" bind:value={sortKey} onchange={() => (pageNumber = 1)} aria-label="Sort by">
         {#each SORT_OPTIONS as option (option.key)}
           <option value={option.key}>{option.label}</option>

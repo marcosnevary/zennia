@@ -266,8 +266,10 @@
     color: var(--accent-text);
   }
 
-  select:hover {
+  select:hover,
+  button.field:not(:disabled):hover {
     background-color: color-mix(in srgb, var(--surface) 90%, var(--text));
+    color: inherit;
   }
 
   button.primary:not(:disabled):hover,
