@@ -4,20 +4,18 @@
   import { emptyStats, attempts, totalTally } from '../../data/stats'
   import { importSummary, type SanitizeResult } from '../../data/words'
   import Help from './Help.svelte'
+  import SettingRow from './SettingRow.svelte'
   import type { WordsFocus } from '../../data/practice-modes'
   import { THEMES, type ThemePreference } from '../../data/theme'
   import { getApp } from '../../state.svelte'
 
   const app = getApp()
-  const theme = $derived(app.settings.theme)
 
   const FOCUSES: { id: WordsFocus; label: string }[] = [
     { id: 'reading', label: 'Romaji' },
     { id: 'meaning', label: 'Meaning' },
     { id: 'both', label: 'Both' },
   ]
-
-  const WIDE = 'flex flex-wrap items-center gap-2 *:flex-1 *:text-center'
 
   let error = $state('')
   let message = $state('')
@@ -49,70 +47,74 @@
     message = 'Statistics reset.'
     error = ''
   }
-
-  // only the buttons that change state animate on a theme switch; the third one would fade its background alone
-  let previousTheme = $state<ThemePreference>()
-
-  function chooseTheme(next: ThemePreference) {
-    previousTheme = theme
-    app.setTheme(next)
-  }
 </script>
 
-<h2 class="section-title">Account</h2>
-{#if app.account.anonymous}
-  <p class="my-2 text-muted">Your data lives in this browser only. Sign in to keep it and use it on other devices.</p>
-  <div class={WIDE}>
-    <button class="action" onclick={() => app.signIn()}>Sign in with Google</button>
-  </div>
-{:else}
-  <p class="my-2">Signed in as {app.account.email}.</p>
-  <div class={WIDE}>
-    <button onclick={() => confirm('Sign out? This browser will start empty until you sign in again.') && app.signOut()}>Sign out</button>
-  </div>
-{/if}
+<div class="divide-y divide-line/20">
+  {#if app.account.anonymous}
+    <SettingRow title="Account" description="Your data lives in this browser only. Sign in to keep it and use it on other devices.">
+      <button class="action" onclick={() => app.signIn()}>Sign in with Google</button>
+    </SettingRow>
+  {:else}
+    <SettingRow title="Account" description={`Signed in as ${app.account.email}.`}>
+      <button onclick={() => confirm('Sign out? This browser will start empty until you sign in again.') && app.signOut()}>Sign out</button>
+    </SettingRow>
+  {/if}
 
-<h2 class="section-title">Theme</h2>
-<div class={WIDE} role="group" aria-label="Theme">
-  {#each THEMES as t (t.id)}
-    <button
-      class="duration-300"
-      data-animate={t.id === theme || t.id === previousTheme ? '' : undefined}
-      class:primary={theme === t.id}
-      aria-pressed={theme === t.id}
-      onclick={() => chooseTheme(t.id)}
-    >{t.label}</button>
-  {/each}
+  <SettingRow title="Theme" description="Light, dark, or the same as your system.">
+    <select
+      class="field chevron py-[7px]"
+      value={app.settings.theme}
+      onchange={(e) => app.setTheme(e.currentTarget.value as ThemePreference)}
+      aria-label="Theme"
+    >
+      {#each THEMES as t (t.id)}
+        <option value={t.id}>{t.label}</option>
+      {/each}
+    </select>
+  </SettingRow>
+
+  <SettingRow
+    title="Answer words by"
+    description="How words are answered in Practice: by romaji, by meaning, or both. Kana are always answered by romaji."
+  >
+    <select
+      class="field chevron py-[7px]"
+      value={app.settings.wordsFocus}
+      onchange={(e) => app.setWordsFocus(e.currentTarget.value as WordsFocus)}
+      aria-label="Answer words by"
+    >
+      {#each FOCUSES as f (f.id)}
+        <option value={f.id}>{f.label}</option>
+      {/each}
+    </select>
+  </SettingRow>
 </div>
 
-<h2 class="section-title">Answer words by</h2>
-<p class="my-2 text-muted">How words are answered in Practice: by romaji, by meaning, or both. Kana are always answered by romaji.</p>
-<select
-  class="field chevron py-[7px]"
-  value={app.settings.wordsFocus}
-  onchange={(e) => app.setWordsFocus(e.currentTarget.value as WordsFocus)}
-  aria-label="Answer words by"
->
-  {#each FOCUSES as f (f.id)}
-    <option value={f.id}>{f.label}</option>
-  {/each}
-</select>
-
-<div class="mt-6 mb-3 flex items-center gap-1.5 pb-2">
+<div class="mt-6 flex items-center gap-1.5">
   <h2 class="m-0">Data</h2>
   <Help />
 </div>
-<div class={WIDE}>
-  <button onclick={exportWords} disabled={app.words.length === 0}>Export JSON</button>
-  <label class="file">
-    Import JSON
-    <input type="file" accept="application/json,.json" onchange={(e) => runImport(e, importJSON)} hidden />
-  </label>
-  <label class="file" title="Anki: Export → Notes in Plain Text. Columns: word, hiragana, meaning">
-    Import Anki deck (.txt)
-    <input type="file" accept="text/plain,.txt,.tsv" onchange={(e) => runImport(e, importAnkiDeck)} hidden />
-  </label>
-  {#if attempts(totalTally(app.stats))}<button class="danger" onclick={resetStats}>Reset stats</button>{/if}
+<div class="divide-y divide-line/20">
+  <SettingRow title="Export words" description="Download all your words as a JSON file, as a backup or to move them elsewhere.">
+    <button onclick={exportWords} disabled={app.words.length === 0}>Export JSON</button>
+  </SettingRow>
+  <SettingRow title="Import words" description="Add the words of a file made by Export JSON.">
+    <label class="file text-center">
+      Import JSON
+      <input type="file" accept="application/json,.json" onchange={(e) => runImport(e, importJSON)} hidden />
+    </label>
+  </SettingRow>
+  <SettingRow title="Import an Anki deck" description="Add the words of Anki notes exported as plain text.">
+    <label class="file text-center" title="Anki: Export → Notes in Plain Text. Columns: word, hiragana, meaning">
+      Import .txt
+      <input type="file" accept="text/plain,.txt,.tsv" onchange={(e) => runImport(e, importAnkiDeck)} hidden />
+    </label>
+  </SettingRow>
+  {#if attempts(totalTally(app.stats))}
+    <SettingRow title="Reset statistics" description="Erase every practice result. This cannot be undone.">
+      <button class="danger" onclick={resetStats}>Reset stats</button>
+    </SettingRow>
+  {/if}
 </div>
 {#if error}<p class="my-4 text-bad" role="alert">{error}</p>{/if}
 {#if message}<p class="my-4 text-muted" role="status">{message}</p>{/if}
