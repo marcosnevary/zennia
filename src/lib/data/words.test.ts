@@ -7,6 +7,7 @@ import {
   filterByTags,
   importSummary,
   makeWord,
+  matchTags,
   mergeWords,
   needsMeaning,
   removeTag,
@@ -255,6 +256,13 @@ describe('tag names', () => {
     expect(validateTag('a'.repeat(31))).not.toBe('')
     expect(validateTag('a'.repeat(30))).toBe('')
     expect(validateTag(' food ')).toBe('')
+  })
+  it('matchTags keeps the tags containing the text, ignoring case and spaces, and all of them for blank text', () => {
+    const tags = ['Food', 'JLPT N5', 'seafood', 'verbs']
+    expect(matchTags(tags, ' FOO ')).toEqual(['Food', 'seafood'])
+    expect(matchTags(tags, 'n5')).toEqual(['JLPT N5'])
+    expect(matchTags(tags, '  ')).toEqual(tags)
+    expect(matchTags(tags, 'kanji')).toEqual([])
   })
 })
 

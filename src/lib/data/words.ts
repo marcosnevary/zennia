@@ -48,6 +48,12 @@ export function sameTag(a: string, b: string): boolean {
   return a.trim().toLowerCase() === b.trim().toLowerCase()
 }
 
+/** The tags that contain the typed text, ignoring case and surrounding spaces; all of them when it is blank. */
+export function matchTags(tags: string[], query: string): string[] {
+  const q = query.trim().toLowerCase()
+  return tags.filter((t) => t.toLowerCase().includes(q))
+}
+
 /** The valid tags of a list, trimmed and without repeats (ignoring case), keeping the first spelling. */
 export function cleanTags(tags: unknown[]): string[] {
   const result: string[] = []

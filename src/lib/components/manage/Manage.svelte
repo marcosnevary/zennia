@@ -5,6 +5,7 @@
   import Pagination from '../Pagination.svelte'
   import TagChip from './TagChip.svelte'
   import TagInput from './TagInput.svelte'
+  import TagsDialog from './TagsDialog.svelte'
   import { paginate } from '../../data/pagination'
   import { toDisplayRomaji } from '../../core/romaji'
   import { defaultKanaSelection } from '../../core/kana'
@@ -26,7 +27,6 @@
     setDisabled,
     sortWords,
     updateWord,
-    validateTag,
     validateWord,
     type SortDirection,
     type SortKey,
@@ -130,35 +130,16 @@
     if (!filterTags.some((t) => sameTag(t, tag))) toggleFilterTag(tag)
   }
 
-  // renaming a tag, inline in the Tags section
-  let renaming = $state<string | null>(null)
-  let renameDraft = $state('')
-  let renameError = $state('')
+  let tagsDialog = $state<TagsDialog>()
 
-  function startRename(tag: string) {
-    renaming = tag
-    renameDraft = tag
-    renameError = ''
-  }
-
-  function confirmRename(event: Event) {
-    event.preventDefault()
-    if (renaming === null) return
-    renameError = validateTag(renameDraft)
-    if (renameError) return
-    const from = renaming
-    const to = renameDraft.trim()
-    const merges = !sameTag(from, to) && tags.some((t) => sameTag(t, to))
-    if (merges && !confirm(`"${to}" already exists. Merge "${from}" into it?`)) return
+  function renameTagEverywhere(from: string, to: string) {
     app.setWords(renameTag(words, from, to))
     // a merge keeps the spelling already in use, so read the final name back from the pool
     const name = allTags(words).find((t) => sameTag(t, to)) ?? to
     activeTags = cleanTags(filterTags.map((t) => (sameTag(t, from) ? name : t)))
-    renaming = null
   }
 
   function deleteTagEverywhere(tag: string) {
-    if (!confirm(`Remove the tag "${tag}" from all words?`)) return
     app.setWords(deleteTag(words, tag))
     // the list may grow if the tag was filtering it, so the selection must not outlive it
     activeTags = activeTags.filter((t) => !sameTag(t, tag))
@@ -247,6 +228,13 @@
   </div>
 </dialog>
 
+<TagsDialog
+  bind:this={tagsDialog}
+  {tags}
+  {words}
+  onrename={renameTagEverywhere}
+  ondelete={deleteTagEverywhere}
+/>
 
 {#snippet fieldError(message: string | undefined)}
   {#if message}<p class="text-bad" role="alert">{message}</p>{/if}
@@ -260,6 +248,11 @@
 {#snippet eyeOffIcon()}
   <Icon>
     <path d="M3 3l18 18M10.6 5.1A9.7 9.7 0 0 1 12 5c5 0 8.5 3.5 10 7a14 14 0 0 1-3 4.2M6.6 6.6A14 14 0 0 0 2 12c1.5 3.5 5 7 10 7a9.8 9.8 0 0 0 4.4-1M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+  </Icon>
+{/snippet}
+{#snippet tagIcon()}
+  <Icon>
+    <path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9zM8 8h.01" />
   </Icon>
 {/snippet}
 {#snippet trashIcon()}
@@ -284,38 +277,6 @@
     <button class="action" type="submit">Add</button>
   </div>
 </form>
-
-<h2 class="section-title">Tags ({tags.length})</h2>
-{#if tags.length === 0}
-  <p class="my-4 text-muted">No tags yet. Add them when you add or edit a word, or with the tag button on selected words.</p>
-{:else}
-  <ul>
-    {#each tags as tag (tag)}
-      <li class="flex items-center gap-3 py-2.5">
-        {#if renaming !== null && sameTag(renaming, tag)}
-          <form class="flex flex-1 items-center gap-1.5" onsubmit={confirmRename}>
-            <input type="text" class="field min-w-0 flex-1" aria-label={`New name for ${tag}`} bind:value={renameDraft} oninput={() => (renameError = '')} />
-            <button class="action" type="submit">Save</button>
-            <button type="button" onclick={() => (renaming = null)}>Cancel</button>
-          </form>
-        {:else}
-          <TagChip {tag} />
-          <span class="text-muted">{filterByTags(words, [tag]).length} word(s)</span>
-          <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
-          <button class={ICON} onclick={() => startRename(tag)} aria-label={`Rename tag ${tag}`} title="Rename tag">
-            <Icon>
-              <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
-            </Icon>
-          </button>
-          <button class="danger {ICON}" onclick={() => deleteTagEverywhere(tag)} aria-label={`Remove tag ${tag} from all words`} title="Remove tag from all words">
-            {@render trashIcon()}
-          </button>
-        {/if}
-      </li>
-    {/each}
-  </ul>
-  {#if renaming !== null && renameError}<p class="my-4 text-bad" role="alert">{renameError}</p>{/if}
-{/if}
 </div>
 <div>
 <h2 class="section-title">Words ({visibleWords.length === words.length ? words.length : `${visibleWords.length} of ${words.length}`})</h2>
@@ -332,6 +293,10 @@
       oninput={onSearch}
     />
     <div class="flex items-center gap-2">
+      <button class="field inline-flex items-center gap-1.5 font-ui" onclick={() => tagsDialog?.open()}>
+        {@render tagIcon()}
+        Tags
+      </button>
       <select class="field chevron" bind:value={sortKey} onchange={() => (pageNumber = 1)} aria-label="Sort by">
         {#each SORT_OPTIONS as option (option.key)}
           <option value={option.key}>{option.label}</option>
@@ -361,9 +326,7 @@
         </Icon>
       </button>
       <button class={ICON} onclick={openTagDialog} aria-label="Tag selected" title="Tag selected">
-        <Icon>
-          <path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9zM8 8h.01" />
-        </Icon>
+        {@render tagIcon()}
       </button>
       <button class={ICON} onclick={() => setSelectedDisabled(false)} aria-label="Enable selected" title="Enable selected">
         {@render eyeIcon()}
