@@ -9,7 +9,7 @@
     type StatsSort,
     type StatsSortDirection,
   } from '../../data/stats'
-  import { buildRows, filterRows, type StatsKind } from '../../data/stats-rows'
+  import { buildRows, filterRows } from '../../data/stats-rows'
   import type { Tally } from '../../core/types'
   import { getApp } from '../../state.svelte'
   import Icon from '../Icon.svelte'
@@ -21,21 +21,12 @@
   const words = $derived(app.words)
   const stats = $derived(app.stats)
 
-  const KINDS: { id: StatsKind; label: string }[] = [
-    { id: 'words', label: 'Words' },
-    { id: 'hiragana', label: 'Hiragana' },
-    { id: 'katakana', label: 'Katakana' },
-  ]
-
   let query = $state('')
   let sort = $state<StatsSort>('accuracy')
   let direction = $state<StatsSortDirection>('desc')
-  let showFilters = $state(false)
-  let kinds = $state<Record<StatsKind, boolean>>({ words: true, hiragana: true, katakana: true })
 
   const rows = $derived(buildRows(stats, words))
-  const visibleRows = $derived(filterRows(rows, { query, kinds, sort, direction }))
-  const activeFilters = $derived(KINDS.filter((k) => !kinds[k.id]).length)
+  const visibleRows = $derived(filterRows(rows, { query, sort, direction }))
 
   const total = $derived(totalTally(stats))
 </script>
@@ -48,13 +39,6 @@
     <StatTile value={attempts(tally)} label="Answers" />
   </section>
 {/snippet}
-
-<svelte:window
-  onclick={(e) => {
-    if (showFilters && !(e.target as Element).closest('.filters')) showFilters = false
-  }}
-  onkeydown={(e) => e.key === 'Escape' && (showFilters = false)}
-/>
 
 {#if !attempts(total)}
   <p class="my-4 text-muted">No statistics yet. Answer some words or kana in Practice and they will show up here.</p>
@@ -70,26 +54,6 @@
       aria-label="Search stats"
       bind:value={query}
     />
-    <div class="relative">
-      <button
-        class="field chevron h-11 w-33 bg-surface text-left"
-        onclick={() => (showFilters = !showFilters)}
-        aria-expanded={showFilters}
-        aria-haspopup="true"
-      >
-        Filters{activeFilters ? ` (${activeFilters})` : ''}
-      </button>
-      {#if showFilters}
-        <div class="absolute top-[calc(100%+4px)] left-0 z-10 flex min-w-40 flex-col gap-2.5 border-2 border-line bg-surface p-3" role="group" aria-label="Filters">
-          {#each KINDS as kind (kind.id)}
-            <label class="flex items-center gap-1.5">
-              <input type="checkbox" bind:checked={kinds[kind.id]} />
-              {kind.label}
-            </label>
-          {/each}
-        </div>
-      {/if}
-    </div>
     <div class="flex items-center gap-2">
       <select class="field chevron h-11" bind:value={sort} aria-label="Sort by">
         {#each STATS_SORT_OPTIONS as option (option.key)}
@@ -113,7 +77,7 @@
     </div>
   </div>
   {#if visibleRows.length === 0}
-    <p class="my-4 text-muted">Nothing matches your search and filters.</p>
+    <p class="my-4 text-muted">Nothing matches your search.</p>
   {/if}
   <ul>
     {#each visibleRows as row (row.key)}

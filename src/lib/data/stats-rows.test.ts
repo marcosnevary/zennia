@@ -19,7 +19,6 @@ describe('buildRows', () => {
     const [row] = buildRows(stats, [word('w1')])
     expect(row).toMatchObject({
       key: 'word:w1',
-      kind: 'words',
       symbol: '食べる',
       reading: 'たべる',
       ja: true,
@@ -40,8 +39,8 @@ describe('buildRows', () => {
       kana: { 'hiragana:か': { hits: 3, misses: 0 }, 'katakana:か': { hits: 0, misses: 2 } },
     }
     expect(buildRows(stats, [])).toEqual([
-      { key: 'hiragana:か', kind: 'hiragana', symbol: 'か', reading: 'ka', search: 'か か ka', ja: false, tally: { hits: 3, misses: 0 } },
-      { key: 'katakana:か', kind: 'katakana', symbol: 'カ', reading: 'ka', search: 'カ か ka', ja: false, tally: { hits: 0, misses: 2 } },
+      { key: 'hiragana:か', symbol: 'か', reading: 'ka', search: 'か か ka', ja: false, tally: { hits: 3, misses: 0 } },
+      { key: 'katakana:か', symbol: 'カ', reading: 'ka', search: 'カ か ka', ja: false, tally: { hits: 0, misses: 2 } },
     ])
   })
 
@@ -59,7 +58,6 @@ describe('filterRows', () => {
   const rows = buildRows(stats, [word('w1'), word('w2', { japanese: '飲む', hiragana: 'のむ', meaning: 'To drink' })])
   const all: StatsFilter = {
     query: '',
-    kinds: { words: true, hiragana: true, katakana: true },
     sort: 'misses',
     direction: 'desc',
   }
@@ -68,10 +66,6 @@ describe('filterRows', () => {
   it('sorts by the chosen value, most misses first by default', () => {
     expect(keys({})).toEqual(['word:w2', 'hiragana:か', 'word:w1', 'katakana:か'])
     expect(keys({ sort: 'misses', direction: 'asc' })).toEqual(['katakana:か', 'word:w1', 'hiragana:か', 'word:w2'])
-  })
-
-  it('hides the kinds that are switched off', () => {
-    expect(keys({ kinds: { words: false, hiragana: true, katakana: false } })).toEqual(['hiragana:か'])
   })
 
   it('matches the search text ignoring case and surrounding spaces', () => {

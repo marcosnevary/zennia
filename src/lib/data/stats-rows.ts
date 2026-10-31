@@ -1,14 +1,10 @@
 import { toRomaji } from 'wanakana'
-import { parseKanaKey, symbolOf, type KanaScript } from '../core/kana'
+import { parseKanaKey, symbolOf } from '../core/kana'
 import type { Stats, Tally, Word } from '../core/types'
 import { sortTallies, type StatsSort, type StatsSortDirection } from './stats'
 
-/** Which practice a row comes from. */
-export type StatsKind = 'words' | KanaScript
-
 export interface StatsRow {
   key: string
-  kind: StatsKind
   /** The word or kana shown big */
   symbol: string
   reading: string
@@ -28,7 +24,6 @@ export function buildRows(stats: Stats, words: Word[]): StatsRow[] {
     if (!word) continue
     rows.push({
       key: `word:${id}`,
-      kind: 'words',
       symbol: word.japanese,
       reading: word.hiragana,
       search: `${word.japanese} ${word.hiragana} ${toRomaji(word.hiragana)} ${word.meaning ?? ''}`.toLowerCase(),
@@ -44,7 +39,6 @@ export function buildRows(stats: Stats, words: Word[]): StatsRow[] {
     const symbol = symbolOf(script, hiragana)
     rows.push({
       key,
-      kind: script,
       symbol,
       reading: romaji,
       search: `${symbol} ${hiragana} ${romaji}`.toLowerCase(),
@@ -57,16 +51,14 @@ export function buildRows(stats: Stats, words: Word[]): StatsRow[] {
 
 export interface StatsFilter {
   query: string
-  /** Kinds that stay in the list */
-  kinds: Record<StatsKind, boolean>
   sort: StatsSort
   direction: StatsSortDirection
 }
 
-/** The rows to show: kinds switched on, matching the search text, in the chosen order. */
-export function filterRows(rows: StatsRow[], { query, kinds, sort, direction }: StatsFilter): StatsRow[] {
+/** The rows to show: matching the search text, in the chosen order. */
+export function filterRows(rows: StatsRow[], { query, sort, direction }: StatsFilter): StatsRow[] {
   const q = query.trim().toLowerCase()
-  const matches = rows.filter((r) => kinds[r.kind] && (!q || r.search.includes(q)))
+  const matches = rows.filter((r) => !q || r.search.includes(q))
   const byKey = new Map(matches.map((r) => [r.key, r]))
   return sortTallies(matches.map((r) => [r.key, r.tally]), sort, direction).map(([key]) => byKey.get(key)!)
 }
