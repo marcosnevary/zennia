@@ -44,9 +44,10 @@
 
       {#each KANA_SECTIONS as section (section.id)}
         {@const keys = sectionKeys(script.id, section)}
+        {@const count = keys.filter((k) => selected.includes(k)).length}
         <div class="mt-4 first-of-type:mt-0">
           <div class="flex items-center justify-start gap-2">
-            <h3 class="m-0 flex-1 text-[0.9rem] font-bold text-muted">{section.title}</h3>
+            <h3 class="m-0 flex-1 text-[0.9rem] font-bold text-muted">{section.title} ({count} of {keys.length})</h3>
             <button class={LINK} onclick={() => select(keys, true)}>All</button>
             <button class={LINK} onclick={() => select(keys, false)}>None</button>
           </div>
