@@ -28,6 +28,8 @@
   let message = $state('')
 
   const chosen = $derived(rows.filter((r) => r.selected))
+  const missing = (row: Row) => row.candidates.length === 0
+  const differs = (row: Row) => row.candidates[row.choice]?.verdict === 'almost'
 
   export function open() {
     text = ''
@@ -96,15 +98,14 @@
       <ul class="max-h-[55vh] overflow-y-auto">
         {#each rows as row (row.item)}
           {@const candidate = row.candidates[row.choice]}
+          {@const warn = differs(row) && 'text-warn'}
           <li class="flex items-center gap-3 py-2.5">
             <input type="checkbox" bind:checked={row.selected} disabled={!candidate} aria-label={`Add ${row.item.romaji}`} />
             {#if candidate}
-              <span class={['text-[1.3rem]', !row.selected && DIM]} lang="ja">{candidate.japanese}</span>
-              <span class={['text-[0.9rem] text-muted', !row.selected && DIM]} lang="ja">{candidate.hiragana} · {toDisplayRomaji(candidate.hiragana)}</span>
-              {#if candidate.verdict === 'almost'}
-                <span class={['shrink-0 text-warn italic', !row.selected && DIM]} title={`The vowel length differs from what you typed (${row.item.romaji})`}>check reading</span>
-              {/if}
-              <span class={['min-w-0 truncate', !row.selected && DIM]}>{candidate.meaning}</span>
+              <span class={['text-[1.3rem]', warn, !row.selected && DIM]} lang="ja">{candidate.japanese}</span>
+              <span class={['text-[0.9rem]', warn || 'text-muted', !row.selected && DIM]} lang="ja">{candidate.hiragana} · {toDisplayRomaji(candidate.hiragana)}</span>
+              <span class={['min-w-0 truncate', warn, !row.selected && DIM]}>{candidate.meaning}</span>
+              {#if warn}<span class="sr-only">(vowel length differs from what you typed)</span>{/if}
               {#each batchTags as tag (tag)}<TagChip {tag} />{/each}
               {#if row.candidates.length > 1}
                 <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
@@ -119,12 +120,22 @@
                 </span>
               {/if}
             {:else}
-              <span class="text-[1.3rem] {DIM}">{row.item.romaji}</span>
-              <span class="text-warn italic">not found</span>
+              <span class="text-[1.3rem] text-bad">{row.item.romaji}</span>
+              <span class="sr-only">(not found)</span>
             {/if}
           </li>
         {/each}
       </ul>
+      {#if rows.some(differs) || rows.some(missing)}
+        <ul class="flex flex-wrap gap-x-4 gap-y-1 text-[0.85rem]" aria-hidden="true">
+          {#if rows.some(differs)}
+            <li class="flex items-center gap-1.5 text-warn"><span class="size-2.5 bg-warn"></span>Vowel length differs from what you typed: check the reading</li>
+          {/if}
+          {#if rows.some(missing)}
+            <li class="flex items-center gap-1.5 text-bad"><span class="size-2.5 bg-bad"></span>Not found in the dictionary</li>
+          {/if}
+        </ul>
+      {/if}
       <p class="text-[0.85rem] text-muted">Dictionary data: JMdict (EDRDG), CC BY-SA 4.0.</p>
       <div class="flex flex-wrap items-center gap-2">
         <button class="action" type="button" onclick={add} disabled={chosen.length === 0}>Add {chosen.length} word(s)</button>
