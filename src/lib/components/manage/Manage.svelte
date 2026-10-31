@@ -48,7 +48,6 @@
   let editErrors = $state<WordErrors>({})
   let dialogEl = $state<HTMLDialogElement>()
   let errors = $state<WordErrors>({})
-  let message = $state('')
   let japaneseEl = $state<HTMLInputElement>()
 
   let { section }: { section: 'words' | 'kana' } = $props()
@@ -67,7 +66,6 @@
     errors = validateWord(fields)
     if (Object.keys(errors).length) return
     app.setWords([makeWord(fields), ...words])
-    message = 'Word added.'
     resetForm()
     japaneseEl?.focus()
   }
@@ -79,7 +77,6 @@
     editMeaning = word.meaning
     editTags = [...word.tags]
     editErrors = {}
-    message = ''
     dialogEl?.showModal()
   }
 
@@ -89,14 +86,12 @@
     editErrors = validateWord(fields)
     if (Object.keys(editErrors).length) return
     app.setWords(words.map((w) => (w.id === editingId ? updateWord(w, fields) : w)))
-    message = 'Word updated.'
     dialogEl?.close()
   }
 
   function remove(word: Word) {
     if (!confirm(`Delete "${word.japanese}"?`)) return
     app.setWords(words.filter((w) => w.id !== word.id))
-    message = 'Word deleted.'
   }
 
   function toggle(word: Word) {
@@ -159,7 +154,6 @@
     // a merge keeps the spelling already in use, so read the final name back from the pool
     const name = allTags(words).find((t) => sameTag(t, to)) ?? to
     activeTags = cleanTags(filterTags.map((t) => (sameTag(t, from) ? name : t)))
-    message = merges ? `Merged "${from}" into "${name}".` : `Renamed "${from}" to "${name}".`
     renaming = null
   }
 
@@ -170,7 +164,6 @@
     activeTags = activeTags.filter((t) => !sameTag(t, tag))
     selected = new Set()
     pageNumber = 1
-    message = `Tag "${tag}" removed from all words.`
   }
 
   // tags on the selected words, from a dialog opened by the tag button; a tag counts as on only when
@@ -205,9 +198,7 @@
   }
 
   function setSelectedDisabled(disabled: boolean) {
-    const count = selectedWords.length
     app.setWords(words.map((w) => (selected.has(w.id) ? setDisabled(w, disabled) : w)))
-    message = `${count} word(s) ${disabled ? 'disabled' : 'enabled'}.`
     selected = new Set()
   }
 
@@ -215,7 +206,6 @@
     const count = selectedWords.length
     if (!confirm(`Delete ${count} selected word(s)?`)) return
     app.setWords(words.filter((w) => !selected.has(w.id)))
-    message = `${count} word(s) deleted.`
     selected = new Set()
   }
 
@@ -257,7 +247,6 @@
   </div>
 </dialog>
 
-{#if message}<p class="my-4 text-muted" role="status">{message}</p>{/if}
 
 {#snippet fieldError(message: string | undefined)}
   {#if message}<p class="text-bad" role="alert">{message}</p>{/if}
