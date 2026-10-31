@@ -175,7 +175,6 @@
     text-transform: inherit;
   }
 
-  /* the open list takes the select's color, which is white on hover */
   option {
     background: var(--surface);
     color: var(--text);
@@ -258,7 +257,6 @@
   }
 
   button:not(:disabled):hover,
-  select:hover,
   .file:hover,
   .tab:hover {
     background: var(--accent);
