@@ -13,14 +13,15 @@
 
   let { selected, onchange }: { selected: string[]; onchange: (keys: string[]) => void } = $props()
 
-  const LINK = 'bg-transparent px-0.5 py-0 text-[0.8rem] text-muted underline'
+  const HEADER = 'bg-transparent px-0.5 py-0 text-[0.8rem] text-muted hover:text-ink'
+  const LINK = `${HEADER} underline`
 
   // same size for every cell, single or double kana
   function cellClass(on: boolean): string {
     const base = 'h-10 w-13 p-0 text-[1.2rem] whitespace-nowrap'
     return on
-      ? `${base} bg-on-bg text-on`
-      : `${base} bg-transparent text-muted`
+      ? `${base} bg-on-bg text-on hover:bg-[color-mix(in_srgb,var(--on-bg)_85%,var(--text))] hover:text-on`
+      : `${base} bg-transparent text-muted hover:bg-[color-mix(in_srgb,var(--surface)_90%,var(--text))] hover:text-ink`
   }
 
   const SCRIPTS: { id: KanaScript; label: string }[] = [
@@ -40,13 +41,14 @@
 <div class="flex flex-col">
   {#each SCRIPTS as script (script.id)}
     <section>
-      <h2 class="section-title">{script.label}</h2>
+      <h2 class="mb-1">{script.label}</h2>
 
       {#each KANA_SECTIONS as section (section.id)}
         {@const keys = sectionKeys(script.id, section)}
-        <div class="mt-4">
+        {@const count = keys.filter((k) => selected.includes(k)).length}
+        <div class="mt-4 first-of-type:mt-0">
           <div class="flex items-center justify-start gap-2">
-            <h3 class="m-0 flex-1 text-[0.9rem] font-bold text-muted">{section.title}</h3>
+            <h3 class="m-0 flex-1 text-[0.9rem] font-bold text-muted">{section.title} ({count} of {keys.length})</h3>
             <button class={LINK} onclick={() => select(keys, true)}>All</button>
             <button class={LINK} onclick={() => select(keys, false)}>None</button>
           </div>
@@ -60,7 +62,7 @@
                     {@const colKeys = columnKeys(script.id, r)}
                     <th scope="col" class="text-[0.8rem] font-normal text-muted" class:pl-5={r.gap}>
                       <button
-                        class={LINK}
+                        class={HEADER}
                         title="Toggle the whole column"
                         onclick={() => toggle(colKeys)}
                       >
@@ -76,7 +78,7 @@
                   <tr>
                     <th scope="row" class="text-[0.8rem] font-normal text-muted">
                       <button
-                        class={LINK}
+                        class={HEADER}
                         title="Toggle the whole row"
                         onclick={() => toggle(line)}
                       >
