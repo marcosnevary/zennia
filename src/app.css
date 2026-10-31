@@ -129,7 +129,7 @@
   border: 2px solid var(--border);
 
   /* typed fields only have the bottom border; selects keep the full one */
-  &:is(input) {
+  &:is(input, textarea) {
     border-width: 0 0 2px;
     padding-left: 0;
   }
@@ -187,6 +187,7 @@
 
   button,
   input,
+  textarea,
   select {
     font: inherit;
     color: inherit;
@@ -198,13 +199,15 @@
     color: var(--text);
   }
 
-  input[type='text'] {
+  input[type='text'],
+  textarea {
     width: 100%;
     padding: 10px 12px;
     background: var(--surface);
   }
 
   input[type='text']:focus-visible,
+  textarea:focus-visible,
   button:focus-visible,
   .tab:focus-visible {
     outline: 2px solid var(--accent);

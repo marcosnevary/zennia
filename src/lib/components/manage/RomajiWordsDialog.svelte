@@ -77,7 +77,7 @@
     {#if rows.length === 0}
       <form class="grid gap-2" onsubmit={look}>
         <textarea
-          class="field min-h-32"
+          class="field min-h-32 resize-y"
           placeholder={'One word per line or separated by commas, e.g.\nneko, taberu, hashi (chopsticks)'}
           aria-label="Words in romaji"
           bind:value={text}
