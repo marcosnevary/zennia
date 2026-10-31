@@ -182,8 +182,8 @@
   }
 
   html {
-    /* keep the centered layout from shifting when a tab needs scrolling */
-    scrollbar-gutter: stable;
+    /* keeps the centered layout from shifting when a tab needs scrolling: 100vw counts a classic scrollbar and 100% does not; scrollbar-gutter would reserve a strip the modal backdrop cannot cover */
+    margin-left: calc(100vw - 100%);
     text-transform: lowercase;
   }
 
@@ -244,6 +244,11 @@
   dialog::backdrop {
     background: rgb(0 0 0 / 0.5);
     backdrop-filter: blur(6px);
+  }
+
+  /* the backdrop stops at the scrollbar, so a modal hides it; the margin above drops with it and the centered layout stays put */
+  html:has(dialog:modal) {
+    overflow: hidden;
   }
 }
 
