@@ -14,24 +14,13 @@
   const app = setApp(new App(createRepo(getDb)))
   onMount(() => app.init())
 
-  const tabsAfterManage = [
+  const tabs = [
+    { path: '/practice', label: 'Practice' },
+    { path: '/manage/words', label: 'Words' },
+    { path: '/manage/kana', label: 'Kana' },
     { path: '/stats', label: 'Stats' },
     { path: '/settings', label: 'Settings' },
   ] as const
-
-  const manageSections = [
-    { path: '/manage/words', label: 'Words' },
-    { path: '/manage/kana', label: 'Kana' },
-  ] as const
-
-  let manageOpen = $state(false)
-  let manageEl = $state<HTMLElement>()
-
-  // the menu closes on any navigation
-  $effect(() => {
-    void page.url.pathname
-    manageOpen = false
-  })
 
   $effect(() => {
     const query = window.matchMedia('(prefers-color-scheme: dark)')
@@ -66,37 +55,11 @@
   })
 </script>
 
-<svelte:window
-  onclick={(e) => manageOpen && !manageEl?.contains(e.target as Node) && (manageOpen = false)}
-  onkeydown={(e) => e.key === 'Escape' && (manageOpen = false)}
-/>
-
 <div class="mx-auto max-w-360 p-4 print:hidden">
   <header class="flex flex-wrap items-center justify-between gap-3 pt-2.5 pb-4">
     <h1 class="font-serif text-[2.6rem] leading-none font-bold">zennia</h1>
-    <nav class="flex gap-2">
-      <a class="tab w-[6.5em]" href={resolve('/practice')} aria-current={page.url.pathname === resolve('/practice') ? 'page' : undefined}>Practice</a>
-      <div class="relative" role="presentation" bind:this={manageEl} onmouseenter={() => (manageOpen = true)} onmouseleave={() => (manageOpen = false)}>
-        <button
-          class="tab w-[6.5em]"
-          aria-current={page.url.pathname.startsWith(resolve('/manage')) ? 'page' : undefined}
-          aria-expanded={manageOpen}
-          aria-haspopup="true"
-          onclick={() => (manageOpen = true)}
-        >
-          Manage
-        </button>
-        {#if manageOpen}
-          <ul class="absolute top-full right-0 left-0 z-10 m-0 grid list-none gap-0 bg-surface p-0 shadow-[0_10px_14px_-6px_rgb(0_0_0/0.18)]">
-            {#each manageSections as { path, label } (path)}
-              <li>
-                <a class="tab block" href={resolve(path)} aria-current={page.url.pathname === resolve(path) ? 'page' : undefined}>{label}</a>
-              </li>
-            {/each}
-          </ul>
-        {/if}
-      </div>
-      {#each tabsAfterManage as { path, label } (path)}
+    <nav class="flex flex-wrap gap-2">
+      {#each tabs as { path, label } (path)}
         <a class="tab w-[6.5em]" href={resolve(path)} aria-current={page.url.pathname === resolve(path) ? 'page' : undefined}>{label}</a>
       {/each}
     </nav>
