@@ -102,7 +102,7 @@
         {#each rows as row (row.item)}
           {@const candidate = row.candidates[row.choice]}
           <li class="grid gap-1.5 py-2.5">
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5">
               <input type="checkbox" bind:checked={row.selected} disabled={!candidate} aria-label={`Add ${row.item.romaji}`} />
               <span class="font-semibold">{row.item.romaji}</span>
               {#if !candidate}
@@ -121,12 +121,13 @@
                   </select>
                 </span>
               {/if}
-            </div>
-            {#if candidate}
-              {#if candidate.verdict === 'almost'}
-                <p class="text-warn">The vowel length differs from what you typed: check the reading.</p>
+              {#if candidate}
+                <!-- wraps under the word only when the dialog is too narrow -->
+                <input type="text" class="field w-auto min-w-40 flex-1" placeholder="Meaning" bind:value={row.meaning} aria-label={`Meaning of ${row.item.romaji}`} aria-invalid={invalid(row)} />
               {/if}
-              <input type="text" class="field" placeholder="Meaning" bind:value={row.meaning} aria-label={`Meaning of ${row.item.romaji}`} aria-invalid={invalid(row)} />
+            </div>
+            {#if candidate?.verdict === 'almost'}
+              <p class="text-warn">The vowel length differs from what you typed: check the reading.</p>
             {/if}
           </li>
         {/each}
