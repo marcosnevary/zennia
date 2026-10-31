@@ -11,7 +11,7 @@ export interface Kana {
 }
 
 export interface KanaRow {
-  /** Romaji label of the row (empty for the vowels) */
+  /** Romaji label of the row (empty for the vowels and ん) */
   label: string
   /** Hiragana cells in column order; null leaves a gap in the grid */
   cells: (string | null)[]
@@ -48,7 +48,7 @@ export const KANA_SECTIONS: KanaSection[] = [
       row('y', 'や・ゆ・よ'),
       row('r', 'らりるれろ'),
       row('w', 'わ・・・を'),
-      row('ん', 'ん・・・・'),
+      row('', 'ん・・・・'),
       { ...row('g', 'がぎぐげご'), gap: true },
       row('z', 'ざじずぜぞ'),
       row('d', 'だぢづでど'),
