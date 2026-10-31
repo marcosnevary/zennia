@@ -8,15 +8,11 @@
   let {
     tags,
     words,
-    active,
-    ontoggle,
     onrename,
     ondelete,
   }: {
     tags: string[]
     words: Word[]
-    active: string[]
-    ontoggle: (tag: string) => void
     onrename: (from: string, to: string) => void
     ondelete: (tag: string) => void
   } = $props()
@@ -88,11 +84,8 @@
                 <button type="button" onclick={() => (renaming = null)}>Cancel</button>
               </form>
             {:else}
-              <label class="flex items-center gap-3">
-                <input type="checkbox" checked={active.some((t) => sameTag(t, tag))} onchange={() => ontoggle(tag)} aria-label={`Filter by ${tag}`} />
-                <TagChip {tag} />
-                <span class="text-muted">{filterByTags(words, [tag]).length} word(s)</span>
-              </label>
+              <TagChip {tag} />
+              <span class="text-muted">{filterByTags(words, [tag]).length} word(s)</span>
               <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
               <button class={ICON} onclick={() => startRename(tag)} aria-label={`Rename tag ${tag}`} title="Rename tag">
                 <Icon>

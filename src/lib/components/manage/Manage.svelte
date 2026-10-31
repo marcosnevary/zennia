@@ -232,8 +232,6 @@
   bind:this={tagsDialog}
   {tags}
   {words}
-  active={filterTags}
-  ontoggle={toggleFilterTag}
   onrename={renameTagEverywhere}
   ondelete={deleteTagEverywhere}
 />
@@ -297,7 +295,7 @@
     <div class="flex items-center gap-2">
       <button class="field inline-flex items-center gap-1.5 font-ui" onclick={() => tagsDialog?.open()}>
         {@render tagIcon()}
-        Tags{filterTags.length ? ` (${filterTags.length})` : ''}
+        Tags
       </button>
       <select class="field chevron" bind:value={sortKey} onchange={() => (pageNumber = 1)} aria-label="Sort by">
         {#each SORT_OPTIONS as option (option.key)}
