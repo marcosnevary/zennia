@@ -2,7 +2,7 @@
   const kana = ['あ', 'い', 'う', 'え', 'お']
 </script>
 
-<div class="mt-6 mb-4" role="status">
+<div class="pointer-events-none fixed inset-0 grid place-items-center" role="status">
   <span class="sr-only">Loading…</span>
   <div class="grid w-fit font-serif text-5xl text-muted" aria-hidden="true">
     {#each kana as char, i (char)}
