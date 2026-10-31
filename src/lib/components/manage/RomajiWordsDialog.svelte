@@ -87,7 +87,7 @@
         <TagInput bind:tags={batchTags} suggestions={tags} />
         {#if error}<p class="text-bad" role="alert">{error}</p>{/if}
         {#if message}<p role="status">{message}</p>{/if}
-        <div class="flex flex-wrap items-center gap-2">
+        <div class="flex flex-wrap items-center justify-end gap-2">
           <button class="action" type="submit" disabled={loading || parseRomajiList(text).length === 0}>{loading ? 'Looking up…' : 'Look up'}</button>
           <button type="button" onclick={() => dialogEl?.close()}>Close</button>
         </div>
