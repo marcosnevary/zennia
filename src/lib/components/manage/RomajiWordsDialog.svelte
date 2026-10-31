@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Icon from '../Icon.svelte'
   import TagInput from './TagInput.svelte'
   import { closeOnBackdrop } from './dialog'
   import { loadDictionary, lookUp, parseRomajiList, type Candidate, type RomajiItem } from '../../data/dictionary'
@@ -71,6 +72,10 @@
   }
 </script>
 
+{#snippet word(c: Candidate)}
+  <span lang="ja"><span class="text-[1.3rem]">{c.japanese}</span> <span class="text-[0.9rem] text-muted">{c.hiragana}</span></span>
+{/snippet}
+
 <dialog class="w-[min(640px,calc(100vw-32px))]" bind:this={dialogEl} use:closeOnBackdrop aria-label="Add from romaji">
   <div class="grid gap-2">
     <h2 class="mt-0 mb-2">Add from romaji</h2>
@@ -103,13 +108,18 @@
               {#if !candidate}
                 <span class="text-muted italic">not found</span>
               {:else if row.candidates.length === 1}
-                <span lang="ja"><span class="text-[1.3rem]">{candidate.japanese}</span> <span class="text-[0.9rem] text-muted">{candidate.hiragana}</span></span>
+                {@render word(candidate)}
               {:else}
-                <select class="field chevron min-w-0 flex-1" lang="ja" bind:value={row.choice} onchange={() => choose(row)} aria-label={`Word for ${row.item.romaji}`}>
-                  {#each row.candidates as c, i (i)}
-                    <option value={i}>{c.japanese} · {c.hiragana} · {c.meaning}</option>
-                  {/each}
-                </select>
+                <!-- an invisible native select covers the word, so the closed state keeps the word's look and the list stays native -->
+                <span class="relative flex cursor-pointer items-center gap-1.5 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent">
+                  {@render word(candidate)}
+                  <Icon class="size-4 text-muted"><path d="M6 9l6 6 6-6" /></Icon>
+                  <select class="absolute inset-0 cursor-pointer opacity-0" lang="ja" bind:value={row.choice} onchange={() => choose(row)} aria-label={`Word for ${row.item.romaji}`}>
+                    {#each row.candidates as c, i (i)}
+                      <option value={i}>{c.japanese} · {c.hiragana} · {c.meaning}</option>
+                    {/each}
+                  </select>
+                </span>
               {/if}
             </div>
             {#if candidate}
