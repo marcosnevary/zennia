@@ -77,12 +77,13 @@
     {#if rows.length === 0}
       <form class="grid gap-2" onsubmit={look}>
         <textarea
-          class="field min-h-32 resize-y"
-          placeholder={'One word per line or separated by commas, e.g.\nneko, taberu, hashi (chopsticks)'}
+          class="field resize-none field-sizing-content"
+          rows="1"
+          placeholder="Words in romaji (e.g. neko, taberu, hashi)"
           aria-label="Words in romaji"
           bind:value={text}
         ></textarea>
-        <p class="text-muted">A hint in parentheses picks the word whose meaning contains it.</p>
+        <p class="text-muted">Separate the words with commas or new lines. A hint in parentheses, e.g. hashi (chopsticks), picks the word whose meaning contains it.</p>
         <TagInput bind:tags={batchTags} suggestions={tags} />
         {#if error}<p class="text-bad" role="alert">{error}</p>{/if}
         {#if message}<p role="status">{message}</p>{/if}
