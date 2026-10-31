@@ -1,9 +1,11 @@
 <script lang="ts">
   import Icon from '../Icon.svelte'
+  import TagChip from './TagChip.svelte'
   import TagInput from './TagInput.svelte'
   import { closeOnBackdrop } from './dialog'
+  import { toDisplayRomaji } from '../../core/romaji'
   import { loadDictionary, lookUp, parseRomajiList, type Candidate, type RomajiItem } from '../../data/dictionary'
-  import { importSummary, makeWord, validateWord, type WordFields } from '../../data/words'
+  import { importSummary, makeWord } from '../../data/words'
   import { getApp } from '../../state.svelte'
 
   let { tags }: { tags: string[] } = $props()
@@ -14,7 +16,6 @@
     item: RomajiItem
     candidates: Candidate[]
     choice: number
-    meaning: string
     selected: boolean
   }
 
@@ -26,12 +27,7 @@
   let error = $state('')
   let message = $state('')
 
-  const fields = (row: Row): WordFields => {
-    const { japanese, hiragana } = row.candidates[row.choice]
-    return { japanese, hiragana, meaning: row.meaning, tags: batchTags }
-  }
   const chosen = $derived(rows.filter((r) => r.selected))
-  const invalid = (row: Row) => row.selected && Object.keys(validateWord(fields(row))).length > 0
 
   export function open() {
     text = ''
@@ -51,7 +47,7 @@
       const dictionary = await loadDictionary()
       rows = parseRomajiList(text).map((item) => {
         const candidates = lookUp(dictionary, item)
-        return { item, candidates, choice: 0, meaning: candidates[0]?.meaning ?? '', selected: candidates.length > 0 }
+        return { item, candidates, choice: 0, selected: candidates.length > 0 }
       })
     } catch {
       error = 'Could not load the dictionary. Check your connection and try again.'
@@ -60,21 +56,20 @@
     }
   }
 
-  function choose(row: Row) {
-    row.meaning = row.candidates[row.choice].meaning
-  }
-
   function add() {
-    const result = app.importWords(chosen.map((row) => makeWord(fields(row))))
+    const result = app.importWords(
+      chosen.map((row) => {
+        const { japanese, hiragana, meaning } = row.candidates[row.choice]
+        return makeWord({ japanese, hiragana, meaning, tags: batchTags })
+      }),
+    )
     message = importSummary(result, 0)
     text = ''
     rows = []
   }
-</script>
 
-{#snippet word(c: Candidate)}
-  <span lang="ja"><span class="text-[1.3rem]">{c.japanese}</span> <span class="text-[0.9rem] text-muted">{c.hiragana}</span></span>
-{/snippet}
+  const DIM = 'opacity-45'
+</script>
 
 <dialog class="w-[min(640px,calc(100vw-32px))]" bind:this={dialogEl} use:closeOnBackdrop aria-label="Add from romaji">
   <div class="grid gap-2">
@@ -101,39 +96,38 @@
       <ul class="max-h-[55vh] overflow-y-auto">
         {#each rows as row (row.item)}
           {@const candidate = row.candidates[row.choice]}
-          <li class="grid gap-1.5 py-2.5">
-            <div class="flex items-center gap-3">
-              <input type="checkbox" bind:checked={row.selected} disabled={!candidate} aria-label={`Add ${row.item.romaji}`} />
-              <span class="font-semibold">{row.item.romaji}</span>
-              {#if !candidate}
-                <span class="text-muted italic">not found</span>
-              {:else if row.candidates.length === 1}
-                {@render word(candidate)}
-              {:else}
-                <!-- an invisible native select covers the word, so the closed state keeps the word's look and the list stays native -->
-                <span class="relative flex cursor-pointer items-center gap-1.5 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent">
-                  {@render word(candidate)}
-                  <Icon class="size-4 text-muted"><path d="M6 9l6 6 6-6" /></Icon>
-                  <select class="absolute inset-0 cursor-pointer opacity-0" lang="ja" bind:value={row.choice} onchange={() => choose(row)} aria-label={`Word for ${row.item.romaji}`}>
+          <li class="flex items-center gap-3 py-2.5">
+            <input type="checkbox" bind:checked={row.selected} disabled={!candidate} aria-label={`Add ${row.item.romaji}`} />
+            {#if candidate}
+              <span class={['text-[1.3rem]', !row.selected && DIM]} lang="ja">{candidate.japanese}</span>
+              <span class={['text-[0.9rem] text-muted', !row.selected && DIM]} lang="ja">{candidate.hiragana} · {toDisplayRomaji(candidate.hiragana)}</span>
+              {#if candidate.verdict === 'almost'}
+                <span class={['shrink-0 text-warn italic', !row.selected && DIM]} title={`The vowel length differs from what you typed (${row.item.romaji})`}>check reading</span>
+              {/if}
+              <span class={['min-w-0 truncate', !row.selected && DIM]}>{candidate.meaning}</span>
+              {#each batchTags as tag (tag)}<TagChip {tag} />{/each}
+              {#if row.candidates.length > 1}
+                <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
+                <!-- an invisible native select covers the chevron, so it looks like the row's icon buttons and the list stays native -->
+                <span class="relative inline-flex shrink-0 p-1.5 hover:bg-accent hover:text-on-accent has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent" title="Choose another word">
+                  <Icon><path d="M6 9l6 6 6-6" /></Icon>
+                  <select class="absolute inset-0 cursor-pointer opacity-0" lang="ja" bind:value={row.choice} aria-label={`Word for ${row.item.romaji}`}>
                     {#each row.candidates as c, i (i)}
                       <option value={i}>{c.japanese} · {c.hiragana} · {c.meaning}</option>
                     {/each}
                   </select>
                 </span>
               {/if}
-            </div>
-            {#if candidate}
-              {#if candidate.verdict === 'almost'}
-                <p class="text-warn">The vowel length differs from what you typed: check the reading.</p>
-              {/if}
-              <input type="text" class="field" placeholder="Meaning" bind:value={row.meaning} aria-label={`Meaning of ${row.item.romaji}`} aria-invalid={invalid(row)} />
+            {:else}
+              <span class="text-[1.3rem] {DIM}">{row.item.romaji}</span>
+              <span class="text-warn italic">not found</span>
             {/if}
           </li>
         {/each}
       </ul>
       <p class="text-[0.85rem] text-muted">Dictionary data: JMdict (EDRDG), CC BY-SA 4.0.</p>
       <div class="flex flex-wrap items-center gap-2">
-        <button class="action" type="button" onclick={add} disabled={chosen.length === 0 || rows.some(invalid)}>Add {chosen.length} word(s)</button>
+        <button class="action" type="button" onclick={add} disabled={chosen.length === 0}>Add {chosen.length} word(s)</button>
         <button type="button" onclick={() => (rows = [])}>Back</button>
       </div>
     {/if}
