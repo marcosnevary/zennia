@@ -145,27 +145,34 @@ describe('validateWord', () => {
   const fields = { japanese: '食べる', hiragana: 'たべる', meaning: 'to eat', tags: [] }
 
   it('accepts a word with a kana reading and a meaning', () => {
-    expect(validateWord(fields)).toBe('')
+    expect(validateWord(fields)).toEqual({})
   })
 
   it('asks for a meaning, ignoring surrounding spaces', () => {
-    const message = 'Fill in the meaning.'
-    expect(validateWord({ ...fields, meaning: '' })).toBe(message)
-    expect(validateWord({ ...fields, meaning: '   ' })).toBe(message)
+    const errors = { meaning: 'Fill in the meaning.' }
+    expect(validateWord({ ...fields, meaning: '' })).toEqual(errors)
+    expect(validateWord({ ...fields, meaning: '   ' })).toEqual(errors)
   })
 
-  it('asks for both the word and the reading, ignoring surrounding spaces', () => {
-    const message = 'Fill in the Japanese word and the hiragana.'
-    expect(validateWord({ ...fields, japanese: '' })).toBe(message)
-    expect(validateWord({ ...fields, hiragana: '' })).toBe(message)
-    expect(validateWord({ ...fields, japanese: '   ' })).toBe(message)
+  it('asks for the word and the reading, each on its own field, ignoring surrounding spaces', () => {
+    expect(validateWord({ ...fields, japanese: '' })).toEqual({ japanese: 'Fill in the Japanese word.' })
+    expect(validateWord({ ...fields, japanese: '   ' })).toEqual({ japanese: 'Fill in the Japanese word.' })
+    expect(validateWord({ ...fields, hiragana: '' })).toEqual({ hiragana: 'Fill in the hiragana.' })
+  })
+
+  it('reports every invalid field at once', () => {
+    expect(validateWord({ japanese: '', hiragana: '', meaning: '', tags: [] })).toEqual({
+      japanese: 'Fill in the Japanese word.',
+      hiragana: 'Fill in the hiragana.',
+      meaning: 'Fill in the meaning.',
+    })
   })
 
   it('only takes kana as the reading: hiragana, katakana and the long vowel mark', () => {
-    const message = 'The hiragana field must contain only kana (hiragana, katakana or ー).'
-    expect(validateWord({ ...fields, hiragana: 'taberu' })).toBe(message)
-    expect(validateWord({ ...fields, hiragana: '食べる' })).toBe(message)
-    expect(validateWord({ ...fields, hiragana: ' コーヒー ' })).toBe('')
+    const errors = { hiragana: 'The hiragana field must contain only kana (hiragana, katakana or ー).' }
+    expect(validateWord({ ...fields, hiragana: 'taberu' })).toEqual(errors)
+    expect(validateWord({ ...fields, hiragana: '食べる' })).toEqual(errors)
+    expect(validateWord({ ...fields, hiragana: ' コーヒー ' })).toEqual({})
   })
 })
 

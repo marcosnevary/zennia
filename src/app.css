@@ -124,6 +124,10 @@
     outline: none;
     border-color: var(--accent);
   }
+
+  &[aria-invalid='true'] {
+    border-color: var(--bad);
+  }
 }
 
 /* custom chevron so the arrow keeps its distance from the border */
