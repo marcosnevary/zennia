@@ -58,6 +58,24 @@ function skeleton(kana: string): string {
     .replace(/oo|ou/g, 'o')
 }
 
+/** Every kana spelling the typed romaji may stand for. */
+function readings(input: string): string[] {
+  const typed = expandMacrons(input.trim().toLowerCase())
+  // "nn" at the end of a word is a common way to type ん
+  const variants = typed.flatMap((t) => (t.endsWith('nn') ? [t, t.slice(0, -1)] : [t]))
+  return variants.map(normalizeKana)
+}
+
+/** A key shared by the kana that sound the same ignoring vowel length, the ones `checkAnswer` accepts as correct or almost. */
+export function soundKey(kana: string): string {
+  return skeleton(normalizeKana(kana))
+}
+
+/** The `soundKey`s of what was typed, to find the words it may stand for. */
+export function typedSoundKeys(input: string): string[] {
+  return [...new Set(readings(input).map(skeleton))]
+}
+
 /**
  * Compares what was typed with the saved hiragana.
  * - correct: same sound (accepts shi/si, chi/ti, tsu/tu, fu/hu, macrons, uppercase)
@@ -68,10 +86,7 @@ export function checkAnswer(input: string, hiragana: string): Verdict {
   if (!input.trim()) return 'incorrect'
 
   const target = normalizeKana(hiragana)
-  const typed = expandMacrons(input.trim().toLowerCase())
-  // "nn" at the end of a word is a common way to type ん
-  const variants = typed.flatMap((t) => (t.endsWith('nn') ? [t, t.slice(0, -1)] : [t]))
-  const candidates = variants.map(normalizeKana)
+  const candidates = readings(input)
 
   if (candidates.includes(target)) return 'correct'
 

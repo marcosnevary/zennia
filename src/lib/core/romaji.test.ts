@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { checkAnswer, toDisplayRomaji } from './romaji'
+import { checkAnswer, soundKey, toDisplayRomaji, typedSoundKeys } from './romaji'
 
 describe('checkAnswer: accepts spelling-system variations', () => {
   it('exact romaji', () => {
@@ -55,5 +55,14 @@ describe('toDisplayRomaji', () => {
     expect(toDisplayRomaji('たべる')).toBe('taberu')
     expect(toDisplayRomaji('がっこう')).toBe('gakkou')
     expect(toDisplayRomaji('コーヒー')).toBe('koohii')
+  })
+})
+
+describe('typedSoundKeys', () => {
+  it('matches the soundKey of every reading that checkAnswer accepts as correct or almost', () => {
+    expect(typedSoundKeys('tōkyō')).toContain(soundKey('とうきょう'))
+    expect(typedSoundKeys('tokyo')).toContain(soundKey('とうきょう'))
+    expect(typedSoundKeys('koohii')).toContain(soundKey('コーヒー'))
+    expect(typedSoundKeys('neko')).not.toContain(soundKey('ねご'))
   })
 })
