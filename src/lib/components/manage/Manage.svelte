@@ -282,7 +282,7 @@
   </div>
 </form>
 <div class="mt-2 {WIDE}">
-  <button type="button" onclick={() => romajiDialog?.open()}>Add from romaji</button>
+  <button type="button" class="field font-ui" onclick={() => romajiDialog?.open()}>Add from romaji</button>
 </div>
 </div>
 <div>
