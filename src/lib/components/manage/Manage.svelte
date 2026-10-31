@@ -30,6 +30,7 @@
     validateWord,
     type SortDirection,
     type SortKey,
+    type WordErrors,
   } from '../../data/words'
 
   const app = getApp()
@@ -44,9 +45,9 @@
   let editHiragana = $state('')
   let editMeaning = $state('')
   let editTags = $state<string[]>([])
-  let editError = $state('')
+  let editErrors = $state<WordErrors>({})
   let dialogEl = $state<HTMLDialogElement>()
-  let error = $state('')
+  let errors = $state<WordErrors>({})
   let japaneseEl = $state<HTMLInputElement>()
 
   let { section }: { section: 'words' | 'kana' } = $props()
@@ -56,14 +57,14 @@
     hiragana = ''
     meaning = ''
     newTags = []
-    error = ''
+    errors = {}
   }
 
   function save(event: Event) {
     event.preventDefault()
     const fields = { japanese, hiragana, meaning, tags: newTags }
-    error = validateWord(fields)
-    if (error) return
+    errors = validateWord(fields)
+    if (Object.keys(errors).length) return
     app.setWords([makeWord(fields), ...words])
     resetForm()
     japaneseEl?.focus()
@@ -75,15 +76,15 @@
     editHiragana = word.hiragana
     editMeaning = word.meaning
     editTags = [...word.tags]
-    editError = ''
+    editErrors = {}
     dialogEl?.showModal()
   }
 
   function saveEdit(event: Event) {
     event.preventDefault()
     const fields = { japanese: editJapanese, hiragana: editHiragana, meaning: editMeaning, tags: editTags }
-    editError = validateWord(fields)
-    if (editError) return
+    editErrors = validateWord(fields)
+    if (Object.keys(editErrors).length) return
     app.setWords(words.map((w) => (w.id === editingId ? updateWord(w, fields) : w)))
     dialogEl?.close()
   }
@@ -220,13 +221,15 @@
 <dialog class="w-[min(420px,calc(100vw-32px))]" bind:this={dialogEl} onclose={() => (editingId = null)} use:closeOnBackdrop aria-label="Edit word">
   <form class="grid gap-2" onsubmit={saveEdit}>
     <h2 class="mt-0 mb-2">Edit word</h2>
-    <input type="text" class="field" lang="ja" placeholder="Japanese (e.g. 食べる)" bind:value={editJapanese} />
-    <input type="text" class="field" lang="ja" placeholder="Hiragana (e.g. たべる)" bind:value={editHiragana} />
-    <input type="text" class="field" placeholder="Meaning (e.g. to eat)" bind:value={editMeaning} />
+    <input type="text" class="field" lang="ja" placeholder="Japanese (e.g. 食べる)" bind:value={editJapanese} aria-invalid={!!editErrors.japanese} oninput={() => (editErrors.japanese = '')} />
+    {@render fieldError(editErrors.japanese)}
+    <input type="text" class="field" lang="ja" placeholder="Hiragana (e.g. たべる)" bind:value={editHiragana} aria-invalid={!!editErrors.hiragana} oninput={() => (editErrors.hiragana = '')} />
+    {@render fieldError(editErrors.hiragana)}
+    <input type="text" class="field" placeholder="Meaning (e.g. to eat)" bind:value={editMeaning} aria-invalid={!!editErrors.meaning} oninput={() => (editErrors.meaning = '')} />
+    {@render fieldError(editErrors.meaning)}
     {#key editingId}
       <TagInput bind:tags={editTags} suggestions={tags} />
     {/key}
-    {#if editError}<p class="my-4 text-bad" role="alert">{editError}</p>{/if}
     <div class={ROW}>
       <button class="action" type="submit">Save</button>
       <button type="button" onclick={() => dialogEl?.close()}>Cancel</button>
@@ -244,8 +247,10 @@
   </div>
 </dialog>
 
-{#if error}<p class="my-4 text-bad" role="alert">{error}</p>{/if}
 
+{#snippet fieldError(message: string | undefined)}
+  {#if message}<p class="text-bad" role="alert">{message}</p>{/if}
+{/snippet}
 {#snippet eyeIcon()}
   <Icon>
     <path d="M2 12c1.5-3.5 5-7 10-7s8.5 3.5 10 7c-1.5 3.5-5 7-10 7S3.5 15.5 2 12z" />
@@ -268,9 +273,12 @@
 <div>
 <h2 class="section-title">New word</h2>
 <form class="grid gap-2" onsubmit={save}>
-  <input type="text" class="field" lang="ja" placeholder="Japanese (e.g. 食べる)" bind:value={japanese} bind:this={japaneseEl} />
-  <input type="text" class="field" lang="ja" placeholder="Hiragana (e.g. たべる)" bind:value={hiragana} />
-  <input type="text" class="field" placeholder="Meaning (e.g. to eat)" bind:value={meaning} />
+  <input type="text" class="field" lang="ja" placeholder="Japanese (e.g. 食べる)" bind:value={japanese} bind:this={japaneseEl} aria-invalid={!!errors.japanese} oninput={() => (errors.japanese = '')} />
+  {@render fieldError(errors.japanese)}
+  <input type="text" class="field" lang="ja" placeholder="Hiragana (e.g. たべる)" bind:value={hiragana} aria-invalid={!!errors.hiragana} oninput={() => (errors.hiragana = '')} />
+  {@render fieldError(errors.hiragana)}
+  <input type="text" class="field" placeholder="Meaning (e.g. to eat)" bind:value={meaning} aria-invalid={!!errors.meaning} oninput={() => (errors.meaning = '')} />
+  {@render fieldError(errors.meaning)}
   <TagInput bind:tags={newTags} suggestions={tags} />
   <div class={WIDE}>
     <button class="action" type="submit">Add</button>

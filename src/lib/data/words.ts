@@ -14,14 +14,18 @@ export interface WordFields {
   tags: string[]
 }
 
-/** The message to show for an invalid form, or '' when the word can be saved. */
-export function validateWord({ japanese, hiragana, meaning }: WordFields): string {
-  const j = japanese.trim()
+/** The message to show under each invalid field of the form. */
+export type WordErrors = Partial<Record<'japanese' | 'hiragana' | 'meaning', string>>
+
+/** The errors of the form, empty when the word can be saved. */
+export function validateWord({ japanese, hiragana, meaning }: WordFields): WordErrors {
+  const errors: WordErrors = {}
   const h = hiragana.trim()
-  if (!j || !h) return 'Fill in the Japanese word and the hiragana.'
-  if (!isKana(h)) return 'The hiragana field must contain only kana (hiragana, katakana or ー).'
-  if (!meaning.trim()) return 'Fill in the meaning.'
-  return ''
+  if (!japanese.trim()) errors.japanese = 'Fill in the Japanese word.'
+  if (!h) errors.hiragana = 'Fill in the hiragana.'
+  else if (!isKana(h)) errors.hiragana = 'The hiragana field must contain only kana (hiragana, katakana or ー).'
+  if (!meaning.trim()) errors.meaning = 'Fill in the meaning.'
+  return errors
 }
 
 /** Whether the word was saved before the meaning became required and still has none. */
