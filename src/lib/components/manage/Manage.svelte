@@ -335,7 +335,7 @@
       oninput={onSearch}
     />
     <div class="flex items-center gap-2">
-      <select class="field chevron bg-surface" bind:value={sortKey} onchange={() => (pageNumber = 1)} aria-label="Sort by">
+      <select class="field chevron" bind:value={sortKey} onchange={() => (pageNumber = 1)} aria-label="Sort by">
         {#each SORT_OPTIONS as option (option.key)}
           <option value={option.key}>{option.label}</option>
         {/each}
