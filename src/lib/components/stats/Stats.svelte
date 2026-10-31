@@ -9,10 +9,12 @@
     type StatsSort,
     type StatsSortDirection,
   } from '../../data/stats'
+  import { paginate } from '../../data/pagination'
   import { buildRows, filterRows } from '../../data/stats-rows'
   import type { Tally } from '../../core/types'
   import { getApp } from '../../state.svelte'
   import Icon from '../Icon.svelte'
+  import Pagination from '../Pagination.svelte'
   import StatTile from '../StatTile.svelte'
 
   const LEVEL_STYLES = { high: 'text-on', low: 'text-off', '': '' }
@@ -27,6 +29,8 @@
 
   const rows = $derived(buildRows(stats, words))
   const visibleRows = $derived(filterRows(rows, { query, sort, direction }))
+  let pageNumber = $state(1)
+  const current = $derived(paginate(visibleRows, pageNumber))
 
   const total = $derived(totalTally(stats))
 </script>
@@ -53,16 +57,20 @@
       placeholder="Search by word, reading, romaji or meaning"
       aria-label="Search stats"
       bind:value={query}
+      oninput={() => (pageNumber = 1)}
     />
     <div class="flex items-center gap-2">
-      <select class="field chevron h-11" bind:value={sort} aria-label="Sort by">
+      <select class="field chevron h-11" bind:value={sort} onchange={() => (pageNumber = 1)} aria-label="Sort by">
         {#each STATS_SORT_OPTIONS as option (option.key)}
           <option value={option.key}>{option.label}</option>
         {/each}
       </select>
       <button
         class="inline-flex p-1.5"
-        onclick={() => (direction = direction === 'asc' ? 'desc' : 'asc')}
+        onclick={() => {
+          direction = direction === 'asc' ? 'desc' : 'asc'
+          pageNumber = 1
+        }}
         aria-label={direction === 'asc' ? 'Ascending' : 'Descending'}
         title={direction === 'asc' ? 'Ascending (click to reverse)' : 'Descending (click to reverse)'}
       >
@@ -80,7 +88,7 @@
     <p class="my-4 text-muted">Nothing matches your search.</p>
   {/if}
   <ul>
-    {#each visibleRows as row (row.key)}
+    {#each current.items as row (row.key)}
       <li class="flex items-center gap-3 py-2.5">
         <span class="text-[1.2rem]" lang="ja">{row.symbol}</span>
         <span class="text-[0.9rem] text-muted" lang={row.ja ? 'ja' : undefined}>{row.reading}</span>
@@ -95,4 +103,5 @@
       </li>
     {/each}
   </ul>
+  <Pagination page={current.page} pageCount={current.pageCount} label="Stats pages" onchange={(n) => (pageNumber = n)} />
 {/if}

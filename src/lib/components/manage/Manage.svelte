@@ -2,9 +2,10 @@
   import Icon from '../Icon.svelte'
   import { closeOnBackdrop } from './dialog'
   import KanaSelector from './KanaSelector.svelte'
-  import Pagination from './Pagination.svelte'
+  import Pagination from '../Pagination.svelte'
   import TagChip from './TagChip.svelte'
   import TagInput from './TagInput.svelte'
+  import { paginate } from '../../data/pagination'
   import { toDisplayRomaji } from '../../core/romaji'
   import { defaultKanaSelection } from '../../core/kana'
   import type { Word } from '../../core/types'
@@ -17,7 +18,6 @@
     filterByTags,
     makeWord,
     needsMeaning,
-    paginate,
     removeTag,
     renameTag,
     sameTag,
@@ -437,7 +437,7 @@
       </li>
     {/each}
   </ul>
-  <Pagination page={current.page} pageCount={current.pageCount} onchange={(n) => (pageNumber = n)} />
+  <Pagination page={current.page} pageCount={current.pageCount} label="Word pages" onchange={(n) => (pageNumber = n)} />
 {/if}
 </div>
 </div>
