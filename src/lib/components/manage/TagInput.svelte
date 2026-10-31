@@ -52,7 +52,7 @@
   />
   {#if error}<p class="text-bad" role="alert">{error}</p>{/if}
   {#if choices.length > 0}
-    <ul class="flex max-h-32 flex-wrap gap-1.5 overflow-y-auto" aria-label="Tags: + adds one to the word, × removes it">
+    <ul class="flex max-h-32 flex-wrap gap-1.5 overflow-y-auto thin-scrollbar" aria-label="Tags: + adds one to the word, × removes it">
       {#each choices as tag (tag)}
         <li>
           {#if has(tag)}

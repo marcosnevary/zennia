@@ -159,6 +159,12 @@
 }
 
 /* row of small, widely spaced square dots */
+/* lists that scroll inside a dialog or field: a thin bar in the muted colour, so it follows the theme */
+@utility thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted) transparent;
+}
+
 @utility dot-leader {
   height: 2px;
   background: linear-gradient(90deg, var(--muted) 2px, transparent 2px) left center / 8px 2px repeat-x;

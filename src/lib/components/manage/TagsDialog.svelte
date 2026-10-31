@@ -74,7 +74,7 @@
       {#if visibleTags.length === 0}
         <p class="my-4 text-muted">No tags match your search.</p>
       {/if}
-      <ul class="max-h-[60vh] overflow-y-auto">
+      <ul class="max-h-[60vh] overflow-y-auto thin-scrollbar">
         {#each visibleTags as tag (tag)}
           <li class="flex items-center gap-3 py-2.5">
             {#if renaming !== null && sameTag(renaming, tag)}
