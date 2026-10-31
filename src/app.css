@@ -124,12 +124,6 @@
   --off-bg: #4a2a0a;
 }
 
-/* the dialog backdrop stops at the scrollbar gutter that html reserves, so while a modal is open the page is locked and the gutter gets the backdrop's tint */
-html:has(dialog:modal) {
-  overflow: hidden;
-  background: color-mix(in srgb, var(--bg) 50%, black);
-}
-
 /* the answer fields are the only bordered inputs */
 @utility field {
   border: 2px solid var(--border);
