@@ -112,10 +112,10 @@
             {/if}
             {#if row.candidates.length > 1}
               <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
-              <!-- an invisible native select covers the chevron, so the list that opens is the native one -->
+              <!-- an invisible native select covers the chevron, so the list that opens is the native one; size-full stops it taking the width of its longest option -->
               <span class="relative -ml-2 inline-flex shrink-0 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent">
                 <Icon><path d="M6 9l6 6 6-6" /></Icon>
-                <select class="absolute inset-0 cursor-pointer opacity-0" lang="ja" bind:value={row.choice} aria-label={`Word for ${row.item.romaji}`}>
+                <select class="absolute inset-0 size-full cursor-pointer opacity-0" lang="ja" bind:value={row.choice} aria-label={`Word for ${row.item.romaji}`}>
                   {#each row.candidates as c, i (i)}
                     <option value={i}>{c.japanese} · {c.hiragana} · {c.meaning}</option>
                   {/each}
