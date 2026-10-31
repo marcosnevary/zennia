@@ -97,7 +97,7 @@
       </form>
     {:else}
       <!-- relative keeps the rows' sr-only text inside this scroll box, so the dialog itself never scrolls -->
-      <ul class="relative max-h-[55vh] overflow-y-auto thin-scrollbar pr-3">
+      <ul class="relative max-h-[55vh] overflow-y-auto thin-scrollbar pr-6">
         {#each found as row (row.item)}
           {@const candidate = row.candidates[row.choice]}
           {@const warn = differs(row) && 'text-warn'}
