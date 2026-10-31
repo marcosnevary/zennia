@@ -263,6 +263,10 @@
     color: var(--accent-text);
   }
 
+  select:hover {
+    background-color: color-mix(in srgb, var(--surface) 90%, var(--text));
+  }
+
   button.primary:not(:disabled):hover,
   .tab[aria-current='page']:hover {
     background: color-mix(in srgb, var(--accent) 80%, var(--text));

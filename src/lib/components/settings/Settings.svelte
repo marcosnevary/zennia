@@ -88,7 +88,7 @@
 <h2 class="section-title">Answer words by</h2>
 <p class="my-2 text-muted">How words are answered in Practice: by romaji, by meaning, or both. Kana are always answered by romaji.</p>
 <select
-  class="field chevron bg-surface py-[7px]"
+  class="field chevron py-[7px]"
   value={app.settings.wordsFocus}
   onchange={(e) => app.setWordsFocus(e.currentTarget.value as WordsFocus)}
   aria-label="Answer words by"

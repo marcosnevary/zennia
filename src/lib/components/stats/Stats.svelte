@@ -91,7 +91,7 @@
       {/if}
     </div>
     <div class="flex items-center gap-2">
-      <select class="field chevron h-11 bg-surface" bind:value={sort} aria-label="Sort by">
+      <select class="field chevron h-11" bind:value={sort} aria-label="Sort by">
         {#each STATS_SORT_OPTIONS as option (option.key)}
           <option value={option.key}>{option.label}</option>
         {/each}
