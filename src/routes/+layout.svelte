@@ -84,10 +84,10 @@
       {/if}
       {@render children()}
     {:else if app.status === 'failed'}
-      <p class="my-4 text-bad" role="alert">Could not load your data: {app.error}</p>
+      <p class="mt-6 mb-4 text-bad" role="alert">Could not load your data: {app.error}</p>
       <button onclick={() => app.init()}>Try again</button>
     {:else}
-      <p class="my-4 text-muted" role="status">Loading…</p>
+      <p class="mt-6 mb-4 text-muted" role="status">Loading…</p>
     {/if}
   </main>
 </div>

@@ -49,7 +49,8 @@
   }
 </script>
 
-<div class="divide-y divide-line/20">
+<!-- with the rows' 12px padding, the first title starts 24px below the tabs, like on the other screens -->
+<div class="mt-3 divide-y divide-line/20">
   {#if app.account.anonymous}
     <SettingRow title="Account" description="Your data lives in this browser only. Sign in to keep it and use it on other devices.">
       <button class="action" onclick={() => app.signIn()}>Sign in with Google</button>
