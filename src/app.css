@@ -231,8 +231,7 @@
     cursor: pointer;
     transition:
       background-color 90ms ease,
-      color 90ms ease,
-      box-shadow 90ms ease;
+      color 90ms ease;
   }
 
   button,
@@ -280,22 +279,6 @@
   button.danger:not(:disabled):hover {
     background: var(--bad);
     color: var(--surface);
-  }
-
-  /* raised above the neighbors, whose backgrounds would otherwise cover the shadow */
-  .tab[aria-current='page'],
-  .tab:hover {
-    z-index: 1;
-    box-shadow: 0 4px 14px rgb(0 0 0 / 0.18);
-  }
-
-  .tab:hover {
-    z-index: 2;
-  }
-
-  :root[data-theme='dark'] .tab[aria-current='page'],
-  :root[data-theme='dark'] .tab:hover {
-    box-shadow: 0 4px 14px rgb(0 0 0 / 0.6);
   }
 
   a.tab {
