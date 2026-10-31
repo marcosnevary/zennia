@@ -142,11 +142,6 @@
     calc(100% - 13px) 50%;
   background-size: 6px 6px;
   background-repeat: no-repeat;
-
-  &:hover {
-    background-color: color-mix(in srgb, var(--surface) 90%, var(--text));
-    color: var(--text);
-  }
 }
 
 /* row of small, widely spaced square dots */
@@ -269,6 +264,12 @@
   .tab:hover {
     background: var(--accent);
     color: var(--accent-text);
+  }
+
+  select:hover,
+  button.field:not(:disabled):hover {
+    background-color: color-mix(in srgb, var(--surface) 90%, var(--text));
+    color: inherit;
   }
 
   button.primary:not(:disabled):hover,
