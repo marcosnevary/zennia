@@ -45,7 +45,7 @@
 {/snippet}
 
 {#if !attempts(total)}
-  <p class="my-4 text-muted">No statistics yet. Answer some words or kana in Practice and they will show up here.</p>
+  <p class="mt-6 mb-4 text-muted">No statistics yet. Answer some words or kana in Practice and they will show up here.</p>
 {:else}
   {@render summary(total)}
 

@@ -82,7 +82,7 @@
 </script>
 
 {#if !current}
-  <p class="my-4 text-muted">
+  <p class="mt-6 mb-4 text-muted">
     Nothing to practice. Select kana or activate words in <a href={resolve('/manage')}>Manage</a>.
   </p>
 {:else}
