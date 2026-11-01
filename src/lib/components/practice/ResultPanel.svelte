@@ -37,7 +37,7 @@
         <!-- text-2xl's negative letter spacing would cramp Japanese -->
         <span class="text-2xl leading-none tracking-normal">{part.text}</span>
         <!-- a lone っ adds no romaji of its own, but keeps the line so the runs stay aligned -->
-        <span class="text-lg" lang="en">{part.romaji || '\u00a0'}</span>
+        <span class="text-base" lang="en">{part.romaji || '\u00a0'}</span>
       </span>
     {/each}
   </div>
