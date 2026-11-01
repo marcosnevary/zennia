@@ -279,6 +279,23 @@
     font-family: var(--font-serif);
   }
 
+  /* secondary buttons: a faint tint, so they read as buttons and not as text */
+  button,
+  .file {
+    background: color-mix(in srgb, var(--surface) 92%, var(--text));
+  }
+
+  button.field {
+    background: var(--surface);
+  }
+
+  /* icon-only buttons are ghost: no fill until hover */
+  button.icon {
+    display: inline-flex;
+    padding: 6px;
+    background: transparent;
+  }
+
   button.primary,
   .tab[aria-current='page'] {
     background: var(--accent);

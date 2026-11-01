@@ -55,7 +55,6 @@
     ondelete(tag)
   }
 
-  const ICON = 'inline-flex p-1.5'
 </script>
 
 <dialog class="w-[min(420px,calc(100vw-32px))]" bind:this={dialogEl} use:closeOnBackdrop aria-label="Tags">
@@ -87,12 +86,12 @@
               <TagChip {tag} />
               <span class="text-muted">{filterByTags(words, [tag]).length} word(s)</span>
               <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
-              <button class={ICON} onclick={() => startRename(tag)} aria-label={`Rename tag ${tag}`} title="Rename tag">
+              <button class="icon" onclick={() => startRename(tag)} aria-label={`Rename tag ${tag}`} title="Rename tag">
                 <Icon>
                   <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
                 </Icon>
               </button>
-              <button class="danger {ICON}" onclick={() => remove(tag)} aria-label={`Remove tag ${tag} from all words`} title="Remove tag from all words">
+              <button class="danger icon" onclick={() => remove(tag)} aria-label={`Remove tag ${tag} from all words`} title="Remove tag from all words">
                 <Icon>
                   <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v5M14 11v5" />
                 </Icon>

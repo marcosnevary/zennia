@@ -195,7 +195,6 @@
   const ROW = 'flex flex-wrap items-center gap-2'
   // buttons share the whole row evenly
   const WIDE = `${ROW} *:flex-1 *:text-center`
-  const ICON = 'inline-flex p-1.5'
   const DIM = 'opacity-45'
 </script>
 
@@ -324,26 +323,26 @@
     <span class="text-muted">{selectedWords.length} selected</span>
     <!-- keeps the space reserved so the layout does not shift when a selection appears -->
     <div class="ml-auto flex gap-2" class:invisible={selectedWords.length === 0}>
-      <button class={ICON} onclick={() => (app.sheetWords = selectedWords)} aria-label="Print writing sheet" title="Print writing sheet">
+      <button class="icon" onclick={() => (app.sheetWords = selectedWords)} aria-label="Print writing sheet" title="Print writing sheet">
         <Icon>
           <path d="M7 9V3h10v6M7 17H4v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6h-3M7 14h10v7H7z" />
         </Icon>
       </button>
-      <button class={ICON} onclick={openTagDialog} aria-label="Tag selected" title="Tag selected">
+      <button class="icon" onclick={openTagDialog} aria-label="Tag selected" title="Tag selected">
         {@render tagIcon()}
       </button>
-      <button class={ICON} onclick={() => setSelectedDisabled(false)} aria-label="Enable selected" title="Enable selected">
+      <button class="icon" onclick={() => setSelectedDisabled(false)} aria-label="Enable selected" title="Enable selected">
         {@render eyeIcon()}
       </button>
-      <button class={ICON} onclick={() => setSelectedDisabled(true)} aria-label="Disable selected" title="Disable selected">
+      <button class="icon" onclick={() => setSelectedDisabled(true)} aria-label="Disable selected" title="Disable selected">
         {@render eyeOffIcon()}
       </button>
-      <button class="danger {ICON}" onclick={removeSelected} aria-label="Delete selected" title="Delete selected">
+      <button class="danger icon" onclick={removeSelected} aria-label="Delete selected" title="Delete selected">
         {@render trashIcon()}
       </button>
     </div>
     <button
-      class={ICON}
+      class="icon"
       onclick={() => {
         sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'
         pageNumber = 1
@@ -382,7 +381,7 @@
         {#each word.tags as tag (tag)}<TagChip {tag} onclick={() => filterByTag(tag)} />{/each}
         <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
         <button
-          class={ICON}
+          class="icon"
           onclick={() => toggle(word)}
           aria-pressed={!word.disabled}
           aria-label={word.disabled ? 'Enable' : 'Disable'}
@@ -390,12 +389,12 @@
         >
           {#if word.disabled}{@render eyeOffIcon()}{:else}{@render eyeIcon()}{/if}
         </button>
-        <button class={ICON} onclick={() => edit(word)} aria-label="Edit" title="Edit">
+        <button class="icon" onclick={() => edit(word)} aria-label="Edit" title="Edit">
           <Icon>
             <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
           </Icon>
         </button>
-        <button class="danger {ICON}" onclick={() => remove(word)} aria-label="Delete" title="Delete">
+        <button class="danger icon" onclick={() => remove(word)} aria-label="Delete" title="Delete">
           {@render trashIcon()}
         </button>
       </li>

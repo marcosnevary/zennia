@@ -66,7 +66,7 @@
         {/each}
       </select>
       <button
-        class="inline-flex p-1.5"
+        class="icon"
         onclick={() => {
           direction = direction === 'asc' ? 'desc' : 'asc'
           pageNumber = 1
