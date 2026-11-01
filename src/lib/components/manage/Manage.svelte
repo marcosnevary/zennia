@@ -176,6 +176,18 @@
     selected = next
   }
 
+  // the buttons and tag chips inside a card do their own thing, so a click on them must not also select it
+  function onCardClick(event: MouseEvent, id: string) {
+    if ((event.target as Element).closest('button')) return
+    toggleSelected(id)
+  }
+
+  function onCardKey(event: KeyboardEvent, id: string) {
+    if (event.target !== event.currentTarget || (event.key !== ' ' && event.key !== 'Enter')) return
+    event.preventDefault()
+    toggleSelected(id)
+  }
+
   function toggleSelectAll() {
     selected = allSelected ? new Set() : new Set(visibleWords.map((w) => w.id))
   }
@@ -362,41 +374,48 @@
   {#if visibleWords.length === 0}
     <p class="my-4 text-muted">No words match your search or tag filter.</p>
   {/if}
-  <ul>
+  <ul class="grid gap-2">
     {#each current.items as word (word.id)}
-      <li class="flex items-center gap-3 py-2">
-        <input
-          type="checkbox"
-          checked={selected.has(word.id)}
-          onchange={() => toggleSelected(word.id)}
+      <li>
+        <div
+          class={[
+            'flex cursor-pointer items-center gap-3 rounded-control border px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action',
+            selected.has(word.id) ? 'border-action bg-action/10' : 'border-line bg-surface',
+          ]}
+          role="checkbox"
+          tabindex="0"
+          aria-checked={selected.has(word.id)}
           aria-label={`Select ${word.japanese}`}
-        />
-        <span class={["text-lg", word.disabled && DIM]} lang="ja">{word.japanese}</span>
-        <span class={["text-sm text-muted", word.disabled && DIM]} lang="ja">{word.hiragana} · {toDisplayRomaji(word.hiragana)}</span>
-        {#if needsMeaning(word)}
-          <span class={["min-w-0 truncate text-warn italic", word.disabled && DIM]} title="Add a meaning to practice this word by meaning">needs meaning</span>
-        {:else}
-          <span class={["min-w-0 truncate", word.disabled && DIM]}>{word.meaning}</span>
-        {/if}
-        {#each word.tags as tag (tag)}<TagChip {tag} onclick={() => filterByTag(tag)} />{/each}
-        <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
-        <button
-          class="icon"
-          onclick={() => toggle(word)}
-          aria-pressed={!word.disabled}
-          aria-label={word.disabled ? 'Enable' : 'Disable'}
-          title={word.disabled ? 'Enable' : 'Disable'}
+          onclick={(event) => onCardClick(event, word.id)}
+          onkeydown={(event) => onCardKey(event, word.id)}
         >
-          {#if word.disabled}{@render eyeOffIcon()}{:else}{@render eyeIcon()}{/if}
-        </button>
-        <button class="icon" onclick={() => edit(word)} aria-label="Edit" title="Edit">
-          <Icon>
-            <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
-          </Icon>
-        </button>
-        <button class="danger icon" onclick={() => remove(word)} aria-label="Delete" title="Delete">
-          {@render trashIcon()}
-        </button>
+          <span class={["text-lg", word.disabled && DIM]} lang="ja">{word.japanese}</span>
+          <span class={["text-sm text-muted", word.disabled && DIM]} lang="ja">{word.hiragana} · {toDisplayRomaji(word.hiragana)}</span>
+          {#if needsMeaning(word)}
+            <span class={["min-w-0 truncate text-warn italic", word.disabled && DIM]} title="Add a meaning to practice this word by meaning">needs meaning</span>
+          {:else}
+            <span class={["min-w-0 truncate", word.disabled && DIM]}>{word.meaning}</span>
+          {/if}
+          {#each word.tags as tag (tag)}<TagChip {tag} onclick={() => filterByTag(tag)} />{/each}
+          <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
+          <button
+            class="icon"
+            onclick={() => toggle(word)}
+            aria-pressed={!word.disabled}
+            aria-label={word.disabled ? 'Enable' : 'Disable'}
+            title={word.disabled ? 'Enable' : 'Disable'}
+          >
+            {#if word.disabled}{@render eyeOffIcon()}{:else}{@render eyeIcon()}{/if}
+          </button>
+          <button class="icon" onclick={() => edit(word)} aria-label="Edit" title="Edit">
+            <Icon>
+              <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+            </Icon>
+          </button>
+          <button class="danger icon" onclick={() => remove(word)} aria-label="Delete" title="Delete">
+            {@render trashIcon()}
+          </button>
+        </div>
       </li>
     {/each}
   </ul>
