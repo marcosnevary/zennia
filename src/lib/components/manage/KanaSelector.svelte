@@ -21,7 +21,7 @@
     const base = 'h-10 w-13 p-0 text-lg whitespace-nowrap'
     return on
       ? `${base} bg-on-bg text-on hover:bg-[color-mix(in_srgb,var(--on-bg)_85%,var(--text))] hover:text-on`
-      : `${base} bg-transparent text-muted hover:bg-[color-mix(in_srgb,var(--surface)_90%,var(--text))] hover:text-ink`
+      : `${base} bg-transparent text-muted hover:bg-tint-hover hover:text-ink`
   }
 
   const SCRIPTS: { id: KanaScript; label: string }[] = [

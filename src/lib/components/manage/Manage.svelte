@@ -382,7 +382,7 @@
         <div
           class={[
             'flex cursor-pointer items-center gap-3 rounded-control px-3 py-1 transition-[background-color,filter] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action active:not-has-[button:active]:brightness-90 motion-reduce:transition-none',
-            selected.has(word.id) ? 'bg-action/10 hover:bg-action/15' : 'hover:bg-[color-mix(in_srgb,var(--surface)_92%,var(--text))]',
+            selected.has(word.id) ? 'bg-action/10 hover:bg-action/15' : 'hover:bg-tint',
           ]}
           role="checkbox"
           tabindex="0"

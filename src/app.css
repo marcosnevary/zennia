@@ -22,6 +22,9 @@
   --color-on-bg: var(--on-bg);
   --color-off: var(--off);
   --color-off-bg: var(--off-bg);
+  /* the fill of secondary buttons, fields and checkboxes, a little darker on hover */
+  --color-tint: color-mix(in srgb, var(--surface) 92%, var(--text));
+  --color-tint-hover: color-mix(in srgb, var(--surface) 90%, var(--text));
 }
 
 @theme {
@@ -127,7 +130,7 @@
   border: 1px solid var(--field-border);
   border-radius: var(--radius-control);
   /* not the background shorthand, which would wipe the chevron's arrow */
-  background-color: color-mix(in srgb, var(--surface) 92%, var(--text));
+  background-color: var(--color-tint);
   transition:
     border-color 150ms,
     box-shadow 150ms,
@@ -135,7 +138,7 @@
 
   /* here and not in the components layer, which loses to the fill above */
   &:is(select, button):not(:disabled):hover {
-    background-color: color-mix(in srgb, var(--surface) 90%, var(--text));
+    background-color: var(--color-tint-hover);
     color: inherit;
   }
 
@@ -255,12 +258,12 @@
     height: 20px;
     margin: 0;
     border-radius: var(--radius-control);
-    background-color: color-mix(in srgb, var(--surface) 92%, var(--text));
+    background-color: var(--color-tint);
     cursor: pointer;
     transition: background-color 150ms;
 
     &:hover {
-      background-color: color-mix(in srgb, var(--surface) 90%, var(--text));
+      background-color: var(--color-tint-hover);
     }
 
     &:checked {
@@ -367,7 +370,7 @@
   /* secondary buttons: a faint tint, so they read as buttons and not as text */
   button,
   .file {
-    background: color-mix(in srgb, var(--surface) 92%, var(--text));
+    background: var(--color-tint);
   }
 
   /* icon-only buttons are ghost: no fill until hover */
