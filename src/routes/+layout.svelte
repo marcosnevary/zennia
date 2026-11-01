@@ -54,7 +54,8 @@
   })
 </script>
 
-<div class="mx-auto max-w-360 p-4 print:hidden">
+<!-- sized and centered on 100vw, which counts a classic scrollbar, so the layout does not shrink or shift when one appears; 1568px is the 1376px content plus the widest side padding -->
+<div class="ml-[max(0px,calc(50vw-784px))] w-[min(100vw,1568px)] px-4 py-4 sm:px-8 lg:px-16 xl:px-24 print:hidden">
   <header class="flex flex-wrap items-center justify-between gap-3 pt-2 pb-4">
     <h1 class="font-serif text-2xl font-bold">zennia</h1>
     <nav class="flex flex-wrap gap-2" data-sveltekit-preload-code="eager">
