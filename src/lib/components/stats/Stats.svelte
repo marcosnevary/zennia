@@ -90,12 +90,12 @@
   <ul>
     {#each current.items as row (row.key)}
       <li class="flex items-center gap-3 py-2">
-        <span class="text-[1.2rem]" lang="ja">{row.symbol}</span>
-        <span class="text-[0.9rem] text-muted" lang={row.ja ? 'ja' : undefined}>{row.reading}</span>
+        <span class="text-lg" lang="ja">{row.symbol}</span>
+        <span class="text-sm text-muted" lang={row.ja ? 'ja' : undefined}>{row.reading}</span>
         <!-- runs from the symbol to the counts on the other side -->
         <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
         <!-- fixed width so the dotted line always ends at the same x, whatever the numbers; the negative margin pulls the counts toward the accuracy column -->
-        <span class="-mr-7 flex w-[5ch] flex-none flex-col text-[0.8rem] leading-[1.3] tabular-nums">
+        <span class="-mr-7 flex w-[5ch] flex-none flex-col text-sm leading-4 tabular-nums">
           <span>✓{row.tally.hits}</span>
           <span>✗{row.tally.misses}</span>
         </span>

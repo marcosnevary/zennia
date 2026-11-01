@@ -105,5 +105,5 @@
   />
   <Scoreboard hits={session.hits} total={session.total} streak={session.streak} bestStreak={session.bestStreak} />
   <!-- same 16px inset as the score above -->
-  <p class="mx-4 mt-3 text-center text-[0.9rem] text-muted">Practicing {describePool(mode.pool)}</p>
+  <p class="mx-4 mt-3 text-center text-sm text-muted">Practicing {describePool(mode.pool)}</p>
 {/if}

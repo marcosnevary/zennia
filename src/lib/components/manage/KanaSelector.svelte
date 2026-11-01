@@ -13,12 +13,12 @@
 
   let { selected, onchange }: { selected: string[]; onchange: (keys: string[]) => void } = $props()
 
-  const HEADER = 'bg-transparent px-1 py-0 text-[0.8rem] text-muted hover:text-ink'
+  const HEADER = 'bg-transparent px-1 py-0 text-sm text-muted hover:text-ink'
   const LINK = `${HEADER} underline`
 
   // same size for every cell, single or double kana
   function cellClass(on: boolean): string {
-    const base = 'h-10 w-13 p-0 text-[1.2rem] whitespace-nowrap'
+    const base = 'h-10 w-13 p-0 text-lg whitespace-nowrap'
     return on
       ? `${base} bg-on-bg text-on hover:bg-[color-mix(in_srgb,var(--on-bg)_85%,var(--text))] hover:text-on`
       : `${base} bg-transparent text-muted hover:bg-[color-mix(in_srgb,var(--surface)_90%,var(--text))] hover:text-ink`
@@ -48,7 +48,7 @@
         {@const count = keys.filter((k) => selected.includes(k)).length}
         <div class="mt-4 first-of-type:mt-0">
           <div class="flex items-center justify-start gap-2">
-            <h3 class="m-0 flex-1 text-[0.9rem] font-bold text-muted">{section.title} ({count} of {keys.length})</h3>
+            <h3 class="m-0 flex-1 text-sm font-bold text-muted">{section.title} ({count} of {keys.length})</h3>
             <button class={LINK} onclick={() => select(keys, true)}>All</button>
             <button class={LINK} onclick={() => select(keys, false)}>None</button>
           </div>
@@ -60,7 +60,7 @@
                   <th></th>
                   {#each section.rows as r, i (i)}
                     {@const colKeys = columnKeys(script.id, r)}
-                    <th scope="col" class="text-[0.8rem] font-normal text-muted" class:pl-5={r.gap}>
+                    <th scope="col" class="text-sm font-normal text-muted" class:pl-5={r.gap}>
                       <button
                         class={HEADER}
                         title="Toggle the whole column"
@@ -76,7 +76,7 @@
                 {#each section.columns as col, c (col)}
                   {@const line = lineKeys(script.id, section, c)}
                   <tr>
-                    <th scope="row" class="text-[0.8rem] font-normal text-muted">
+                    <th scope="row" class="text-sm font-normal text-muted">
                       <button
                         class={HEADER}
                         title="Toggle the whole row"

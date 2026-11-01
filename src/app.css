@@ -29,6 +29,20 @@
   /* Libron for content; the Japanese fallbacks are serif to match */
   --font-serif: 'Libron', Georgia, 'Hiragino Mincho ProN', 'Noto Serif JP', 'Yu Mincho', serif;
 
+  /* the only font sizes: Tailwind's defaults are dropped so nothing falls outside the scale */
+  --text-*: initial;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.75rem;
+  --text-xl--line-height: 1.1;
+  --text-2xl: 2.5rem;
+  --text-2xl--line-height: 1.1;
+  --text-2xl--letter-spacing: -0.02em;
+  /* the practice prompt is Japanese, which negative letter spacing would cramp */
+  --text-display: 4rem;
+  --text-display--line-height: 1.2;
+
   /* each kana of the loading animation holds its 20% slot of the cycle and fades into the next one */
   --animate-kana: kana 2.5s ease-in-out infinite;
   @keyframes kana {
@@ -234,7 +248,7 @@
 
   h2 {
     font-family: var(--font-serif);
-    font-size: 1.1rem;
+    font-size: var(--text-lg);
     font-weight: 700;
     margin: 24px 0 8px;
   }
