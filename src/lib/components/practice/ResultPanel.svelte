@@ -43,7 +43,7 @@
   </div>
   <p class="sr-only" lang="ja">{a.written.map((part) => part.text).join('')}</p>
   <p class="sr-only">{a.romaji}</p>
-  {#if a.meaning !== undefined}<p class="mt-2">{a.meaning}</p>{/if}
+  {#if a.meaning !== undefined}<p class="mt-2 text-lg">{a.meaning}</p>{/if}
 {/snippet}
 
 <!-- both are items of the grid cell that holds the prompt, which they cover -->
