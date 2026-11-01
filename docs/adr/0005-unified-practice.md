@@ -12,7 +12,7 @@ Practice was split into a kana screen and a words screen, and the page called Se
 
 ## Decision
 
-- Four tabs: `/practice`, `/manage`, `/stats` and `/settings`. `/` redirects to `/practice`; `/kana` and `/words` no longer exist.
+- Four tabs: `/practice`, `/manage`, `/stats` and `/settings`. `/` redirects to `/practice`. [ADR 6](0006-practice-follows-manage.md) later split Manage into the Words (`/words`) and Kana (`/kana`) tabs.
 - **Practice** draws words and kana in one session. The user chooses what it includes, the _practice scope_: Hiragana and/or Katakana, any word tags, and untagged words. A word is included when it has any chosen tag, or no tags when untagged is chosen. The kana of a script are included when that script is chosen.
 - The scope is saved in `settings.practice_scope` (`jsonb`, migration `0002_practice_scope.sql`). `null` means everything, so existing users keep practicing what they did. Tags that no word has anymore are dropped from a saved scope when the words change.
 - **Manage** holds adding, editing and tagging words, import/export, and the grid that picks which hiragana and katakana characters exist in practice (`kana_selection`, unchanged). The scope only filters those characters by script.

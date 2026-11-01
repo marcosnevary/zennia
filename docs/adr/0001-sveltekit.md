@@ -15,7 +15,7 @@ The app has no backend of its own (the data is stored by Supabase, see [ADR 3](0
 ## Decision
 
 - Use SvelteKit with `adapter-static` in SPA mode: SSR is disabled in `src/routes/+layout.ts` and `index.html` is the fallback page.
-- One route per tab: `/kana`, `/words`, `/stats` and `/manage`. `/` redirects to `/kana`.
+- One route per tab: `/practice`, `/words`, `/kana`, `/stats` and `/settings` (see [ADR 6](0006-practice-follows-manage.md)). `/` redirects to `/practice`.
 - Shared state (words, stats, settings, the writing sheet being printed) lives in `App`, in `src/lib/state.svelte.ts`. `src/routes/+layout.svelte` creates it.
 - Code lives under `src/lib/` and is imported with the `#lib/*` subpath import, which replaces the deprecated `$lib` alias in SvelteKit 3.
 - Deploy to Vercel. `vercel.json` rewrites unknown paths to `index.html` so deep links work.
