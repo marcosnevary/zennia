@@ -226,7 +226,6 @@
   html {
     /* the page layout is sized on 100vw so a classic scrollbar neither shrinks nor shifts it; on narrow screens it reaches under the scrollbar, and this hides that overflow */
     overflow-x: clip;
-    text-transform: lowercase;
   }
 
   body {
@@ -239,7 +238,6 @@
   select {
     font: inherit;
     color: inherit;
-    text-transform: inherit;
   }
 
   option {
