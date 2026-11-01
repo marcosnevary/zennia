@@ -46,7 +46,7 @@
 
 <!-- the bottom padding plus the scoreboard's 12px margin gives the same 24px as above the result -->
 <section class="mt-6 bg-surface px-4 pt-6 pb-3 text-center">
-  <p class="mb-5 font-serif text-[4rem] leading-[1.2]" lang="ja">{prompt}</p>
+  <p class="mb-5 font-serif text-display" lang="ja">{prompt}</p>
 
   <form class="flex gap-2" {onsubmit}>
     <div class="flex min-w-0 flex-1 flex-col gap-2">
@@ -91,7 +91,7 @@
         {:else if verdict === 'almost'}Almost: only the length of a vowel differs.
         {:else}Incorrect.{/if}
       </strong>
-      <p class="mt-1 text-[1.2rem]" lang="ja">{reading}</p>
+      <p class="mt-1 text-lg" lang="ja">{reading}</p>
       {#if detail !== undefined}<p class="mt-1">{detail}</p>{/if}
       {#if note}<p class="mt-1">{note}</p>{/if}
     </div>

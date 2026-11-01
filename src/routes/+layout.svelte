@@ -52,7 +52,7 @@
 
 <div class="mx-auto max-w-360 p-4 print:hidden">
   <header class="flex flex-wrap items-center justify-between gap-3 pt-2 pb-4">
-    <h1 class="font-serif text-[2.6rem] leading-none font-bold">zennia</h1>
+    <h1 class="font-serif text-2xl font-bold">zennia</h1>
     <nav class="flex flex-wrap gap-2">
       {#each tabs as { path, label } (path)}
         <a class="tab w-[6.5em]" href={resolve(path)} aria-current={page.url.pathname === resolve(path) ? 'page' : undefined}>{label}</a>

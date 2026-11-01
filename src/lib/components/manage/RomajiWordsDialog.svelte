@@ -103,8 +103,8 @@
           {@const warn = differs(row) && 'text-warn'}
           <li class="flex items-center gap-3 py-2">
             <input type="checkbox" bind:checked={row.selected} aria-label={`Add ${row.item.romaji}`} />
-            <span class={['min-w-0 truncate text-[1.3rem]', warn, !row.selected && DIM]} lang="ja">{candidate.japanese}</span>
-            <span class={['min-w-0 truncate text-[0.9rem]', warn || 'text-muted', !row.selected && DIM]} lang="ja">{candidate.hiragana} · {toDisplayRomaji(candidate.hiragana)}</span>
+            <span class={['min-w-0 truncate text-lg', warn, !row.selected && DIM]} lang="ja">{candidate.japanese}</span>
+            <span class={['min-w-0 truncate text-sm', warn || 'text-muted', !row.selected && DIM]} lang="ja">{candidate.hiragana} · {toDisplayRomaji(candidate.hiragana)}</span>
             <span class={['min-w-0 truncate', warn, !row.selected && DIM]}>{candidate.meaning}</span>
             {#if warn}<span class="sr-only">(vowel length differs from what you typed)</span>{/if}
             {#if batchTags.length}
@@ -126,7 +126,7 @@
         {/each}
       </ul>
       {#if found.some(differs) || notFound.length}
-        <ul class="grid gap-1 text-[0.85rem]">
+        <ul class="grid gap-1 text-sm">
           {#if found.some(differs)}
             <li class="flex items-baseline gap-2 text-warn"><span class="size-3 shrink-0 bg-warn" aria-hidden="true"></span>Vowel length differs from what you typed: check the reading</li>
           {/if}
@@ -135,7 +135,7 @@
           {/if}
         </ul>
       {/if}
-      <p class="text-[0.85rem] text-muted">Dictionary data: JMdict (EDRDG), CC BY-SA 4.0.</p>
+      <p class="text-sm text-muted">Dictionary data: JMdict (EDRDG), CC BY-SA 4.0.</p>
       <div class="flex flex-wrap items-center justify-end gap-2">
         <button class="action" type="button" onclick={add} disabled={chosen.length === 0}>Add {chosen.length} word(s)</button>
         <button type="button" onclick={() => (rows = [])}>Back</button>

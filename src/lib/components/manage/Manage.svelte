@@ -371,8 +371,8 @@
           onchange={() => toggleSelected(word.id)}
           aria-label={`Select ${word.japanese}`}
         />
-        <span class={["text-[1.3rem]", word.disabled && DIM]} lang="ja">{word.japanese}</span>
-        <span class={["text-[0.9rem] text-muted", word.disabled && DIM]} lang="ja">{word.hiragana} · {toDisplayRomaji(word.hiragana)}</span>
+        <span class={["text-lg", word.disabled && DIM]} lang="ja">{word.japanese}</span>
+        <span class={["text-sm text-muted", word.disabled && DIM]} lang="ja">{word.hiragana} · {toDisplayRomaji(word.hiragana)}</span>
         {#if needsMeaning(word)}
           <span class={["min-w-0 truncate text-warn italic", word.disabled && DIM]} title="Add a meaning to practice this word by meaning">needs meaning</span>
         {:else}
