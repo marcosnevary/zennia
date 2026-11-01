@@ -10,7 +10,7 @@
 </script>
 
 {#if pageCount > 1}
-  <nav class="mt-3 flex flex-wrap items-center justify-center gap-1.5" aria-label={label}>
+  <nav class="mt-3 flex flex-wrap items-center justify-center gap-2" aria-label={label}>
     <button class={CELL} onclick={() => onchange(1)} disabled={page === 1} aria-label="First page" title="First page">
       <Icon><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5" /></Icon>
     </button>

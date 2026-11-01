@@ -65,7 +65,7 @@
     {:else}
       <input
         type="search"
-        class="field appearance-none bg-surface py-2.5"
+        class="field appearance-none"
         placeholder="Search tags"
         aria-label="Search tags"
         bind:value={query}
@@ -75,9 +75,9 @@
       {/if}
       <ul class="max-h-[60vh] overflow-y-auto thin-scrollbar">
         {#each visibleTags as tag (tag)}
-          <li class="flex items-center gap-3 py-2.5">
+          <li class="flex items-center gap-3 py-2">
             {#if renaming !== null && sameTag(renaming, tag)}
-              <form class="flex flex-1 items-center gap-1.5" onsubmit={confirmRename}>
+              <form class="flex flex-1 items-center gap-2" onsubmit={confirmRename}>
                 <input type="text" class="field min-w-0 flex-1" aria-label={`New name for ${tag}`} bind:value={renameDraft} oninput={() => (renameError = '')} />
                 <button class="action" type="submit">Save</button>
                 <button type="button" onclick={() => (renaming = null)}>Cancel</button>
