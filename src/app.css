@@ -127,6 +127,9 @@
 /* the answer fields are the only bordered inputs */
 @utility field {
   border: 2px solid var(--border);
+  transition:
+    border-color 150ms,
+    background-color 150ms;
 
   /* typed fields only have the bottom border; selects keep the full one */
   &:is(input, textarea) {
@@ -134,9 +137,10 @@
     padding-left: 0;
   }
 
+  /* blue rather than the accent: the accent is almost the border's own color, so the focus would not show */
   &:focus-visible {
     outline: none;
-    border-color: var(--accent);
+    border-color: var(--action);
   }
 
   &[aria-invalid='true'] {
@@ -262,6 +266,11 @@
     padding: 9px 14px;
     background: var(--surface);
     cursor: pointer;
+    transition:
+      background-color 150ms,
+      color 150ms,
+      border-color 150ms,
+      filter 150ms;
   }
 
   button,
@@ -320,8 +329,26 @@
     color: inherit;
   }
 
+  /* one rule for every variant: darkening works whatever the background */
+  button:not(:disabled):active,
+  .file:active,
+  .tab:active {
+    filter: brightness(0.9);
+  }
+
   button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+}
+
+/* unlayered, so it beats the transitions set in the layers above */
+@media (prefers-reduced-motion: reduce) {
+  .field,
+  button,
+  select,
+  .file,
+  .tab {
+    transition: none;
   }
 }
