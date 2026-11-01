@@ -141,7 +141,7 @@
   --off-bg: #4a2a0a;
 }
 
-/* filled with the secondary button tint and no visible border; the transparent border only shows focus, errors and the practice verdict */
+/* filled with the secondary button tint and no visible border; the transparent border only shows focus and errors */
 @utility field {
   --field-border: transparent;
   border: 1px solid var(--field-border);
@@ -176,20 +176,28 @@
     --field-border: var(--bad);
   }
 
-  /* after :focus-visible, so the outcome of a practice answer still shows in the focused field */
+  /* a checked practice answer shows its outcome in the fill, like the result panel, so its aria-invalid draws no
+     border; the border only appears while the field is focused, in the outcome's color */
+  &[data-verdict] {
+    --field-border: transparent;
+    background-color: color-mix(in srgb, var(--verdict) 15%, var(--surface));
+    color: var(--verdict);
+  }
+
+  &[data-verdict]:focus-visible {
+    --field-border: var(--verdict);
+  }
+
   &[data-verdict='correct'] {
-    --field-border: var(--ok);
-    color: var(--ok);
+    --verdict: var(--ok);
   }
 
   &[data-verdict='almost'] {
-    --field-border: var(--warn);
-    color: var(--warn);
+    --verdict: var(--warn);
   }
 
   &[data-verdict='incorrect'] {
-    --field-border: var(--bad);
-    color: var(--bad);
+    --verdict: var(--bad);
   }
 }
 

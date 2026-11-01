@@ -62,6 +62,16 @@
       answer = ''
       meaningAnswer = ''
       focusField()
+    } else {
+      inputEl?.blur()
+      meaningEl?.blur()
+    }
+  }
+
+  // Check takes the focus off the fields, so Enter and Space reach the page and still move on to the next round
+  function onWindowKeydown(event: KeyboardEvent) {
+    if (session.verdict !== null && event.target === document.body && (event.key === ' ' || event.key === 'Enter')) {
+      submit(event)
     }
   }
 
@@ -83,6 +93,8 @@
 
   draw()
 </script>
+
+<svelte:window onkeydown={onWindowKeydown} />
 
 {#if !current}
   <p class="mt-6 mb-4 text-muted">
