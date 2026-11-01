@@ -154,6 +154,13 @@ export function importSummary({ added, updated, duplicates }: MergeResult, skipp
   return `${added} added${updatedNote}, ${duplicates} already existed.${skippedNote}`
 }
 
+/** The main outcome of an import in a few words, short enough for a button label; `importSummary` has the rest. */
+export function importBrief({ added, updated }: MergeResult): string {
+  if (added) return `${added} added`
+  if (updated) return `${updated} updated`
+  return 'Nothing new'
+}
+
 const MEANING_SEPARATOR = '; '
 
 /** Appends `meaning` to `current` unless it is empty or already one of its parts. */
