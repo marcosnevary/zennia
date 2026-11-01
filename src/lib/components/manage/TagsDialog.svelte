@@ -73,7 +73,8 @@
       {#if visibleTags.length === 0}
         <p class="my-4 text-muted">No tags match your search.</p>
       {/if}
-      <ul class="max-h-[60vh] overflow-y-auto thin-scrollbar">
+      <!-- the inner padding keeps the scroll box from clipping the focus border of the rename field, which grows outwards -->
+      <ul class="-mx-1 max-h-[60vh] overflow-y-auto px-1 thin-scrollbar">
         {#each visibleTags as tag (tag)}
           <li class="flex items-center gap-3 py-2">
             {#if renaming !== null && sameTag(renaming, tag)}
