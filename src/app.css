@@ -414,6 +414,25 @@
   }
 
   /* one rule for every variant: darkening works whatever the background */
+  /* an icon sits before its label, and centered in a button wider than both */
+  button:has(> svg),
+  .file:has(> svg),
+  .tab:has(> svg) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  /* 20px beside a label, where 24px outweighs the text; icon-only buttons keep the full 24px */
+  button:not(.icon) > svg,
+  .file > svg,
+  .tab > svg {
+    flex: none;
+    width: 20px;
+    height: 20px;
+  }
+
   button:not(:disabled):active,
   .file:active,
   .tab:active {

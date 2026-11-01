@@ -1,7 +1,9 @@
 <script lang="ts">
+  import ArrowRight from '@lucide/svelte/icons/arrow-right'
+  import Check from '@lucide/svelte/icons/check'
+  import X from '@lucide/svelte/icons/x'
   import type { Verdict } from '../../core/types'
   import type { RightAnswer } from '../../data/practice-modes'
-  import Icon from '../Icon.svelte'
   import ResultPanel from './ResultPanel.svelte'
   import Scoreboard from './Scoreboard.svelte'
 
@@ -59,9 +61,8 @@
 {#snippet verdictIcon(fieldVerdict: Verdict | null)}
   {#if fieldVerdict}
     <!-- top-2 puts the 24px icon on the text line of the 40px field -->
-    <Icon class="pointer-events-none absolute top-2 right-3 size-6 {VERDICT_TEXT[fieldVerdict]}">
-      {#if fieldVerdict === 'correct'}<path d="M20 6 9 17l-5-5" />{:else}<path d="M18 6 6 18M6 6l12 12" />{/if}
-    </Icon>
+    {@const VerdictIcon = fieldVerdict === 'correct' ? Check : X}
+    <VerdictIcon class="pointer-events-none absolute top-2 right-3 {VERDICT_TEXT[fieldVerdict]}" />
   {/if}
 {/snippet}
 
@@ -123,7 +124,7 @@
       {/if}
     </div>
     <!-- fixed width, so the button does not resize when its label switches between Check and Next -->
-    <button class="action w-24 flex-none" type="submit">{verdict ? 'Next' : 'Check'}</button>
+    <button class="action w-28 flex-none" type="submit">{#if verdict}<ArrowRight />Next{:else}<Check />Check{/if}</button>
   </form>
 
   <Scoreboard {hits} {total} />

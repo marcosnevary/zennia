@@ -1,5 +1,7 @@
 <script lang="ts">
-  import Icon from '../Icon.svelte'
+  import Check from '@lucide/svelte/icons/check'
+  import Pencil from '@lucide/svelte/icons/pencil'
+  import Trash from '@lucide/svelte/icons/trash'
   import TagChip from './TagChip.svelte'
   import { closeOnBackdrop } from './dialog'
   import type { Word } from '../../core/types'
@@ -80,7 +82,7 @@
             {#if renaming !== null && sameTag(renaming, tag)}
               <form class="flex flex-1 items-center gap-2" onsubmit={confirmRename}>
                 <input type="text" class="field min-w-0 flex-1" aria-label={`New name for ${tag}`} bind:value={renameDraft} oninput={() => (renameError = '')} />
-                <button class="action" type="submit">Save</button>
+                <button class="action" type="submit"><Check />Save</button>
                 <button type="button" onclick={() => (renaming = null)}>Cancel</button>
               </form>
             {:else}
@@ -88,14 +90,10 @@
               <span class="text-muted">{filterByTags(words, [tag]).length} word(s)</span>
               <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
               <button class="icon" onclick={() => startRename(tag)} aria-label={`Rename tag ${tag}`} title="Rename tag">
-                <Icon>
-                  <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
-                </Icon>
+                <Pencil />
               </button>
               <button class="danger icon" onclick={() => remove(tag)} aria-label={`Remove tag ${tag} from all words`} title="Remove tag from all words">
-                <Icon>
-                  <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v5M14 11v5" />
-                </Icon>
+                <Trash />
               </button>
             {/if}
           </li>
@@ -104,7 +102,7 @@
       {#if renaming !== null && renameError}<p class="text-bad" role="alert">{renameError}</p>{/if}
     {/if}
     <div class="dialog-actions">
-      <button class="action" type="button" onclick={() => dialogEl?.close()}>Done</button>
+      <button class="action" type="button" onclick={() => dialogEl?.close()}><Check />Done</button>
     </div>
   </div>
 </dialog>

@@ -1,5 +1,8 @@
 <script lang="ts">
-  import Icon from './Icon.svelte'
+  import ChevronLeft from '@lucide/svelte/icons/chevron-left'
+  import ChevronRight from '@lucide/svelte/icons/chevron-right'
+  import ChevronsLeft from '@lucide/svelte/icons/chevrons-left'
+  import ChevronsRight from '@lucide/svelte/icons/chevrons-right'
   import { pageEntries } from '../data/pagination'
 
   let { page, pageCount, label, onchange }: { page: number; pageCount: number; label: string; onchange: (page: number) => void } = $props()
@@ -12,10 +15,10 @@
 {#if pageCount > 1}
   <nav class="mt-3 flex flex-wrap items-center justify-center gap-2" aria-label={label}>
     <button class={CELL} onclick={() => onchange(1)} disabled={page === 1} aria-label="First page" title="First page">
-      <Icon><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5" /></Icon>
+      <ChevronsLeft />
     </button>
     <button class={CELL} onclick={() => onchange(page - 1)} disabled={page === 1} aria-label="Previous page" title="Previous page">
-      <Icon><path d="M15 18l-6-6 6-6" /></Icon>
+      <ChevronLeft />
     </button>
     {#each entries as entry, i (i)}
       {#if entry === 'gap'}
@@ -25,10 +28,10 @@
       {/if}
     {/each}
     <button class={CELL} onclick={() => onchange(page + 1)} disabled={page === pageCount} aria-label="Next page" title="Next page">
-      <Icon><path d="M9 18l6-6-6-6" /></Icon>
+      <ChevronRight />
     </button>
     <button class={CELL} onclick={() => onchange(pageCount)} disabled={page === pageCount} aria-label="Last page" title="Last page">
-      <Icon><path d="M13 17l5-5-5-5M6 17l5-5-5-5" /></Icon>
+      <ChevronsRight />
     </button>
   </nav>
 {/if}

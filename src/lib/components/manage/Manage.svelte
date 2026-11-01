@@ -1,5 +1,15 @@
 <script lang="ts">
-  import Icon from '../Icon.svelte'
+  import ArrowDown from '@lucide/svelte/icons/arrow-down'
+  import ArrowUp from '@lucide/svelte/icons/arrow-up'
+  import Check from '@lucide/svelte/icons/check'
+  import Eye from '@lucide/svelte/icons/eye'
+  import EyeOff from '@lucide/svelte/icons/eye-off'
+  import ListPlus from '@lucide/svelte/icons/list-plus'
+  import Plus from '@lucide/svelte/icons/plus'
+  import Printer from '@lucide/svelte/icons/printer'
+  import Tag from '@lucide/svelte/icons/tag'
+  import Tags from '@lucide/svelte/icons/tags'
+  import Trash from '@lucide/svelte/icons/trash'
   import { closeOnBackdrop } from './dialog'
   import KanaSelector from './KanaSelector.svelte'
   import Pagination from '../Pagination.svelte'
@@ -244,7 +254,7 @@
       <TagInput bind:tags={editTags} suggestions={tags} />
     {/key}
     <div class="dialog-actions">
-      <button class="action" type="submit">Save</button>
+      <button class="action" type="submit"><Check />Save</button>
       <button type="button" onclick={() => dialogEl?.close()}>Cancel</button>
     </div>
   </form>
@@ -255,7 +265,7 @@
     <h2 class="mt-0 mb-2">Tag {selectedWords.length} selected word(s)</h2>
     <TagInput bind:tags={() => commonTags, setCommonTags} suggestions={dialogChoices} />
     <div class="dialog-actions">
-      <button class="action" type="button" onclick={() => tagDialogEl?.close()}>Done</button>
+      <button class="action" type="button" onclick={() => tagDialogEl?.close()}><Check />Done</button>
     </div>
   </div>
 </dialog>
@@ -273,27 +283,6 @@
 {#snippet fieldError(message: string | undefined)}
   {#if message}<p class="text-bad" role="alert">{message}</p>{/if}
 {/snippet}
-{#snippet eyeIcon()}
-  <Icon>
-    <path d="M2 12c1.5-3.5 5-7 10-7s8.5 3.5 10 7c-1.5 3.5-5 7-10 7S3.5 15.5 2 12z" />
-    <circle cx="12" cy="12" r="3" />
-  </Icon>
-{/snippet}
-{#snippet eyeOffIcon()}
-  <Icon>
-    <path d="M3 3l18 18M10.6 5.1A9.7 9.7 0 0 1 12 5c5 0 8.5 3.5 10 7a14 14 0 0 1-3 4.2M6.6 6.6A14 14 0 0 0 2 12c1.5 3.5 5 7 10 7a9.8 9.8 0 0 0 4.4-1M9.9 9.9a3 3 0 0 0 4.2 4.2" />
-  </Icon>
-{/snippet}
-{#snippet tagIcon()}
-  <Icon>
-    <path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9zM8 8h.01" />
-  </Icon>
-{/snippet}
-{#snippet trashIcon()}
-  <Icon>
-    <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v5M14 11v5" />
-  </Icon>
-{/snippet}
 
 {#if section === 'words'}
 <div class="grid items-start gap-x-8 gap-y-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]">
@@ -308,11 +297,11 @@
   {@render fieldError(errors.meaning)}
   <TagInput bind:tags={newTags} suggestions={tags} />
   <div class={WIDE}>
-    <button class="action" type="submit">Add</button>
+    <button class="action" type="submit"><Plus />Add</button>
   </div>
 </form>
 <div class="mt-2 {WIDE}">
-  <button type="button" class="field" onclick={() => romajiDialog?.open()}>Add from romaji</button>
+  <button type="button" class="field" onclick={() => romajiDialog?.open()}><ListPlus />Add from romaji</button>
 </div>
 </div>
 <div>
@@ -330,7 +319,7 @@
       oninput={onSearch}
     />
     <div class="flex items-center gap-2">
-      <button class="field" onclick={() => tagsDialog?.open()}>Tags</button>
+      <button class="field" onclick={() => tagsDialog?.open()}><Tags />Tags</button>
       <select
         class="field chevron"
         value={sortKey}
@@ -357,24 +346,22 @@
       Select all {visibleWords.length} {visibleWords.length === words.length ? 'words' : 'results'}
     </label>
     <span class="text-muted">{activeWordCount} active · {selectedWords.length} selected</span>
-    <!-- keeps the space reserved so the layout does not shift when a selection appears -->
-    <div class="ml-auto flex gap-2" class:invisible={selectedWords.length === 0}>
+    <!-- keeps the space reserved so the layout does not shift when a selection appears; the icons are 20px in 40px buttons -->
+    <div class="ml-auto flex gap-2 *:size-10 *:items-center *:justify-center [&_svg]:size-5" class:invisible={selectedWords.length === 0}>
       <button class="icon" onclick={() => (app.sheetWords = selectedWords)} aria-label="Print writing sheet" title="Print writing sheet">
-        <Icon>
-          <path d="M7 9V3h10v6M7 17H4v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6h-3M7 14h10v7H7z" />
-        </Icon>
+        <Printer />
       </button>
       <button class="icon" onclick={openTagDialog} aria-label="Tag selected" title="Tag selected">
-        {@render tagIcon()}
+        <Tag />
       </button>
       <button class="icon" onclick={() => setSelectedDisabled(false)} aria-label="Enable selected" title="Enable selected">
-        {@render eyeIcon()}
+        <Eye />
       </button>
       <button class="icon" onclick={() => setSelectedDisabled(true)} aria-label="Disable selected" title="Disable selected">
-        {@render eyeOffIcon()}
+        <EyeOff />
       </button>
       <button class="danger icon" onclick={removeSelected} aria-label="Delete selected" title="Delete selected">
-        {@render trashIcon()}
+        <Trash />
       </button>
     </div>
     <button
@@ -383,13 +370,7 @@
       aria-label={sortDirection === 'asc' ? 'Ascending' : 'Descending'}
       title={sortDirection === 'asc' ? 'Ascending (click to reverse)' : 'Descending (click to reverse)'}
     >
-      <Icon>
-        {#if sortDirection === 'asc'}
-          <path d="M12 19V5M5 12l7-7 7 7" />
-        {:else}
-          <path d="M12 5v14M5 12l7 7 7-7" />
-        {/if}
-      </Icon>
+      {#if sortDirection === 'asc'}<ArrowUp />{:else}<ArrowDown />{/if}
     </button>
   </div>
   {#if visibleWords.length === 0}
