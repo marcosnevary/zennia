@@ -4,7 +4,7 @@
   // `onclick` makes the chip a button; `onadd` / `onremove` put a + / X button beside it. With none it is plain text.
   let { tag, onclick, onadd, onremove }: { tag: string; onclick?: () => void; onadd?: () => void; onremove?: () => void } = $props()
 
-  const BUTTON = 'rounded-pill bg-transparent font-ui py-0 hover:text-inherit hover:underline'
+  const BUTTON = 'rounded-pill bg-transparent py-0 hover:text-inherit hover:underline'
   const nameClass = $derived(`${BUTTON} pl-2 ${onadd || onremove ? 'pr-1' : 'pr-2'}`)
 </script>
 

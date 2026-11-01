@@ -25,9 +25,10 @@
 }
 
 @theme {
-  --font-ui: system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', sans-serif;
-  /* Libron for content; the Japanese fallbacks are serif to match */
-  --font-serif: 'Libron', Georgia, 'Hiragino Mincho ProN', 'Noto Serif JP', 'Yu Mincho', serif;
+  /* Geist has no Japanese glyphs, so kana and kanji fall back to the system's Japanese sans-serif */
+  --font-ui: 'Geist Variable', system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', sans-serif;
+  /* Libron only for the zennia logo; everything else is in the UI font */
+  --font-logo: 'Libron', Georgia, serif;
 
   /* the only font sizes: Tailwind's defaults are dropped so nothing falls outside the scale */
   --text-*: initial;
@@ -66,30 +67,9 @@
 /* Libron (SIL OFL), https://github.com/nicoverbruggen/libron */
 @font-face {
   font-family: 'Libron';
-  src: url('/fonts/Libron-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Libron';
-  src: url('/fonts/Libron-Italic.woff2') format('woff2');
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Libron';
   src: url('/fonts/Libron-Bold.woff2') format('woff2');
   font-weight: 700;
   font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Libron';
-  src: url('/fonts/Libron-BoldItalic.woff2') format('woff2');
-  font-weight: 700;
-  font-style: italic;
   font-display: swap;
 }
 
@@ -332,7 +312,6 @@
   }
 
   h2 {
-    font-family: var(--font-serif);
     font-size: var(--text-lg);
     font-weight: 700;
     margin: 24px 0 8px;
@@ -380,12 +359,6 @@
       color 150ms,
       border-color 150ms,
       filter 150ms;
-  }
-
-  button,
-  .file,
-  .tab {
-    font-family: var(--font-serif);
   }
 
   /* tabs are ghost: no fill until hover or the current page */
