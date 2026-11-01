@@ -105,6 +105,7 @@
   let activeTags = $state<string[]>([])
   const filterTags = $derived(activeTags.filter((a) => tags.some((t) => sameTag(t, a))))
   const visibleWords = $derived(sortWords(searchWords(filterByTags(words, filterTags), query), sortKey, sortDirection))
+  const activeWordCount = $derived(visibleWords.filter((w) => !w.disabled).length)
   let pageNumber = $state(1)
   const current = $derived(paginate(visibleWords, pageNumber))
 
@@ -355,7 +356,7 @@
       <input type="checkbox" checked={allSelected} onchange={toggleSelectAll} />
       Select all {visibleWords.length} {visibleWords.length === words.length ? 'words' : 'results'}
     </label>
-    <span class="text-muted">{selectedWords.length} selected</span>
+    <span class="text-muted">{activeWordCount} active · {selectedWords.length} selected</span>
     <!-- keeps the space reserved so the layout does not shift when a selection appears -->
     <div class="ml-auto flex gap-2" class:invisible={selectedWords.length === 0}>
       <button class="icon" onclick={() => (app.sheetWords = selectedWords)} aria-label="Print writing sheet" title="Print writing sheet">
