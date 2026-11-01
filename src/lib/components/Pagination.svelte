@@ -5,7 +5,7 @@
   let { page, pageCount, label, onchange }: { page: number; pageCount: number; label: string; onchange: (page: number) => void } = $props()
 
   // one size for every control, so the row does not grow or shrink between pages
-  const CELL = 'icon inline-flex h-9 w-10 items-center justify-center p-0'
+  const CELL = 'icon inline-flex size-10 items-center justify-center p-0'
   const entries = $derived(pageEntries(page, pageCount))
 </script>
 
