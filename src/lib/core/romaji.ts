@@ -100,3 +100,18 @@ export function checkAnswer(input: string, hiragana: string): Verdict {
 export function toDisplayRomaji(hiragana: string): string {
   return toRomaji(normalizeKana(hiragana))
 }
+
+/**
+ * The display romaji of each run of a word, matching the romaji of the whole word.
+ * Each run gets what it adds to the romaji of the runs before it, since っ doubles the consonant of the
+ * next run. The apostrophe after ん is dropped: the runs are shown apart, so ne and n·e can't be confused.
+ */
+export function toDisplayRomajiRuns(runs: string[]): string[] {
+  let before = ''
+  return runs.map((_, i) => {
+    const upTo = toDisplayRomaji(runs.slice(0, i + 1).join(''))
+    const own = upTo.startsWith(before) ? upTo.slice(before.length) : toDisplayRomaji(runs[i])
+    before = upTo
+    return own.replace(/^'/, '')
+  })
+}
