@@ -54,7 +54,8 @@
   })
 </script>
 
-<div class="mx-auto max-w-360 px-4 py-4 sm:px-8 print:hidden">
+<!-- the max width is the 1376px content plus the widest side padding, so wide screens keep the same content width while laptops get a roomier margin -->
+<div class="mx-auto max-w-392 px-4 py-4 sm:px-8 lg:px-16 xl:px-24 print:hidden">
   <header class="flex flex-wrap items-center justify-between gap-3 pt-2 pb-4">
     <h1 class="font-serif text-2xl font-bold">zennia</h1>
     <nav class="flex flex-wrap gap-2" data-sveltekit-preload-code="eager">
