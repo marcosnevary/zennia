@@ -12,6 +12,7 @@
   import Trash from '@lucide/svelte/icons/trash'
   import { closeOnBackdrop } from './dialog'
   import KanaSelector from './KanaSelector.svelte'
+  import AnnotatedWord from '../AnnotatedWord.svelte'
   import Pagination from '../Pagination.svelte'
   import RomajiWordsDialog from './RomajiWordsDialog.svelte'
   import Switch from '../Switch.svelte'
@@ -19,6 +20,7 @@
   import TagInput from './TagInput.svelte'
   import TagsDialog from './TagsDialog.svelte'
   import { paginate } from '../../data/pagination'
+  import { annotate } from '../../core/furigana'
   import { toDisplayRomaji } from '../../core/romaji'
   import { defaultKanaSelection } from '../../core/kana'
   import type { Word } from '../../core/types'
@@ -393,8 +395,7 @@
           onmousedown={onCardMouseDown}
           onkeydown={(event) => onCardKey(event, word)}
         >
-          <span class={["text-lg", word.disabled && DIM]} lang="ja">{word.japanese}</span>
-          <span class={["text-sm text-muted", word.disabled && DIM]} lang="ja">{word.hiragana} · {toDisplayRomaji(word.hiragana)}</span>
+          <AnnotatedWord class={word.disabled ? DIM : undefined} parts={annotate(word.japanese, word.hiragana)} romaji={toDisplayRomaji(word.hiragana)} size="md" reserveReading />
           {#if needsMeaning(word)}
             <span class={["min-w-0 truncate text-warn italic", word.disabled && DIM]} title="Add a meaning to practice this word by meaning">Needs meaning</span>
           {:else}

@@ -1,4 +1,5 @@
 import { isHiragana } from 'wanakana'
+import { toDisplayRomajiRuns } from './romaji'
 
 /** A run of a written word, with the part of the reading that goes above it when it is not hiragana. */
 export interface FuriganaPart {
@@ -24,4 +25,16 @@ export function furigana(written: string, reading: string): FuriganaPart[] {
   if (!match) return [{ text: written, reading }]
   let group = 1
   return runs.map((run) => (run.kana ? { text: run.text } : { text: run.text, reading: match[group++] }))
+}
+
+/** A run of a written word, with its furigana above it and its romaji below it. */
+export interface AnnotatedPart extends FuriganaPart {
+  romaji: string
+}
+
+/** Splits a word into its furigana runs and gives each run its own romaji, so 食べる reads ta below 食 and beru below べる. */
+export function annotate(written: string, reading: string): AnnotatedPart[] {
+  const parts = furigana(written, reading)
+  const romaji = toDisplayRomajiRuns(parts.map((part) => part.reading ?? part.text))
+  return parts.map((part, i) => ({ ...part, romaji: romaji[i] }))
 }

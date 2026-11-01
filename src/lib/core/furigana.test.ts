@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { furigana } from './furigana'
+import { annotate, furigana } from './furigana'
 
 describe('furigana', () => {
   it('puts the reading above the kanji only, not the hiragana that follows', () => {
@@ -27,5 +27,16 @@ describe('furigana', () => {
 
   it('gives the whole word the reading when its hiragana does not fit it', () => {
     expect(furigana('食べる', 'くう')).toEqual([{ text: '食べる', reading: 'くう' }])
+  })
+})
+
+describe('annotate', () => {
+  it('gives each run its own romaji', () => {
+    expect(annotate('食べる', 'たべる')).toEqual([{ text: '食', reading: 'た', romaji: 'ta' }, { text: 'べる', romaji: 'beru' }])
+    expect(annotate('ア', 'あ')).toEqual([{ text: 'ア', reading: 'あ', romaji: 'a' }])
+  })
+
+  it('keeps a word in hiragana as one run', () => {
+    expect(annotate('たべる', 'たべる')).toEqual([{ text: 'たべる', romaji: 'taberu' }])
   })
 })
