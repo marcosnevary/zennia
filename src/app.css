@@ -43,6 +43,11 @@
   --text-display: 4rem;
   --text-display--line-height: 1.2;
 
+  /* corner radii: controls and small surfaces, dialogs, and chips or dots */
+  --radius-control: 8px;
+  --radius-panel: 16px;
+  --radius-pill: 9999px;
+
   /* each kana of the loading animation holds its 20% slot of the cycle and fades into the next one */
   --animate-kana: kana 2.5s ease-in-out infinite;
   @keyframes kana {
@@ -145,6 +150,7 @@
   /* typed fields only have the bottom border; selects keep the full one. The padding counts the border, so every control is 40px tall like a plain button */
   &:is(input, textarea) {
     border-width: 0 0 2px;
+    border-radius: 0;
     padding-left: 0;
     padding-bottom: 6px;
   }
@@ -198,7 +204,6 @@
 @layer base {
   * {
     box-sizing: border-box;
-    border-radius: 0;
   }
 
   html {
@@ -253,6 +258,7 @@
     margin: auto;
     border: 0;
     padding: 24px;
+    border-radius: var(--radius-panel);
     background: var(--bg);
     color: inherit;
     box-shadow: 0 12px 40px rgb(0 0 0 / 0.2);
@@ -274,13 +280,14 @@
 }
 
 @layer components {
-  /* flat blocks with square corners and no borders */
+  /* flat blocks with rounded corners and no borders */
   button,
   select,
   .file,
   .tab {
     position: relative;
     padding: 8px 16px;
+    border-radius: var(--radius-control);
     background: var(--surface);
     cursor: pointer;
     transition:
