@@ -4,7 +4,8 @@
   // `onclick` makes the chip a button; `onadd` / `onremove` put a + / X button beside it. With none it is plain text.
   let { tag, onclick, onadd, onremove }: { tag: string; onclick?: () => void; onadd?: () => void; onremove?: () => void } = $props()
 
-  const nameClass = $derived(`bg-transparent font-ui py-px pl-2 ${onadd || onremove ? 'pr-1' : 'pr-2'}`)
+  const BUTTON = 'bg-transparent font-ui py-px hover:text-inherit hover:underline'
+  const nameClass = $derived(`${BUTTON} pl-2 ${onadd || onremove ? 'pr-1' : 'pr-2'}`)
 </script>
 
 <!-- pastel background from the tag's hue; the text stays dark so it reads in both themes -->
@@ -18,8 +19,8 @@
     <span class={nameClass}>{tag}</span>
   {/if}
   {#if onadd}
-    <button type="button" class="bg-transparent font-ui py-px pr-1.5 pl-0.5" onclick={onadd} aria-label={`Add tag ${tag}`}>+</button>
+    <button type="button" class="{BUTTON} pr-1.5 pl-0.5" onclick={onadd} aria-label={`Add tag ${tag}`}>+</button>
   {:else if onremove}
-    <button type="button" class="bg-transparent font-ui py-px pr-1.5 pl-0.5" onclick={onremove} aria-label={`Remove tag ${tag}`}>×</button>
+    <button type="button" class="{BUTTON} pr-1.5 pl-0.5" onclick={onremove} aria-label={`Remove tag ${tag}`}>×</button>
   {/if}
 </span>
