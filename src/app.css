@@ -79,7 +79,7 @@
   --surface: #ffffff;
   --text: #1c1917;
   --muted: #78716c;
-  --border: #000000;
+  --border: #78716c;
   --accent: #3f3f46;
   --accent-text: #ffffff;
   --action: #0062a3;
@@ -107,7 +107,8 @@
   --surface: #111111;
   --text: #f2f2f2;
   --muted: #a3a3a3;
-  --border: #a3a3a3;
+  /* the dimmest gray that keeps the 3:1 against the page that field borders need */
+  --border: #6b6b6b;
   --accent: #d4d4d8;
   --accent-text: #1c1917;
   --action: #7ec4f0;
@@ -277,6 +278,11 @@
   .file,
   .tab {
     font-family: var(--font-serif);
+  }
+
+  /* tabs are ghost: no fill until hover or the current page */
+  .tab {
+    background: transparent;
   }
 
   /* secondary buttons: a faint tint, so they read as buttons and not as text */
