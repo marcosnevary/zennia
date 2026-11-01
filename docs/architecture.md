@@ -11,7 +11,7 @@ SvelteKit static SPA (see [ADR 1](adr/0001-sveltekit.md)). There is no server of
 - `supabase/migrations/`: the database schema.
 - `src/lib/components/`: Svelte components, grouped by feature.
 - `src/lib/state.svelte.ts`: `App`, the shared data and the actions that change it. The layout creates it and components get it with `getApp()`.
-- `src/app.css`: Tailwind setup, theme variables and the shared button, field and dialog styles ([ADR 2](adr/0002-tailwind.md)).
+- `src/app.css`: Tailwind setup, theme variables and the shared button, field, checkbox and dialog styles ([ADR 2](adr/0002-tailwind.md)).
 - `static/`: fonts, favicons, `strokes.json` (KanjiVG, built by `scripts/build-strokes.mjs`) and `dictionary.json` (the JMdict common words used by "Add from romaji", built by `scripts/build-dictionary.mjs` from the `jmdict-eng-common` release of [jmdict-simplified](https://github.com/scriptin/jmdict-simplified)). Both are committed and fetched only when needed.
 - `src/app.html`: the page shell, including the description and Open Graph tags used by link previews (WhatsApp and others). They must stay static there: the app never renders on the server and link crawlers don't run JavaScript, so tags set from `<svelte:head>` would not be seen.
 
