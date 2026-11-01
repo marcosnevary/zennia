@@ -258,6 +258,54 @@
     color: var(--text);
   }
 
+  /* drawn by hand so it takes the control fill and the action color; 24px like the icons and the switch track */
+  input[type='checkbox'] {
+    appearance: none;
+    display: inline-grid;
+    place-content: center;
+    flex: none;
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    border-radius: var(--radius-control);
+    background-color: color-mix(in srgb, var(--surface) 92%, var(--text));
+    cursor: pointer;
+    transition: background-color 150ms;
+
+    &:hover {
+      background-color: color-mix(in srgb, var(--surface) 90%, var(--text));
+    }
+
+    &:checked {
+      background-color: var(--action);
+    }
+
+    &:checked:hover {
+      background-color: color-mix(in srgb, var(--action) 80%, var(--text));
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--action);
+      outline-offset: 2px;
+    }
+
+    /* a mask, so the check takes the theme's color like the stroked icons */
+    &::before {
+      content: '';
+      width: 16px;
+      height: 16px;
+      background-color: var(--action-text);
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E")
+        center / contain no-repeat;
+      transform: scale(0);
+      transition: transform 150ms;
+    }
+
+    &:checked::before {
+      transform: scale(1);
+    }
+  }
+
   input[type='text'],
   input[type='search'],
   textarea {
@@ -402,7 +450,9 @@
   button,
   select,
   .file,
-  .tab {
+  .tab,
+  input[type='checkbox'],
+  input[type='checkbox']::before {
     transition: none;
   }
 }
