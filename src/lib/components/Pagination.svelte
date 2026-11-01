@@ -21,7 +21,7 @@
       {#if entry === 'gap'}
         <span class="{CELL} text-muted" aria-hidden="true">…</span>
       {:else}
-        <button class={CELL} class:primary={entry === page} aria-current={entry === page ? 'page' : undefined} onclick={() => onchange(entry)}>{entry}</button>
+        <button class={CELL} class:action={entry === page} aria-current={entry === page ? 'page' : undefined} onclick={() => onchange(entry)}>{entry}</button>
       {/if}
     {/each}
     <button class={CELL} onclick={() => onchange(page + 1)} disabled={page === pageCount} aria-label="Next page" title="Next page">
