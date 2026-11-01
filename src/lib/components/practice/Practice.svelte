@@ -86,7 +86,7 @@
 
 {#if !current}
   <p class="mt-6 mb-4 text-muted">
-    Nothing to practice. Select kana or activate words in <a href={resolve('/manage')}>Manage</a>.
+    Nothing to practice. Select kana in <a href={resolve('/kana')}>Kana</a> or activate words in <a href={resolve('/words')}>Words</a>.
   </p>
 {:else}
   <PracticeCard
