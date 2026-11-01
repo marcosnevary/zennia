@@ -59,7 +59,7 @@
 {#snippet verdictIcon(fieldVerdict: Verdict | null)}
   {#if fieldVerdict}
     <!-- top-2 puts the 24px icon on the text line of the 40px field -->
-    <Icon class="pointer-events-none absolute top-2 right-0 size-6 {VERDICT_TEXT[fieldVerdict]}">
+    <Icon class="pointer-events-none absolute top-2 right-3 size-6 {VERDICT_TEXT[fieldVerdict]}">
       {#if fieldVerdict === 'correct'}<path d="M20 6 9 17l-5-5" />{:else}<path d="M18 6 6 18M6 6l12 12" />{/if}
     </Icon>
   {/if}
@@ -86,7 +86,7 @@
         <div class="relative">
           <input
             type="text"
-            class="field {readingVerdict ? 'pr-8' : ''}"
+            class="field {readingVerdict ? 'pr-11' : ''}"
             data-verdict={readingVerdict}
             aria-invalid={readingVerdict ? readingVerdict !== 'correct' : undefined}
             bind:this={inputEl}
@@ -106,7 +106,7 @@
         <div class="relative">
           <input
             type="text"
-            class="field {meaningVerdict ? 'pr-8' : ''}"
+            class="field {meaningVerdict ? 'pr-11' : ''}"
             data-verdict={meaningVerdict}
             aria-invalid={meaningVerdict ? meaningVerdict !== 'correct' : undefined}
             bind:this={meaningEl}

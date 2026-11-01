@@ -140,48 +140,54 @@
   --off-bg: #4a2a0a;
 }
 
-/* the answer fields are the only bordered inputs */
+/* filled with the secondary button tint and no visible border; the transparent border only shows focus, errors and the practice verdict */
 @utility field {
-  border: 2px solid var(--border);
+  --field-border: transparent;
+  border: 1px solid var(--field-border);
+  border-radius: var(--radius-control);
+  /* not the background shorthand, which would wipe the chevron's arrow */
+  background-color: color-mix(in srgb, var(--surface) 92%, var(--text));
   transition:
     border-color 150ms,
+    box-shadow 150ms,
     background-color 150ms;
 
-  /* typed fields only have the bottom border; selects keep the full one. The padding counts the border, so every control is 40px tall like a plain button */
-  &:is(input, textarea) {
-    border-width: 0 0 2px;
-    border-radius: 0;
-    padding-left: 0;
-    padding-bottom: 6px;
+  /* here and not in the components layer, which loses to the fill above */
+  &:is(select, button):not(:disabled):hover {
+    background-color: color-mix(in srgb, var(--surface) 90%, var(--text));
+    color: inherit;
   }
 
-  &:is(select, button) {
-    padding-top: 6px;
-    padding-bottom: 6px;
+  /* the padding counts the border, so every control is 40px tall like a plain button */
+  &:is(input, textarea, select, button) {
+    padding-top: 7px;
+    padding-bottom: 7px;
   }
 
+  /* the shadow doubles the border outwards without changing the field's size, in whatever color the state below sets */
   &:focus-visible {
     outline: none;
-    border-color: var(--action);
+    --field-border: var(--action);
+    box-shadow: 0 0 0 1px var(--field-border);
   }
 
   &[aria-invalid='true'] {
-    border-color: var(--bad);
+    --field-border: var(--bad);
   }
 
   /* after :focus-visible, so the outcome of a practice answer still shows in the focused field */
   &[data-verdict='correct'] {
-    border-color: var(--ok);
+    --field-border: var(--ok);
     color: var(--ok);
   }
 
   &[data-verdict='almost'] {
-    border-color: var(--warn);
+    --field-border: var(--warn);
     color: var(--warn);
   }
 
   &[data-verdict='incorrect'] {
-    border-color: var(--bad);
+    --field-border: var(--bad);
     color: var(--bad);
   }
 }
@@ -330,10 +336,6 @@
     background: color-mix(in srgb, var(--surface) 92%, var(--text));
   }
 
-  button.field {
-    background: var(--surface);
-  }
-
   /* icon-only buttons are ghost: no fill until hover */
   button.icon {
     display: inline-flex;
@@ -356,12 +358,6 @@
   .tab:hover {
     background: var(--action);
     color: var(--action-text);
-  }
-
-  select:hover,
-  button.field:not(:disabled):hover {
-    background-color: color-mix(in srgb, var(--surface) 90%, var(--text));
-    color: inherit;
   }
 
   button.action:not(:disabled):hover,
