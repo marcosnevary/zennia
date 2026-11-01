@@ -2,7 +2,7 @@
   import '../app.css'
   import { onMount } from 'svelte'
   import { asset, resolve } from '$app/paths'
-  import { page } from '$app/state'
+  import { navigating, page } from '$app/state'
   import Loading from '#lib/components/Loading.svelte'
   import PrintSheet from '#lib/components/print/PrintSheet.svelte'
   import { getDb } from '#lib/data/db/client.ts'
@@ -22,6 +22,10 @@
     { path: '/stats', label: 'Stats' },
     { path: '/settings', label: 'Settings' },
   ] as const
+
+  // SvelteKit keeps the old page until the new route's code loads, so follow the in-flight navigation to switch at once
+  const currentPath = $derived(navigating.to?.url.pathname ?? page.url.pathname)
+  const loadingRoute = $derived(navigating.to != null && navigating.to.route.id !== page.route.id)
 
   $effect(() => {
     const query = window.matchMedia('(prefers-color-scheme: dark)')
@@ -53,9 +57,9 @@
 <div class="mx-auto max-w-360 p-4 print:hidden">
   <header class="flex flex-wrap items-center justify-between gap-3 pt-2 pb-4">
     <h1 class="font-serif text-2xl font-bold">zennia</h1>
-    <nav class="flex flex-wrap gap-2">
+    <nav class="flex flex-wrap gap-2" data-sveltekit-preload-code="eager">
       {#each tabs as { path, label } (path)}
-        <a class="tab w-[6.5em]" href={resolve(path)} aria-current={page.url.pathname === resolve(path) ? 'page' : undefined}>{label}</a>
+        <a class="tab w-[6.5em]" href={resolve(path)} aria-current={currentPath === resolve(path) ? 'page' : undefined}>{label}</a>
       {/each}
     </nav>
   </header>
@@ -77,7 +81,11 @@
           </div>
         </div>
       {/if}
-      {@render children()}
+      {#if loadingRoute}
+        <Loading />
+      {:else}
+        {@render children()}
+      {/if}
     {:else if app.status === 'failed'}
       <p class="mt-6 mb-4 text-bad" role="alert">Could not load your data: {app.error}</p>
       <button onclick={() => app.init()}>Try again</button>
