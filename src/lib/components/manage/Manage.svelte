@@ -91,11 +91,6 @@
     dialogEl?.close()
   }
 
-  function remove(word: Word) {
-    if (!confirm(`Delete "${word.japanese}"?`)) return
-    app.setWords(words.filter((w) => w.id !== word.id))
-  }
-
   function toggle(word: Word) {
     app.setWords(words.map((w) => (w.id === word.id ? setDisabled(w, !w.disabled) : w)))
   }
@@ -418,9 +413,6 @@
           {#each word.tags as tag (tag)}<TagChip {tag} onclick={() => filterByTag(tag)} />{/each}
           <span class="min-w-4 flex-1" aria-hidden="true"></span>
           <Switch checked={!word.disabled} onchange={() => toggle(word)} label="Enabled" title={word.disabled ? 'Enable' : 'Disable'} />
-          <button class="danger icon" onclick={() => remove(word)} aria-label="Delete" title="Delete">
-            {@render trashIcon()}
-          </button>
         </div>
       </li>
     {/each}
