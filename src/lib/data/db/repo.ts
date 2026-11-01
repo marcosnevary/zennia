@@ -94,7 +94,10 @@ export function createRepo(getDb: () => Db): Repo {
         fetchAll<KanaStatRow>((from, to) =>
           db.from('kana_stats').select('script, hiragana, hits, misses').order('script').order('hiragana').range(from, to),
         ),
-        db.from('settings').select('theme, words_focus, kana_selection').maybeSingle<SettingsRow>(),
+        db
+          .from('settings')
+          .select('theme, words_focus, kana_selection, words_sort, words_sort_direction, stats_sort, stats_sort_direction')
+          .maybeSingle<SettingsRow>(),
       ])
       return {
         words: words.map(wordFromRow),

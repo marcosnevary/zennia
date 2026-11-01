@@ -6,9 +6,17 @@ import type { Account } from './data/db/client'
 import type { Repo, Stored } from './data/db/repo'
 import type { Recorder, WordsFocus } from './data/practice-modes'
 import { DEFAULT_SETTINGS, type Settings } from './data/settings'
-import { attempts, emptyStats, recordAnswer, recordKana, totalTally } from './data/stats'
+import {
+  attempts,
+  emptyStats,
+  recordAnswer,
+  recordKana,
+  totalTally,
+  type StatsSort,
+  type StatsSortDirection,
+} from './data/stats'
 import { readThemeCache, writeThemeCache, type ThemePreference } from './data/theme'
-import { mergeWords, type MergeResult } from './data/words'
+import { mergeWords, type MergeResult, type SortDirection, type SortKey } from './data/words'
 
 function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : 'Unknown error.'
@@ -170,6 +178,14 @@ export class App {
 
   setWordsFocus(wordsFocus: WordsFocus): void {
     this.#setSettings({ wordsFocus })
+  }
+
+  setWordsSort(wordsSort: SortKey, wordsSortDirection: SortDirection): void {
+    this.#setSettings({ wordsSort, wordsSortDirection })
+  }
+
+  setStatsSort(statsSort: StatsSort, statsSortDirection: StatsSortDirection): void {
+    this.#setSettings({ statsSort, statsSortDirection })
   }
 
   setKanaSelection(kanaSelection: string[]): void {

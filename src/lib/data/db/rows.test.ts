@@ -46,15 +46,43 @@ describe('settings', () => {
   })
 
   it('falls back to the defaults for values it does not know', () => {
-    expect(settingsFromRow({ theme: 'blue', words_focus: 'x', kana_selection: ['hiragana:あ'] })).toEqual({
-      theme: 'system',
-      wordsFocus: 'reading',
-      kanaSelection: ['hiragana:あ'],
-    })
+    expect(
+      settingsFromRow({
+        theme: 'blue',
+        words_focus: 'x',
+        kana_selection: ['hiragana:あ'],
+        words_sort: 'x',
+        words_sort_direction: 'up',
+        stats_sort: 'x',
+        stats_sort_direction: 'down',
+      }),
+    ).toEqual({ ...DEFAULT_SETTINGS, kanaSelection: ['hiragana:あ'] })
+  })
+
+  it('reads the saved sorts', () => {
+    expect(
+      settingsFromRow({
+        theme: 'dark',
+        words_focus: 'both',
+        kana_selection: null,
+        words_sort: 'reading',
+        words_sort_direction: 'desc',
+        stats_sort: 'misses',
+        stats_sort_direction: 'asc',
+      }),
+    ).toMatchObject({ wordsSort: 'reading', wordsSortDirection: 'desc', statsSort: 'misses', statsSortDirection: 'asc' })
   })
 
   it('writes only the fields that changed', () => {
     expect(settingsToRow({ wordsFocus: 'both' })).toEqual({ words_focus: 'both' })
     expect(settingsToRow({ kanaSelection: null })).toEqual({ kana_selection: null })
+    expect(settingsToRow({ wordsSort: 'status', wordsSortDirection: 'desc' })).toEqual({
+      words_sort: 'status',
+      words_sort_direction: 'desc',
+    })
+    expect(settingsToRow({ statsSort: 'hits', statsSortDirection: 'asc' })).toEqual({
+      stats_sort: 'hits',
+      stats_sort_direction: 'asc',
+    })
   })
 })
