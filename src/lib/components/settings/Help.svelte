@@ -41,7 +41,7 @@
     hiragana reading or without a meaning, and repeated word + reading pairs, are skipped; the summary tells you how many.
   </p>
 
-  <div class="flex gap-2">
+  <div class="dialog-actions">
     <button class="action" type="button" onclick={() => helpEl?.close()}>Close</button>
   </div>
 </dialog>

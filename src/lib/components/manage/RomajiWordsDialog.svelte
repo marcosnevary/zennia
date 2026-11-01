@@ -90,7 +90,7 @@
         <TagInput bind:tags={batchTags} suggestions={tags} />
         {#if error}<p class="text-bad" role="alert">{error}</p>{/if}
         {#if message}<p role="status">{message}</p>{/if}
-        <div class="flex flex-wrap items-center justify-end gap-2">
+        <div class="dialog-actions">
           <button class="action" type="submit" disabled={loading || parseRomajiList(text).length === 0}>{loading ? 'Looking up…' : 'Look up'}</button>
           <button type="button" onclick={() => dialogEl?.close()}>Close</button>
         </div>
@@ -136,7 +136,7 @@
         </ul>
       {/if}
       <p class="text-sm text-muted">Dictionary data: JMdict (EDRDG), CC BY-SA 4.0.</p>
-      <div class="flex flex-wrap items-center justify-end gap-2">
+      <div class="dialog-actions">
         <button class="action" type="button" onclick={add} disabled={chosen.length === 0}>Add {chosen.length} word(s)</button>
         <button type="button" onclick={() => (rows = [])}>Back</button>
       </div>
