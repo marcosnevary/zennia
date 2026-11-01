@@ -103,7 +103,7 @@
       </ul>
       {#if renaming !== null && renameError}<p class="text-bad" role="alert">{renameError}</p>{/if}
     {/if}
-    <div class="flex flex-wrap items-center justify-end gap-2">
+    <div class="dialog-actions">
       <button class="action" type="button" onclick={() => dialogEl?.close()}>Done</button>
     </div>
   </div>

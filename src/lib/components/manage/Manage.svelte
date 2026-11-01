@@ -243,7 +243,7 @@
     {#key editingId}
       <TagInput bind:tags={editTags} suggestions={tags} />
     {/key}
-    <div class={ROW}>
+    <div class="dialog-actions">
       <button class="action" type="submit">Save</button>
       <button type="button" onclick={() => dialogEl?.close()}>Cancel</button>
     </div>
@@ -254,7 +254,7 @@
   <div class="grid gap-2">
     <h2 class="mt-0 mb-2">Tag {selectedWords.length} selected word(s)</h2>
     <TagInput bind:tags={() => commonTags, setCommonTags} suggestions={dialogChoices} />
-    <div class={ROW}>
+    <div class="dialog-actions">
       <button class="action" type="button" onclick={() => tagDialogEl?.close()}>Done</button>
     </div>
   </div>

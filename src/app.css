@@ -221,6 +221,15 @@
   background: linear-gradient(90deg, var(--muted) 2px, transparent 2px) left center / 8px 2px repeat-x;
 }
 
+/* the buttons at the bottom of a dialog, on the right with the main one first */
+@utility dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 @utility section-title {
   padding-bottom: 8px;
   margin-bottom: 12px;
