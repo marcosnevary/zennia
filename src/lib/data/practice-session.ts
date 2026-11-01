@@ -20,13 +20,11 @@ export interface Session<T> {
   verdict: Verdict | null
   hits: number
   total: number
-  streak: number
-  bestStreak: number
   lastKey: string | null
 }
 
 export function startSession<T>(): Session<T> {
-  return { current: null, verdict: null, hits: 0, total: 0, streak: 0, bestStreak: 0, lastKey: null }
+  return { current: null, verdict: null, hits: 0, total: 0, lastKey: null }
 }
 
 /** The items the next draw may pick: the pool without the previous item, unless that is the only one. */
@@ -64,14 +62,11 @@ export function submit<T>(
   if (!answer.trim()) return session
   const verdict = mode.check(answer, current)
   const hit = verdict === 'correct'
-  const streak = hit ? session.streak + 1 : 0
   mode.record(current, verdict)
   return {
     ...session,
     verdict,
     hits: session.hits + (hit ? 1 : 0),
     total: session.total + 1,
-    streak,
-    bestStreak: Math.max(session.bestStreak, streak),
   }
 }

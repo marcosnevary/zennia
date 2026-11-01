@@ -20,8 +20,8 @@ Practice was split into a kana screen and a words screen, and the page called Se
 - The Stats list is paginated the same way, 10 rows per page. Searching or sorting goes back to the first page.
 - **Settings** only has the account ([ADR 4](0004-google-login.md)) and the theme.
 - `mixedMode` (`src/lib/data/practice-modes.ts`) composes `wordsMode` and `kanaMode`, so each item is weighted, checked and recorded by its own rules. Kana still never count as "almost". Item keys are prefixed (`word:`, `kana:`) so an id can never collide with a symbol.
-- The words focus (romaji, meaning or both) stays in Practice and only applies to words; a kana is always answered by its reading.
-- The scope and the focus are chosen in a "Customize" dialog, opened by a button next to Reset session under the score. The button is not called Settings, since that is a tab.
+- The words focus (romaji, meaning or both) only applies to words; a kana is always answered by its reading.
+- The scope and the focus are chosen in a "Customize" dialog on the practice screen. The button is not called Settings, since that is a tab. [ADR 6](0006-practice-follows-manage.md) later removed the scope and the dialog, and moved the focus to Settings.
 
 ## Consequences
 

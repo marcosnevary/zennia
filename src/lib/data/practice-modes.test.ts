@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { checkParts, describePool, joinAnswers, kanaMode, mixedMode, wordsMode } from './practice-modes'
+import { checkParts, joinAnswers, kanaMode, mixedMode, rightAnswer, wordsMode } from './practice-modes'
 import { emptyStats } from './stats'
 import { kanaKey } from '../core/kana'
 import type { Word } from '../core/types'
@@ -128,11 +128,24 @@ describe('mixedMode', () => {
   })
 })
 
-describe('describePool', () => {
-  it('counts words and the kana of each script, leaving out empty parts', () => {
-    const mode = mixedMode([word('a'), word('b')], [kanaKey('hiragana', 'あ'), kanaKey('hiragana', 'い'), kanaKey('katakana', 'あ')], emptyStats())
-    expect(describePool(mode.pool)).toBe('2 words · 2 hiragana · 1 katakana')
-    expect(describePool(mixedMode([word('a')], [], emptyStats()).pool)).toBe('1 word')
-    expect(describePool([])).toBe('')
+describe('rightAnswer', () => {
+  it('shows a word with furigana, its romaji and meaning', () => {
+    const item = { kind: 'word', word: word('食べる', { hiragana: 'たべる', meaning: 'to eat' }) } as const
+    expect(rightAnswer(item)).toEqual({
+      written: [{ text: '食', reading: 'た' }, { text: 'べる' }],
+      romaji: 'taberu',
+      meaning: 'to eat',
+    })
+  })
+
+  it('marks a missing meaning', () => {
+    const item = { kind: 'word', word: word('たべる', { hiragana: 'たべる' }) } as const
+    expect(rightAnswer(item).meaning).toBe('(no meaning saved)')
+  })
+
+  it('puts the hiragana above a katakana, and has no meaning for kana', () => {
+    const [hiragana, katakana] = mixedMode([], [kanaKey('hiragana', 'あ'), kanaKey('katakana', 'あ')], emptyStats()).pool
+    expect(rightAnswer(hiragana)).toEqual({ written: [{ text: 'あ' }], romaji: 'a', meaning: undefined })
+    expect(rightAnswer(katakana)).toEqual({ written: [{ text: 'ア', reading: 'あ' }], romaji: 'a', meaning: undefined })
   })
 })

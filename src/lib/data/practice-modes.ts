@@ -1,6 +1,7 @@
+import { furigana, type FuriganaPart } from '../core/furigana'
 import { acceptedReadings, buildKana, kanaKey, type Kana, type KanaScript } from '../core/kana'
 import { checkMeaning } from '../core/meaning'
-import { checkAnswer } from '../core/romaji'
+import { checkAnswer, toDisplayRomaji } from '../core/romaji'
 import type { Stats, Verdict, Word } from '../core/types'
 import type { PracticeMode } from './practice-session'
 import { drawWeight, recordAnswer, recordKana } from './stats'
@@ -72,6 +73,24 @@ export function wordsMode(
 /** An item of a mixed practice: a word or a kana. */
 export type PracticeItem = { kind: 'word'; word: Word } | { kind: 'kana'; kana: Kana }
 
+/** The right answer of an item, shown with the verdict. */
+export interface RightAnswer {
+  /** The word as written, or the kana symbol, with its reading above what is not hiragana */
+  written: FuriganaPart[]
+  romaji: string
+  /** Only for words */
+  meaning?: string
+}
+
+export function rightAnswer(item: PracticeItem): RightAnswer {
+  const [written, hiragana] = item.kind === 'word' ? [item.word.japanese, item.word.hiragana] : [item.kana.symbol, item.kana.hiragana]
+  return {
+    written: furigana(written, hiragana),
+    romaji: toDisplayRomaji(hiragana),
+    meaning: item.kind === 'word' ? item.word.meaning || '(no meaning saved)' : undefined,
+  }
+}
+
 /** Words and kana drawn together; each item is weighted, checked and recorded by its own mode. */
 export function mixedMode(
   words: Word[],
@@ -104,17 +123,4 @@ export function kanaMode(selected: string[], stats: Stats, recorder: Recorder = 
       acceptedReadings(k.hiragana).some((h) => checkAnswer(answer, h) === 'correct') ? 'correct' : 'incorrect',
     record: (k, verdict) => recorder.kana(k.script, k.hiragana, verdict === 'correct'),
   }
-}
-
-/** What a pool holds, like "12 words · 46 hiragana"; empty parts are left out. */
-export function describePool(pool: PracticeItem[]): string {
-  const words = pool.filter((item) => item.kind === 'word').length
-  const kana = (script: KanaScript) => pool.filter((item) => item.kind === 'kana' && item.kana.script === script).length
-  return [
-    words && `${words} ${words === 1 ? 'word' : 'words'}`,
-    kana('hiragana') && `${kana('hiragana')} hiragana`,
-    kana('katakana') && `${kana('katakana')} katakana`,
-  ]
-    .filter(Boolean)
-    .join(' · ')
 }

@@ -5,7 +5,7 @@ SvelteKit static SPA (see [ADR 1](adr/0001-sveltekit.md)). There is no server of
 ## Layout
 
 - `src/routes/`: one folder per tab (`practice`, `manage/words`, `manage/kana`, `stats`, `settings`, see [ADR 5](adr/0005-unified-practice.md)), plus the shell in `+layout.svelte`. Words and Kana are separate tabs; `/manage` redirects to Words.
-- `src/lib/core/`: pure logic (kana tables, answer checking, meaning matching, writing sheet).
+- `src/lib/core/`: pure logic (kana tables, answer checking, meaning matching, furigana, writing sheet).
 - `src/lib/data/`: data model, sanitizing, import/export and the dictionary lookup (`dictionary.ts`).
 - `src/lib/data/db/`: database access: the Supabase client (`client.ts`), the `Repo` that reads and writes the rows (`repo.ts`, `rows.ts`) and the one-time import of the old `localStorage` data (`legacy.ts`).
 - `supabase/migrations/`: the database schema.

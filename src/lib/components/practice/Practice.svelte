@@ -1,10 +1,9 @@
 <script lang="ts">
   import { resolve } from '$app/paths'
   import { defaultKanaSelection } from '../../core/kana'
-  import { toDisplayRomaji } from '../../core/romaji'
+  import type { Verdict } from '../../core/types'
   import PracticeCard from './PracticeCard.svelte'
-  import Scoreboard from './Scoreboard.svelte'
-  import { checkParts, describePool, joinAnswers, mixedMode, type PracticeItem } from '../../data/practice-modes'
+  import { checkParts, joinAnswers, mixedMode, rightAnswer, type PracticeItem } from '../../data/practice-modes'
   import { drawOdds, nextRound, startSession, submit as submitAnswer } from '../../data/practice-session'
   import { getApp } from '../../state.svelte'
 
@@ -40,12 +39,16 @@
         : meaningAnswer,
   )
 
-  // the outcome of each part, shown with the verdict when both are practiced
-  const note = $derived.by(() => {
-    if (focus !== 'both' || current?.kind !== 'word' || !session.verdict) return undefined
+  /** The outcome of each field once checked, shown on the field itself. */
+  const parts = $derived.by((): { reading: Verdict | null; meaning: Verdict | null } => {
+    if (!current || !session.verdict) return { reading: null, meaning: null }
+    if (current.kind === 'kana') return { reading: session.verdict, meaning: null }
     const { reading, meaning } = checkParts(typed, current.word, focus)
-    return `Romaji: ${reading} · Meaning: ${meaning ? 'correct' : 'incorrect'}`
+    return { reading, meaning: meaning === null ? null : meaning ? 'correct' : 'incorrect' }
   })
+
+  // the fields show the parts by color, so screen readers get them in words when both are practiced
+  const note = $derived(parts.reading && parts.meaning ? `Romaji: ${parts.reading} · Meaning: ${parts.meaning}` : undefined)
 
   function focusField() {
     queueMicrotask(() => (askReading ? inputEl : meaningEl)?.focus({ preventScroll: true }))
@@ -89,11 +92,12 @@
   <PracticeCard
     prompt={current.kind === 'word' ? current.word.japanese : current.kana.symbol}
     verdict={session.verdict}
-    reading={current.kind === 'word'
-      ? `${current.word.hiragana} · ${toDisplayRomaji(current.word.hiragana)}`
-      : `${current.kana.symbol} · ${toDisplayRomaji(current.kana.hiragana)}`}
-    detail={current.kind === 'word' ? current.word.meaning || '(no meaning saved)' : undefined}
+    rightAnswer={rightAnswer(current)}
     {note}
+    readingVerdict={parts.reading}
+    meaningVerdict={parts.meaning}
+    hits={session.hits}
+    total={session.total}
     {askReading}
     {askMeaning}
     bind:answer
@@ -103,7 +107,4 @@
     onsubmit={submit}
     {onkeydown}
   />
-  <Scoreboard hits={session.hits} total={session.total} streak={session.streak} bestStreak={session.bestStreak} />
-  <!-- same 16px inset as the score above -->
-  <p class="mx-4 mt-3 text-center text-sm text-muted">Practicing {describePool(mode.pool)}</p>
 {/if}

@@ -39,18 +39,18 @@ describe('nextRound', () => {
 })
 
 describe('submit', () => {
-  it('counts a correct answer, extends the streak and records it', () => {
+  it('counts a correct answer and records it', () => {
     const { mode, recorded } = fakeMode(['a'], ['correct'])
     const session = submit(nextRound(startSession<Item>(), mode), 'x', mode)
-    expect(session).toMatchObject({ verdict: 'correct', hits: 1, total: 1, streak: 1, bestStreak: 1 })
+    expect(session).toMatchObject({ verdict: 'correct', hits: 1, total: 1 })
     expect(recorded).toEqual([['a', 'correct']])
   })
 
-  it('breaks the streak on a wrong or almost answer but keeps the best one', () => {
+  it('counts a wrong or almost answer in the total but not in the hits', () => {
     const { mode } = fakeMode(['a'], ['correct', 'correct', 'almost', 'incorrect'])
     let session = nextRound(startSession<Item>(), mode)
     for (let i = 0; i < 4; i++) session = submit(submit(session, 'x', mode), '', mode)
-    expect(session).toMatchObject({ hits: 2, total: 4, streak: 0, bestStreak: 2 })
+    expect(session).toMatchObject({ hits: 2, total: 4 })
   })
 
   it('moves on to the next item when submitted after a verdict, without counting again', () => {

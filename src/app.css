@@ -168,6 +168,22 @@
   &[aria-invalid='true'] {
     border-color: var(--bad);
   }
+
+  /* after :focus-visible, so the outcome of a practice answer still shows in the focused field */
+  &[data-verdict='correct'] {
+    border-color: var(--ok);
+    color: var(--ok);
+  }
+
+  &[data-verdict='almost'] {
+    border-color: var(--warn);
+    color: var(--warn);
+  }
+
+  &[data-verdict='incorrect'] {
+    border-color: var(--bad);
+    color: var(--bad);
+  }
 }
 
 /* custom chevron so the arrow keeps its distance from the border */
