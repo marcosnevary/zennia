@@ -258,14 +258,14 @@
     color: var(--text);
   }
 
-  /* drawn by hand so it takes the control fill and the action color; 24px like the icons and the switch track */
+  /* drawn by hand so it takes the control fill and the action color; 20px, a little under the line height so it does not crowd its label */
   input[type='checkbox'] {
     appearance: none;
     display: inline-grid;
     place-content: center;
     flex: none;
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     margin: 0;
     border-radius: var(--radius-control);
     background-color: color-mix(in srgb, var(--surface) 92%, var(--text));
