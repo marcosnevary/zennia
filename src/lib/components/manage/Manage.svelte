@@ -380,8 +380,8 @@
       <li>
         <div
           class={[
-            'flex cursor-pointer items-center gap-3 rounded-control border px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action',
-            selected.has(word.id) ? 'border-action bg-action/10' : 'border-line bg-surface',
+            'flex cursor-pointer items-center gap-3 rounded-control px-3 py-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action motion-reduce:transition-none',
+            selected.has(word.id) ? 'bg-action/10 hover:bg-action/15' : 'hover:bg-[color-mix(in_srgb,var(--surface)_92%,var(--text))]',
           ]}
           role="checkbox"
           tabindex="0"
@@ -398,7 +398,7 @@
             <span class={["min-w-0 truncate", word.disabled && DIM]}>{word.meaning}</span>
           {/if}
           {#each word.tags as tag (tag)}<TagChip {tag} onclick={() => filterByTag(tag)} />{/each}
-          <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
+          <span class="min-w-4 flex-1" aria-hidden="true"></span>
           <Switch checked={!word.disabled} onchange={() => toggle(word)} label="Enabled" title={word.disabled ? 'Enable' : 'Disable'} />
           <button class="icon" onclick={() => edit(word)} aria-label="Edit" title="Edit">
             <Icon>
