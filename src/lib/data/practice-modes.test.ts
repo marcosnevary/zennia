@@ -129,10 +129,10 @@ describe('mixedMode', () => {
 })
 
 describe('rightAnswer', () => {
-  it('shows a word with furigana, its romaji and meaning', () => {
+  it('shows a word with furigana and romaji on each run, its romaji and meaning', () => {
     const item = { kind: 'word', word: word('食べる', { hiragana: 'たべる', meaning: 'to eat' }) } as const
     expect(rightAnswer(item)).toEqual({
-      written: [{ text: '食', reading: 'た' }, { text: 'べる' }],
+      written: [{ text: '食', reading: 'た', romaji: 'ta' }, { text: 'べる', romaji: 'beru' }],
       romaji: 'taberu',
       meaning: 'to eat',
     })
@@ -145,7 +145,7 @@ describe('rightAnswer', () => {
 
   it('puts the hiragana above a katakana, and has no meaning for kana', () => {
     const [hiragana, katakana] = mixedMode([], [kanaKey('hiragana', 'あ'), kanaKey('katakana', 'あ')], emptyStats()).pool
-    expect(rightAnswer(hiragana)).toEqual({ written: [{ text: 'あ' }], romaji: 'a', meaning: undefined })
-    expect(rightAnswer(katakana)).toEqual({ written: [{ text: 'ア', reading: 'あ' }], romaji: 'a', meaning: undefined })
+    expect(rightAnswer(hiragana)).toEqual({ written: [{ text: 'あ', romaji: 'a' }], romaji: 'a', meaning: undefined })
+    expect(rightAnswer(katakana)).toEqual({ written: [{ text: 'ア', reading: 'あ', romaji: 'a' }], romaji: 'a', meaning: undefined })
   })
 })

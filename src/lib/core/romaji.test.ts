@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { checkAnswer, soundKey, toDisplayRomaji, typedSoundKeys } from './romaji'
+import { checkAnswer, soundKey, toDisplayRomaji, toDisplayRomajiRuns, typedSoundKeys } from './romaji'
 
 describe('checkAnswer: accepts spelling-system variations', () => {
   it('exact romaji', () => {
@@ -55,6 +55,18 @@ describe('toDisplayRomaji', () => {
     expect(toDisplayRomaji('たべる')).toBe('taberu')
     expect(toDisplayRomaji('がっこう')).toBe('gakkou')
     expect(toDisplayRomaji('コーヒー')).toBe('koohii')
+  })
+})
+
+describe('toDisplayRomajiRuns', () => {
+  it('gives each run its own romaji', () => {
+    expect(toDisplayRomajiRuns(['た', 'べる'])).toEqual(['ta', 'beru'])
+  })
+  it('gives the consonant doubled by っ to the next run', () => {
+    expect(toDisplayRomajiRuns(['ひ', 'っ', 'こ', 'し'])).toEqual(['hi', '', 'kko', 'shi'])
+  })
+  it('drops the apostrophe after ん between runs', () => {
+    expect(toDisplayRomajiRuns(['きん', 'えん'])).toEqual(['kin', 'en'])
   })
 })
 
