@@ -215,12 +215,6 @@
   background-repeat: no-repeat;
 }
 
-/* lists that scroll inside a dialog or field: a thin, faded bar in the muted colour, so it follows the theme */
-@utility thin-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--muted) 50%, transparent) transparent;
-}
-
 /* row of small, widely spaced square dots */
 @utility dot-leader {
   height: 2px;
@@ -235,6 +229,9 @@
 @layer base {
   * {
     box-sizing: border-box;
+    /* a thin, faded bar in the muted colour, so every scrollbar follows the theme; scrollbar-width does not inherit, hence every element */
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--muted) 50%, transparent) transparent;
   }
 
   html {

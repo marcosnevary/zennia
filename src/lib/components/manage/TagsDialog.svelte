@@ -74,7 +74,7 @@
         <p class="my-4 text-muted">No tags match your search.</p>
       {/if}
       <!-- the inner padding keeps the scroll box from clipping the focus border of the rename field, which grows outwards -->
-      <ul class="-mx-1 max-h-[60vh] overflow-y-auto px-1 thin-scrollbar">
+      <ul class="-mx-1 max-h-[60vh] overflow-y-auto px-1">
         {#each visibleTags as tag (tag)}
           <li class="flex items-center gap-3 py-2">
             {#if renaming !== null && sameTag(renaming, tag)}
