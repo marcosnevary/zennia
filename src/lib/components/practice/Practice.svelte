@@ -3,7 +3,7 @@
   import { defaultKanaSelection } from '../../core/kana'
   import type { Verdict } from '../../core/types'
   import PracticeCard from './PracticeCard.svelte'
-  import { checkParts, describePool, joinAnswers, mixedMode, rightAnswer, type PracticeItem } from '../../data/practice-modes'
+  import { checkParts, joinAnswers, mixedMode, rightAnswer, type PracticeItem } from '../../data/practice-modes'
   import { drawOdds, nextRound, startSession, submit as submitAnswer } from '../../data/practice-session'
   import { getApp } from '../../state.svelte'
 
@@ -107,6 +107,4 @@
     onsubmit={submit}
     {onkeydown}
   />
-  <!-- same 16px inset as the card's padding -->
-  <p class="mx-4 mt-3 text-center text-sm text-muted">Practicing {describePool(mode.pool)}</p>
 {/if}

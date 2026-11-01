@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { checkParts, describePool, joinAnswers, kanaMode, mixedMode, rightAnswer, wordsMode } from './practice-modes'
+import { checkParts, joinAnswers, kanaMode, mixedMode, rightAnswer, wordsMode } from './practice-modes'
 import { emptyStats } from './stats'
 import { kanaKey } from '../core/kana'
 import type { Word } from '../core/types'
@@ -125,15 +125,6 @@ describe('mixedMode', () => {
   it('leaves out the words that need a meaning when the meaning is practiced', () => {
     const mode = mixedMode([word('a')], kana, emptyStats(), 'meaning')
     expect(mode.pool.map((item) => item.kind)).toEqual(['kana'])
-  })
-})
-
-describe('describePool', () => {
-  it('counts words and the kana of each script, leaving out empty parts', () => {
-    const mode = mixedMode([word('a'), word('b')], [kanaKey('hiragana', 'あ'), kanaKey('hiragana', 'い'), kanaKey('katakana', 'あ')], emptyStats())
-    expect(describePool(mode.pool)).toBe('2 words · 2 hiragana · 1 katakana')
-    expect(describePool(mixedMode([word('a')], [], emptyStats()).pool)).toBe('1 word')
-    expect(describePool([])).toBe('')
   })
 })
 

@@ -65,8 +65,7 @@
   {/if}
 {/snippet}
 
-<!-- the bottom padding plus the 12px margin of the line below gives the same 24px as above the fields -->
-<section class="mt-6 bg-surface px-4 pt-6 pb-3 text-center">
+<section class="mt-6 bg-surface px-4 py-6 text-center">
   <!-- the verdict takes the place of the prompt: they share one grid cell and cross-fade -->
   <div class="mb-5 grid">
     <p
