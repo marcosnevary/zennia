@@ -53,14 +53,14 @@
   <div class="mt-4 mb-2 flex flex-wrap items-center gap-2">
     <input
       type="search"
-      class="field h-11 min-w-50 flex-1 appearance-none bg-surface"
+      class="field min-w-50 flex-1 appearance-none"
       placeholder="Search by word, reading, romaji or meaning"
       aria-label="Search stats"
       bind:value={query}
       oninput={() => (pageNumber = 1)}
     />
     <div class="flex items-center gap-2">
-      <select class="field chevron h-11" bind:value={sort} onchange={() => (pageNumber = 1)} aria-label="Sort by">
+      <select class="field chevron" bind:value={sort} onchange={() => (pageNumber = 1)} aria-label="Sort by">
         {#each STATS_SORT_OPTIONS as option (option.key)}
           <option value={option.key}>{option.label}</option>
         {/each}
@@ -89,7 +89,7 @@
   {/if}
   <ul>
     {#each current.items as row (row.key)}
-      <li class="flex items-center gap-3 py-2.5">
+      <li class="flex items-center gap-3 py-2">
         <span class="text-[1.2rem]" lang="ja">{row.symbol}</span>
         <span class="text-[0.9rem] text-muted" lang={row.ja ? 'ja' : undefined}>{row.reading}</span>
         <!-- runs from the symbol to the counts on the other side -->
@@ -99,7 +99,7 @@
           <span>✓{row.tally.hits}</span>
           <span>✗{row.tally.misses}</span>
         </span>
-        <span class="w-16 flex-none py-0.5 text-center font-bold tabular-nums {LEVEL_STYLES[accuracyLevel(row.tally)]}">{percent(accuracy(row.tally))}</span>
+        <span class="w-16 flex-none text-center font-bold tabular-nums {LEVEL_STYLES[accuracyLevel(row.tally)]}">{percent(accuracy(row.tally))}</span>
       </li>
     {/each}
   </ul>

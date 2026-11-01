@@ -101,14 +101,14 @@
         {#each found as row (row.item)}
           {@const candidate = row.candidates[row.choice]}
           {@const warn = differs(row) && 'text-warn'}
-          <li class="flex items-center gap-3 py-2.5">
+          <li class="flex items-center gap-3 py-2">
             <input type="checkbox" bind:checked={row.selected} aria-label={`Add ${row.item.romaji}`} />
             <span class={['min-w-0 truncate text-[1.3rem]', warn, !row.selected && DIM]} lang="ja">{candidate.japanese}</span>
             <span class={['min-w-0 truncate text-[0.9rem]', warn || 'text-muted', !row.selected && DIM]} lang="ja">{candidate.hiragana} · {toDisplayRomaji(candidate.hiragana)}</span>
             <span class={['min-w-0 truncate', warn, !row.selected && DIM]}>{candidate.meaning}</span>
             {#if warn}<span class="sr-only">(vowel length differs from what you typed)</span>{/if}
             {#if batchTags.length}
-              <span class="flex min-w-0 gap-1.5 overflow-hidden">{#each batchTags as tag (tag)}<TagChip {tag} />{/each}</span>
+              <span class="flex min-w-0 gap-2 overflow-hidden">{#each batchTags as tag (tag)}<TagChip {tag} />{/each}</span>
             {/if}
             {#if row.candidates.length > 1}
               <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
@@ -128,10 +128,10 @@
       {#if found.some(differs) || notFound.length}
         <ul class="grid gap-1 text-[0.85rem]">
           {#if found.some(differs)}
-            <li class="flex items-baseline gap-1.5 text-warn"><span class="size-2.5 shrink-0 bg-warn" aria-hidden="true"></span>Vowel length differs from what you typed: check the reading</li>
+            <li class="flex items-baseline gap-2 text-warn"><span class="size-3 shrink-0 bg-warn" aria-hidden="true"></span>Vowel length differs from what you typed: check the reading</li>
           {/if}
           {#if notFound.length}
-            <li class="flex items-baseline gap-1.5 text-bad"><span class="size-2.5 shrink-0 bg-bad" aria-hidden="true"></span>Not found in the dictionary: {notFound.map((r) => r.item.romaji).join(', ')}</li>
+            <li class="flex items-baseline gap-2 text-bad"><span class="size-3 shrink-0 bg-bad" aria-hidden="true"></span>Not found in the dictionary: {notFound.map((r) => r.item.romaji).join(', ')}</li>
           {/if}
         </ul>
       {/if}

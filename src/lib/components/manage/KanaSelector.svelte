@@ -13,7 +13,7 @@
 
   let { selected, onchange }: { selected: string[]; onchange: (keys: string[]) => void } = $props()
 
-  const HEADER = 'bg-transparent px-0.5 py-0 text-[0.8rem] text-muted hover:text-ink'
+  const HEADER = 'bg-transparent px-1 py-0 text-[0.8rem] text-muted hover:text-ink'
   const LINK = `${HEADER} underline`
 
   // same size for every cell, single or double kana

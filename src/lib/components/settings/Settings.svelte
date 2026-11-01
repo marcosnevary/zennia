@@ -63,7 +63,7 @@
 
   <SettingRow title="Theme" description="Light, dark, or the same as your system.">
     <select
-      class="field chevron py-[7px]"
+      class="field chevron"
       value={app.settings.theme}
       onchange={(e) => app.setTheme(e.currentTarget.value as ThemePreference)}
       aria-label="Theme"
@@ -79,7 +79,7 @@
     description="How words are answered in Practice: by romaji, by meaning, or both. Kana are always answered by romaji."
   >
     <select
-      class="field chevron py-[7px]"
+      class="field chevron"
       value={app.settings.wordsFocus}
       onchange={(e) => app.setWordsFocus(e.currentTarget.value as WordsFocus)}
       aria-label="Answer words by"
@@ -91,7 +91,7 @@
   </SettingRow>
 </div>
 
-<div class="mt-6 flex items-center gap-1.5">
+<div class="mt-6 flex items-center gap-2">
   <h2 class="m-0">Data</h2>
   <Help />
 </div>

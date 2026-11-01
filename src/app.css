@@ -132,10 +132,16 @@
     border-color 150ms,
     background-color 150ms;
 
-  /* typed fields only have the bottom border; selects keep the full one */
+  /* typed fields only have the bottom border; selects keep the full one. The padding counts the border, so every control is 40px tall like a plain button */
   &:is(input, textarea) {
     border-width: 0 0 2px;
     padding-left: 0;
+    padding-bottom: 6px;
+  }
+
+  &:is(select, button) {
+    padding-top: 6px;
+    padding-bottom: 6px;
   }
 
   /* blue rather than the accent: the accent is almost the border's own color, so the focus would not show */
@@ -153,12 +159,12 @@
 @utility chevron {
   appearance: none;
   padding-right: 36px;
-  padding-left: 10px;
+  padding-left: 12px;
   background-image:
     linear-gradient(45deg, transparent 50%, var(--text) 50%), linear-gradient(135deg, var(--text) 50%, transparent 50%);
   background-position:
-    calc(100% - 19px) 50%,
-    calc(100% - 13px) 50%;
+    calc(100% - 20px) 50%,
+    calc(100% - 14px) 50%;
   background-size: 6px 6px;
   background-repeat: no-repeat;
 }
@@ -211,9 +217,10 @@
   }
 
   input[type='text'],
+  input[type='search'],
   textarea {
     width: 100%;
-    padding: 10px 12px;
+    padding: 8px 12px;
     background: var(--surface);
   }
 
@@ -264,7 +271,7 @@
   .file,
   .tab {
     position: relative;
-    padding: 9px 14px;
+    padding: 8px 16px;
     background: var(--surface);
     cursor: pointer;
     transition:
@@ -298,7 +305,7 @@
   /* icon-only buttons are ghost: no fill until hover */
   button.icon {
     display: inline-flex;
-    padding: 6px;
+    padding: 8px;
     background: transparent;
   }
 

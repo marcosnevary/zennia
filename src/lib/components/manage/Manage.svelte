@@ -292,7 +292,7 @@
   <div class="mb-2 flex flex-wrap items-center gap-2">
     <input
       type="search"
-      class="field min-w-50 flex-1 appearance-none bg-surface py-2.5"
+      class="field min-w-50 flex-1 appearance-none"
       placeholder="Search by word, reading, romaji or meaning"
       aria-label="Search words"
       bind:value={query}
@@ -308,7 +308,7 @@
     </div>
   </div>
   {#if filterTags.length > 0}
-    <div class="mb-2 flex flex-wrap items-center gap-1.5" role="group" aria-label="Active tag filter">
+    <div class="mb-2 flex flex-wrap items-center gap-2" role="group" aria-label="Active tag filter">
       <span class="text-muted">Tagged:</span>
       {#each filterTags as tag (tag)}
         <TagChip {tag} onremove={() => toggleFilterTag(tag)} />
@@ -316,7 +316,7 @@
     </div>
   {/if}
   <div class="{ROW} mb-2">
-    <label class="flex items-center gap-1.5">
+    <label class="flex items-center gap-2">
       <input type="checkbox" checked={allSelected} onchange={toggleSelectAll} />
       Select all {visibleWords.length} {visibleWords.length === words.length ? 'words' : 'results'}
     </label>
@@ -364,7 +364,7 @@
   {/if}
   <ul>
     {#each current.items as word (word.id)}
-      <li class="flex items-center gap-3 py-2.5">
+      <li class="flex items-center gap-3 py-2">
         <input
           type="checkbox"
           checked={selected.has(word.id)}
