@@ -8,9 +8,9 @@
   const nameClass = $derived(`${BUTTON} pl-2 ${onadd || onremove ? 'pr-1' : 'pr-2'}`)
 </script>
 
-<!-- pastel background from the tag's hue; the text stays dark so it reads in both themes -->
+<!-- pastel background from the tag's hue, dimmer in dark mode; the text stays dark so it reads in both themes -->
 <span
-  class="inline-flex shrink-0 items-center bg-[hsl(var(--hue)_75%_86%)] text-[0.85rem] leading-[1.4] text-[hsl(var(--hue)_45%_22%)]"
+  class="inline-flex shrink-0 items-center bg-[hsl(var(--hue)_75%_86%)] text-[0.85rem] dark:bg-[hsl(var(--hue)_35%_70%)] leading-[1.4] text-[hsl(var(--hue)_45%_22%)]"
   style:--hue={tagHue(tag)}
 >
   {#if onclick}
