@@ -177,10 +177,23 @@
     selected = next
   }
 
-  // the buttons and tag chips inside a card do their own thing, so a click on them must not also select it
+  // the buttons and tag chips inside a card do their own thing, so a click on them must not also select or edit it
+  function onButton(event: MouseEvent): boolean {
+    return !!(event.target as Element).closest('button')
+  }
+
   function onCardClick(event: MouseEvent, id: string) {
-    if ((event.target as Element).closest('button')) return
-    toggleSelected(id)
+    if (!onButton(event)) toggleSelected(id)
+  }
+
+  // the double click's two clicks have already toggled the selection there and back, so it ends as it was
+  function onCardDoubleClick(event: MouseEvent, word: Word) {
+    if (!onButton(event)) edit(word)
+  }
+
+  // a double click would otherwise highlight the word under the pointer
+  function onCardMouseDown(event: MouseEvent) {
+    if (event.detail > 1) event.preventDefault()
   }
 
   function onCardKey(event: KeyboardEvent, id: string) {
@@ -388,6 +401,8 @@
           aria-checked={selected.has(word.id)}
           aria-label={`Select ${word.japanese}`}
           onclick={(event) => onCardClick(event, word.id)}
+          ondblclick={(event) => onCardDoubleClick(event, word)}
+          onmousedown={onCardMouseDown}
           onkeydown={(event) => onCardKey(event, word.id)}
         >
           <span class={["text-lg", word.disabled && DIM]} lang="ja">{word.japanese}</span>
