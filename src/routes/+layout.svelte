@@ -17,8 +17,8 @@
 
   const tabs = [
     { path: '/practice', label: 'Practice' },
-    { path: '/manage/words', label: 'Words' },
-    { path: '/manage/kana', label: 'Kana' },
+    { path: '/words', label: 'Words' },
+    { path: '/kana', label: 'Kana' },
     { path: '/stats', label: 'Stats' },
     { path: '/settings', label: 'Settings' },
   ] as const
