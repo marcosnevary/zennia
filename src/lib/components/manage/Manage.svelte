@@ -312,7 +312,7 @@
   </div>
 </form>
 <div class="mt-2 {WIDE}">
-  <button type="button" class="field font-ui" onclick={() => romajiDialog?.open()}>Add from romaji</button>
+  <button type="button" class="field" onclick={() => romajiDialog?.open()}>Add from romaji</button>
 </div>
 </div>
 <div>
@@ -330,7 +330,7 @@
       oninput={onSearch}
     />
     <div class="flex items-center gap-2">
-      <button class="field font-ui" onclick={() => tagsDialog?.open()}>Tags</button>
+      <button class="field" onclick={() => tagsDialog?.open()}>Tags</button>
       <select
         class="field chevron"
         value={sortKey}
