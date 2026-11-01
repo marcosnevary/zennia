@@ -85,7 +85,7 @@
   </form>
 
   {#if verdict}
-    <div class="mt-6 p-3 text-left {VERDICT_STYLES[verdict]}" role="status">
+    <div class="mt-6 rounded-control p-3 text-left {VERDICT_STYLES[verdict]}" role="status">
       <strong>
         {#if verdict === 'correct'}Correct!
         {:else if verdict === 'almost'}Almost: only the length of a vowel differs.

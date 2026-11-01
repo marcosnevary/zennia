@@ -4,13 +4,13 @@
   // `onclick` makes the chip a button; `onadd` / `onremove` put a + / X button beside it. With none it is plain text.
   let { tag, onclick, onadd, onremove }: { tag: string; onclick?: () => void; onadd?: () => void; onremove?: () => void } = $props()
 
-  const BUTTON = 'bg-transparent font-ui py-0 hover:text-inherit hover:underline'
+  const BUTTON = 'rounded-pill bg-transparent font-ui py-0 hover:text-inherit hover:underline'
   const nameClass = $derived(`${BUTTON} pl-2 ${onadd || onremove ? 'pr-1' : 'pr-2'}`)
 </script>
 
 <!-- pastel background from the tag's hue, dimmer in dark mode; the text stays dark so it reads in both themes -->
 <span
-  class="inline-flex shrink-0 items-center bg-[hsl(var(--hue)_75%_86%)] text-sm dark:bg-[hsl(var(--hue)_35%_70%)] leading-5 text-[hsl(var(--hue)_45%_22%)]"
+  class="inline-flex shrink-0 items-center rounded-pill bg-[hsl(var(--hue)_75%_86%)] text-sm dark:bg-[hsl(var(--hue)_35%_70%)] leading-5 text-[hsl(var(--hue)_45%_22%)]"
   style:--hue={tagHue(tag)}
 >
   {#if onclick}

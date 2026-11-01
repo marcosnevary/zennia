@@ -113,7 +113,7 @@
             {#if row.candidates.length > 1}
               <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
               <!-- an invisible native select covers the chevron, so the list that opens is the native one; it is clipped to the chevron because a select's own width and padding would push the list sideways -->
-              <span class="relative -ml-2 inline-flex shrink-0 overflow-hidden has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-action">
+              <span class="relative -ml-2 inline-flex shrink-0 overflow-hidden rounded-control has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-action">
                 <Icon><path d="M6 9l6 6 6-6" /></Icon>
                 <select class="absolute inset-0 size-full cursor-pointer p-0 opacity-0" lang="ja" bind:value={row.choice} aria-label={`Word for ${row.item.romaji}`}>
                   {#each row.candidates as c, i (i)}
@@ -128,10 +128,10 @@
       {#if found.some(differs) || notFound.length}
         <ul class="grid gap-1 text-sm">
           {#if found.some(differs)}
-            <li class="flex items-baseline gap-2 text-warn"><span class="size-3 shrink-0 bg-warn" aria-hidden="true"></span>Vowel length differs from what you typed: check the reading</li>
+            <li class="flex items-baseline gap-2 text-warn"><span class="size-3 shrink-0 rounded-pill bg-warn" aria-hidden="true"></span>Vowel length differs from what you typed: check the reading</li>
           {/if}
           {#if notFound.length}
-            <li class="flex items-baseline gap-2 text-bad"><span class="size-3 shrink-0 bg-bad" aria-hidden="true"></span>Not found in the dictionary: {notFound.map((r) => r.item.romaji).join(', ')}</li>
+            <li class="flex items-baseline gap-2 text-bad"><span class="size-3 shrink-0 rounded-pill bg-bad" aria-hidden="true"></span>Not found in the dictionary: {notFound.map((r) => r.item.romaji).join(', ')}</li>
           {/if}
         </ul>
       {/if}
