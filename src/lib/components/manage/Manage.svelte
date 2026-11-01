@@ -4,6 +4,7 @@
   import KanaSelector from './KanaSelector.svelte'
   import Pagination from '../Pagination.svelte'
   import RomajiWordsDialog from './RomajiWordsDialog.svelte'
+  import Switch from '../Switch.svelte'
   import TagChip from './TagChip.svelte'
   import TagInput from './TagInput.svelte'
   import TagsDialog from './TagsDialog.svelte'
@@ -398,15 +399,7 @@
           {/if}
           {#each word.tags as tag (tag)}<TagChip {tag} onclick={() => filterByTag(tag)} />{/each}
           <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
-          <button
-            class="icon"
-            onclick={() => toggle(word)}
-            aria-pressed={!word.disabled}
-            aria-label={word.disabled ? 'Enable' : 'Disable'}
-            title={word.disabled ? 'Enable' : 'Disable'}
-          >
-            {#if word.disabled}{@render eyeOffIcon()}{:else}{@render eyeIcon()}{/if}
-          </button>
+          <Switch checked={!word.disabled} onchange={() => toggle(word)} label="Enabled" title={word.disabled ? 'Enable' : 'Disable'} />
           <button class="icon" onclick={() => edit(word)} aria-label="Edit" title="Edit">
             <Icon>
               <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
