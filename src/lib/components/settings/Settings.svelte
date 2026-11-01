@@ -2,7 +2,7 @@
   import { importAnkiDeck } from '../../data/anki'
   import { downloadText, exportFilename, exportJSON, importJSON } from '../../data/io'
   import { emptyStats, attempts, totalTally } from '../../data/stats'
-  import { importSummary, type SanitizeResult } from '../../data/words'
+  import { importBrief, importSummary, type SanitizeResult } from '../../data/words'
   import Help from './Help.svelte'
   import SettingRow from './SettingRow.svelte'
   import type { WordsFocus } from '../../data/practice-modes'
@@ -17,35 +17,57 @@
     { id: 'both', label: 'Both' },
   ]
 
+  const FEEDBACK_MS = 4000
+
   let error = $state('')
-  let message = $state('')
+
+  // the outcome of an action replaces the label of the button that ran it for a moment, like "Copied!";
+  // the button only fits a few words, so the full detail takes the place of the row's description
+  let feedback = $state<{ key: string; text: string; detail?: string } | null>(null)
+  let feedbackTimer: ReturnType<typeof setTimeout> | undefined
+  $effect(() => () => clearTimeout(feedbackTimer))
+
+  function flash(key: string, text: string, detail?: string) {
+    clearTimeout(feedbackTimer)
+    feedback = { key, text, detail }
+    feedbackTimer = setTimeout(() => (feedback = null), FEEDBACK_MS)
+  }
+
+  function labelFor(key: string, label: string): string {
+    return feedback?.key === key ? feedback.text : label
+  }
+
+  function describe(key: string, description: string): string {
+    return (feedback?.key === key && feedback.detail) || description
+  }
 
   function exportWords() {
     downloadText(exportFilename(), exportJSON(app.words))
-    message = `${app.words.length} word(s) exported.`
     error = ''
+    flash('export', `✓ ${app.words.length} exported`)
   }
 
-  async function runImport(event: Event, parse: (text: string) => SanitizeResult) {
+  async function runImport(event: Event, key: string, parse: (text: string) => SanitizeResult) {
     const input = event.currentTarget as HTMLInputElement
     const file = input.files?.[0]
     input.value = ''
     if (!file) return
-    message = ''
     error = ''
     try {
       const { words: incoming, skipped } = parse(await file.text())
-      message = importSummary(app.importWords(incoming), skipped)
+      const result = app.importWords(incoming)
+      flash(key, `✓ ${importBrief(result)}`, importSummary(result, skipped))
     } catch (e) {
       error = e instanceof Error ? e.message : 'Could not import the file.'
+      flash(key, '✗ Import failed')
     }
   }
 
   function resetStats() {
     if (!confirm('Reset all statistics? This cannot be undone.')) return
     app.replaceStats(emptyStats())
-    message = 'Statistics reset.'
     error = ''
+    flash('reset', '✓ Stats reset')
   }
 </script>
 
@@ -97,25 +119,27 @@
 </div>
 <div class="divide-y divide-line/40">
   <SettingRow title="Export words" description="Download all your words as a JSON file, as a backup or to move them elsewhere.">
-    <button onclick={exportWords} disabled={app.words.length === 0}>Export JSON</button>
+    <button onclick={exportWords} disabled={app.words.length === 0}>{labelFor('export', 'Export JSON')}</button>
   </SettingRow>
-  <SettingRow title="Import words" description="Add the words of a file made by Export JSON.">
+  <SettingRow title="Import words" description={describe('json', 'Add the words of a file made by Export JSON.')}>
     <label class="file text-center">
-      Import JSON
-      <input type="file" accept="application/json,.json" onchange={(e) => runImport(e, importJSON)} hidden />
+      {labelFor('json', 'Import JSON')}
+      <input type="file" accept="application/json,.json" onchange={(e) => runImport(e, 'json', importJSON)} hidden />
     </label>
   </SettingRow>
-  <SettingRow title="Import an Anki deck" description="Add the words of Anki notes exported as plain text.">
+  <SettingRow title="Import an Anki deck" description={describe('anki', 'Add the words of Anki notes exported as plain text.')}>
     <label class="file text-center" title="Anki: Export → Notes in Plain Text. Columns: word, hiragana, meaning">
-      Import .txt
-      <input type="file" accept="text/plain,.txt,.tsv" onchange={(e) => runImport(e, importAnkiDeck)} hidden />
+      {labelFor('anki', 'Import .txt')}
+      <input type="file" accept="text/plain,.txt,.tsv" onchange={(e) => runImport(e, 'anki', importAnkiDeck)} hidden />
     </label>
   </SettingRow>
-  {#if attempts(totalTally(app.stats))}
+  <!-- the row outlives the reset until its confirmation on the button is over -->
+  {#if attempts(totalTally(app.stats)) || feedback?.key === 'reset'}
     <SettingRow title="Reset statistics" description="Erase every practice result. This cannot be undone.">
-      <button class="danger" onclick={resetStats}>Reset stats</button>
+      <button class="danger" onclick={resetStats}>{labelFor('reset', 'Reset stats')}</button>
     </SettingRow>
   {/if}
 </div>
 {#if error}<p class="my-4 text-bad" role="alert">{error}</p>{/if}
-{#if message}<p class="my-4 text-muted" role="status">{message}</p>{/if}
+<!-- a label change is not announced, so the outcome is also read from here -->
+<p class="sr-only" role="status">{feedback?.detail ?? feedback?.text ?? ''}</p>

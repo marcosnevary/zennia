@@ -5,6 +5,7 @@ import {
   cleanTags,
   deleteTag,
   filterByTags,
+  importBrief,
   importSummary,
   makeWord,
   matchTags,
@@ -244,6 +245,20 @@ describe('importSummary', () => {
     expect(importSummary({ words: [], added: 0, updated: 0, duplicates: 2 }, 4)).toBe(
       '0 added, 2 already existed. 4 invalid item(s) ignored.',
     )
+  })
+})
+
+describe('importBrief', () => {
+  it('names the words added', () => {
+    expect(importBrief({ words: [], added: 3, updated: 1, duplicates: 5 })).toBe('3 added')
+  })
+
+  it('names the words updated when none was added', () => {
+    expect(importBrief({ words: [], added: 0, updated: 2, duplicates: 5 })).toBe('2 updated')
+  })
+
+  it('says nothing is new when every word already existed', () => {
+    expect(importBrief({ words: [], added: 0, updated: 0, duplicates: 5 })).toBe('Nothing new')
   })
 })
 
