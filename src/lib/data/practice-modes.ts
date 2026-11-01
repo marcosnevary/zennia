@@ -1,6 +1,7 @@
+import { furigana, type FuriganaPart } from '../core/furigana'
 import { acceptedReadings, buildKana, kanaKey, type Kana, type KanaScript } from '../core/kana'
 import { checkMeaning } from '../core/meaning'
-import { checkAnswer } from '../core/romaji'
+import { checkAnswer, toDisplayRomaji } from '../core/romaji'
 import type { Stats, Verdict, Word } from '../core/types'
 import type { PracticeMode } from './practice-session'
 import { drawWeight, recordAnswer, recordKana } from './stats'
@@ -71,6 +72,24 @@ export function wordsMode(
 
 /** An item of a mixed practice: a word or a kana. */
 export type PracticeItem = { kind: 'word'; word: Word } | { kind: 'kana'; kana: Kana }
+
+/** The right answer of an item, shown with the verdict. */
+export interface RightAnswer {
+  /** The word as written, or the kana symbol, with its reading above what is not hiragana */
+  written: FuriganaPart[]
+  romaji: string
+  /** Only for words */
+  meaning?: string
+}
+
+export function rightAnswer(item: PracticeItem): RightAnswer {
+  const [written, hiragana] = item.kind === 'word' ? [item.word.japanese, item.word.hiragana] : [item.kana.symbol, item.kana.hiragana]
+  return {
+    written: furigana(written, hiragana),
+    romaji: toDisplayRomaji(hiragana),
+    meaning: item.kind === 'word' ? item.word.meaning || '(no meaning saved)' : undefined,
+  }
+}
 
 /** Words and kana drawn together; each item is weighted, checked and recorded by its own mode. */
 export function mixedMode(

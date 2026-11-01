@@ -1,10 +1,9 @@
 <script lang="ts">
   import { resolve } from '$app/paths'
   import { defaultKanaSelection } from '../../core/kana'
-  import { toDisplayRomaji } from '../../core/romaji'
   import type { Verdict } from '../../core/types'
   import PracticeCard from './PracticeCard.svelte'
-  import { checkParts, describePool, joinAnswers, mixedMode, type PracticeItem } from '../../data/practice-modes'
+  import { checkParts, describePool, joinAnswers, mixedMode, rightAnswer, type PracticeItem } from '../../data/practice-modes'
   import { drawOdds, nextRound, startSession, submit as submitAnswer } from '../../data/practice-session'
   import { getApp } from '../../state.svelte'
 
@@ -93,10 +92,7 @@
   <PracticeCard
     prompt={current.kind === 'word' ? current.word.japanese : current.kana.symbol}
     verdict={session.verdict}
-    reading={current.kind === 'word'
-      ? `${current.word.hiragana} · ${toDisplayRomaji(current.word.hiragana)}`
-      : `${current.kana.symbol} · ${toDisplayRomaji(current.kana.hiragana)}`}
-    detail={current.kind === 'word' ? current.word.meaning || '(no meaning saved)' : undefined}
+    rightAnswer={rightAnswer(current)}
     {note}
     readingVerdict={parts.reading}
     meaningVerdict={parts.meaning}

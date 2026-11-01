@@ -1,13 +1,9 @@
 <script lang="ts">
   import type { Verdict } from '../../core/types'
+  import type { RightAnswer } from '../../data/practice-modes'
   import Icon from '../Icon.svelte'
+  import ResultPanel from './ResultPanel.svelte'
   import Scoreboard from './Scoreboard.svelte'
-
-  const VERDICT_STYLES: Record<Verdict, string> = {
-    correct: 'bg-ok-bg text-ok',
-    almost: 'bg-warn-bg text-warn',
-    incorrect: 'bg-bad-bg text-bad',
-  }
 
   const VERDICT_TEXT: Record<Verdict, string> = {
     correct: 'text-ok',
@@ -18,8 +14,7 @@
   let {
     prompt,
     verdict,
-    reading,
-    detail,
+    rightAnswer,
     note,
     readingVerdict = null,
     meaningVerdict = null,
@@ -37,10 +32,8 @@
     /** The word or symbol being asked */
     prompt: string
     verdict: Verdict | null
-    /** Shown with the verdict: the right answer */
-    reading: string
-    /** Optional extra line below the reading (the meaning of a word) */
-    detail?: string
+    /** Shown with the verdict */
+    rightAnswer: RightAnswer
     /** Optional outcome of each part of the answer, for screen readers */
     note?: string
     /** Outcome of the romaji field, shown on it once checked */
@@ -72,9 +65,21 @@
   {/if}
 {/snippet}
 
-<!-- the bottom padding plus the 12px margin of the line below gives the same 24px as above the result -->
+<!-- the bottom padding plus the 12px margin of the line below gives the same 24px as above the fields -->
 <section class="mt-6 bg-surface px-4 pt-6 pb-3 text-center">
-  <p class="mb-5 font-serif text-display" lang="ja">{prompt}</p>
+  <!-- the verdict takes the place of the prompt: they share one grid cell and cross-fade -->
+  <div class="mb-5 grid">
+    <p
+      class="col-start-1 row-start-1 self-center text-display motion-safe:transition-opacity motion-safe:duration-200 {verdict
+        ? 'opacity-0'
+        : ''}"
+      lang="ja"
+      aria-hidden={verdict !== null}
+    >
+      {prompt}
+    </p>
+    <ResultPanel {verdict} answer={rightAnswer} {note} />
+  </div>
 
   <form class="flex gap-2" {onsubmit}>
     <div class="flex min-w-0 flex-1 flex-col gap-2">
@@ -121,19 +126,6 @@
     <!-- fixed width, so the button does not resize when its label switches between Check and Next -->
     <button class="action w-24 flex-none" type="submit">{verdict ? 'Next' : 'Check'}</button>
   </form>
-
-  {#if verdict}
-    <div class="mt-6 rounded-control p-3 text-left {VERDICT_STYLES[verdict]}" role="status">
-      <strong>
-        {#if verdict === 'correct'}Correct!
-        {:else if verdict === 'almost'}Almost: only the length of a vowel differs.
-        {:else}Incorrect.{/if}
-      </strong>
-      <p class="mt-1 text-lg" lang="ja">{reading}</p>
-      {#if detail !== undefined}<p class="mt-1">{detail}</p>{/if}
-      {#if note}<p class="sr-only">{note}</p>{/if}
-    </div>
-  {/if}
 
   <Scoreboard {hits} {total} />
 </section>
