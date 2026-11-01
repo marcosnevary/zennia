@@ -10,8 +10,8 @@
   --color-ink: var(--text);
   --color-muted: var(--muted);
   --color-line: var(--border);
-  --color-accent: var(--accent);
-  --color-on-accent: var(--accent-text);
+  --color-action: var(--action);
+  --color-on-action: var(--action-text);
   --color-ok: var(--ok);
   --color-ok-bg: var(--ok-bg);
   --color-warn: var(--warn);
@@ -94,8 +94,6 @@
   --text: #1c1917;
   --muted: #78716c;
   --border: #78716c;
-  --accent: #3f3f46;
-  --accent-text: #ffffff;
   --action: #0062a3;
   --action-text: #ffffff;
   --ok: #15803d;
@@ -123,8 +121,6 @@
   --muted: #a3a3a3;
   /* the dimmest gray that keeps the 3:1 against the page that field borders need */
   --border: #6b6b6b;
-  --accent: #d4d4d8;
-  --accent-text: #1c1917;
   --action: #7ec4f0;
   --action-text: #111111;
   --ok: #86efac;
@@ -158,7 +154,6 @@
     padding-bottom: 6px;
   }
 
-  /* blue rather than the accent: the accent is almost the border's own color, so the focus would not show */
   &:focus-visible {
     outline: none;
     border-color: var(--action);
@@ -242,7 +237,7 @@
   textarea:focus-visible,
   button:focus-visible,
   .tab:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--action);
     outline-offset: 2px;
   }
 
@@ -323,13 +318,8 @@
     background: transparent;
   }
 
-  button.primary,
+  button.action,
   .tab[aria-current='page'] {
-    background: var(--accent);
-    color: var(--accent-text);
-  }
-
-  button.action {
     background: var(--action);
     color: var(--action-text);
   }
@@ -341,8 +331,8 @@
   button:not(:disabled):hover,
   .file:hover,
   .tab:hover {
-    background: var(--accent);
-    color: var(--accent-text);
+    background: var(--action);
+    color: var(--action-text);
   }
 
   select:hover,
@@ -351,14 +341,9 @@
     color: inherit;
   }
 
-  button.primary:not(:disabled):hover,
+  button.action:not(:disabled):hover,
   .tab[aria-current='page']:hover {
-    background: color-mix(in srgb, var(--accent) 80%, var(--text));
-  }
-
-  button.action:not(:disabled):hover {
     background: color-mix(in srgb, var(--action) 80%, var(--text));
-    color: var(--action-text);
   }
 
   button.danger:not(:disabled):hover {
