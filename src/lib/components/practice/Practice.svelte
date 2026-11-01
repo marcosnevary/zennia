@@ -3,7 +3,6 @@
   import { defaultKanaSelection } from '../../core/kana'
   import { toDisplayRomaji } from '../../core/romaji'
   import PracticeCard from './PracticeCard.svelte'
-  import Scoreboard from './Scoreboard.svelte'
   import { checkParts, describePool, joinAnswers, mixedMode, type PracticeItem } from '../../data/practice-modes'
   import { drawOdds, nextRound, startSession, submit as submitAnswer } from '../../data/practice-session'
   import { getApp } from '../../state.svelte'
@@ -94,6 +93,8 @@
       : `${current.kana.symbol} · ${toDisplayRomaji(current.kana.hiragana)}`}
     detail={current.kind === 'word' ? current.word.meaning || '(no meaning saved)' : undefined}
     {note}
+    hits={session.hits}
+    total={session.total}
     {askReading}
     {askMeaning}
     bind:answer
@@ -103,7 +104,6 @@
     onsubmit={submit}
     {onkeydown}
   />
-  <Scoreboard hits={session.hits} total={session.total} streak={session.streak} bestStreak={session.bestStreak} />
-  <!-- same 16px inset as the score above -->
+  <!-- same 16px inset as the card's padding -->
   <p class="mx-4 mt-3 text-center text-sm text-muted">Practicing {describePool(mode.pool)}</p>
 {/if}

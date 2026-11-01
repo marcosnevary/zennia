@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Verdict } from '../../core/types'
+  import Scoreboard from './Scoreboard.svelte'
 
   const VERDICT_STYLES: Record<Verdict, string> = {
     correct: 'bg-ok-bg text-ok',
@@ -13,6 +14,8 @@
     reading,
     detail,
     note,
+    hits,
+    total,
     askReading = true,
     askMeaning = false,
     answer = $bindable(),
@@ -31,6 +34,9 @@
     detail?: string
     /** Optional line with the outcome of each part of the answer, shown with the verdict */
     note?: string
+    /** Session score, shown below the fields */
+    hits: number
+    total: number
     /** Whether the romaji field is shown */
     askReading?: boolean
     /** Whether the meaning field is shown */
@@ -44,7 +50,7 @@
   } = $props()
 </script>
 
-<!-- the bottom padding plus the scoreboard's 12px margin gives the same 24px as above the result -->
+<!-- the bottom padding plus the 12px margin of the line below gives the same 24px as above the result -->
 <section class="mt-6 bg-surface px-4 pt-6 pb-3 text-center">
   <p class="mb-5 font-serif text-display" lang="ja">{prompt}</p>
 
@@ -96,4 +102,6 @@
       {#if note}<p class="mt-1">{note}</p>{/if}
     </div>
   {/if}
+
+  <Scoreboard {hits} {total} />
 </section>
