@@ -24,8 +24,13 @@
   const stats = $derived(app.stats)
 
   let query = $state('')
-  let sort = $state<StatsSort>('accuracy')
-  let direction = $state<StatsSortDirection>('desc')
+  const sort = $derived(app.settings.statsSort)
+  const direction = $derived(app.settings.statsSortDirection)
+
+  function setSort(next: StatsSort, nextDirection: StatsSortDirection) {
+    app.setStatsSort(next, nextDirection)
+    pageNumber = 1
+  }
 
   const rows = $derived(buildRows(stats, words))
   const visibleRows = $derived(filterRows(rows, { query, sort, direction }))
@@ -60,17 +65,19 @@
       oninput={() => (pageNumber = 1)}
     />
     <div class="flex items-center gap-2">
-      <select class="field chevron" bind:value={sort} onchange={() => (pageNumber = 1)} aria-label="Sort by">
+      <select
+        class="field chevron"
+        value={sort}
+        onchange={(e) => setSort(e.currentTarget.value as StatsSort, direction)}
+        aria-label="Sort by"
+      >
         {#each STATS_SORT_OPTIONS as option (option.key)}
           <option value={option.key}>{option.label}</option>
         {/each}
       </select>
       <button
         class="icon"
-        onclick={() => {
-          direction = direction === 'asc' ? 'desc' : 'asc'
-          pageNumber = 1
-        }}
+        onclick={() => setSort(sort, direction === 'asc' ? 'desc' : 'asc')}
         aria-label={direction === 'asc' ? 'Ascending' : 'Descending'}
         title={direction === 'asc' ? 'Ascending (click to reverse)' : 'Descending (click to reverse)'}
       >

@@ -1,6 +1,8 @@
 import type { KanaScript } from '../../core/kana'
 import type { Stats, Tally, Word } from '../../core/types'
 import { DEFAULT_SETTINGS, type Settings } from '../settings'
+import { STATS_SORT_OPTIONS } from '../stats'
+import { SORT_OPTIONS } from '../words'
 
 export interface WordRow {
   id: string
@@ -26,7 +28,17 @@ export interface SettingsRow {
   theme: string
   words_focus: string
   kana_selection: string[] | null
+  words_sort: string
+  words_sort_direction: string
+  stats_sort: string
+  stats_sort_direction: string
 }
+
+function oneOf<T extends string>(value: string, allowed: readonly T[], fallback: T): T {
+  return (allowed as readonly string[]).includes(value) ? (value as T) : fallback
+}
+
+const DIRECTIONS = ['asc', 'desc'] as const
 
 export function wordFromRow(row: WordRow): Word {
   const word: Word = {
@@ -79,6 +91,10 @@ export function settingsFromRow(row: SettingsRow | null): Settings {
     theme: row.theme === 'light' || row.theme === 'dark' ? row.theme : 'system',
     wordsFocus: row.words_focus === 'meaning' || row.words_focus === 'both' ? row.words_focus : 'reading',
     kanaSelection: row.kana_selection,
+    wordsSort: oneOf(row.words_sort, SORT_OPTIONS.map((o) => o.key), DEFAULT_SETTINGS.wordsSort),
+    wordsSortDirection: oneOf(row.words_sort_direction, DIRECTIONS, DEFAULT_SETTINGS.wordsSortDirection),
+    statsSort: oneOf(row.stats_sort, STATS_SORT_OPTIONS.map((o) => o.key), DEFAULT_SETTINGS.statsSort),
+    statsSortDirection: oneOf(row.stats_sort_direction, DIRECTIONS, DEFAULT_SETTINGS.statsSortDirection),
   }
 }
 
@@ -87,5 +103,9 @@ export function settingsToRow(patch: Partial<Settings>): Partial<SettingsRow> {
   if (patch.theme !== undefined) row.theme = patch.theme
   if (patch.wordsFocus !== undefined) row.words_focus = patch.wordsFocus
   if (patch.kanaSelection !== undefined) row.kana_selection = patch.kanaSelection
+  if (patch.wordsSort !== undefined) row.words_sort = patch.wordsSort
+  if (patch.wordsSortDirection !== undefined) row.words_sort_direction = patch.wordsSortDirection
+  if (patch.statsSort !== undefined) row.stats_sort = patch.statsSort
+  if (patch.statsSortDirection !== undefined) row.stats_sort_direction = patch.statsSortDirection
   return row
 }

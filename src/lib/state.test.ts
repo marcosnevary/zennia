@@ -118,9 +118,23 @@ describe('App', () => {
     const { app, calls } = await ready()
     app.setWordsFocus('both')
     app.setKanaSelection(['hiragana:あ'])
+    app.setWordsSort('reading', 'desc')
+    app.setStatsSort('misses', 'asc')
     await app.flush()
-    expect(app.settings).toMatchObject({ wordsFocus: 'both', kanaSelection: ['hiragana:あ'] })
-    expect(calls).toEqual(['settings {"wordsFocus":"both"}', 'settings {"kanaSelection":["hiragana:あ"]}'])
+    expect(app.settings).toMatchObject({
+      wordsFocus: 'both',
+      kanaSelection: ['hiragana:あ'],
+      wordsSort: 'reading',
+      wordsSortDirection: 'desc',
+      statsSort: 'misses',
+      statsSortDirection: 'asc',
+    })
+    expect(calls).toEqual([
+      'settings {"wordsFocus":"both"}',
+      'settings {"kanaSelection":["hiragana:あ"]}',
+      'settings {"wordsSort":"reading","wordsSortDirection":"desc"}',
+      'settings {"statsSort":"misses","statsSortDirection":"asc"}',
+    ])
   })
 
   it('reads the data back when a write fails', async () => {
@@ -157,7 +171,7 @@ describe('legacy localStorage import', () => {
   it('uploads the old data once and removes it', async () => {
     saveLegacy()
     const { app, calls } = await ready()
-    expect(calls).toEqual(['upsert a,b', 'stats a|', 'settings ' + JSON.stringify({ theme: 'system', wordsFocus: 'both', kanaSelection: null })])
+    expect(calls).toEqual(['upsert a,b', 'stats a|', 'settings ' + JSON.stringify({ ...DEFAULT_SETTINGS, wordsFocus: 'both' })])
     expect(store.has('zennia:words')).toBe(false)
     expect(store.has('zennia:stats')).toBe(false)
     expect(app.status).toBe('ready')

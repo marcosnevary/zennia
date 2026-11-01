@@ -98,8 +98,8 @@
   // selection (ids that no longer exist are ignored)
   let selected = $state<Set<string>>(new Set())
   let query = $state('')
-  let sortKey = $state<SortKey>('japanese')
-  let sortDirection = $state<SortDirection>('asc')
+  const sortKey = $derived(app.settings.wordsSort)
+  const sortDirection = $derived(app.settings.wordsSortDirection)
   // the tag filter: only tags still in use count, so deleting the last word with a tag drops it from the filter
   const tags = $derived(allTags(words))
   let activeTags = $state<string[]>([])
@@ -107,6 +107,12 @@
   const visibleWords = $derived(sortWords(searchWords(filterByTags(words, filterTags), query), sortKey, sortDirection))
   let pageNumber = $state(1)
   const current = $derived(paginate(visibleWords, pageNumber))
+
+  function setSort(key: SortKey, direction: SortDirection) {
+    app.setWordsSort(key, direction)
+    pageNumber = 1
+  }
+
   const selectedWords = $derived(words.filter((w) => selected.has(w.id)))
   const allSelected = $derived(visibleWords.length > 0 && visibleWords.every((w) => selected.has(w.id)))
 
@@ -324,7 +330,12 @@
     />
     <div class="flex items-center gap-2">
       <button class="field font-ui" onclick={() => tagsDialog?.open()}>Tags</button>
-      <select class="field chevron" bind:value={sortKey} onchange={() => (pageNumber = 1)} aria-label="Sort by">
+      <select
+        class="field chevron"
+        value={sortKey}
+        onchange={(e) => setSort(e.currentTarget.value as SortKey, sortDirection)}
+        aria-label="Sort by"
+      >
         {#each SORT_OPTIONS as option (option.key)}
           <option value={option.key}>{option.label}</option>
         {/each}
@@ -367,10 +378,7 @@
     </div>
     <button
       class="icon"
-      onclick={() => {
-        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'
-        pageNumber = 1
-      }}
+      onclick={() => setSort(sortKey, sortDirection === 'asc' ? 'desc' : 'asc')}
       aria-label={sortDirection === 'asc' ? 'Ascending' : 'Descending'}
       title={sortDirection === 'asc' ? 'Ascending (click to reverse)' : 'Descending (click to reverse)'}
     >
