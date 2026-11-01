@@ -196,10 +196,13 @@
     if (event.detail > 1) event.preventDefault()
   }
 
-  function onCardKey(event: KeyboardEvent, id: string) {
-    if (event.target !== event.currentTarget || (event.key !== ' ' && event.key !== 'Enter')) return
+  // Enter stands in for the double click, the only other way to edit a word
+  function onCardKey(event: KeyboardEvent, word: Word) {
+    if (event.target !== event.currentTarget) return
+    if (event.key === ' ') toggleSelected(word.id)
+    else if (event.key === 'Enter') edit(word)
+    else return
     event.preventDefault()
-    toggleSelected(id)
   }
 
   function toggleSelectAll() {
@@ -403,7 +406,7 @@
           onclick={(event) => onCardClick(event, word.id)}
           ondblclick={(event) => onCardDoubleClick(event, word)}
           onmousedown={onCardMouseDown}
-          onkeydown={(event) => onCardKey(event, word.id)}
+          onkeydown={(event) => onCardKey(event, word)}
         >
           <span class={["text-lg", word.disabled && DIM]} lang="ja">{word.japanese}</span>
           <span class={["text-sm text-muted", word.disabled && DIM]} lang="ja">{word.hiragana} · {toDisplayRomaji(word.hiragana)}</span>
@@ -415,11 +418,6 @@
           {#each word.tags as tag (tag)}<TagChip {tag} onclick={() => filterByTag(tag)} />{/each}
           <span class="min-w-4 flex-1" aria-hidden="true"></span>
           <Switch checked={!word.disabled} onchange={() => toggle(word)} label="Enabled" title={word.disabled ? 'Enable' : 'Disable'} />
-          <button class="icon" onclick={() => edit(word)} aria-label="Edit" title="Edit">
-            <Icon>
-              <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
-            </Icon>
-          </button>
           <button class="danger icon" onclick={() => remove(word)} aria-label="Delete" title="Delete">
             {@render trashIcon()}
           </button>
