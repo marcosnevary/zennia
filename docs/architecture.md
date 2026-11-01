@@ -9,7 +9,7 @@ SvelteKit static SPA (see [ADR 1](adr/0001-sveltekit.md)). There is no server of
 - `src/lib/data/`: data model, sanitizing, import/export and the dictionary lookup (`dictionary.ts`).
 - `src/lib/data/db/`: database access: the Supabase client (`client.ts`), the `Repo` that reads and writes the rows (`repo.ts`, `rows.ts`) and the one-time import of the old `localStorage` data (`legacy.ts`).
 - `supabase/migrations/`: the database schema.
-- `src/lib/components/`: Svelte components, grouped by feature.
+- `src/lib/components/`: Svelte components, grouped by feature. Icons come from `@lucide/svelte` ([ADR 7](adr/0007-lucide-icons.md)).
 - `src/lib/state.svelte.ts`: `App`, the shared data and the actions that change it. The layout creates it and components get it with `getApp()`.
 - `src/app.css`: Tailwind setup, theme variables and the shared button, field, checkbox and dialog styles ([ADR 2](adr/0002-tailwind.md)).
 - `static/`: fonts, favicons, `strokes.json` (KanjiVG, built by `scripts/build-strokes.mjs`) and `dictionary.json` (the JMdict common words used by "Add from romaji", built by `scripts/build-dictionary.mjs` from the `jmdict-eng-common` release of [jmdict-simplified](https://github.com/scriptin/jmdict-simplified)). Both are committed and fetched only when needed.

@@ -9,7 +9,7 @@
     <h3 class="m-0 text-base font-bold">{title}</h3>
     <p class="mt-1 mb-0 text-muted">{description}</p>
   </div>
-  <div class="w-full *:block *:w-full sm:w-52">
+  <div class="flex w-full flex-col sm:w-52">
     {@render children()}
   </div>
 </div>

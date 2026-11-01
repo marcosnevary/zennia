@@ -414,6 +414,25 @@
   }
 
   /* one rule for every variant: darkening works whatever the background */
+  /* an icon sits before its label, and centered in a button wider than both */
+  button:has(> svg),
+  .file:has(> svg),
+  .tab:has(> svg) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  /* 20px beside a label, where 24px outweighs the text; icon-only buttons keep the full 24px */
+  button:not(.icon) > svg,
+  .file > svg,
+  .tab > svg {
+    flex: none;
+    width: 20px;
+    height: 20px;
+  }
+
   button:not(:disabled):active,
   .file:active,
   .tab:active {
@@ -423,6 +442,341 @@
   button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+}
+
+/* each icon plays a short move of its own that hints at its action, once, when its control is hovered or focused;
+   the selectors for parts of an icon (path:nth-child) follow the order of the paths in Lucide's markup */
+@media (prefers-reduced-motion: no-preference) {
+  :is(button:not(:disabled), .file, .tab):is(:hover, :focus-visible) > svg {
+    --icon-motion: 300ms ease-in-out;
+
+    /* parts that scale or turn on themselves, not around the icon's center */
+    & > * {
+      transform-box: fill-box;
+    }
+
+    /* tabs */
+    /* the pencil without its line, tilting on its tip as it slides along */
+    &.lucide-pencil-line > path:nth-child(n + 2) {
+      transform-box: view-box;
+      transform-origin: 3px 21px;
+      animation: icon-write var(--icon-motion);
+    }
+
+    &.lucide-book-open {
+      animation: icon-open var(--icon-motion);
+    }
+
+    &.lucide-languages {
+      & > path:nth-child(-n + 4) {
+        animation: icon-nudge var(--icon-motion);
+        --dy: -2px;
+      }
+
+      & > path:nth-child(n + 5) {
+        animation: icon-nudge var(--icon-motion);
+        --dy: 2px;
+      }
+    }
+
+    &.lucide-chart-column > path:nth-child(n + 2) {
+      transform-origin: bottom;
+      animation: icon-grow-up var(--icon-motion) backwards;
+    }
+
+    &.lucide-chart-column > path:nth-child(3) {
+      animation-delay: 60ms;
+    }
+
+    &.lucide-chart-column > path:nth-child(4) {
+      animation-delay: 120ms;
+    }
+
+    /* half a turn, which any gear lands on unchanged */
+    &.lucide-settings {
+      animation: icon-turn var(--icon-motion);
+      --turn: 180deg;
+    }
+
+    /* words and tags */
+    &.lucide-plus {
+      animation: icon-spin-pop var(--icon-motion);
+    }
+
+    &.lucide-list-plus > path:nth-child(-n + 3) {
+      transform-origin: left;
+      animation: icon-grow-right var(--icon-motion) backwards;
+    }
+
+    &.lucide-list-plus > path:nth-child(2) {
+      animation-delay: 60ms;
+    }
+
+    &.lucide-list-plus > path:nth-child(3) {
+      animation-delay: 120ms;
+    }
+
+    &.lucide-tag {
+      transform-origin: 15% 15%;
+      animation: icon-swing var(--icon-motion);
+    }
+
+    &.lucide-tags {
+      transform-origin: 15% 15%;
+      animation: icon-wiggle var(--icon-motion);
+    }
+
+    &.lucide-pencil {
+      transform-origin: 15% 85%;
+      animation: icon-wiggle var(--icon-motion);
+    }
+
+    &.lucide-printer > rect {
+      animation: icon-nudge var(--icon-motion);
+      --dy: 3px;
+    }
+
+    &.lucide-eye {
+      animation: icon-blink var(--icon-motion);
+    }
+
+    &.lucide-eye-off > path:nth-child(4) {
+      stroke-dasharray: 29;
+      animation: icon-draw var(--icon-motion);
+      --length: 29;
+    }
+
+    /* the lid and its handle, hinged on the lid's left end */
+    &.lucide-trash > path:is(:nth-child(4), :nth-child(5)) {
+      transform-box: view-box;
+      transform-origin: 3px 6px;
+      animation: icon-lid var(--icon-motion);
+    }
+
+    &.lucide-search {
+      animation: icon-look var(--icon-motion);
+    }
+
+    /* the order flips, so the arrow does too */
+    &:is(.lucide-arrow-up, .lucide-arrow-down) {
+      animation: icon-flip var(--icon-motion);
+    }
+
+    /* practice; the check is drawn from its short arm, the way it is written */
+    &.lucide-check > path {
+      stroke-dasharray: 24;
+      animation: icon-draw var(--icon-motion);
+      --length: -24;
+    }
+
+    &.lucide-arrow-right {
+      animation: icon-launch var(--icon-motion);
+    }
+
+    /* pages: one chevron nudges, two spread apart */
+    &.lucide-chevron-right {
+      animation: icon-nudge var(--icon-motion);
+      --dx: 3px;
+    }
+
+    &.lucide-chevron-left {
+      animation: icon-nudge var(--icon-motion);
+      --dx: -3px;
+    }
+
+    &.lucide-chevrons-right > path:nth-child(2) {
+      animation: icon-nudge var(--icon-motion);
+      --dx: 3px;
+    }
+
+    &.lucide-chevrons-left > path:nth-child(1) {
+      animation: icon-nudge var(--icon-motion);
+      --dx: -3px;
+    }
+
+    /* settings and errors */
+    &.lucide-log-in > path:nth-child(-n + 2) {
+      animation: icon-enter var(--icon-motion);
+    }
+
+    &.lucide-log-out > path:nth-child(-n + 2) {
+      animation: icon-leave var(--icon-motion);
+    }
+
+    &.lucide-download > path:is(:nth-child(1), :nth-child(3)) {
+      animation: icon-drop var(--icon-motion);
+    }
+
+    &.lucide-upload {
+      & > path:nth-child(-n + 2) {
+        animation: icon-nudge var(--icon-motion);
+        --dy: -3px;
+      }
+
+      & > path:nth-child(3) {
+        animation: icon-nudge var(--icon-motion);
+        --dy: 2px;
+      }
+    }
+
+    &.lucide-rotate-cw {
+      animation: icon-turn var(--icon-motion);
+      --turn: 360deg;
+    }
+
+    /* winds forward before turning back, like a rewind */
+    &.lucide-rotate-ccw {
+      animation: icon-rewind var(--icon-motion);
+    }
+  }
+}
+
+@keyframes icon-nudge {
+  50% {
+    translate: var(--dx, 0) var(--dy, 0);
+  }
+}
+
+@keyframes icon-draw {
+  from {
+    stroke-dashoffset: var(--length);
+  }
+}
+
+@keyframes icon-write {
+  50% {
+    translate: 3px 0;
+    rotate: -6deg;
+  }
+}
+
+@keyframes icon-open {
+  40% {
+    scale: 0.6 1;
+  }
+}
+
+@keyframes icon-grow-up {
+  from {
+    scale: 1 0;
+  }
+}
+
+@keyframes icon-grow-right {
+  from {
+    scale: 0 1;
+  }
+}
+
+@keyframes icon-turn {
+  to {
+    rotate: var(--turn);
+  }
+}
+
+@keyframes icon-spin-pop {
+  50% {
+    scale: 1.2;
+  }
+  to {
+    rotate: 90deg;
+  }
+}
+
+@keyframes icon-rewind {
+  25% {
+    rotate: 30deg;
+  }
+  to {
+    rotate: -360deg;
+  }
+}
+
+@keyframes icon-swing {
+  25% {
+    rotate: 14deg;
+  }
+  55% {
+    rotate: -9deg;
+  }
+  80% {
+    rotate: 4deg;
+  }
+}
+
+@keyframes icon-wiggle {
+  25% {
+    rotate: -12deg;
+  }
+  75% {
+    rotate: 8deg;
+  }
+}
+
+@keyframes icon-blink {
+  50% {
+    scale: 1 0.1;
+  }
+}
+
+@keyframes icon-lid {
+  50% {
+    translate: 0 -2px;
+    rotate: -12deg;
+  }
+}
+
+@keyframes icon-look {
+  25% {
+    translate: 2px 0;
+  }
+  50% {
+    translate: 0 2px;
+  }
+  75% {
+    translate: -2px 0;
+  }
+}
+
+@keyframes icon-flip {
+  to {
+    rotate: x 360deg;
+  }
+}
+
+@keyframes icon-launch {
+  30% {
+    translate: -2px 0;
+  }
+  70% {
+    translate: 4px 0;
+  }
+}
+
+@keyframes icon-enter {
+  from {
+    translate: -6px 0;
+    opacity: 0;
+  }
+}
+
+@keyframes icon-leave {
+  50% {
+    translate: 6px 0;
+    opacity: 0;
+  }
+  51% {
+    translate: -6px 0;
+  }
+}
+
+@keyframes icon-drop {
+  40% {
+    translate: 0 4px;
+  }
+  70% {
+    translate: 0 -1px;
   }
 }
 

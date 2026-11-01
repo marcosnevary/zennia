@@ -1,4 +1,6 @@
 <script lang="ts">
+  import ArrowDown from '@lucide/svelte/icons/arrow-down'
+  import ArrowUp from '@lucide/svelte/icons/arrow-up'
   import {
     STATS_SORT_OPTIONS,
     accuracy,
@@ -13,7 +15,6 @@
   import { buildRows, filterRows } from '../../data/stats-rows'
   import type { Tally } from '../../core/types'
   import { getApp } from '../../state.svelte'
-  import Icon from '../Icon.svelte'
   import Pagination from '../Pagination.svelte'
   import StatTile from '../StatTile.svelte'
 
@@ -81,13 +82,7 @@
         aria-label={direction === 'asc' ? 'Ascending' : 'Descending'}
         title={direction === 'asc' ? 'Ascending (click to reverse)' : 'Descending (click to reverse)'}
       >
-        <Icon>
-          {#if direction === 'asc'}
-            <path d="M12 19V5M5 12l7-7 7 7" />
-          {:else}
-            <path d="M12 5v14M5 12l7 7 7-7" />
-          {/if}
-        </Icon>
+        {#if direction === 'asc'}<ArrowUp />{:else}<ArrowDown />{/if}
       </button>
     </div>
   </div>

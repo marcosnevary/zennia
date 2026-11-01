@@ -1,5 +1,7 @@
 <script lang="ts">
-  import Icon from '../Icon.svelte'
+  import ChevronDown from '@lucide/svelte/icons/chevron-down'
+  import Plus from '@lucide/svelte/icons/plus'
+  import Search from '@lucide/svelte/icons/search'
   import TagChip from './TagChip.svelte'
   import TagInput from './TagInput.svelte'
   import { closeOnBackdrop } from './dialog'
@@ -91,7 +93,7 @@
         {#if error}<p class="text-bad" role="alert">{error}</p>{/if}
         {#if message}<p role="status">{message}</p>{/if}
         <div class="dialog-actions">
-          <button class="action" type="submit" disabled={loading || parseRomajiList(text).length === 0}>{loading ? 'Looking up…' : 'Look up'}</button>
+          <button class="action" type="submit" disabled={loading || parseRomajiList(text).length === 0}><Search />{loading ? 'Looking up…' : 'Look up'}</button>
           <button type="button" onclick={() => dialogEl?.close()}>Close</button>
         </div>
       </form>
@@ -114,7 +116,7 @@
               <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
               <!-- an invisible native select covers the chevron, so the list that opens is the native one; it is clipped to the chevron because a select's own width and padding would push the list sideways -->
               <span class="relative -ml-2 inline-flex shrink-0 overflow-hidden rounded-control has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-action">
-                <Icon><path d="M6 9l6 6 6-6" /></Icon>
+                <ChevronDown />
                 <select class="absolute inset-0 size-full cursor-pointer p-0 opacity-0" lang="ja" bind:value={row.choice} aria-label={`Word for ${row.item.romaji}`}>
                   {#each row.candidates as c, i (i)}
                     <option value={i}>{c.japanese} · {c.hiragana} · {c.meaning}</option>
@@ -137,7 +139,7 @@
       {/if}
       <p class="text-sm text-muted">Dictionary data: JMdict (EDRDG), CC BY-SA 4.0.</p>
       <div class="dialog-actions">
-        <button class="action" type="button" onclick={add} disabled={chosen.length === 0}>Add {chosen.length} word(s)</button>
+        <button class="action" type="button" onclick={add} disabled={chosen.length === 0}><Plus />Add {chosen.length} word(s)</button>
         <button type="button" onclick={() => (rows = [])}>Back</button>
       </div>
     {/if}

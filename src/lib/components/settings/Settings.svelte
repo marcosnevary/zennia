@@ -1,4 +1,9 @@
 <script lang="ts">
+  import Download from '@lucide/svelte/icons/download'
+  import LogIn from '@lucide/svelte/icons/log-in'
+  import LogOut from '@lucide/svelte/icons/log-out'
+  import RotateCcw from '@lucide/svelte/icons/rotate-ccw'
+  import Upload from '@lucide/svelte/icons/upload'
   import { importAnkiDeck } from '../../data/anki'
   import { downloadText, exportFilename, exportJSON, importJSON } from '../../data/io'
   import { emptyStats, attempts, totalTally } from '../../data/stats'
@@ -75,11 +80,11 @@
 <div class="mt-3 divide-y divide-line/40">
   {#if app.account.anonymous}
     <SettingRow title="Account" description="Your data lives in this browser only. Sign in to keep it and use it on other devices.">
-      <button class="action" onclick={() => app.signIn()}>Sign in with Google</button>
+      <button class="action" onclick={() => app.signIn()}><LogIn />Sign in with Google</button>
     </SettingRow>
   {:else}
     <SettingRow title="Account" description={`Signed in as ${app.account.email}.`}>
-      <button onclick={() => confirm('Sign out? This browser will start empty until you sign in again.') && app.signOut()}>Sign out</button>
+      <button onclick={() => confirm('Sign out? This browser will start empty until you sign in again.') && app.signOut()}><LogOut />Sign out</button>
     </SettingRow>
   {/if}
 
@@ -119,24 +124,24 @@
 </div>
 <div class="divide-y divide-line/40">
   <SettingRow title="Export words" description="Download all your words as a JSON file, as a backup or to move them elsewhere.">
-    <button onclick={exportWords} disabled={app.words.length === 0}>{labelFor('export', 'Export JSON')}</button>
+    <button onclick={exportWords} disabled={app.words.length === 0}><Download />{labelFor('export', 'Export JSON')}</button>
   </SettingRow>
   <SettingRow title="Import words" description={describe('json', 'Add the words of a file made by Export JSON.')}>
-    <label class="file text-center">
-      {labelFor('json', 'Import JSON')}
+    <label class="file">
+      <Upload />{labelFor('json', 'Import JSON')}
       <input type="file" accept="application/json,.json" onchange={(e) => runImport(e, 'json', importJSON)} hidden />
     </label>
   </SettingRow>
   <SettingRow title="Import an Anki deck" description={describe('anki', 'Add the words of Anki notes exported as plain text.')}>
     <label class="file text-center" title="Anki: Export → Notes in Plain Text. Columns: word, hiragana, meaning">
-      {labelFor('anki', 'Import .txt')}
+      <Upload />{labelFor('anki', 'Import .txt')}
       <input type="file" accept="text/plain,.txt,.tsv" onchange={(e) => runImport(e, 'anki', importAnkiDeck)} hidden />
     </label>
   </SettingRow>
   <!-- the row outlives the reset until its confirmation on the button is over -->
   {#if attempts(totalTally(app.stats)) || feedback?.key === 'reset'}
     <SettingRow title="Reset statistics" description="Erase every practice result. This cannot be undone.">
-      <button class="danger" onclick={resetStats}>{labelFor('reset', 'Reset stats')}</button>
+      <button class="danger" onclick={resetStats}><RotateCcw />{labelFor('reset', 'Reset stats')}</button>
     </SettingRow>
   {/if}
 </div>

@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",
+    "@lucide/svelte": "^1.66.0",
     "@supabase/supabase-js": "^2.118.0",
     "wanakana": "^5.3.1"
   },
