@@ -22,9 +22,10 @@
   --color-on-bg: var(--on-bg);
   --color-off: var(--off);
   --color-off-bg: var(--off-bg);
-  /* the fill of secondary buttons, fields and checkboxes, a little darker on hover */
+  /* the fill of secondary buttons, fields and checkboxes, a little darker on hover; pressed only for the word cards */
   --color-tint: color-mix(in srgb, var(--surface) 92%, var(--text));
   --color-tint-hover: color-mix(in srgb, var(--surface) 90%, var(--text));
+  --color-tint-pressed: color-mix(in srgb, var(--surface) 84%, var(--text));
 }
 
 @theme {
