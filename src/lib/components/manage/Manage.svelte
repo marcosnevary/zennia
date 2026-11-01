@@ -105,6 +105,7 @@
   let activeTags = $state<string[]>([])
   const filterTags = $derived(activeTags.filter((a) => tags.some((t) => sameTag(t, a))))
   const visibleWords = $derived(sortWords(searchWords(filterByTags(words, filterTags), query), sortKey, sortDirection))
+  const activeWordCount = $derived(visibleWords.filter((w) => !w.disabled).length)
   let pageNumber = $state(1)
   const current = $derived(paginate(visibleWords, pageNumber))
 
@@ -315,7 +316,7 @@
 </div>
 </div>
 <div>
-<h2 class="section-title">Words ({visibleWords.length === words.length ? words.length : `${visibleWords.length} of ${words.length}`})</h2>
+<h2 class="section-title">Words ({visibleWords.length === words.length ? words.length : `${visibleWords.length} of ${words.length}`}{words.length > 0 ? ` · ${activeWordCount} active` : ''})</h2>
 {#if words.length === 0}
   <p class="my-4 text-muted">No words yet.</p>
 {:else}
