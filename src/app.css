@@ -98,7 +98,8 @@
   --surface: #ffffff;
   --text: #1c1917;
   --muted: #78716c;
-  --border: #78716c;
+  /* the lightest gray that keeps the 3:1 against the page that borders need */
+  --border: #9a938e;
   --action: #0062a3;
   --action-text: #ffffff;
   --ok: #15803d;
@@ -124,7 +125,7 @@
   --surface: #111111;
   --text: #f2f2f2;
   --muted: #a3a3a3;
-  /* the dimmest gray that keeps the 3:1 against the page that field borders need */
+  /* the dimmest gray that keeps the 3:1 against the page that borders need */
   --border: #6b6b6b;
   --action: #7ec4f0;
   --action-text: #111111;
