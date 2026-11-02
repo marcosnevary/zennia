@@ -156,54 +156,55 @@
       </div>
       {#if visibleTags.length === 0}
         <p class="my-4 text-muted">No tags match your search.</p>
-      {/if}
-      <!-- reaches up behind the 40px select-all row and the 8px gap below it -->
-      <ul class="scroll-list-10 [--scroll-list-cap:50dvh] [--scroll-list-under:48px]" bind:this={listEl}>
-        {#each visibleTags as tag (tag)}
-          {@const count = filterByTags(words, [tag]).length}
-          <li>
-            <div
-              class={[
-                'flex min-h-10 cursor-pointer items-center gap-3 rounded-control px-3 py-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action motion-reduce:transition-none',
-                isSelected(tag)
-                  ? 'bg-action/10 hover:bg-action/15 active:not-has-[:is(button,input):active]:bg-action/20'
-                  : 'hover:bg-tint active:not-has-[:is(button,input):active]:bg-tint-pressed',
-              ]}
-              role="checkbox"
-              tabindex="0"
-              aria-checked={isSelected(tag)}
-              aria-label={`Select ${tag}`}
-              onclick={(event) => onRowClick(event, tag)}
-              onkeydown={(event) => onRowKey(event, tag)}
-            >
-              {#if renaming !== null && sameTag(renaming, tag)}
-                <!-- the hidden copy of the text sizes the chip as the name is typed, as a field cannot fit its content -->
-                <span class="{CHIP} focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-action" style:--hue={tagHue(tag)}>
-                  <!-- out of the flow, so the field's default width (about 20 characters) does not widen the chip -->
-                  <span class="relative min-w-1">
-                    <span class="invisible whitespace-pre">{renameDraft}</span>
-                    <input
-                      type="text"
-                      class="absolute inset-0 w-full cursor-text bg-transparent p-0 outline-none"
-                      aria-label={`New name for ${tag}`}
-                      aria-invalid={!!renameError}
-                      bind:value={renameDraft}
-                      oninput={() => (renameError = '')}
-                      onkeydown={onRenameKey}
-                      onblur={saveRename}
-                      {@attach focusAndSelect}
-                    />
+      {:else}
+        <!-- reaches up behind the 40px select-all row and the 8px gap below it -->
+        <ul class="scroll-list-10 [--scroll-list-cap:50dvh] [--scroll-list-under:48px]" bind:this={listEl}>
+          {#each visibleTags as tag (tag)}
+            {@const count = filterByTags(words, [tag]).length}
+            <li>
+              <div
+                class={[
+                  'flex min-h-10 cursor-pointer items-center gap-3 rounded-control px-3 py-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action motion-reduce:transition-none',
+                  isSelected(tag)
+                    ? 'bg-action/10 hover:bg-action/15 active:not-has-[:is(button,input):active]:bg-action/20'
+                    : 'hover:bg-tint active:not-has-[:is(button,input):active]:bg-tint-pressed',
+                ]}
+                role="checkbox"
+                tabindex="0"
+                aria-checked={isSelected(tag)}
+                aria-label={`Select ${tag}`}
+                onclick={(event) => onRowClick(event, tag)}
+                onkeydown={(event) => onRowKey(event, tag)}
+              >
+                {#if renaming !== null && sameTag(renaming, tag)}
+                  <!-- the hidden copy of the text sizes the chip as the name is typed, as a field cannot fit its content -->
+                  <span class="{CHIP} focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-action" style:--hue={tagHue(tag)}>
+                    <!-- out of the flow, so the field's default width (about 20 characters) does not widen the chip -->
+                    <span class="relative min-w-1">
+                      <span class="invisible whitespace-pre">{renameDraft}</span>
+                      <input
+                        type="text"
+                        class="absolute inset-0 w-full cursor-text bg-transparent p-0 outline-none"
+                        aria-label={`New name for ${tag}`}
+                        aria-invalid={!!renameError}
+                        bind:value={renameDraft}
+                        oninput={() => (renameError = '')}
+                        onkeydown={onRenameKey}
+                        onblur={saveRename}
+                        {@attach focusAndSelect}
+                      />
+                    </span>
                   </span>
-                </span>
-              {:else}
-                <TagChip {tag} title="Rename tag" onclick={() => startRename(tag)} />
-              {/if}
-              <span class="min-w-4 flex-1" aria-hidden="true"></span>
-              <span class="text-sm text-muted">{count} {plural(count, 'word')}</span>
-            </div>
-          </li>
-        {/each}
-      </ul>
+                {:else}
+                  <TagChip {tag} title="Rename tag" onclick={() => startRename(tag)} />
+                {/if}
+                <span class="min-w-4 flex-1" aria-hidden="true"></span>
+                <span class="text-sm text-muted">{count} {plural(count, 'word')}</span>
+              </div>
+            </li>
+          {/each}
+        </ul>
+      {/if}
       {#if renaming !== null && renameError}<p class="text-bad" role="alert">{renameError}</p>{/if}
     {/if}
     <div class="dialog-actions">

@@ -363,41 +363,42 @@
   </div>
   {#if visibleWords.length === 0}
     <p class="my-4 text-muted">No words match your search or tag filter.</p>
+  {:else}
+    <!-- reaches up behind the 40px select-all row and the 8px below it -->
+    <ul class="scroll-list-12 [--scroll-list-rows:12] [--scroll-list-under:48px]" bind:this={listEl}>
+      {#each visibleWords as word (word.id)}
+        <li>
+          <div
+            class={[
+              'flex cursor-pointer items-center gap-3 rounded-control px-3 py-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action motion-reduce:transition-none',
+              selected.has(word.id) ? 'bg-action/10 hover:bg-action/15 active:not-has-[button:active]:bg-action/20' : 'hover:bg-tint active:not-has-[button:active]:bg-tint-pressed',
+            ]}
+            role="checkbox"
+            tabindex="0"
+            aria-checked={selected.has(word.id)}
+            aria-label={`Select ${word.japanese}`}
+            onclick={(event) => onCardClick(event, word.id)}
+            ondblclick={(event) => onCardDoubleClick(event, word)}
+            onmousedown={onCardMouseDown}
+            onkeydown={(event) => onCardKey(event, word)}
+          >
+            <span class={["text-lg", word.disabled && DIM]} lang="ja">{word.japanese}</span>
+            <span class={["text-sm text-muted", word.disabled && DIM]} lang="ja">{wordReading(word)}</span>
+            {#if needsMeaning(word)}
+              <span class={["min-w-0 truncate text-warn italic", word.disabled && DIM]} title="Add a meaning to practice this word by meaning">Needs meaning</span>
+            {:else}
+              <span class={["min-w-0 truncate", word.disabled && DIM]}>{word.meaning}</span>
+            {/if}
+            {#if word.tags.length > 0}
+              <span class="flex gap-1">{#each word.tags as tag (tag)}<TagChip {tag} onclick={() => filterByTag(tag)} />{/each}</span>
+            {/if}
+            <span class="min-w-4 flex-1" aria-hidden="true"></span>
+            <Switch checked={!word.disabled} onchange={() => toggle(word)} label="Enabled" title={word.disabled ? 'Enable' : 'Disable'} />
+          </div>
+        </li>
+      {/each}
+    </ul>
   {/if}
-  <!-- reaches up behind the 40px select-all row and the 8px below it -->
-  <ul class="scroll-list-12 [--scroll-list-rows:12] [--scroll-list-under:48px]" bind:this={listEl}>
-    {#each visibleWords as word (word.id)}
-      <li>
-        <div
-          class={[
-            'flex cursor-pointer items-center gap-3 rounded-control px-3 py-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action motion-reduce:transition-none',
-            selected.has(word.id) ? 'bg-action/10 hover:bg-action/15 active:not-has-[button:active]:bg-action/20' : 'hover:bg-tint active:not-has-[button:active]:bg-tint-pressed',
-          ]}
-          role="checkbox"
-          tabindex="0"
-          aria-checked={selected.has(word.id)}
-          aria-label={`Select ${word.japanese}`}
-          onclick={(event) => onCardClick(event, word.id)}
-          ondblclick={(event) => onCardDoubleClick(event, word)}
-          onmousedown={onCardMouseDown}
-          onkeydown={(event) => onCardKey(event, word)}
-        >
-          <span class={["text-lg", word.disabled && DIM]} lang="ja">{word.japanese}</span>
-          <span class={["text-sm text-muted", word.disabled && DIM]} lang="ja">{wordReading(word)}</span>
-          {#if needsMeaning(word)}
-            <span class={["min-w-0 truncate text-warn italic", word.disabled && DIM]} title="Add a meaning to practice this word by meaning">Needs meaning</span>
-          {:else}
-            <span class={["min-w-0 truncate", word.disabled && DIM]}>{word.meaning}</span>
-          {/if}
-          {#if word.tags.length > 0}
-            <span class="flex gap-1">{#each word.tags as tag (tag)}<TagChip {tag} onclick={() => filterByTag(tag)} />{/each}</span>
-          {/if}
-          <span class="min-w-4 flex-1" aria-hidden="true"></span>
-          <Switch checked={!word.disabled} onchange={() => toggle(word)} label="Enabled" title={word.disabled ? 'Enable' : 'Disable'} />
-        </div>
-      </li>
-    {/each}
-  </ul>
 {/if}
 </div>
 </div>

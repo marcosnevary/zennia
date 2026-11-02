@@ -97,27 +97,28 @@
   </div>
   {#if visibleRows.length === 0}
     <p class="my-4 text-muted">Nothing matches your search.</p>
+  {:else}
+    <ul class="scroll-list-12" bind:this={listEl}>
+      {#each visibleRows as row (row.key)}
+        <li class="flex min-h-12 items-center gap-3 rounded-control px-3 py-1 transition-colors hover:bg-tint motion-reduce:transition-none">
+          <span class="text-lg" lang="ja">{row.symbol}</span>
+          <span class="text-sm text-muted" lang={row.ja ? 'ja' : undefined}>{row.reading}</span>
+          {#if row.meaning}
+            <span class="min-w-0 truncate">{row.meaning}</span>
+          {/if}
+          {#if row.tags.length > 0}
+            <span class="flex gap-1">{#each row.tags as tag (tag)}<TagChip {tag} onclick={() => filterByTag(tag)} />{/each}</span>
+          {/if}
+          <span class="min-w-4 flex-1" aria-hidden="true"></span>
+          <!-- both counts have a fixed width, the correct one right-aligned and the wrong one left-aligned, so they meet at the same
+               point in every row with only the gap between them, whatever the numbers; the negative margin pulls them toward the accuracy column -->
+          <span class="-mr-7 flex flex-none gap-2 text-sm tabular-nums *:flex *:w-[6ch] *:gap-1">
+            <span class="justify-end"><span>○</span>{row.tally.hits}</span>
+            <span><span>✗</span>{row.tally.misses}</span>
+          </span>
+          <span class="w-16 flex-none text-center font-bold tabular-nums {LEVEL_STYLES[accuracyLevel(row.tally)]}">{percent(accuracy(row.tally))}</span>
+        </li>
+      {/each}
+    </ul>
   {/if}
-  <ul class="scroll-list-12" bind:this={listEl}>
-    {#each visibleRows as row (row.key)}
-      <li class="flex min-h-12 items-center gap-3 rounded-control px-3 py-1 transition-colors hover:bg-tint motion-reduce:transition-none">
-        <span class="text-lg" lang="ja">{row.symbol}</span>
-        <span class="text-sm text-muted" lang={row.ja ? 'ja' : undefined}>{row.reading}</span>
-        {#if row.meaning}
-          <span class="min-w-0 truncate">{row.meaning}</span>
-        {/if}
-        {#if row.tags.length > 0}
-          <span class="flex gap-1">{#each row.tags as tag (tag)}<TagChip {tag} onclick={() => filterByTag(tag)} />{/each}</span>
-        {/if}
-        <span class="min-w-4 flex-1" aria-hidden="true"></span>
-        <!-- both counts have a fixed width, the correct one right-aligned and the wrong one left-aligned, so they meet at the same
-             point in every row with only the gap between them, whatever the numbers; the negative margin pulls them toward the accuracy column -->
-        <span class="-mr-7 flex flex-none gap-2 text-sm tabular-nums *:flex *:w-[6ch] *:gap-1">
-          <span class="justify-end"><span>○</span>{row.tally.hits}</span>
-          <span><span>✗</span>{row.tally.misses}</span>
-        </span>
-        <span class="w-16 flex-none text-center font-bold tabular-nums {LEVEL_STYLES[accuracyLevel(row.tally)]}">{percent(accuracy(row.tally))}</span>
-      </li>
-    {/each}
-  </ul>
 {/if}
