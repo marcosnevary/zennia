@@ -30,6 +30,8 @@
     { path: '/settings', label: 'Settings', icon: Settings },
   ] as const
 
+  const TEXT_FIELDS = 'input:not([type=checkbox], [type=radio], [type=file], [type=range]), textarea'
+
   // SvelteKit keeps the old page until the new route's code loads, so follow the in-flight navigation to switch at once
   const currentPath = $derived(navigating.to?.url.pathname ?? page.url.pathname)
   const loadingRoute = $derived(navigating.to != null && navigating.to.route.id !== page.route.id)
@@ -57,7 +59,14 @@
       window.removeEventListener('afterprint', stopPrinting)
     }
   })
+
+  function blurOnEscape(event: KeyboardEvent) {
+    const field = document.activeElement
+    if (event.key === 'Escape' && field instanceof HTMLElement && field.matches(TEXT_FIELDS)) field.blur()
+  }
 </script>
+
+<svelte:window onkeydown={blurOnEscape} />
 
 <!-- sized and centered on 100vw, which counts a classic scrollbar, so the layout does not shrink or shift when one appears; 1568px is the 1376px content plus the widest side padding -->
 <div class="ml-[max(0px,calc(50vw-784px))] w-[min(100vw,1568px)] px-4 py-4 sm:px-8 lg:px-16 xl:px-24 print:hidden">
