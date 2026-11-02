@@ -173,11 +173,12 @@
               {#if renaming !== null && sameTag(renaming, tag)}
                 <!-- the hidden copy of the text sizes the chip as the name is typed, as a field cannot fit its content -->
                 <span class="{CHIP} focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-action" style:--hue={tagHue(tag)}>
-                  <span class="grid min-w-4">
-                    <span class="invisible col-start-1 row-start-1 whitespace-pre">{renameDraft}</span>
+                  <!-- out of the flow, so the field's default width (about 20 characters) does not widen the chip -->
+                  <span class="relative min-w-1">
+                    <span class="invisible whitespace-pre">{renameDraft}</span>
                     <input
                       type="text"
-                      class="col-start-1 row-start-1 w-full min-w-0 cursor-text bg-transparent p-0 outline-none"
+                      class="absolute inset-0 w-full cursor-text bg-transparent p-0 outline-none"
                       aria-label={`New name for ${tag}`}
                       aria-invalid={!!renameError}
                       bind:value={renameDraft}
