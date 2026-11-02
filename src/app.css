@@ -721,9 +721,15 @@
       animation: icon-look var(--icon-motion);
     }
 
-    /* the order flips, so the arrow does too */
-    &:is(.lucide-arrow-up, .lucide-arrow-down) {
-      animation: icon-flip var(--icon-motion);
+    /* the arrow slides the way the order runs */
+    &.lucide-arrow-up {
+      animation: icon-nudge var(--icon-motion);
+      --dy: -3px;
+    }
+
+    &.lucide-arrow-down {
+      animation: icon-nudge var(--icon-motion);
+      --dy: 3px;
     }
 
     /* practice; the check is drawn from its short arm, the way it is written */
@@ -921,12 +927,6 @@
   }
   75% {
     translate: -2px 0;
-  }
-}
-
-@keyframes icon-flip {
-  to {
-    rotate: x 360deg;
   }
 }
 
