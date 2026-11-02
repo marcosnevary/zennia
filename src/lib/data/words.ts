@@ -33,6 +33,12 @@ export function needsMeaning(word: Word): boolean {
   return !word.meaning.trim()
 }
 
+/** The muted line next to a word: its hiragana and romaji, or only the romaji when the word is written in hiragana. */
+export function wordReading({ japanese, hiragana }: Pick<Word, 'japanese' | 'hiragana'>): string {
+  const romaji = toDisplayRomaji(hiragana)
+  return japanese === hiragana ? romaji : `${hiragana} · ${romaji}`
+}
+
 export const MAX_TAG_LENGTH = 30
 
 /** The message to show for an invalid tag name, or '' when it can be used. */

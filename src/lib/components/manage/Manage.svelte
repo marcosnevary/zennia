@@ -17,7 +17,6 @@
   import TagChip from './TagChip.svelte'
   import TagInput from './TagInput.svelte'
   import TagsDialog from './TagsDialog.svelte'
-  import { toDisplayRomaji } from '../../core/romaji'
   import { defaultKanaSelection } from '../../core/kana'
   import type { Word } from '../../core/types'
   import { getApp } from '../../state.svelte'
@@ -38,6 +37,7 @@
     sortWords,
     updateWord,
     validateWord,
+    wordReading,
     type SortDirection,
     type SortKey,
     type WordErrors,
@@ -399,7 +399,7 @@
           onkeydown={(event) => onCardKey(event, word)}
         >
           <span class={["text-lg", word.disabled && DIM]} lang="ja">{word.japanese}</span>
-          <span class={["text-sm text-muted", word.disabled && DIM]} lang="ja">{word.japanese === word.hiragana ? '' : `${word.hiragana} · `}{toDisplayRomaji(word.hiragana)}</span>
+          <span class={["text-sm text-muted", word.disabled && DIM]} lang="ja">{wordReading(word)}</span>
           {#if needsMeaning(word)}
             <span class={["min-w-0 truncate text-warn italic", word.disabled && DIM]} title="Add a meaning to practice this word by meaning">Needs meaning</span>
           {:else}

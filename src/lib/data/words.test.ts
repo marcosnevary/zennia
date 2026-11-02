@@ -21,6 +21,7 @@ import {
   updateWord,
   validateTag,
   validateWord,
+  wordReading,
 } from './words'
 
 describe('sanitizeWords and mergeWords', () => {
@@ -399,5 +400,10 @@ describe('required meaning', () => {
     const [a, b] = sanitizeWords([noMeaning, withMeaning]).words
     expect(needsMeaning(a)).toBe(true)
     expect(needsMeaning(b)).toBe(false)
+  })
+
+  it('wordReading shows the hiragana only when the word is not written in it', () => {
+    expect(wordReading({ japanese: '食べる', hiragana: 'たべる' })).toBe('たべる · taberu')
+    expect(wordReading({ japanese: 'すし', hiragana: 'すし' })).toBe('sushi')
   })
 })
