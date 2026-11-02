@@ -11,6 +11,7 @@
   import Tags from '@lucide/svelte/icons/tags'
   import Trash from '@lucide/svelte/icons/trash'
   import { prefersReducedMotion } from 'svelte/motion'
+  import { cubicInOut } from 'svelte/easing'
   import { fade } from 'svelte/transition'
   import { closeOnBackdrop } from './dialog'
   import KanaSelector from './KanaSelector.svelte'
@@ -236,7 +237,7 @@
   const WIDE = `${ROW} *:flex-1 *:text-center`
   const DIM = 'opacity-45'
   // the badge lingers a moment after the pointer reaches the row, so it is seen going away rather than just missing
-  const badgeOut = $derived({ delay: 300, duration: prefersReducedMotion.current ? 0 : 300 })
+  const badgeOut = $derived({ delay: 100, duration: prefersReducedMotion.current ? 0 : 500, easing: cubicInOut })
 </script>
 
 <div>
