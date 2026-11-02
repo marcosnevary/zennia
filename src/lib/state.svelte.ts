@@ -234,6 +234,10 @@ export class App {
     this.#setSettings({ statsSort, statsSortDirection })
   }
 
+  setNumberKeyTabs(numberKeyTabs: boolean): void {
+    this.#setSettings({ numberKeyTabs })
+  }
+
   setKanaSelection(kanaSelection: string[]): void {
     this.#setSettings({ kanaSelection: [...kanaSelection] })
   }

@@ -34,6 +34,7 @@ export interface SettingsRow {
   stats_sort: string
   stats_sort_direction: string
   tag_colors: unknown
+  number_key_tabs: boolean
 }
 
 function oneOf<T extends string>(value: string, allowed: readonly T[], fallback: T): T {
@@ -103,6 +104,7 @@ export function settingsFromRow(row: SettingsRow | null): Settings {
     statsSort: oneOf(row.stats_sort, STATS_SORT_OPTIONS.map((o) => o.key), DEFAULT_SETTINGS.statsSort),
     statsSortDirection: oneOf(row.stats_sort_direction, DIRECTIONS, DEFAULT_SETTINGS.statsSortDirection),
     tagColors: tagColorsFrom(row.tag_colors),
+    numberKeyTabs: typeof row.number_key_tabs === 'boolean' ? row.number_key_tabs : DEFAULT_SETTINGS.numberKeyTabs,
   }
 }
 
@@ -116,5 +118,6 @@ export function settingsToRow(patch: Partial<Settings>): Partial<SettingsRow> {
   if (patch.statsSort !== undefined) row.stats_sort = patch.statsSort
   if (patch.statsSortDirection !== undefined) row.stats_sort_direction = patch.statsSortDirection
   if (patch.tagColors !== undefined) row.tag_colors = patch.tagColors
+  if (patch.numberKeyTabs !== undefined) row.number_key_tabs = patch.numberKeyTabs
   return row
 }

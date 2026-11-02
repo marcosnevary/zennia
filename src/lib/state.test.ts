@@ -164,6 +164,7 @@ describe('App', () => {
     app.setKanaSelection(['hiragana:あ'])
     app.setWordsSort('reading', 'desc')
     app.setStatsSort('misses', 'asc')
+    app.setNumberKeyTabs(false)
     await app.flush()
     expect(app.settings).toMatchObject({
       wordsFocus: 'both',
@@ -172,12 +173,14 @@ describe('App', () => {
       wordsSortDirection: 'desc',
       statsSort: 'misses',
       statsSortDirection: 'asc',
+      numberKeyTabs: false,
     })
     expect(calls).toEqual([
       'settings {"wordsFocus":"both"}',
       'settings {"kanaSelection":["hiragana:あ"]}',
       'settings {"wordsSort":"reading","wordsSortDirection":"desc"}',
       'settings {"statsSort":"misses","statsSortDirection":"asc"}',
+      'settings {"numberKeyTabs":false}',
     ])
   })
 
