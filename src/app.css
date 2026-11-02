@@ -550,6 +550,28 @@
     box-shadow: 0 12px 40px rgb(0 0 0 / 0.7);
   }
 
+  /* a popover menu, placed by its opener; lighter than a dialog, as it sits on the page without a backdrop */
+  .menu {
+    inset: auto;
+    margin: 0;
+    border: 0;
+    min-width: 192px;
+    /* 8px is the panel radius minus the items' control radius, so their corners follow the menu's */
+    padding: 8px;
+    border-radius: var(--radius-panel);
+    background: var(--bg);
+    color: inherit;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.16);
+
+    &:popover-open {
+      display: grid;
+    }
+  }
+
+  :root[data-theme='dark'] .menu {
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.6);
+  }
+
   dialog::backdrop {
     background: rgb(0 0 0 / 0.5);
     backdrop-filter: blur(6px);
@@ -618,6 +640,18 @@
 
   .tab[aria-current='page'] {
     background: var(--color-tint);
+  }
+
+  /* the account pill and menu items are ghost like the tabs: a light tint on hover, not the dark fill of a button */
+  button.menu-item {
+    justify-content: flex-start;
+    background: transparent;
+  }
+
+  button.menu-item:not(:disabled):hover,
+  button.menu-item[aria-expanded='true'] {
+    background: var(--color-tint-soft);
+    color: inherit;
   }
 
   button.action:not(:disabled):hover {

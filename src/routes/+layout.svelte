@@ -5,7 +5,6 @@
   import ChartColumn from '@lucide/svelte/icons/chart-column'
   import Languages from '@lucide/svelte/icons/languages'
   import LogIn from '@lucide/svelte/icons/log-in'
-  import LogOut from '@lucide/svelte/icons/log-out'
   import PencilLine from '@lucide/svelte/icons/pencil-line'
   import RotateCw from '@lucide/svelte/icons/rotate-cw'
   import Settings from '@lucide/svelte/icons/settings'
@@ -13,6 +12,7 @@
   import { goto } from '$app/navigation'
   import { resolve } from '$app/paths'
   import { navigating, page } from '$app/state'
+  import AccountMenu from '#lib/components/account/AccountMenu.svelte'
   import Loading from '#lib/components/Loading.svelte'
   import PrintSheet from '#lib/components/print/PrintSheet.svelte'
   import { getDb } from '#lib/data/db/client.ts'
@@ -126,14 +126,7 @@
             <LogIn /><span class="max-md:sr-only">Sign in</span>
           </button>
         {:else}
-          <p class="truncate text-sm text-muted max-md:hidden" title={app.account.email}>{app.account.email}</p>
-          <button
-            class="rounded-pill max-md:size-10 max-md:p-0"
-            onclick={() => confirm('Sign out? This browser will start empty until you sign in again.') && app.signOut()}
-            title="Sign out of {app.account.email}"
-          >
-            <LogOut /><span class="max-md:sr-only">Sign out</span>
-          </button>
+          <AccountMenu />
         {/if}
       </div>
     {/if}
