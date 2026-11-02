@@ -7,7 +7,7 @@
   import { plural } from '../../core/plural'
   import { toDisplayRomaji } from '../../core/romaji'
   import { loadDictionary, lookUp, parseRomajiList, type Candidate, type RomajiItem } from '../../data/dictionary'
-  import { importSummary, makeWord } from '../../data/words'
+  import { importSummary, makeWord, wordReading } from '../../data/words'
   import { getApp } from '../../state.svelte'
 
   let { tags }: { tags: string[] } = $props()
@@ -33,6 +33,28 @@
   const found = $derived(rows.filter((r) => r.candidates.length > 0))
   const notFound = $derived(rows.filter((r) => r.candidates.length === 0))
   const differs = (row: Row) => row.candidates[row.choice]?.verdict === 'almost'
+  const allSelected = $derived(found.every((r) => r.selected))
+
+  function toggleSelectAll() {
+    const next = !allSelected
+    for (const row of found) row.selected = next
+  }
+
+  // the candidate select inside a row does its own thing, so a click on it must not also toggle the row
+  function onRowClick(event: MouseEvent, row: Row) {
+    if (!(event.target as Element).closest('select')) row.selected = !row.selected
+  }
+
+  // a double click would otherwise highlight the word under the pointer
+  function onRowMouseDown(event: MouseEvent) {
+    if (event.detail > 1) event.preventDefault()
+  }
+
+  function onRowKey(event: KeyboardEvent, row: Row) {
+    if (event.target !== event.currentTarget || event.key !== ' ') return
+    row.selected = !row.selected
+    event.preventDefault()
+  }
 
   export function open() {
     text = ''
@@ -72,8 +94,6 @@
     text = ''
     rows = []
   }
-
-  const DIM = 'opacity-45'
 </script>
 
 <dialog class="w-[min(720px,calc(100vw-32px))]" bind:this={dialogEl} use:closeOnBackdrop aria-label="Add from romaji">
@@ -98,32 +118,51 @@
         </div>
       </form>
     {:else}
-      <!-- relative keeps the rows' sr-only text inside this scroll box, so the dialog itself never scrolls -->
-      <ul class="relative max-h-[55vh] overflow-y-auto pr-4">
-        {#each found as row (row.item)}
-          {@const candidate = row.candidates[row.choice]}
-          {@const warn = differs(row) && 'text-warn'}
-          <li class="flex items-center gap-3 py-2">
-            <input type="checkbox" bind:checked={row.selected} aria-label={`Add ${row.item.romaji}`} />
-            <span class={['min-w-0 truncate text-lg', warn, !row.selected && DIM]} lang="ja">{candidate.japanese}</span>
-            <span class={['min-w-0 truncate text-sm', warn || 'text-muted', !row.selected && DIM]} lang="ja">{candidate.hiragana} · {toDisplayRomaji(candidate.hiragana)}</span>
-            <span class={['min-w-0 truncate', warn, !row.selected && DIM]}>{candidate.meaning}</span>
-            {#if warn}<span class="sr-only">(vowel length differs from what you typed)</span>{/if}
-            {#if row.candidates.length > 1}
-              <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
-              <!-- an invisible native select covers the chevron, so the list that opens is the native one; it is clipped to the chevron because a select's own width and padding would push the list sideways -->
-              <span class="relative -ml-2 inline-flex shrink-0 overflow-hidden rounded-control has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-action">
-                <ChevronDown />
-                <select class="absolute inset-0 size-full cursor-pointer p-0 opacity-0" lang="ja" bind:value={row.choice} aria-label={`Word for ${row.item.romaji}`}>
-                  {#each row.candidates as c, i (i)}
-                    <option value={i}>{c.japanese} · {c.hiragana} · {c.meaning}</option>
-                  {/each}
-                </select>
-              </span>
-            {/if}
-          </li>
-        {/each}
-      </ul>
+      {#if found.length}
+        <!-- on top of the list, which scrolls up behind it -->
+        <div class="relative z-10 flex flex-wrap items-center gap-2">
+          <label class="flex items-center gap-2">
+            <input type="checkbox" checked={allSelected} onchange={toggleSelectAll} />
+            {found.length === 1 ? 'Select' : 'Select all'} {found.length} {plural(found.length, 'word')}
+          </label>
+          <span class="text-muted">{chosen.length} selected</span>
+        </div>
+        <!-- reaches up behind the 40px select-all row and the 8px gap below it -->
+        <ul class="scroll-list-12 [--scroll-list-cap:50dvh] [--scroll-list-under:48px]">
+          {#each found as row (row.item)}
+            {@const candidate = row.candidates[row.choice]}
+            {@const warn = differs(row)}
+            <li>
+              <div
+                class={['select-row min-h-12', warn && '[--select-row-color:var(--warn)]']}
+                role="checkbox"
+                tabindex="0"
+                aria-checked={row.selected}
+                aria-label={`Add ${candidate.japanese}${warn ? ' (vowel length differs from what you typed)' : ''}`}
+                onclick={(event) => onRowClick(event, row)}
+                onmousedown={onRowMouseDown}
+                onkeydown={(event) => onRowKey(event, row)}
+              >
+                <span class="text-lg" lang="ja">{candidate.japanese}</span>
+                <span class="text-sm text-muted" lang="ja">{wordReading(candidate)}</span>
+                <span class="min-w-0 truncate">{candidate.meaning}</span>
+                {#if row.candidates.length > 1}
+                  <span class="min-w-4 flex-1" aria-hidden="true"></span>
+                  <!-- an invisible native select covers the chevron, so the list that opens is the native one; it is clipped to the chevron because a select's own width and padding would push the list sideways -->
+                  <span class="relative inline-flex shrink-0 overflow-hidden rounded-control has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-action">
+                    <ChevronDown />
+                    <select class="absolute inset-0 size-full cursor-pointer p-0 opacity-0" lang="ja" bind:value={row.choice} aria-label={`Word for ${row.item.romaji}`}>
+                      {#each row.candidates as c, i (i)}
+                        <option value={i}>{c.japanese} · {c.hiragana} · {c.meaning}</option>
+                      {/each}
+                    </select>
+                  </span>
+                {/if}
+              </div>
+            </li>
+          {/each}
+        </ul>
+      {/if}
       {#if found.some(differs) || notFound.length}
         <ul class="grid gap-1 text-sm">
           {#if found.some(differs)}

@@ -163,12 +163,7 @@
             {@const count = filterByTags(words, [tag]).length}
             <li>
               <div
-                class={[
-                  'flex min-h-10 cursor-pointer items-center gap-3 rounded-control px-3 py-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action motion-reduce:transition-none',
-                  isSelected(tag)
-                    ? 'bg-action/10 hover:bg-action/15 active:not-has-[:is(button,input):active]:bg-action/20'
-                    : 'hover:bg-tint active:not-has-[:is(button,input):active]:bg-tint-pressed',
-                ]}
+                class="select-row"
                 role="checkbox"
                 tabindex="0"
                 aria-checked={isSelected(tag)}
