@@ -287,9 +287,8 @@
 {/snippet}
 
 {#if section === 'vocabulary'}
-<div class="grid items-start gap-x-8 gap-y-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]">
+<div class="mt-6 grid items-start gap-x-8 gap-y-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]">
 <div>
-<h2 class="section-title">New word</h2>
 <form class="grid gap-2" onsubmit={save}>
   <input type="text" class="field" lang="ja" placeholder="Japanese (e.g. 食べる)" bind:value={japanese} bind:this={japaneseEl} aria-invalid={!!errors.japanese} oninput={() => (errors.japanese = '')} />
   {@render fieldError(errors.japanese)}
@@ -307,7 +306,6 @@
 </div>
 </div>
 <div>
-<h2 class="section-title">Vocabulary ({visibleWords.length === words.length ? words.length : `${visibleWords.length} of ${words.length}`})</h2>
 {#if words.length === 0}
   <p class="my-4 text-muted">No words yet.</p>
 {:else}
