@@ -13,7 +13,7 @@ describe('parseTSV', () => {
 describe('importAnkiDeck', () => {
   const header = '#separator:tab\n#html:true\n#tags column:4\n'
 
-  it('reads word, hiragana and meaning from the first three columns and ignores the rest', () => {
+  it('reads word, reading and meaning from the first three columns and ignores the rest', () => {
     const text = `${header}私\tわたし\tI (polite, general)\t私[わたし]\t[sound:x.mp3]\n生きる\tいきる\tto&nbsp;live<br>to exist\textra\n`
     const { words, skipped } = importAnkiDeck(text)
     expect(skipped).toBe(0)

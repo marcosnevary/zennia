@@ -57,7 +57,7 @@
     <input
       type="search"
       class="field min-w-50 flex-1 appearance-none"
-      placeholder="Search by word, reading, romaji or meaning"
+      placeholder="Search by word, reading or meaning"
       aria-label="Search stats"
       bind:value={query}
       oninput={() => listEl?.scrollTo({ top: 0 })}

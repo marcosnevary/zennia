@@ -246,9 +246,9 @@
 <dialog class="w-[min(420px,calc(100vw-32px))]" bind:this={dialogEl} onclose={() => (editingId = null)} use:closeOnBackdrop aria-label="Edit word">
   <form class="grid gap-2" onsubmit={saveEdit}>
     <h2 class="mt-0 mb-2">Edit word</h2>
-    <input type="text" class="field" lang="ja" placeholder="Japanese (e.g. 食べる)" bind:value={editJapanese} aria-invalid={!!editErrors.japanese} oninput={() => (editErrors.japanese = '')} />
+    <input type="text" class="field" lang="ja" placeholder="Word (e.g. 食べる)" bind:value={editJapanese} aria-invalid={!!editErrors.japanese} oninput={() => (editErrors.japanese = '')} />
     {@render fieldError(editErrors.japanese)}
-    <input type="text" class="field" lang="ja" placeholder="Hiragana (e.g. たべる)" bind:value={editHiragana} aria-invalid={!!editErrors.hiragana} oninput={() => (editErrors.hiragana = '')} />
+    <input type="text" class="field" lang="ja" placeholder="Reading in kana (e.g. たべる)" bind:value={editHiragana} aria-invalid={!!editErrors.hiragana} oninput={() => (editErrors.hiragana = '')} />
     {@render fieldError(editErrors.hiragana)}
     <input type="text" class="field" placeholder="Meaning (e.g. to eat)" bind:value={editMeaning} aria-invalid={!!editErrors.meaning} oninput={() => (editErrors.meaning = '')} />
     {@render fieldError(editErrors.meaning)}
@@ -290,9 +290,9 @@
 <div class="mt-6 grid items-start gap-x-8 gap-y-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]">
 <div>
 <form class="grid gap-2" onsubmit={save}>
-  <input type="text" class="field" lang="ja" placeholder="Japanese (e.g. 食べる)" bind:value={japanese} bind:this={japaneseEl} aria-invalid={!!errors.japanese} oninput={() => (errors.japanese = '')} />
+  <input type="text" class="field" lang="ja" placeholder="Word (e.g. 食べる)" bind:value={japanese} bind:this={japaneseEl} aria-invalid={!!errors.japanese} oninput={() => (errors.japanese = '')} />
   {@render fieldError(errors.japanese)}
-  <input type="text" class="field" lang="ja" placeholder="Hiragana (e.g. たべる)" bind:value={hiragana} aria-invalid={!!errors.hiragana} oninput={() => (errors.hiragana = '')} />
+  <input type="text" class="field" lang="ja" placeholder="Reading in kana (e.g. たべる)" bind:value={hiragana} aria-invalid={!!errors.hiragana} oninput={() => (errors.hiragana = '')} />
   {@render fieldError(errors.hiragana)}
   <input type="text" class="field" placeholder="Meaning (e.g. to eat)" bind:value={meaning} aria-invalid={!!errors.meaning} oninput={() => (errors.meaning = '')} />
   {@render fieldError(errors.meaning)}
@@ -320,7 +320,7 @@
         id="word-search"
         type="search"
         class="min-w-30 flex-1 appearance-none bg-transparent p-0 outline-none"
-        placeholder="Search by word, reading, romaji or meaning"
+        placeholder="Search by word, reading or meaning"
         aria-label="Search words"
         bind:value={query}
         oninput={onSearch}

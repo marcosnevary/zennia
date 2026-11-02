@@ -21,9 +21,9 @@ export type WordErrors = Partial<Record<'japanese' | 'hiragana' | 'meaning', str
 export function validateWord({ japanese, hiragana, meaning }: WordFields): WordErrors {
   const errors: WordErrors = {}
   const h = hiragana.trim()
-  if (!japanese.trim()) errors.japanese = 'Fill in the Japanese word.'
-  if (!h) errors.hiragana = 'Fill in the hiragana.'
-  else if (!isKana(h)) errors.hiragana = 'The hiragana field must contain only kana (hiragana, katakana or ー).'
+  if (!japanese.trim()) errors.japanese = 'Fill in the word.'
+  if (!h) errors.hiragana = 'Fill in the reading.'
+  else if (!isKana(h)) errors.hiragana = 'The reading must contain only kana (hiragana, katakana or ー).'
   if (!meaning.trim()) errors.meaning = 'Fill in the meaning.'
   return errors
 }

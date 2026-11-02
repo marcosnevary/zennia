@@ -48,7 +48,7 @@
   })
 
   // the fields show the parts by color, so screen readers get them in words when both are practiced
-  const note = $derived(parts.reading && parts.meaning ? `Romaji: ${parts.reading} · Meaning: ${parts.meaning}` : undefined)
+  const note = $derived(parts.reading && parts.meaning ? `Reading: ${parts.reading} · Meaning: ${parts.meaning}` : undefined)
 
   function focusField() {
     queueMicrotask(() => (askReading ? inputEl : meaningEl)?.focus({ preventScroll: true }))

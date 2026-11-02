@@ -91,7 +91,7 @@ function stripHtml(html: string): string {
 export function importAnkiDeck(text: string): SanitizeResult {
   const rows = parseTSV(text)
   if (rows.length === 0 || rows.every((r) => r.length < 2)) {
-    throw new Error('Not an Anki deck export: expected tab-separated columns (word, hiragana, meaning).')
+    throw new Error('Not an Anki deck export: expected tab-separated columns (word, reading, meaning).')
   }
 
   const candidates: unknown[] = []
