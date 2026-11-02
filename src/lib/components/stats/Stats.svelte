@@ -97,7 +97,7 @@
         <span class="min-w-4 flex-1" aria-hidden="true"></span>
         <!-- each count has a fixed width so they line up from row to row, whatever the numbers; the negative margin pulls them toward the accuracy column -->
         <span class="-mr-7 flex flex-none gap-1 text-sm tabular-nums *:w-[5ch]">
-          <span>✓{row.tally.hits}</span>
+          <span>○{row.tally.hits}</span>
           <span>✗{row.tally.misses}</span>
         </span>
         <span class="w-16 flex-none text-center font-bold tabular-nums {LEVEL_STYLES[accuracyLevel(row.tally)]}">{percent(accuracy(row.tally))}</span>
