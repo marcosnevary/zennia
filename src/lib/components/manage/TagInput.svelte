@@ -1,5 +1,5 @@
 <script lang="ts">
-  import TagChip from './TagChip.svelte'
+  import TagChip from '../TagChip.svelte'
   import { cleanTags, sameTag, validateTag } from '../../data/words'
 
   let { tags = $bindable(), suggestions }: { tags: string[]; suggestions: string[] } = $props()

@@ -2,7 +2,7 @@
   import ChevronDown from '@lucide/svelte/icons/chevron-down'
   import Plus from '@lucide/svelte/icons/plus'
   import Search from '@lucide/svelte/icons/search'
-  import TagChip from './TagChip.svelte'
+  import TagChip from '../TagChip.svelte'
   import TagInput from './TagInput.svelte'
   import { closeOnBackdrop } from './dialog'
   import { plural } from '../../core/plural'

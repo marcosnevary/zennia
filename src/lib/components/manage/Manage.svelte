@@ -14,7 +14,7 @@
   import KanaSelector from './KanaSelector.svelte'
   import RomajiWordsDialog from './RomajiWordsDialog.svelte'
   import Switch from '../Switch.svelte'
-  import TagChip from './TagChip.svelte'
+  import TagChip from '../TagChip.svelte'
   import TagInput from './TagInput.svelte'
   import TagsDialog from './TagsDialog.svelte'
   import { defaultKanaSelection } from '../../core/kana'
@@ -321,7 +321,7 @@
         id="word-search"
         type="search"
         class="min-w-30 flex-1 appearance-none bg-transparent p-0 outline-none"
-        placeholder="Search by word, reading or meaning"
+        placeholder="Search by word, reading, meaning or #tag"
         aria-label="Search words"
         bind:value={query}
         oninput={onSearch}

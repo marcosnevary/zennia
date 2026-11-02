@@ -1,6 +1,7 @@
 <script lang="ts">
   import {
     KANA_SECTIONS,
+    SCRIPT_LABELS,
     columnKeys,
     kanaKey,
     lineKeys,
@@ -24,10 +25,7 @@
       : `${base} bg-transparent text-muted hover:bg-tint-hover hover:text-ink`
   }
 
-  const SCRIPTS: { id: KanaScript; label: string }[] = [
-    { id: 'hiragana', label: 'Hiragana' },
-    { id: 'katakana', label: 'Katakana' },
-  ]
+  const SCRIPTS = (Object.entries(SCRIPT_LABELS) as [KanaScript, string][]).map(([id, label]) => ({ id, label }))
 
   function select(keys: string[], on: boolean) {
     onchange(selectKeys(selected, keys, on))

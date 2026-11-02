@@ -2,6 +2,9 @@ import { toKatakana } from 'wanakana'
 
 export type KanaScript = 'hiragana' | 'katakana'
 
+/** The name of each script, also the system tag of its kana in Stats */
+export const SCRIPT_LABELS: Record<KanaScript, string> = { hiragana: 'Hiragana', katakana: 'Katakana' }
+
 export interface Kana {
   /** The symbol shown in practice */
   symbol: string

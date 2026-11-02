@@ -23,6 +23,7 @@ describe('buildRows', () => {
       reading: 'たべる · taberu',
       meaning: 'To eat',
       ja: true,
+      tags: [],
       tally: { hits: 2, misses: 1 },
     })
     expect(row.search).toBe('食べる たべる taberu to eat')
@@ -40,8 +41,8 @@ describe('buildRows', () => {
       kana: { 'hiragana:か': { hits: 3, misses: 0 }, 'katakana:か': { hits: 0, misses: 2 } },
     }
     expect(buildRows(stats, [])).toEqual([
-      { key: 'hiragana:か', symbol: 'か', reading: 'ka', meaning: '', search: 'か か ka', ja: false, tally: { hits: 3, misses: 0 } },
-      { key: 'katakana:か', symbol: 'カ', reading: 'ka', meaning: '', search: 'カ か ka', ja: false, tally: { hits: 0, misses: 2 } },
+      { key: 'hiragana:か', symbol: 'か', reading: 'ka', meaning: '', search: 'か か ka', ja: false, tags: ['Hiragana'], tally: { hits: 3, misses: 0 } },
+      { key: 'katakana:か', symbol: 'カ', reading: 'ka', meaning: '', search: 'カ か ka', ja: false, tags: ['Katakana'], tally: { hits: 0, misses: 2 } },
     ])
   })
 
@@ -56,7 +57,10 @@ describe('filterRows', () => {
     words: { w1: { hits: 5, misses: 1 }, w2: { hits: 0, misses: 4 } },
     kana: { 'hiragana:か': { hits: 3, misses: 2 }, 'katakana:か': { hits: 1, misses: 0 } },
   }
-  const rows = buildRows(stats, [word('w1'), word('w2', { japanese: '飲む', hiragana: 'のむ', meaning: 'To drink' })])
+  const rows = buildRows(stats, [
+    word('w1', { tags: ['Verbs', 'N5'] }),
+    word('w2', { japanese: '飲む', hiragana: 'のむ', meaning: 'To drink', tags: ['verbs'] }),
+  ])
   const all: StatsFilter = {
     query: '',
     sort: 'misses',
@@ -73,5 +77,12 @@ describe('filterRows', () => {
     expect(keys({ query: '  DRINK ' })).toEqual(['word:w2'])
     expect(keys({ query: 'ka' })).toEqual(['hiragana:か', 'katakana:か'])
     expect(keys({ query: 'nothing like this' })).toEqual([])
+  })
+
+  it('keeps only the rows with a tag containing each # term, kana going by their script', () => {
+    expect(keys({ query: '#hira' })).toEqual(['hiragana:か'])
+    expect(keys({ query: '#KATA' })).toEqual(['katakana:か'])
+    expect(keys({ query: '#verbs #n5' })).toEqual(['word:w1'])
+    expect(keys({ query: '#verbs drink' })).toEqual(['word:w2'])
   })
 })

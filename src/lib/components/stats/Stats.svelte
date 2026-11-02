@@ -12,9 +12,11 @@
     type StatsSortDirection,
   } from '../../data/stats'
   import { buildRows, filterRows } from '../../data/stats-rows'
+  import { parseSearch, tagTerm } from '../../data/words'
   import type { Tally } from '../../core/types'
   import { getApp } from '../../state.svelte'
   import StatTile from '../StatTile.svelte'
+  import TagChip from '../TagChip.svelte'
 
   const LEVEL_STYLES = { high: 'text-on', low: 'text-off', '': '' }
 
@@ -29,6 +31,14 @@
 
   function setSort(next: StatsSort, nextDirection: StatsSortDirection) {
     app.setStatsSort(next, nextDirection)
+    listEl?.scrollTo({ top: 0 })
+  }
+
+  // Stats has no tag filter like Vocabulary's, so a clicked tag goes into the search as its # term
+  function searchTag(tag: string) {
+    const term = tagTerm(tag)
+    if (parseSearch(query).tags.includes(term.slice(1))) return
+    query = `${query.trim()} ${term}`.trim()
     listEl?.scrollTo({ top: 0 })
   }
 
@@ -57,7 +67,7 @@
     <input
       type="search"
       class="field min-w-50 flex-1 appearance-none"
-      placeholder="Search by word, reading or meaning"
+      placeholder="Search by word, reading, meaning or #tag"
       aria-label="Search stats"
       bind:value={query}
       oninput={() => listEl?.scrollTo({ top: 0 })}
@@ -93,6 +103,9 @@
         <span class="text-sm text-muted" lang={row.ja ? 'ja' : undefined}>{row.reading}</span>
         {#if row.meaning}
           <span class="min-w-0 truncate">{row.meaning}</span>
+        {/if}
+        {#if row.tags.length > 0}
+          <span class="flex gap-1">{#each row.tags as tag (tag)}<TagChip {tag} onclick={() => searchTag(tag)} />{/each}</span>
         {/if}
         <span class="min-w-4 flex-1" aria-hidden="true"></span>
         <!-- both counts have a fixed width, the correct one right-aligned and the wrong one left-aligned, so they meet at the same

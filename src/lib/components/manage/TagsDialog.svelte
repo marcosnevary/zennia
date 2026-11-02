@@ -1,7 +1,7 @@
 <script lang="ts">
   import Check from '@lucide/svelte/icons/check'
   import Trash from '@lucide/svelte/icons/trash'
-  import TagChip, { CHIP } from './TagChip.svelte'
+  import TagChip, { CHIP } from '../TagChip.svelte'
   import { closeOnBackdrop } from './dialog'
   import { plural } from '../../core/plural'
   import type { Word } from '../../core/types'
