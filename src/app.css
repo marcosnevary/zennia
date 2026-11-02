@@ -239,6 +239,16 @@
      that width whether the list scrolls or not */
   scrollbar-gutter: stable;
   margin: calc(-4px - var(--scroll-list-under, 0px)) calc(-4px - var(--scrollbar-width, 0px)) -4px -4px;
+  /* the bar shows only while the list is pointed at or focused; the gutter stays, so nothing shifts */
+  scrollbar-color: transparent transparent;
+
+  &:is(:hover, :focus-within) {
+    scrollbar-color: color-mix(in srgb, var(--muted) 50%, transparent) transparent;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: scrollbar-color 150ms;
+  }
   scroll-padding-top: var(--scroll-list-under, 0px);
   max-height: min(
     calc(var(--scroll-list-rows, 10) * (var(--spacing) * --value(integer) + 8px) + var(--scroll-list-under, 0px)),
