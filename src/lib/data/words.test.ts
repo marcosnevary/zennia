@@ -19,6 +19,7 @@ import {
   sortWords,
   tagHue,
   updateWord,
+  withAnyTag,
   validateTag,
   validateWord,
   wordReading,
@@ -367,6 +368,13 @@ describe('tag operations', () => {
     expect(ids(['food'])).toEqual(['1', '2', '4'])
     expect(ids(['FOOD', 'n5'])).toEqual(['1'])
     expect(ids(['food', 'fruit'])).toEqual(['4'])
+  })
+
+  it('withAnyTag keeps the words that have at least one of the tags, and nothing for no tags', () => {
+    const ids = (tags: string[]) => withAnyTag(list, tags).map((x) => x.id)
+    expect(ids([])).toEqual([])
+    expect(ids(['N5'])).toEqual(['1'])
+    expect(ids(['n5', 'FRUIT'])).toEqual(['1', '4'])
   })
 })
 

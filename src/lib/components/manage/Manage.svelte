@@ -346,7 +346,7 @@
   <div class="{ROW} relative z-10 mb-2">
     <label class="flex items-center gap-2">
       <input type="checkbox" checked={allSelected} onchange={toggleSelectAll} />
-      Select all {visibleWords.length} {plural(visibleWords.length, visibleWords.length === words.length ? 'word' : 'result')}
+      {visibleWords.length === 1 ? 'Select' : 'Select all'} {visibleWords.length} {plural(visibleWords.length, visibleWords.length === words.length ? 'word' : 'result')}
     </label>
     <span class="text-muted">{activeWordCount} active · {selectedWords.length} selected</span>
     <!-- keeps the space reserved so the layout does not shift when a selection appears; the icons are 20px in 40px buttons -->

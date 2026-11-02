@@ -270,6 +270,11 @@ export function filterByTags(words: Word[], tags: string[]): Word[] {
   return words.filter((w) => tags.every((tag) => w.tags.some((t) => sameTag(t, tag))))
 }
 
+/** The words that have at least one of the tags: the ones deleting those tags would change. */
+export function withAnyTag(words: Word[], tags: string[]): Word[] {
+  return words.filter((w) => tags.some((tag) => w.tags.some((t) => sameTag(t, tag))))
+}
+
 export type SortKey = 'list' | 'japanese' | 'reading' | 'meaning' | 'status'
 export type SortDirection = 'asc' | 'desc'
 
