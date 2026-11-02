@@ -20,7 +20,8 @@ describe('buildRows', () => {
     expect(row).toMatchObject({
       key: 'word:w1',
       symbol: '食べる',
-      reading: 'たべる',
+      reading: 'たべる · taberu',
+      meaning: 'To eat',
       ja: true,
       tally: { hits: 2, misses: 1 },
     })
@@ -39,8 +40,8 @@ describe('buildRows', () => {
       kana: { 'hiragana:か': { hits: 3, misses: 0 }, 'katakana:か': { hits: 0, misses: 2 } },
     }
     expect(buildRows(stats, [])).toEqual([
-      { key: 'hiragana:か', symbol: 'か', reading: 'ka', search: 'か か ka', ja: false, tally: { hits: 3, misses: 0 } },
-      { key: 'katakana:か', symbol: 'カ', reading: 'ka', search: 'カ か ka', ja: false, tally: { hits: 0, misses: 2 } },
+      { key: 'hiragana:か', symbol: 'か', reading: 'ka', meaning: '', search: 'か か ka', ja: false, tally: { hits: 3, misses: 0 } },
+      { key: 'katakana:か', symbol: 'カ', reading: 'ka', meaning: '', search: 'カ か ka', ja: false, tally: { hits: 0, misses: 2 } },
     ])
   })
 

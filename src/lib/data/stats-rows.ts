@@ -1,6 +1,7 @@
 import { toRomaji } from 'wanakana'
 import { parseKanaKey, symbolOf } from '../core/kana'
 import type { Stats, Tally, Word } from '../core/types'
+import { wordReading } from './words'
 import { sortTallies, type StatsSort, type StatsSortDirection } from './stats'
 
 export interface StatsRow {
@@ -8,6 +9,8 @@ export interface StatsRow {
   /** The word or kana shown big */
   symbol: string
   reading: string
+  /** Empty for kana */
+  meaning: string
   /** Lowercase text the search box matches against */
   search: string
   /** Whether `symbol` is Japanese text of a saved word (shown in the word font) */
@@ -25,7 +28,8 @@ export function buildRows(stats: Stats, words: Word[]): StatsRow[] {
     rows.push({
       key: `word:${id}`,
       symbol: word.japanese,
-      reading: word.hiragana,
+      reading: wordReading(word),
+      meaning: word.meaning ?? '',
       search: `${word.japanese} ${word.hiragana} ${toRomaji(word.hiragana)} ${word.meaning ?? ''}`.toLowerCase(),
       ja: true,
       tally,
@@ -41,6 +45,7 @@ export function buildRows(stats: Stats, words: Word[]): StatsRow[] {
       key,
       symbol,
       reading: romaji,
+      meaning: '',
       search: `${symbol} ${hiragana} ${romaji}`.toLowerCase(),
       ja: false,
       tally,

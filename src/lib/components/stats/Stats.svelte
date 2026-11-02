@@ -86,14 +86,16 @@
   {#if visibleRows.length === 0}
     <p class="my-4 text-muted">Nothing matches your search.</p>
   {/if}
-  <ul class="scroll-list-10" bind:this={listEl}>
+  <ul class="scroll-list-12" bind:this={listEl}>
     {#each visibleRows as row (row.key)}
-      <li class="flex min-h-10 items-center gap-3">
+      <li class="flex min-h-12 items-center gap-3 rounded-control px-3 py-1 transition-colors hover:bg-tint motion-reduce:transition-none">
         <span class="text-lg" lang="ja">{row.symbol}</span>
         <span class="text-sm text-muted" lang={row.ja ? 'ja' : undefined}>{row.reading}</span>
-        <!-- runs from the symbol to the counts on the other side -->
-        <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
-        <!-- fixed width so the dotted line always ends at the same x, whatever the numbers; the negative margin pulls the counts toward the accuracy column -->
+        {#if row.meaning}
+          <span class="min-w-0 truncate">{row.meaning}</span>
+        {/if}
+        <span class="min-w-4 flex-1" aria-hidden="true"></span>
+        <!-- fixed width so the counts line up from row to row, whatever the numbers; the negative margin pulls them toward the accuracy column -->
         <span class="-mr-7 flex w-[5ch] flex-none flex-col text-sm leading-4 tabular-nums">
           <span>✓{row.tally.hits}</span>
           <span>✗{row.tally.misses}</span>
