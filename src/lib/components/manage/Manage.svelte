@@ -315,12 +315,14 @@
   <p class="my-4 text-muted">No words yet.</p>
 {:else}
   <div class="mb-2 flex flex-wrap items-center gap-2">
-    <!-- a label, so clicking beside the chips focuses the input -->
-    <label class="field flex min-h-10 min-w-50 flex-1 cursor-text flex-wrap items-center gap-1 px-3 py-1">
+    <!-- a label, so clicking beside the chips focuses the input; without `for` it would label the first chip's X
+         button instead, which then turns hovered and clicked along with the whole bar -->
+    <label for="word-search" class="field flex min-h-10 min-w-50 flex-1 cursor-text flex-wrap items-center gap-1 px-3 py-1">
       {#each filterTags as tag (tag)}
         <TagChip {tag} onremove={() => toggleFilterTag(tag)} />
       {/each}
       <input
+        id="word-search"
         type="search"
         class="min-w-30 flex-1 appearance-none bg-transparent p-0 outline-none"
         placeholder="Search by word, reading, romaji or meaning"
