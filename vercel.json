@@ -2,6 +2,6 @@
   "outputDirectory": "build",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
   "git": {
-    "deploymentEnabled": { "*": false, "main": true }
+    "deploymentEnabled": { "**": false, "main": true }
   }
 }
