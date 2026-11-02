@@ -8,7 +8,7 @@
   import RotateCw from '@lucide/svelte/icons/rotate-cw'
   import Settings from '@lucide/svelte/icons/settings'
   import { onMount } from 'svelte'
-  import { asset, resolve } from '$app/paths'
+  import { resolve } from '$app/paths'
   import { navigating, page } from '$app/state'
   import Loading from '#lib/components/Loading.svelte'
   import PrintSheet from '#lib/components/print/PrintSheet.svelte'
@@ -40,9 +40,7 @@
     let printing = false
     const apply = () => {
       if (printing) return
-      const resolved = resolveTheme(app.settings.theme, query.matches)
-      document.documentElement.dataset.theme = resolved
-      document.querySelector<HTMLLinkElement>('link[rel="icon"]')!.href = asset(resolved === 'dark' ? 'favicon-dark.png' : 'favicon.png')
+      document.documentElement.dataset.theme = resolveTheme(app.settings.theme, query.matches)
     }
     const startPrinting = () => (printing = true)
     const stopPrinting = () => {
