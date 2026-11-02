@@ -131,10 +131,10 @@
         <ul class="scroll-list-12 [--scroll-list-cap:50dvh] [--scroll-list-under:48px]">
           {#each found as row (row.item)}
             {@const candidate = row.candidates[row.choice]}
-            {@const warn = differs(row) && 'text-warn'}
+            {@const warn = differs(row)}
             <li>
               <div
-                class="select-row min-h-12"
+                class={['select-row min-h-12', warn && '[--select-row-color:var(--warn)]']}
                 role="checkbox"
                 tabindex="0"
                 aria-checked={row.selected}
@@ -143,9 +143,9 @@
                 onmousedown={onRowMouseDown}
                 onkeydown={(event) => onRowKey(event, row)}
               >
-                <span class={['text-lg', warn]} lang="ja">{candidate.japanese}</span>
-                <span class={['text-sm', warn || 'text-muted']} lang="ja">{wordReading(candidate)}</span>
-                <span class={['min-w-0 truncate', warn]}>{candidate.meaning}</span>
+                <span class="text-lg" lang="ja">{candidate.japanese}</span>
+                <span class="text-sm text-muted" lang="ja">{wordReading(candidate)}</span>
+                <span class="min-w-0 truncate">{candidate.meaning}</span>
                 {#if row.candidates.length > 1}
                   <span class="min-w-4 flex-1" aria-hidden="true"></span>
                   <!-- an invisible native select covers the chevron, so the list that opens is the native one; it is clipped to the chevron because a select's own width and padding would push the list sideways -->

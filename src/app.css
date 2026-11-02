@@ -201,8 +201,9 @@
   background-repeat: no-repeat;
 }
 
-/* a list row selected by clicking it (role="checkbox"): the tint on hover, the action color at low opacity when
-   selected, and a stronger fill while pressed, except when the press is on a control inside it, which does its own thing */
+/* a list row selected by clicking it (role="checkbox"): the tint on hover, the action color (or --select-row-color) at
+   low opacity when selected, and a stronger fill while pressed, except when the press is on a control inside it, which
+   does its own thing */
 @utility select-row {
   display: flex;
   min-height: 40px;
@@ -225,15 +226,15 @@
   }
 
   &[aria-checked='true'] {
-    background-color: color-mix(in oklab, var(--action) 10%, transparent);
+    background-color: color-mix(in oklab, var(--select-row-color, var(--action)) 10%, transparent);
   }
 
   &[aria-checked='true']:hover {
-    background-color: color-mix(in oklab, var(--action) 15%, transparent);
+    background-color: color-mix(in oklab, var(--select-row-color, var(--action)) 15%, transparent);
   }
 
   &[aria-checked='true']:active:not(:has(:is(button, input, select):active)) {
-    background-color: color-mix(in oklab, var(--action) 20%, transparent);
+    background-color: color-mix(in oklab, var(--select-row-color, var(--action)) 20%, transparent);
   }
 
   &:focus-visible {
