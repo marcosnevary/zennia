@@ -340,6 +340,14 @@
           <option value={option.key}>{option.label}</option>
         {/each}
       </select>
+      <button
+        class="icon"
+        onclick={() => setSort(sortKey, sortDirection === 'asc' ? 'desc' : 'asc')}
+        aria-label={sortDirection === 'asc' ? 'Ascending' : 'Descending'}
+        title={sortDirection === 'asc' ? 'Ascending (click to reverse)' : 'Descending (click to reverse)'}
+      >
+        {#if sortDirection === 'asc'}<ArrowUp />{:else}<ArrowDown />{/if}
+      </button>
     </div>
   </div>
   <!-- on top of the list, which scrolls up behind it -->
@@ -367,14 +375,6 @@
         <Trash />
       </button>
     </div>
-    <button
-      class="icon"
-      onclick={() => setSort(sortKey, sortDirection === 'asc' ? 'desc' : 'asc')}
-      aria-label={sortDirection === 'asc' ? 'Ascending' : 'Descending'}
-      title={sortDirection === 'asc' ? 'Ascending (click to reverse)' : 'Descending (click to reverse)'}
-    >
-      {#if sortDirection === 'asc'}<ArrowUp />{:else}<ArrowDown />{/if}
-    </button>
   </div>
   {#if visibleWords.length === 0}
     <p class="my-4 text-muted">No words match your search or tag filter.</p>

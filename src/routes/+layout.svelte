@@ -23,6 +23,15 @@
   const app = setApp(new App(createRepo(getDb)))
   onMount(() => app.init())
 
+  // 0 with overlay scrollbars; the probe picks up the thin scrollbar app.css gives every element
+  onMount(() => {
+    const probe = document.createElement('div')
+    probe.style.cssText = 'position: absolute; visibility: hidden; width: 100px; overflow: scroll'
+    document.body.append(probe)
+    document.documentElement.style.setProperty('--scrollbar-width', `${probe.offsetWidth - probe.clientWidth}px`)
+    probe.remove()
+  })
+
   const tabs = [
     { path: '/practice', label: 'Practice', icon: PencilLine },
     { path: '/vocabulary', label: 'Vocabulary', icon: BookOpen },

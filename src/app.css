@@ -234,7 +234,22 @@
   gap: 8px;
   overflow-y: auto;
   padding: calc(4px + var(--scroll-list-under, 0px)) 4px 4px;
-  margin: calc(-4px - var(--scroll-list-under, 0px)) -4px -4px;
+  /* a classic scrollbar takes its width out of the rows, which would end short of the content around the list, so its
+     gutter sits past the right edge instead (--scrollbar-width, measured in +layout.svelte); stable, so the rows keep
+     that width whether the list scrolls or not */
+  scrollbar-gutter: stable;
+  margin: calc(-4px - var(--scroll-list-under, 0px)) calc(-4px - var(--scrollbar-width, 0px)) -4px -4px;
+  /* the bar shows only while the list is pointed at or focused; the gutter stays, so nothing shifts. It fades from the
+     muted colour at zero alpha, not from transparent (black), which the scrollbar's transition runs through a darker grey */
+  scrollbar-color: rgb(from var(--muted) r g b / 0) transparent;
+
+  &:is(:hover, :focus-within) {
+    scrollbar-color: rgb(from var(--muted) r g b / 0.5) transparent;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: scrollbar-color 150ms;
+  }
   scroll-padding-top: var(--scroll-list-under, 0px);
   max-height: min(
     calc(var(--scroll-list-rows, 10) * (var(--spacing) * --value(integer) + 8px) + var(--scroll-list-under, 0px)),
@@ -721,9 +736,15 @@
       animation: icon-look var(--icon-motion);
     }
 
-    /* the order flips, so the arrow does too */
-    &:is(.lucide-arrow-up, .lucide-arrow-down) {
-      animation: icon-flip var(--icon-motion);
+    /* the arrow slides the way the order runs */
+    &.lucide-arrow-up {
+      animation: icon-nudge var(--icon-motion);
+      --dy: -3px;
+    }
+
+    &.lucide-arrow-down {
+      animation: icon-nudge var(--icon-motion);
+      --dy: 3px;
     }
 
     /* practice; the check is drawn from its short arm, the way it is written */
@@ -921,12 +942,6 @@
   }
   75% {
     translate: -2px 0;
-  }
-}
-
-@keyframes icon-flip {
-  to {
-    rotate: x 360deg;
   }
 }
 
