@@ -381,8 +381,8 @@
             onpointerenter={() => app.markSeen(word.id)}
           >
             {#if app.newWordIds.has(word.id)}
-              <!-- half over the 8px gap above the row, right above the word -->
-              <span class="absolute -top-2 left-3 rounded-pill bg-action px-2 text-sm leading-4 font-medium text-on-action">new!</span>
+              <!-- on the row's corner; no further left than the list's 4px padding, which would clip it -->
+              <span class="absolute -top-2 -left-1rounded-pill bg-action px-2 text-sm leading-4 font-medium text-on-action">new!</span>
             {/if}
             <span class={["text-lg", word.disabled && DIM]} lang="ja">{word.japanese}</span>
             <span class={["text-sm text-muted", word.disabled && DIM]} lang="ja">{wordReading(word)}</span>
