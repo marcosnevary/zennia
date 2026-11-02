@@ -234,7 +234,11 @@
   gap: 8px;
   overflow-y: auto;
   padding: calc(4px + var(--scroll-list-under, 0px)) 4px 4px;
-  margin: calc(-4px - var(--scroll-list-under, 0px)) -4px -4px;
+  /* a classic scrollbar takes its width out of the rows, which would end short of the content around the list, so its
+     gutter sits past the right edge instead (--scrollbar-width, measured in +layout.svelte); stable, so the rows keep
+     that width whether the list scrolls or not */
+  scrollbar-gutter: stable;
+  margin: calc(-4px - var(--scroll-list-under, 0px)) calc(-4px - var(--scrollbar-width, 0px)) -4px -4px;
   scroll-padding-top: var(--scroll-list-under, 0px);
   max-height: min(
     calc(var(--scroll-list-rows, 10) * (var(--spacing) * --value(integer) + 8px) + var(--scroll-list-under, 0px)),
