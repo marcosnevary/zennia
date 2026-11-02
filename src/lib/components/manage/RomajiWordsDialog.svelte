@@ -110,7 +110,7 @@
             <span class={['min-w-0 truncate', warn, !row.selected && DIM]}>{candidate.meaning}</span>
             {#if warn}<span class="sr-only">(vowel length differs from what you typed)</span>{/if}
             {#if batchTags.length}
-              <span class="flex min-w-0 gap-2 overflow-hidden">{#each batchTags as tag (tag)}<TagChip {tag} />{/each}</span>
+              <span class="flex min-w-0 gap-1 overflow-hidden">{#each batchTags as tag (tag)}<TagChip {tag} />{/each}</span>
             {/if}
             {#if row.candidates.length > 1}
               <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
