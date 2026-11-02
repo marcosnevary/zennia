@@ -19,7 +19,7 @@ Styling was plain CSS: global rules in `src/app.css` plus a scoped `<style>` blo
 - Corners are rounded with three radius tokens in `@theme`: `--radius-control` (8px: buttons, selects, fields, checkboxes, tabs, file labels, stat tiles, word cards), `--radius-panel` (16px: dialogs, the practice result panel) and `--radius-pill` (tag chips, dots and switches), used through `rounded-control`, `rounded-panel` and `rounded-pill`.
 - Text uses Geist (`--font-ui`, from `@fontsource-variable/geist`, OFL), with the system's Japanese sans-serif fonts as fallback for kana and kanji. Libron (`--font-logo`, in `static/fonts/`) is used only for the zennia logo in the header.
 - Font sizes come from a 6-step scale in `@theme`, which replaces Tailwind's default sizes: `text-sm` (14px), `text-base` (16px), `text-lg` (20px), `text-xl` (28px), `text-2xl` (40px) and `text-display` (64px). The large steps carry their line height, and `text-2xl` a -2% letter spacing.
-- Patterns used in several places are `@utility` rules in `src/app.css` (`field`, `chevron`, `dot-leader`, `section-title`, `dialog-actions`) or components (`StatTile`, `Switch`).
+- Patterns used in several places are `@utility` rules in `src/app.css` (`field`, `chevron`, `dot-leader`, `dialog-actions`) or components (`StatTile`, `Switch`).
 - Every dialog ends with its buttons on the right, main one first (`dialog-actions`).
 - `PrintSheet.svelte` keeps its scoped `<style>`: it is print-only, sized in millimeters, and relies on `@page`.
 

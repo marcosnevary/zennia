@@ -353,11 +353,6 @@
   }
 }
 
-@utility section-title {
-  padding-bottom: 8px;
-  margin-bottom: 12px;
-}
-
 @layer base {
   * {
     box-sizing: border-box;
