@@ -56,6 +56,18 @@
     onsubmit: (event: Event) => void
     onkeydown: (event: KeyboardEvent) => void
   } = $props()
+
+  function moveFocus(event: KeyboardEvent) {
+    const target = event.key === 'ArrowDown' ? meaningEl : event.key === 'ArrowUp' ? inputEl : undefined
+    if (!target || target === event.target) return
+    event.preventDefault()
+    target.focus()
+  }
+
+  function onReadingKeydown(event: KeyboardEvent) {
+    moveFocus(event)
+    onkeydown(event)
+  }
 </script>
 
 {#snippet verdictIcon(fieldVerdict: Verdict | null)}
@@ -92,7 +104,7 @@
             aria-invalid={readingVerdict ? readingVerdict !== 'correct' : undefined}
             bind:this={inputEl}
             bind:value={answer}
-            {onkeydown}
+            onkeydown={onReadingKeydown}
             readonly={verdict !== null}
             placeholder="Type in romaji"
             autocomplete="off"
@@ -112,6 +124,7 @@
             aria-invalid={meaningVerdict ? meaningVerdict !== 'correct' : undefined}
             bind:this={meaningEl}
             bind:value={meaningAnswer}
+            onkeydown={moveFocus}
             readonly={verdict !== null}
             placeholder="Type the meaning"
             autocomplete="off"
