@@ -636,6 +636,28 @@
   }
 }
 
+/* the outcome of an action is drawn as it appears, wherever the pointer is; the X stroke by stroke, like the check */
+@media (prefers-reduced-motion: no-preference) {
+  .outcome > path {
+    animation: icon-draw 300ms ease-in-out backwards;
+  }
+
+  .lucide-check.outcome > path {
+    stroke-dasharray: 24;
+    --length: -24;
+  }
+
+  .lucide-x.outcome > path {
+    stroke-dasharray: 17;
+    --length: -17;
+    animation-duration: 150ms;
+
+    &:nth-child(2) {
+      animation-delay: 150ms;
+    }
+  }
+}
+
 @keyframes icon-nudge {
   50% {
     translate: var(--dx, 0) var(--dy, 0);
