@@ -1,7 +1,7 @@
 import { toRomaji } from 'wanakana'
 import { SCRIPT_LABELS, parseKanaKey, symbolOf } from '../core/kana'
 import type { Stats, Tally, Word } from '../core/types'
-import { hasSearchTags, parseSearch, wordReading } from './words'
+import { hasEveryTag, hasSearchTags, parseSearch, wordReading } from './words'
 import { sortTallies, type StatsSort, type StatsSortDirection } from './stats'
 
 export interface StatsRow {
@@ -60,14 +60,16 @@ export function buildRows(stats: Stats, words: Word[]): StatsRow[] {
 
 export interface StatsFilter {
   query: string
+  /** The tag chips of the search bar: a row needs every one */
+  tags: string[]
   sort: StatsSort
   direction: StatsSortDirection
 }
 
-/** The rows to show: matching the search text and its `#` terms, in the chosen order. */
-export function filterRows(rows: StatsRow[], { query, sort, direction }: StatsFilter): StatsRow[] {
-  const { text, tags } = parseSearch(query)
-  const matches = rows.filter((r) => r.search.includes(text) && hasSearchTags(r.tags, tags))
+/** The rows to show: having the chosen tags and matching the search text and its `#` terms, in the chosen order. */
+export function filterRows(rows: StatsRow[], { query, tags, sort, direction }: StatsFilter): StatsRow[] {
+  const search = parseSearch(query)
+  const matches = rows.filter((r) => hasEveryTag(r.tags, tags) && r.search.includes(search.text) && hasSearchTags(r.tags, search.tags))
   const byKey = new Map(matches.map((r) => [r.key, r]))
   return sortTallies(matches.map((r) => [r.key, r.tally]), sort, direction).map(([key]) => byKey.get(key)!)
 }

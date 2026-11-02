@@ -63,6 +63,7 @@ describe('filterRows', () => {
   ])
   const all: StatsFilter = {
     query: '',
+    tags: [],
     sort: 'misses',
     direction: 'desc',
   }
@@ -84,5 +85,12 @@ describe('filterRows', () => {
     expect(keys({ query: '#KATA' })).toEqual(['katakana:か'])
     expect(keys({ query: '#verbs #n5' })).toEqual(['word:w1'])
     expect(keys({ query: '#verbs drink' })).toEqual(['word:w2'])
+  })
+
+  it('keeps only the rows with every chosen tag, system tags included, along with the search', () => {
+    expect(keys({ tags: ['hiragana'] })).toEqual(['hiragana:か'])
+    expect(keys({ tags: ['Verbs', 'n5'] })).toEqual(['word:w1'])
+    expect(keys({ tags: ['verbs'], query: 'drink' })).toEqual(['word:w2'])
+    expect(keys({ tags: ['Verb'] })).toEqual([])
   })
 })

@@ -12,11 +12,12 @@
     type StatsSortDirection,
   } from '../../data/stats'
   import { buildRows, filterRows } from '../../data/stats-rows'
-  import { parseSearch, tagTerm } from '../../data/words'
+  import { cleanTags, findTag } from '../../data/words'
   import type { Tally } from '../../core/types'
   import { getApp } from '../../state.svelte'
   import StatTile from '../StatTile.svelte'
   import TagChip from '../TagChip.svelte'
+  import TagSearch from '../TagSearch.svelte'
 
   const LEVEL_STYLES = { high: 'text-on', low: 'text-off', '': '' }
 
@@ -34,16 +35,16 @@
     listEl?.scrollTo({ top: 0 })
   }
 
-  // Stats has no tag filter like Vocabulary's, so a clicked tag goes into the search as its # term
-  function searchTag(tag: string) {
-    const term = tagTerm(tag)
-    if (parseSearch(query).tags.includes(term.slice(1))) return
-    query = `${query.trim()} ${term}`.trim()
+  const rows = $derived(buildRows(stats, words))
+  const tags = $derived(cleanTags(rows.flatMap((r) => r.tags)))
+  let activeTags = $state<string[]>([])
+  const visibleRows = $derived(filterRows(rows, { query, tags: activeTags, sort, direction }))
+
+  function filterByTag(tag: string) {
+    if (findTag(activeTags, tag)) return
+    activeTags = [...activeTags, tag]
     listEl?.scrollTo({ top: 0 })
   }
-
-  const rows = $derived(buildRows(stats, words))
-  const visibleRows = $derived(filterRows(rows, { query, sort, direction }))
 
   const total = $derived(totalTally(stats))
 </script>
@@ -64,13 +65,14 @@
 
   <h2 class="mb-0">Practiced ({visibleRows.length === rows.length ? rows.length : `${visibleRows.length} of ${rows.length}`})</h2>
   <div class="mt-4 mb-2 flex flex-wrap items-center gap-2">
-    <input
-      type="search"
-      class="field min-w-50 flex-1 appearance-none"
+    <TagSearch
+      id="stats-search"
       placeholder="Search by word, reading, meaning or #tag"
-      aria-label="Search stats"
-      bind:value={query}
-      oninput={() => listEl?.scrollTo({ top: 0 })}
+      label="Search stats"
+      bind:query
+      bind:tags={activeTags}
+      suggestions={tags}
+      onchange={() => listEl?.scrollTo({ top: 0 })}
     />
     <div class="flex items-center gap-2">
       <select
@@ -105,7 +107,7 @@
           <span class="min-w-0 truncate">{row.meaning}</span>
         {/if}
         {#if row.tags.length > 0}
-          <span class="flex gap-1">{#each row.tags as tag (tag)}<TagChip {tag} onclick={() => searchTag(tag)} />{/each}</span>
+          <span class="flex gap-1">{#each row.tags as tag (tag)}<TagChip {tag} onclick={() => filterByTag(tag)} />{/each}</span>
         {/if}
         <span class="min-w-4 flex-1" aria-hidden="true"></span>
         <!-- both counts have a fixed width, the correct one right-aligned and the wrong one left-aligned, so they meet at the same
