@@ -31,7 +31,8 @@
     { path: '/settings', label: 'Settings', icon: Settings },
   ] as const
 
-  const TEXT_FIELDS = 'input:not([type=checkbox], [type=radio], [type=file], [type=range]), textarea'
+  // the controls that take typed digits (a select jumps to the option they start), so the number keys are left to them
+  const FIELDS = 'input:not([type=checkbox], [type=radio], [type=file], [type=range]), textarea, select'
 
   // SvelteKit keeps the old page until the new route's code loads, so follow the in-flight navigation to switch at once
   const currentPath = $derived(navigating.to?.url.pathname ?? page.url.pathname)
@@ -61,16 +62,18 @@
     }
   })
 
+  // Escape is left alone where something else handles it: an open dialog closes on it, and a field that handles it cancels it
   function blurOnEscape(event: KeyboardEvent) {
-    const field = document.activeElement
-    if (event.key === 'Escape' && field instanceof HTMLElement && field.matches(TEXT_FIELDS)) field.blur()
+    const control = document.activeElement
+    if (event.key !== 'Escape' || event.defaultPrevented || !(control instanceof HTMLElement)) return
+    if (!control.closest('dialog')) control.blur()
   }
 
   // Shift is allowed because some layouts (AZERTY) need it to type the digits; the other modifiers belong to the browser and system
   function switchTab(event: KeyboardEvent) {
     const tab = tabs.find((_, i) => event.key === String(i + 1))
     if (!tab || event.metaKey || event.ctrlKey || event.altKey) return
-    if (document.activeElement?.matches(`${TEXT_FIELDS}, select`) || document.querySelector('dialog[open]')) return
+    if (document.activeElement?.matches(FIELDS) || document.querySelector('dialog[open]')) return
     event.preventDefault()
     const href = resolve(tab.path)
     goto(href, { replace: currentPath === href })
