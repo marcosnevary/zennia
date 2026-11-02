@@ -159,10 +159,10 @@
     activeTags = cleanTags(filterTags.map((t) => (sameTag(t, from) ? name : t)))
   }
 
-  function deleteTagEverywhere(tag: string) {
-    app.setWords(deleteTag(words, tag))
-    // the list may grow if the tag was filtering it, so the selection must not outlive it
-    activeTags = activeTags.filter((t) => !sameTag(t, tag))
+  function deleteTagsEverywhere(gone: string[]) {
+    app.setWords(gone.reduce(deleteTag, words))
+    // the list may grow if a tag was filtering it, so the selection must not outlive it
+    activeTags = activeTags.filter((t) => !gone.some((g) => sameTag(t, g)))
     selected = new Set()
     pageNumber = 1
   }
@@ -280,7 +280,7 @@
   {tags}
   {words}
   onrename={renameTagEverywhere}
-  ondelete={deleteTagEverywhere}
+  ondelete={deleteTagsEverywhere}
 />
 
 <RomajiWordsDialog bind:this={romajiDialog} {tags} />
