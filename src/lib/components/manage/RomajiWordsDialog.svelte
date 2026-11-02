@@ -2,7 +2,6 @@
   import ChevronDown from '@lucide/svelte/icons/chevron-down'
   import Plus from '@lucide/svelte/icons/plus'
   import Search from '@lucide/svelte/icons/search'
-  import TagChip from '../TagChip.svelte'
   import TagInput from './TagInput.svelte'
   import { closeOnBackdrop } from './dialog'
   import { plural } from '../../core/plural'
@@ -110,9 +109,6 @@
             <span class={['min-w-0 truncate text-sm', warn || 'text-muted', !row.selected && DIM]} lang="ja">{candidate.hiragana} · {toDisplayRomaji(candidate.hiragana)}</span>
             <span class={['min-w-0 truncate', warn, !row.selected && DIM]}>{candidate.meaning}</span>
             {#if warn}<span class="sr-only">(vowel length differs from what you typed)</span>{/if}
-            {#if batchTags.length}
-              <span class="flex min-w-0 gap-1 overflow-hidden">{#each batchTags as tag (tag)}<TagChip {tag} />{/each}</span>
-            {/if}
             {#if row.candidates.length > 1}
               <span class="dot-leader min-w-4 flex-1" aria-hidden="true"></span>
               <!-- an invisible native select covers the chevron, so the list that opens is the native one; it is clipped to the chevron because a select's own width and padding would push the list sideways -->
