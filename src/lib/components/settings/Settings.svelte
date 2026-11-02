@@ -53,9 +53,14 @@
   }
 
   // the old content fades out before the new one fades in, so they never share the button;
-  // only the content fades, not the control, so its fill stays put
+  // only the content fades, not the control, so its fill stays put.
+  // A new outcome on a button that already shows one only redraws its icon
   async function show(next: typeof feedback) {
-    const keys = [...new Set([feedback?.key, next?.key])]
+    if (next && next.key === feedback?.key) {
+      feedback = next
+      return
+    }
+    const keys = [feedback?.key, next?.key]
     const contents = () => keys.flatMap((key) => [...(controls.get(key ?? '')?.children ?? [])])
     const animate = !prefersReducedMotion.current
     const fadingOut = animate ? contents().map((child) => child.animate([{ opacity: 0 }], { duration: 100, fill: 'forwards' })) : []
@@ -102,7 +107,10 @@
 
 {#snippet action(key: string, Icon: Component, label: string)}
   {#if feedback?.key === key}
-    {#if feedback.ok}<Check class="outcome" />{:else}<X class="outcome" />{/if}<span>{feedback.text}</span>
+    {#key feedback}
+      {#if feedback.ok}<Check class="outcome" />{:else}<X class="outcome" />{/if}
+    {/key}
+    <span>{feedback.text}</span>
   {:else}
     <Icon /><span>{label}</span>
   {/if}
