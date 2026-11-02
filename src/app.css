@@ -201,12 +201,6 @@
   background-repeat: no-repeat;
 }
 
-/* row of small, widely spaced square dots */
-@utility dot-leader {
-  height: 2px;
-  background: linear-gradient(90deg, var(--muted) 2px, transparent 2px) left center / 8px 2px repeat-x;
-}
-
 /* a list row selected by clicking it (role="checkbox"): the tint on hover, the action color at low opacity when
    selected, and a stronger fill while pressed, except when the press is on a control inside it, which does its own thing */
 @utility select-row {
