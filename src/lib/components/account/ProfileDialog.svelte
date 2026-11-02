@@ -81,7 +81,7 @@
         {/if}
       </div>
     </div>
-    <label class="grid gap-2">
+    <label class="grid gap-1">
       <span class="text-sm text-muted">Name</span>
       <input class="field" type="text" maxlength="50" autocomplete="name" bind:value={name} />
     </label>
