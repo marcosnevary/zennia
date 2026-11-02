@@ -52,15 +52,9 @@
   />
   {#if error}<p class="text-bad" role="alert">{error}</p>{/if}
   {#if choices.length > 0}
-    <ul class="flex max-h-32 flex-wrap gap-1 overflow-y-auto" aria-label="Tags: + adds one to the word, × removes it">
+    <ul class="flex max-h-32 flex-wrap gap-1 overflow-y-auto" aria-label="Tags: pressed ones are on the word, click one to add or remove it">
       {#each choices as tag (tag)}
-        <li>
-          {#if has(tag)}
-            <TagChip {tag} onremove={() => toggle(tag)} />
-          {:else}
-            <TagChip {tag} onadd={() => toggle(tag)} />
-          {/if}
-        </li>
+        <li><TagChip {tag} selected={has(tag)} onclick={() => toggle(tag)} /></li>
       {/each}
     </ul>
   {/if}

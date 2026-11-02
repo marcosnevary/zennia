@@ -144,7 +144,7 @@
     if (event.key === 'Backspace' && query === '' && last) toggleFilterTag(last)
   }
 
-  // clicking a tag on a word narrows the list to it (it never undoes: the active filter has the X)
+  // clicking a tag on a word narrows the list to it (it never undoes: clicking the chip in the search bar does)
   function filterByTag(tag: string) {
     if (!filterTags.some((t) => sameTag(t, tag))) toggleFilterTag(tag)
   }
@@ -172,7 +172,7 @@
   let tagDialogEl = $state<HTMLDialogElement>()
   const commonTags = $derived(tags.filter((t) => selectedWords.length > 0 && selectedWords.every((w) => w.tags.some((x) => sameTag(x, t)))))
 
-  // tags seen while the dialog is open stay listed after being taken off, so × only deselects them
+  // tags seen while the dialog is open stay listed after being taken off, so a click only deselects them
   let dialogTags = $state<string[]>([])
   const dialogChoices = $derived(cleanTags([...tags, ...dialogTags]))
 
@@ -315,11 +315,11 @@
   <p class="my-4 text-muted">No words yet.</p>
 {:else}
   <div class="mb-2 flex flex-wrap items-center gap-2">
-    <!-- a label, so clicking beside the chips focuses the input; without `for` it would label the first chip's X
+    <!-- a label, so clicking beside the chips focuses the input; without `for` it would label the first chip
          button instead, which then turns hovered and clicked along with the whole bar -->
     <label for="word-search" class="field flex min-h-10 min-w-50 flex-1 cursor-text flex-wrap items-center gap-1 px-3 py-1">
       {#each filterTags as tag (tag)}
-        <TagChip {tag} onremove={() => toggleFilterTag(tag)} />
+        <TagChip {tag} selected onclick={() => toggleFilterTag(tag)} />
       {/each}
       <input
         id="word-search"
