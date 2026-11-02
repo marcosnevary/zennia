@@ -36,7 +36,7 @@ function fakeRepo(stored: Partial<Stored> = {}, conflict = false) {
     saveSettings: vi.fn(async (patch) => {
       calls.push(`settings ${JSON.stringify(patch)}`)
     }),
-    account: vi.fn(async () => ({ anonymous: true, email: null })),
+    account: vi.fn(async () => ({ anonymous: true, email: null, name: null, avatarUrl: null })),
     linkAccount: vi.fn(async () => {
       calls.push('link')
     }),

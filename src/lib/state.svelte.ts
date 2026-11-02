@@ -46,7 +46,7 @@ export class App {
   settings = $state<Settings>({ ...DEFAULT_SETTINGS, theme: readThemeCache() })
   status = $state<'loading' | 'ready' | 'failed'>('loading')
   error = $state('')
-  account = $state<Account>({ anonymous: true, email: null })
+  account = $state<Account>({ anonymous: true, email: null, name: null, avatarUrl: null })
   // Google sent the user back because that account already has data; waits for them to choose
   conflict = $state(false)
   // words of the writing sheet being printed; it renders hidden and only shows up in the print dialog

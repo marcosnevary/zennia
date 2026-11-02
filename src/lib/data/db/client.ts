@@ -1,4 +1,4 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js'
 
 export type Db = SupabaseClient
 
@@ -21,6 +21,8 @@ export function getDb(): Db {
 export interface Account {
   anonymous: boolean
   email: string | null
+  name: string | null
+  avatarUrl: string | null
 }
 
 function readLinkConflict(): boolean {
@@ -40,7 +42,18 @@ export function takeLinkConflict(): boolean {
 
 export async function getAccount(db: Db): Promise<Account> {
   const { data } = await db.auth.getUser()
-  return { anonymous: data.user?.is_anonymous ?? true, email: data.user?.email ?? null }
+  return accountOf(data.user)
+}
+
+export function accountOf(user: User | null): Account {
+  // linkIdentity does not copy the Google profile into user_metadata of an anonymous user, only into its identity
+  const profile = { ...user?.user_metadata, ...user?.identities?.find((i) => i.provider === 'google')?.identity_data }
+  return {
+    anonymous: user?.is_anonymous ?? true,
+    email: user?.email ?? null,
+    name: profile.full_name ?? profile.name ?? null,
+    avatarUrl: profile.avatar_url ?? profile.picture ?? null,
+  }
 }
 
 /** Attaches Google to the anonymous user, which keeps its id and data. Leaves the page to go to Google. */

@@ -13,7 +13,7 @@ Every browser gets an anonymous Supabase user, so data cannot be reached from an
 ## Decision
 
 - Google is the only provider: no passwords to reset and no email delivery to set up.
-- Login is optional. The app keeps working with an anonymous user; the bottom of the sidebar offers "Sign in with Google" and, once signed in, shows the email and Sign out.
+- Login is optional. The app keeps working with an anonymous user; the bottom of the sidebar offers "Sign in with Google" and, once signed in, shows the Google photo and name (the first letter of the name when there is no photo) and Sign out.
 - Signing in calls `linkIdentity`, which attaches Google to the anonymous user. It keeps its `user_id`, so no data moves and the schema and RLS do not change.
 - If the Google account already belongs to another user, Supabase returns `identity_already_exists` in the redirect URL. The app then signs in to that account with `signInWithOAuth`. If the browser has data, the user is asked first, because that data is discarded; merging is not supported.
 - Signing out starts a fresh anonymous user.

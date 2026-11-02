@@ -25,6 +25,8 @@
   const app = setApp(new App(createRepo(getDb)))
   onMount(() => app.init())
 
+  let avatarFailed = $state(false)
+
   // 0 with overlay scrollbars; the probe picks up the thin scrollbar app.css gives every element
   onMount(() => {
     const probe = document.createElement('div')
@@ -126,14 +128,32 @@
             <LogIn /><span class="max-md:sr-only">Sign in</span>
           </button>
         {:else}
-          <p class="truncate text-sm text-muted max-md:hidden" title={app.account.email}>{app.account.email}</p>
-          <button
-            class="rounded-pill max-md:size-10 max-md:p-0"
-            onclick={() => confirm('Sign out? This browser will start empty until you sign in again.') && app.signOut()}
-            title="Sign out of {app.account.email}"
-          >
-            <LogOut /><span class="max-md:sr-only">Sign out</span>
-          </button>
+          {@const label = app.account.name ?? app.account.email ?? ''}
+          <div class="flex items-center gap-2 max-md:flex-col md:pl-4" title={app.account.email}>
+            {#if app.account.avatarUrl && !avatarFailed}
+              <!-- Google's photo host refuses some requests that carry a referrer -->
+              <img
+                class="size-8 shrink-0 rounded-pill"
+                src={app.account.avatarUrl}
+                alt=""
+                referrerpolicy="no-referrer"
+                onerror={() => (avatarFailed = true)}
+              />
+            {:else}
+              <span class="flex size-8 shrink-0 items-center justify-center rounded-pill bg-tint text-sm" aria-hidden="true">
+                {label.charAt(0).toUpperCase()}
+              </span>
+            {/if}
+            <p class="min-w-0 flex-1 truncate text-sm max-md:hidden">{label}</p>
+            <button
+              class="icon rounded-pill"
+              onclick={() => confirm('Sign out? This browser will start empty until you sign in again.') && app.signOut()}
+              title="Sign out of {app.account.email}"
+              aria-label="Sign out"
+            >
+              <LogOut />
+            </button>
+          </div>
         {/if}
       </div>
     {/if}
