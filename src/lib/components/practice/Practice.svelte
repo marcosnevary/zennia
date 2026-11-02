@@ -68,10 +68,15 @@
     }
   }
 
-  // Check takes the focus off the fields, so Enter and Space reach the page and still move on to the next round
+  // Check takes the focus off the fields, so Enter and Space reach the page and still move on to the next round;
+  // before Check, Enter on the page brings the focus back to the answer
   function onWindowKeydown(event: KeyboardEvent) {
-    if (session.verdict !== null && event.target === document.body && (event.key === ' ' || event.key === 'Enter')) {
+    if (event.target !== document.body) return
+    if (session.verdict !== null && (event.key === ' ' || event.key === 'Enter')) {
       submit(event)
+    } else if (session.verdict === null && event.key === 'Enter') {
+      event.preventDefault()
+      focusField()
     }
   }
 
