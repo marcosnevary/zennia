@@ -10,6 +10,9 @@
   import Tag from '@lucide/svelte/icons/tag'
   import Tags from '@lucide/svelte/icons/tags'
   import Trash from '@lucide/svelte/icons/trash'
+  import { prefersReducedMotion } from 'svelte/motion'
+  import { cubicInOut } from 'svelte/easing'
+  import { fade } from 'svelte/transition'
   import { closeOnBackdrop } from './dialog'
   import KanaSelector from './KanaSelector.svelte'
   import RomajiWordsDialog from './RomajiWordsDialog.svelte'
@@ -233,6 +236,8 @@
   // buttons share the whole row evenly
   const WIDE = `${ROW} *:flex-1 *:text-center`
   const DIM = 'opacity-45'
+  // the badge lingers a moment after the pointer reaches the row, so it is seen going away rather than just missing
+  const badgeOut = $derived({ delay: 100, duration: prefersReducedMotion.current ? 0 : 500, easing: cubicInOut })
 </script>
 
 <div>
@@ -369,7 +374,7 @@
       {#each visibleWords as word (word.id)}
         <li>
           <div
-            class="select-row"
+            class="select-row relative"
             role="checkbox"
             tabindex="0"
             aria-checked={selected.has(word.id)}
@@ -378,7 +383,12 @@
             ondblclick={(event) => onCardDoubleClick(event, word)}
             onmousedown={onCardMouseDown}
             onkeydown={(event) => onCardKey(event, word)}
+            onpointerenter={() => app.markSeen(word.id)}
           >
+            {#if app.newWordIds.has(word.id)}
+              <!-- on the row's corner; no further left than the list's 4px padding, which would clip it -->
+              <span out:fade={badgeOut} class="absolute -top-2 -left-1 rounded-pill bg-action px-2 text-sm leading-4 font-medium text-on-action">new!</span>
+            {/if}
             <span class={["text-lg", word.disabled && DIM]} lang="ja">{word.japanese}</span>
             <span class={["text-sm text-muted", word.disabled && DIM]} lang="ja">{wordReading(word)}</span>
             {#if needsMeaning(word)}

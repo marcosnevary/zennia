@@ -89,6 +89,15 @@ describe('App', () => {
     expect(app.words.map((w) => w.id)).toEqual(['x', 'y', 'a'])
   })
 
+  it('marks added words as new until they are seen', async () => {
+    const { app } = await ready({ words: [word('a', 1)] })
+    expect(app.newWordIds.size).toBe(0)
+    app.setWords([word('b', 2), word('c', 3), { ...app.words[0], disabled: true }])
+    expect([...app.newWordIds].sort()).toEqual(['b', 'c'])
+    app.markSeen('b')
+    expect([...app.newWordIds]).toEqual(['c'])
+  })
+
   it('drops the stats of a deleted word', async () => {
     const stats: Stats = { words: { a: { hits: 1, misses: 0 } }, kana: {} }
     const { app } = await ready({ words: [word('a', 1)], stats })
