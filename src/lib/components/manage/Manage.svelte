@@ -60,7 +60,7 @@
   let errors = $state<WordErrors>({})
   let japaneseEl = $state<HTMLInputElement>()
 
-  let { section }: { section: 'words' | 'kana' } = $props()
+  let { section }: { section: 'vocabulary' | 'kana' } = $props()
 
   function resetForm() {
     japanese = ''
@@ -286,7 +286,7 @@
   {#if message}<p class="text-bad" role="alert">{message}</p>{/if}
 {/snippet}
 
-{#if section === 'words'}
+{#if section === 'vocabulary'}
 <div class="grid items-start gap-x-8 gap-y-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]">
 <div>
 <h2 class="section-title">New word</h2>
@@ -307,7 +307,7 @@
 </div>
 </div>
 <div>
-<h2 class="section-title">Words ({visibleWords.length === words.length ? words.length : `${visibleWords.length} of ${words.length}`})</h2>
+<h2 class="section-title">Vocabulary ({visibleWords.length === words.length ? words.length : `${visibleWords.length} of ${words.length}`})</h2>
 {#if words.length === 0}
   <p class="my-4 text-muted">No words yet.</p>
 {:else}

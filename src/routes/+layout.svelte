@@ -24,7 +24,7 @@
 
   const tabs = [
     { path: '/practice', label: 'Practice', icon: PencilLine },
-    { path: '/words', label: 'Words', icon: BookOpen },
+    { path: '/vocabulary', label: 'Vocabulary', icon: BookOpen },
     { path: '/kana', label: 'Kana', icon: Languages },
     { path: '/stats', label: 'Stats', icon: ChartColumn },
     { path: '/settings', label: 'Settings', icon: Settings },
