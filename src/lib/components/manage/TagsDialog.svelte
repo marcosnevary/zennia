@@ -2,11 +2,11 @@
   import Check from '@lucide/svelte/icons/check'
   import Trash from '@lucide/svelte/icons/trash'
   import Pagination from '../Pagination.svelte'
-  import TagChip from './TagChip.svelte'
+  import TagChip, { CHIP } from './TagChip.svelte'
   import { closeOnBackdrop } from './dialog'
   import type { Word } from '../../core/types'
   import { paginate } from '../../data/pagination'
-  import { filterByTags, matchTags, sameTag, validateTag } from '../../data/words'
+  import { filterByTags, matchTags, sameTag, tagHue, validateTag } from '../../data/words'
 
   let {
     tags,
@@ -67,18 +67,35 @@
     renameError = ''
   }
 
-  function confirmRename(event: Event) {
-    event.preventDefault()
+  function saveRename() {
     if (renaming === null) return
-    renameError = validateTag(renameDraft)
-    if (renameError) return
     const from = renaming
     const to = renameDraft.trim()
+    renameError = validateTag(to)
+    if (renameError) return
     const merges = !sameTag(from, to) && tags.some((t) => sameTag(t, to))
-    if (merges && !confirm(`"${to}" already exists. Merge "${from}" into it?`)) return
-    onrename(from, to)
+    if (merges && !confirm(`"${to}" already exists. Merge "${from}" into it?`)) {
+      renaming = null
+      return
+    }
+    if (to !== from) onrename(from, to)
     selected = selected.filter((t) => !sameTag(t, from))
     renaming = null
+  }
+
+  // Enter saves through the blur, so the field has already let go of the focus when the merge confirm() takes it
+  // and the blur cannot save a second time
+  function onRenameKey(event: KeyboardEvent) {
+    if (event.key === 'Enter') (event.currentTarget as HTMLInputElement).blur()
+    else if (event.key === 'Escape') renaming = null
+    else return
+    // Escape would otherwise also close the dialog
+    event.preventDefault()
+  }
+
+  function focusAndSelect(input: HTMLInputElement) {
+    input.focus()
+    input.select()
   }
 
   function removeSelected() {
@@ -87,14 +104,12 @@
     selected = []
   }
 
-
-  // the double click's two clicks have already toggled the selection there and back, so it ends as it was;
-  // a double click would otherwise highlight the tag under the pointer
-  function onRowMouseDown(event: MouseEvent) {
-    if (event.detail > 1) event.preventDefault()
+  // the tag chip and the rename field inside a row do their own thing, so a click on them must not also select it
+  function onRowClick(event: MouseEvent, tag: string) {
+    if (!(event.target as Element).closest('button, input')) toggleSelected(tag)
   }
 
-  // Enter stands in for the double click, the only other way to rename a tag
+  // Enter stands in for the click on the chip
   function onRowKey(event: KeyboardEvent, tag: string) {
     if (event.target !== event.currentTarget) return
     if (event.key === ' ') toggleSelected(tag)
@@ -141,32 +156,44 @@
       <ul class="grid gap-2">
         {#each current.items as tag (tag)}
           <li>
-            {#if renaming !== null && sameTag(renaming, tag)}
-              <form class="flex items-center gap-2" onsubmit={confirmRename}>
-                <input type="text" class="field min-w-0 flex-1" aria-label={`New name for ${tag}`} bind:value={renameDraft} oninput={() => (renameError = '')} />
-                <button class="action" type="submit"><Check />Save</button>
-                <button type="button" onclick={() => (renaming = null)}>Cancel</button>
-              </form>
-            {:else}
-              <div
-                class={[
-                  'flex min-h-10 cursor-pointer items-center gap-3 rounded-control px-3 py-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action motion-reduce:transition-none',
-                  isSelected(tag) ? 'bg-action/10 hover:bg-action/15 active:bg-action/20' : 'hover:bg-tint active:bg-tint-pressed',
-                ]}
-                role="checkbox"
-                tabindex="0"
-                aria-checked={isSelected(tag)}
-                aria-label={`Select ${tag}`}
-                onclick={() => toggleSelected(tag)}
-                ondblclick={() => startRename(tag)}
-                onmousedown={onRowMouseDown}
-                onkeydown={(event) => onRowKey(event, tag)}
-              >
-                <TagChip {tag} />
-                <span class="min-w-4 flex-1" aria-hidden="true"></span>
-                <span class="text-sm text-muted">{filterByTags(words, [tag]).length} word(s)</span>
-              </div>
-            {/if}
+            <div
+              class={[
+                'flex min-h-10 cursor-pointer items-center gap-3 rounded-control px-3 py-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action motion-reduce:transition-none',
+                isSelected(tag)
+                  ? 'bg-action/10 hover:bg-action/15 active:not-has-[:is(button,input):active]:bg-action/20'
+                  : 'hover:bg-tint active:not-has-[:is(button,input):active]:bg-tint-pressed',
+              ]}
+              role="checkbox"
+              tabindex="0"
+              aria-checked={isSelected(tag)}
+              aria-label={`Select ${tag}`}
+              onclick={(event) => onRowClick(event, tag)}
+              onkeydown={(event) => onRowKey(event, tag)}
+            >
+              {#if renaming !== null && sameTag(renaming, tag)}
+                <!-- the hidden copy of the text sizes the chip as the name is typed, as a field cannot fit its content -->
+                <span class="{CHIP} focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-action" style:--hue={tagHue(tag)}>
+                  <span class="grid min-w-4">
+                    <span class="invisible col-start-1 row-start-1 whitespace-pre">{renameDraft}</span>
+                    <input
+                      type="text"
+                      class="col-start-1 row-start-1 w-full min-w-0 cursor-text bg-transparent p-0 outline-none"
+                      aria-label={`New name for ${tag}`}
+                      aria-invalid={!!renameError}
+                      bind:value={renameDraft}
+                      oninput={() => (renameError = '')}
+                      onkeydown={onRenameKey}
+                      onblur={saveRename}
+                      {@attach focusAndSelect}
+                    />
+                  </span>
+                </span>
+              {:else}
+                <TagChip {tag} title="Rename tag" onclick={() => startRename(tag)} />
+              {/if}
+              <span class="min-w-4 flex-1" aria-hidden="true"></span>
+              <span class="text-sm text-muted">{filterByTags(words, [tag]).length} word(s)</span>
+            </div>
           </li>
         {/each}
       </ul>
