@@ -150,7 +150,7 @@
   }
 
   /* the shadow doubles the border outwards without changing the field's size, in whatever color the state below sets */
-  /* a field wrapping an input (the Words search with its tag chips) shows the focus of that input */
+  /* a field wrapping an input (the Vocabulary search with its tag chips) shows the focus of that input */
   &:focus-visible,
   &:has(> input:focus-visible) {
     outline: none;
