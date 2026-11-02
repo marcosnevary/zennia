@@ -15,6 +15,8 @@ export interface Settings {
   statsSortDirection: StatsSortDirection
   /** The colour of each tag in use, by `tagKey`. */
   tagColors: Record<string, TagColor>
+  /** Whether the keys 1 to 5 switch tabs. */
+  numberKeyTabs: boolean
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -26,4 +28,5 @@ export const DEFAULT_SETTINGS: Settings = {
   statsSort: 'accuracy',
   statsSortDirection: 'desc',
   tagColors: {},
+  numberKeyTabs: true,
 }

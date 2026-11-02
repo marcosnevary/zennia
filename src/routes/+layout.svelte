@@ -82,6 +82,7 @@
 
   // Shift is allowed because some layouts (AZERTY) need it to type the digits; the other modifiers belong to the browser and system
   function switchTab(event: KeyboardEvent) {
+    if (!app.settings.numberKeyTabs) return
     const tab = tabs.find((_, i) => event.key === String(i + 1))
     if (!tab || event.metaKey || event.ctrlKey || event.altKey) return
     if (document.activeElement?.matches(FIELDS) || document.querySelector('dialog[open]')) return
@@ -110,8 +111,8 @@
           class="tab rounded-pill max-md:size-10 max-md:p-0 md:justify-start"
           href={resolve(path)}
           aria-current={currentPath === resolve(path) ? 'page' : undefined}
-          title="{label} ({i + 1})"
-          aria-keyshortcuts={String(i + 1)}
+          title={app.settings.numberKeyTabs ? `${label} (${i + 1})` : label}
+          aria-keyshortcuts={app.settings.numberKeyTabs ? String(i + 1) : undefined}
         >
           <TabIcon /><span class="max-md:sr-only">{label}</span>
         </a>

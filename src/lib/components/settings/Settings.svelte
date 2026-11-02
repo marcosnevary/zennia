@@ -13,6 +13,7 @@
   import { importBrief, importSummary, type SanitizeResult } from '../../data/words'
   import Help from './Help.svelte'
   import SettingRow from './SettingRow.svelte'
+  import Switch from '../Switch.svelte'
   import type { WordsFocus } from '../../data/practice-modes'
   import { THEMES, type ThemePreference } from '../../data/theme'
   import { getApp } from '../../state.svelte'
@@ -143,6 +144,19 @@
         <option value={f.id}>{f.label}</option>
       {/each}
     </select>
+  </SettingRow>
+
+  <SettingRow
+    title="Switch tabs with number keys"
+    description="Press 1 to 5 to open Practice, Vocabulary, Kana, Stats or Settings, except while typing in a field."
+  >
+    <div class="flex sm:justify-end">
+      <Switch
+        checked={app.settings.numberKeyTabs}
+        onchange={() => app.setNumberKeyTabs(!app.settings.numberKeyTabs)}
+        label="Switch tabs with number keys"
+      />
+    </div>
   </SettingRow>
 </div>
 
