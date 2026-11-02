@@ -79,7 +79,7 @@
   {/if}
 {/snippet}
 
-<section class="mt-6 bg-surface px-4 py-6 text-center">
+<section class="mt-6 bg-surface px-4 pb-6 text-center">
   <!-- the verdict takes the place of the prompt: they share one grid cell and cross-fade -->
   <div class="mb-5 grid">
     <p
