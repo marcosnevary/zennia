@@ -4,4 +4,7 @@
 | --- | --- | --- |
 | Dictionary | `Dictionary` (`src/lib/data/dictionary.ts`) | The bundled JMdict common words, looked up by sound to fill in the words of a romaji list ("Add from romaji"). |
 | Furigana | `furigana`, `FuriganaPart` (`src/lib/core/furigana.ts`) | The reading in hiragana shown above the kanji or katakana of a word, in the practice feedback. Hiragana runs (okurigana) get none. |
+| Meaning | `meaning` (`Word`, `src/lib/core/types.ts`) | What the word means, free text. Practice can ask for it instead of, or along with, the reading. |
+| Reading | `hiragana` (`Word`), `reading` (sort key and `WordsFocus`) | How a word is pronounced, written in kana. It is typed and shown in romaji too, but romaji is not a separate field. Answers are checked against it. |
 | Vocabulary | `/vocabulary`, `Manage` with `section="vocabulary"` (`src/lib/components/manage/Manage.svelte`) | The tab where the user adds, lists and tags their words and picks which ones are active in practice. |
+| Word | `Word` (`src/lib/core/types.ts`); its written form is `japanese` | One entry of the vocabulary, with its reading, meaning and tags. "Word" is also the name of its written form (kanji or kana), the one shown in practice, which is `japanese` in the code and in the export file. |

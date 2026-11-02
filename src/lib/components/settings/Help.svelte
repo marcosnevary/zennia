@@ -22,7 +22,7 @@
   <h3 class="mt-4 mb-1 text-base font-bold">Import JSON</h3>
   <p class="mt-1 mb-2">
     Loads a file created by <strong>Export JSON</strong>. A plain list of words also works, where each item has
-    <code>japanese</code>, <code>hiragana</code> and <code>meaning</code>. Imported words are
+    <code>japanese</code> (the word), <code>hiragana</code> (the reading in kana) and <code>meaning</code>. Imported words are
     <strong>added</strong> to your current list, nothing is replaced or deleted. Words you already have (same word and
     reading) are skipped, and invalid items, including words without a meaning, are ignored.
   </p>
@@ -33,9 +33,9 @@
     <strong>Notes in Plain Text (.txt)</strong> (not "Cards in Plain Text"). Then pick the exported file with <strong>Import Anki deck</strong>.
   </p>
   <p class="mt-1 mb-2">
-    The first three columns of the file must be, in this order, the <strong>Japanese word</strong>, its
-    <strong>hiragana</strong> reading and the <strong>meaning</strong>. Any other column is ignored. Rows without a valid
-    hiragana reading or without a meaning, and repeated word + reading pairs, are skipped; the summary tells you how many.
+    The first three columns of the file must be, in this order, the <strong>word</strong>, its
+    <strong>reading</strong> in kana and the <strong>meaning</strong>. Any other column is ignored. Rows without a valid
+    reading or without a meaning, and repeated word + reading pairs, are skipped; the summary tells you how many.
   </p>
 
   <div class="dialog-actions">

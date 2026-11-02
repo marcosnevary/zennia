@@ -22,7 +22,7 @@
   const app = getApp()
 
   const FOCUSES: { id: WordsFocus; label: string }[] = [
-    { id: 'reading', label: 'Romaji' },
+    { id: 'reading', label: 'Reading' },
     { id: 'meaning', label: 'Meaning' },
     { id: 'both', label: 'Both' },
   ]
@@ -175,7 +175,7 @@
   <SettingRow title="Import an Anki deck" description={describe('anki', 'Add the words of Anki notes exported as plain text.')}>
     <label
       class="file text-center"
-      title="Anki: Export → Notes in Plain Text. Columns: word, hiragana, meaning"
+      title="Anki: Export → Notes in Plain Text. Columns: word, reading, meaning"
       {@attach control('anki')}
     >
       {@render action('anki', Download, 'Import .txt')}
