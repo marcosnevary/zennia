@@ -95,10 +95,11 @@
           <span class="min-w-0 truncate">{row.meaning}</span>
         {/if}
         <span class="min-w-4 flex-1" aria-hidden="true"></span>
-        <!-- fixed width so the counts line up from row to row, whatever the numbers; the negative margin pulls them toward the accuracy column -->
-        <span class="-mr-7 flex w-[5ch] flex-none flex-col text-sm leading-4 tabular-nums">
-          <span>○{row.tally.hits}</span>
-          <span>✗{row.tally.misses}</span>
+        <!-- both counts have a fixed width, the correct one right-aligned and the wrong one left-aligned, so they meet at the same
+             point in every row with only the gap between them, whatever the numbers; the negative margin pulls them toward the accuracy column -->
+        <span class="-mr-7 flex flex-none gap-2 text-sm tabular-nums *:flex *:w-[6ch] *:gap-1">
+          <span class="justify-end"><span>○</span>{row.tally.hits}</span>
+          <span><span>✗</span>{row.tally.misses}</span>
         </span>
         <span class="w-16 flex-none text-center font-bold tabular-nums {LEVEL_STYLES[accuracyLevel(row.tally)]}">{percent(accuracy(row.tally))}</span>
       </li>
