@@ -379,7 +379,7 @@
     <p class="my-4 text-muted">No words match your search or tag filter.</p>
   {/if}
   <!-- reaches up behind the 40px select-all row and the 8px below it -->
-  <ul class="scroll-list-12 [--scroll-list-under:48px]" bind:this={listEl}>
+  <ul class="scroll-list-12 [--scroll-list-rows:12] [--scroll-list-under:48px]" bind:this={listEl}>
     {#each visibleWords as word (word.id)}
       <li>
         <div
