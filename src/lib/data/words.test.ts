@@ -5,12 +5,14 @@ import {
   cleanTags,
   deleteTag,
   filterByTags,
+  hasSearchTags,
   importBrief,
   importSummary,
   makeWord,
   matchTags,
   mergeWords,
   needsMeaning,
+  parseSearch,
   removeTag,
   renameTag,
   sanitizeWords,
@@ -18,6 +20,7 @@ import {
   setDisabled,
   sortWords,
   tagHue,
+  tagTerm,
   updateWord,
   withAnyTag,
   validateTag,
@@ -229,6 +232,49 @@ describe('searchWords', () => {
     expect(ids('  DOG ')).toEqual(['1'])
     expect(ids('a')).toEqual(['2', '3'])
     expect(ids('nothing like this')).toEqual([])
+  })
+
+  it('keeps only the words with a tag containing each # term, along with the text', () => {
+    const tagged = [
+      { ...word('1', '犬', 'いぬ', 'Dog'), tags: ['Animals', 'N5'] },
+      { ...word('2', '猫', 'ねこ', 'cat'), tags: ['animals'] },
+      word('3', '食べる', 'たべる', 'to eat'),
+    ]
+    const tagIds = (query: string) => searchWords(tagged, query).map((w) => w.id)
+    expect(tagIds('#anim')).toEqual(['1', '2'])
+    expect(tagIds('#ANIMALS #n5')).toEqual(['1'])
+    expect(tagIds('#animals cat')).toEqual(['2'])
+    expect(tagIds('#')).toEqual(['1', '2', '3'])
+    expect(tagIds('#verbs')).toEqual([])
+  })
+})
+
+describe('parseSearch', () => {
+  it('splits the # terms from the text, lowercase', () => {
+    expect(parseSearch('  To  #N5 eat #Verbs ')).toEqual({ text: 'to eat', tags: ['n5', 'verbs'] })
+    expect(parseSearch('#')).toEqual({ text: '', tags: [] })
+    expect(parseSearch('')).toEqual({ text: '', tags: [] })
+  })
+})
+
+describe('hasSearchTags', () => {
+  it('needs a tag containing every term', () => {
+    expect(hasSearchTags(['Hiragana'], ['gana'])).toBe(true)
+    expect(hasSearchTags(['Hiragana'], ['gana', 'kata'])).toBe(false)
+    expect(hasSearchTags([], [])).toBe(true)
+    expect(hasSearchTags([], ['n5'])).toBe(false)
+  })
+
+  it('leaves out the spaces inside a tag name, which a term cannot hold', () => {
+    expect(hasSearchTags(['JLPT N5'], ['jlptn5'])).toBe(true)
+    expect(hasSearchTags(['JLPT N5'], ['tn'])).toBe(true)
+  })
+})
+
+describe('tagTerm', () => {
+  it('is the tag after a #, lowercase and without spaces', () => {
+    expect(tagTerm(' JLPT  N5 ')).toBe('#jlptn5')
+    expect(tagTerm('Verbs')).toBe('#verbs')
   })
 })
 

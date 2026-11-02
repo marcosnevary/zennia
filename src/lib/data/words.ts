@@ -88,12 +88,42 @@ export function updateWord(word: Word, { japanese, hiragana, meaning, tags }: Wo
   return { ...word, japanese: japanese.trim(), hiragana: hiragana.trim(), meaning: meaning.trim(), tags: cleanTags(tags) }
 }
 
-/** The words matching the search in the word, the reading, its romaji or the meaning; everything for a blank search. */
+export interface SearchQuery {
+  /** The plain text to look for, lowercase */
+  text: string
+  /** The `#` terms, lowercase and without the `#` */
+  tags: string[]
+}
+
+/** Splits a search into its `#tag` terms and the rest of the text. A bare `#` counts as neither. */
+export function parseSearch(query: string): SearchQuery {
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean)
+  return {
+    text: terms.filter((t) => !t.startsWith('#')).join(' '),
+    tags: terms.filter((t) => t.startsWith('#') && t.length > 1).map((t) => t.slice(1)),
+  }
+}
+
+/** The `#` term that finds a tag: a search term ends at a space, so the spaces inside a tag name are left out. */
+export function tagTerm(tag: string): string {
+  return `#${tag.replace(/\s+/g, '').toLowerCase()}`
+}
+
+/** Whether every `#` term is contained in one of the tags, ignoring case and the spaces inside tag names. */
+export function hasSearchTags(tags: string[], terms: string[]): boolean {
+  return terms.every((term) => tags.some((tag) => tagTerm(tag).slice(1).includes(term)))
+}
+
+/**
+ * The words matching the search in the word, the reading, its romaji or the meaning, and having a tag for
+ * every `#` term; everything for a blank search.
+ */
 export function searchWords(words: Word[], query: string): Word[] {
-  const q = query.trim().toLowerCase()
-  if (!q) return words
-  return words.filter((w) =>
-    [w.japanese, w.hiragana, toDisplayRomaji(w.hiragana), w.meaning].some((field) => field.toLowerCase().includes(q)),
+  const { text, tags } = parseSearch(query)
+  return words.filter(
+    (w) =>
+      hasSearchTags(w.tags, tags) &&
+      [w.japanese, w.hiragana, toDisplayRomaji(w.hiragana), w.meaning].some((field) => field.toLowerCase().includes(text)),
   )
 }
 
