@@ -15,8 +15,17 @@ import {
   type StatsSort,
   type StatsSortDirection,
 } from './data/stats'
+import { assignTagColors, tagKey } from './data/tag-colors'
 import { readThemeCache, writeThemeCache, type ThemePreference } from './data/theme'
-import { mergeWords, type MergeResult, type SortDirection, type SortKey } from './data/words'
+import {
+  allTags,
+  findTag,
+  mergeWords,
+  renameTag,
+  type MergeResult,
+  type SortDirection,
+  type SortKey,
+} from './data/words'
 
 function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : 'Unknown error.'
@@ -81,6 +90,7 @@ export class App {
         stored = await this.#repo.load()
       }
       this.#apply(stored)
+      this.#syncTagColors()
       this.status = 'ready'
     } catch (e) {
       this.error = messageOf(e)
@@ -146,6 +156,17 @@ export class App {
       if (changed.length) await this.#repo.upsertWords(changed)
       if (removed.length) await this.#repo.deleteWords(removed)
     })
+    this.#syncTagColors()
+  }
+
+  /** Renames the tag on every word; the tag keeps its colour, unless it merges into one that already has its own. */
+  renameTag(from: string, to: string): void {
+    const merged = findTag(allTags(this.words), to)
+    const colors = this.settings.tagColors
+    if (!merged && colors[tagKey(from)]) {
+      this.settings.tagColors = { ...colors, [tagKey(to)]: colors[tagKey(from)] }
+    }
+    this.setWords(renameTag(this.words, from, to))
   }
 
   markSeen(id: string): void {
@@ -214,6 +235,13 @@ export class App {
     this.stats = stored.stats
     this.settings = stored.settings
     writeThemeCache(stored.settings.theme)
+  }
+
+  // gives new tags a colour and frees the colours of tags no longer in use
+  #syncTagColors(): void {
+    const saved = $state.snapshot(this.settings.tagColors)
+    const tagColors = assignTagColors(allTags(this.words), saved)
+    if (tagColors !== saved) this.#setSettings({ tagColors })
   }
 
   #persist(write: () => Promise<void>): void {

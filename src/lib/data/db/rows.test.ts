@@ -55,6 +55,7 @@ describe('settings', () => {
         words_sort_direction: 'up',
         stats_sort: 'x',
         stats_sort_direction: 'down',
+        tag_colors: 'x',
       }),
     ).toEqual({ ...DEFAULT_SETTINGS, kanaSelection: ['hiragana:あ'] })
   })
@@ -69,8 +70,24 @@ describe('settings', () => {
         words_sort_direction: 'desc',
         stats_sort: 'misses',
         stats_sort_direction: 'asc',
+        tag_colors: {},
       }),
     ).toMatchObject({ wordsSort: 'reading', wordsSortDirection: 'desc', statsSort: 'misses', statsSortDirection: 'asc' })
+  })
+
+  it('reads the tag colours it can draw and drops the rest', () => {
+    expect(
+      settingsFromRow({
+        theme: 'system',
+        words_focus: 'reading',
+        kana_selection: null,
+        words_sort: 'japanese',
+        words_sort_direction: 'asc',
+        stats_sort: 'accuracy',
+        stats_sort_direction: 'desc',
+        tag_colors: { food: { hue: 10, tone: 1 }, bad: { hue: 400, tone: 0 }, worse: 'red' },
+      }).tagColors,
+    ).toEqual({ food: { hue: 10, tone: 1 } })
   })
 
   it('writes only the fields that changed', () => {
@@ -84,5 +101,6 @@ describe('settings', () => {
       stats_sort: 'hits',
       stats_sort_direction: 'asc',
     })
+    expect(settingsToRow({ tagColors: { food: { hue: 10, tone: 1 } } })).toEqual({ tag_colors: { food: { hue: 10, tone: 1 } } })
   })
 })

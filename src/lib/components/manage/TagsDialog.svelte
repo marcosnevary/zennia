@@ -1,11 +1,11 @@
 <script lang="ts">
   import Check from '@lucide/svelte/icons/check'
   import Trash from '@lucide/svelte/icons/trash'
-  import TagChip, { CHIP } from '../TagChip.svelte'
+  import TagChip, { CHIP, useTagStyle } from '../TagChip.svelte'
   import { closeOnBackdrop } from './dialog'
   import { plural } from '../../core/plural'
   import type { Word } from '../../core/types'
-  import { filterByTags, matchTags, sameTag, tagHue, validateTag, withAnyTag } from '../../data/words'
+  import { filterByTags, matchTags, sameTag, validateTag, withAnyTag } from '../../data/words'
 
   let {
     tags,
@@ -18,6 +18,8 @@
     onrename: (from: string, to: string) => void
     ondelete: (tags: string[]) => void
   } = $props()
+
+  const tagStyle = useTagStyle()
 
   let dialogEl = $state<HTMLDialogElement>()
   let query = $state('')
@@ -173,7 +175,7 @@
               >
                 {#if renaming !== null && sameTag(renaming, tag)}
                   <!-- the hidden copy of the text sizes the chip as the name is typed, as a field cannot fit its content -->
-                  <span class="{CHIP} focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-action" style:--hue={tagHue(tag)}>
+                  <span class="{CHIP} focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-action" style={tagStyle(tag)}>
                     <!-- out of the flow, so the field's default width (about 20 characters) does not widen the chip -->
                     <span class="relative min-w-1">
                       <span class="invisible whitespace-pre">{renameDraft}</span>

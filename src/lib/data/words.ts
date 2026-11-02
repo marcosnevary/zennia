@@ -2,6 +2,7 @@ import { isKana } from 'wanakana'
 import { plural } from '../core/plural'
 import { toDisplayRomaji } from '../core/romaji'
 import type { Word } from '../core/types'
+import { tagKey } from './tag-colors'
 
 export function newId(): string {
   return crypto.randomUUID()
@@ -54,7 +55,7 @@ export function validateTag(tag: string): string {
 
 /** Whether two tag names are the same tag: equal ignoring case and surrounding spaces. */
 export function sameTag(a: string, b: string): boolean {
-  return a.trim().toLowerCase() === b.trim().toLowerCase()
+  return tagKey(a) === tagKey(b)
 }
 
 /** The spelling the list uses for the tag, if it has it. */
@@ -252,13 +253,6 @@ export function mergeWords(current: Word[], incoming: Word[]): MergeResult {
   }
 
   return { words, added, updated, duplicates }
-}
-
-/** The hue (0-359) a tag is drawn with, the same for every spelling of it, so a tag keeps its colour everywhere. */
-export function tagHue(tag: string): number {
-  let hash = 0
-  for (const char of tag.trim().toLowerCase()) hash = (hash * 31 + char.codePointAt(0)!) % 360
-  return hash
 }
 
 const tagCollator = new Intl.Collator(undefined, { sensitivity: 'base' })
