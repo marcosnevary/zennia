@@ -10,6 +10,8 @@
   import Tag from '@lucide/svelte/icons/tag'
   import Tags from '@lucide/svelte/icons/tags'
   import Trash from '@lucide/svelte/icons/trash'
+  import { prefersReducedMotion } from 'svelte/motion'
+  import { fade } from 'svelte/transition'
   import { closeOnBackdrop } from './dialog'
   import KanaSelector from './KanaSelector.svelte'
   import RomajiWordsDialog from './RomajiWordsDialog.svelte'
@@ -233,6 +235,8 @@
   // buttons share the whole row evenly
   const WIDE = `${ROW} *:flex-1 *:text-center`
   const DIM = 'opacity-45'
+  // the badge lingers a moment after the pointer reaches the row, so it is seen going away rather than just missing
+  const badgeOut = $derived({ delay: 800, duration: prefersReducedMotion.current ? 0 : 300 })
 </script>
 
 <div>
@@ -382,7 +386,7 @@
           >
             {#if app.newWordIds.has(word.id)}
               <!-- on the row's corner; no further left than the list's 4px padding, which would clip it -->
-              <span class="absolute -top-2 -left-1rounded-pill bg-action px-2 text-sm leading-4 font-medium text-on-action">new!</span>
+              <span out:fade={badgeOut} class="absolute -top-2 -left-1 rounded-pill bg-action px-2 text-sm leading-4 font-medium text-on-action">new!</span>
             {/if}
             <span class={["text-lg", word.disabled && DIM]} lang="ja">{word.japanese}</span>
             <span class={["text-sm text-muted", word.disabled && DIM]} lang="ja">{wordReading(word)}</span>
