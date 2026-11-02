@@ -7,6 +7,8 @@
   import Upload from '@lucide/svelte/icons/upload'
   import X from '@lucide/svelte/icons/x'
   import type { Component } from 'svelte'
+  import type { Attachment } from 'svelte/attachments'
+  import { prefersReducedMotion } from 'svelte/motion'
   import { importAnkiDeck } from '../../data/anki'
   import { downloadText, exportFilename, exportJSON, importJSON } from '../../data/io'
   import { emptyStats, attempts, totalTally } from '../../data/stats'
@@ -39,6 +41,17 @@
     clearTimeout(feedbackTimer)
     feedback = { key, ok, text, detail }
     feedbackTimer = setTimeout(() => (feedback = null), FEEDBACK_MS)
+  }
+
+  // the content swaps at once and then fades in by its color, so the button's own fill never blinks
+  function fadeOnFeedback(key: string): Attachment {
+    let shown: typeof feedback = null
+    return (element) => {
+      const current = feedback?.key === key ? feedback : null
+      if (current === shown) return
+      shown = current
+      if (!prefersReducedMotion.current) element.animate([{ color: 'transparent' }], { duration: 200, easing: 'ease-out' })
+    }
   }
 
   function describe(key: string, description: string): string {
@@ -77,7 +90,7 @@
 
 {#snippet action(key: string, Icon: Component, label: string)}
   {#if feedback?.key === key}
-    {#if feedback.ok}<Check />{:else}<X />{/if}{feedback.text}
+    {#if feedback.ok}<Check class="outcome" />{:else}<X class="outcome" />{/if}{feedback.text}
   {:else}
     <Icon />{label}
   {/if}
@@ -131,16 +144,20 @@
 </div>
 <div class="divide-y divide-line/40">
   <SettingRow title="Export words" description="Download all your words as a JSON file, as a backup or to move them elsewhere.">
-    <button onclick={exportWords} disabled={app.words.length === 0}>{@render action('export', Upload, 'Export JSON')}</button>
+    <button onclick={exportWords} disabled={app.words.length === 0} {@attach fadeOnFeedback('export')}>{@render action('export', Upload, 'Export JSON')}</button>
   </SettingRow>
   <SettingRow title="Import words" description={describe('json', 'Add the words of a file made by Export JSON.')}>
-    <label class="file">
+    <label class="file" {@attach fadeOnFeedback('json')}>
       {@render action('json', Download, 'Import JSON')}
       <input type="file" accept="application/json,.json" onchange={(e) => runImport(e, 'json', importJSON)} hidden />
     </label>
   </SettingRow>
   <SettingRow title="Import an Anki deck" description={describe('anki', 'Add the words of Anki notes exported as plain text.')}>
-    <label class="file text-center" title="Anki: Export → Notes in Plain Text. Columns: word, hiragana, meaning">
+    <label
+      class="file text-center"
+      title="Anki: Export → Notes in Plain Text. Columns: word, hiragana, meaning"
+      {@attach fadeOnFeedback('anki')}
+    >
       {@render action('anki', Download, 'Import .txt')}
       <input type="file" accept="text/plain,.txt,.tsv" onchange={(e) => runImport(e, 'anki', importAnkiDeck)} hidden />
     </label>
@@ -148,7 +165,7 @@
   <!-- the row outlives the reset until its confirmation on the button is over -->
   {#if attempts(totalTally(app.stats)) || feedback?.key === 'reset'}
     <SettingRow title="Reset statistics" description="Erase every practice result. This cannot be undone.">
-      <button class="danger" onclick={resetStats}>{@render action('reset', RotateCcw, 'Reset stats')}</button>
+      <button class="danger" onclick={resetStats} {@attach fadeOnFeedback('reset')}>{@render action('reset', RotateCcw, 'Reset stats')}</button>
     </SettingRow>
   {/if}
 </div>
