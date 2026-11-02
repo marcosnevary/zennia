@@ -207,6 +207,47 @@
   background: linear-gradient(90deg, var(--muted) 2px, transparent 2px) left center / 8px 2px repeat-x;
 }
 
+/* a list row selected by clicking it (role="checkbox"): the tint on hover, the action color at low opacity when
+   selected, and a stronger fill while pressed, except when the press is on a control inside it, which does its own thing */
+@utility select-row {
+  display: flex;
+  min-height: 40px;
+  cursor: pointer;
+  align-items: center;
+  gap: 12px;
+  border-radius: var(--radius-control);
+  padding: 4px 12px;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: background-color 150ms;
+  }
+
+  &:hover {
+    background-color: var(--color-tint);
+  }
+
+  &:active:not(:has(:is(button, input, select):active)) {
+    background-color: var(--color-tint-pressed);
+  }
+
+  &[aria-checked='true'] {
+    background-color: color-mix(in oklab, var(--action) 10%, transparent);
+  }
+
+  &[aria-checked='true']:hover {
+    background-color: color-mix(in oklab, var(--action) 15%, transparent);
+  }
+
+  &[aria-checked='true']:active:not(:has(:is(button, input, select):active)) {
+    background-color: color-mix(in oklab, var(--action) 20%, transparent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--action);
+    outline-offset: 2px;
+  }
+}
+
 /* the buttons at the bottom of a dialog, on the right with the main one first */
 @utility dialog-actions {
   display: flex;

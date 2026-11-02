@@ -369,10 +369,7 @@
       {#each visibleWords as word (word.id)}
         <li>
           <div
-            class={[
-              'flex cursor-pointer items-center gap-3 rounded-control px-3 py-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action motion-reduce:transition-none',
-              selected.has(word.id) ? 'bg-action/10 hover:bg-action/15 active:not-has-[button:active]:bg-action/20' : 'hover:bg-tint active:not-has-[button:active]:bg-tint-pressed',
-            ]}
+            class="select-row"
             role="checkbox"
             tabindex="0"
             aria-checked={selected.has(word.id)}
