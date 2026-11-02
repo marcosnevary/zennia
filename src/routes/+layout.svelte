@@ -8,6 +8,7 @@
   import RotateCw from '@lucide/svelte/icons/rotate-cw'
   import Settings from '@lucide/svelte/icons/settings'
   import { onMount } from 'svelte'
+  import { goto } from '$app/navigation'
   import { resolve } from '$app/paths'
   import { navigating, page } from '$app/state'
   import Loading from '#lib/components/Loading.svelte'
@@ -64,9 +65,24 @@
     const field = document.activeElement
     if (event.key === 'Escape' && field instanceof HTMLElement && field.matches(TEXT_FIELDS)) field.blur()
   }
+
+  // Shift is allowed because some layouts (AZERTY) need it to type the digits; the other modifiers belong to the browser and system
+  function switchTab(event: KeyboardEvent) {
+    const tab = tabs.find((_, i) => event.key === String(i + 1))
+    if (!tab || event.metaKey || event.ctrlKey || event.altKey) return
+    if (document.activeElement?.matches(`${TEXT_FIELDS}, select`) || document.querySelector('dialog[open]')) return
+    event.preventDefault()
+    const href = resolve(tab.path)
+    goto(href, { replace: currentPath === href })
+  }
+
+  function onkeydown(event: KeyboardEvent) {
+    blurOnEscape(event)
+    switchTab(event)
+  }
 </script>
 
-<svelte:window onkeydown={blurOnEscape} />
+<svelte:window {onkeydown} />
 
 <!-- sized and centered on 100vw, which counts a classic scrollbar, so the layout does not shrink or shift when one appears; 1568px is the 1376px content plus the widest side padding -->
 <div class="ml-[max(0px,calc(50vw-784px))] w-[min(100vw,1568px)] px-4 py-4 sm:px-8 lg:px-16 xl:px-24 print:hidden">
@@ -74,8 +90,14 @@
     <h1 class="font-logo text-2xl font-bold">zennia</h1>
     <!-- equal columns as wide as the widest tab; below md the five tabs only fit as icons -->
     <nav class="grid auto-cols-fr grid-flow-col gap-2" data-sveltekit-preload-code="eager">
-      {#each tabs as { path, label, icon: TabIcon } (path)}
-        <a class="tab" href={resolve(path)} aria-current={currentPath === resolve(path) ? 'page' : undefined}>
+      {#each tabs as { path, label, icon: TabIcon }, i (path)}
+        <a
+          class="tab"
+          href={resolve(path)}
+          aria-current={currentPath === resolve(path) ? 'page' : undefined}
+          title="{label} ({i + 1})"
+          aria-keyshortcuts={String(i + 1)}
+        >
           <TabIcon /><span class="max-md:sr-only">{label}</span>
         </a>
       {/each}
