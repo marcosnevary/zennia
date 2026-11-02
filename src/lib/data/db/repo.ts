@@ -1,6 +1,17 @@
 import type { Stats, Word } from '../../core/types'
 import type { Settings } from '../settings'
-import { getAccount, linkGoogle, openSession, signInGoogle, signOut, takeLinkConflict, type Account, type Db } from './client'
+import {
+  getAccount,
+  linkGoogle,
+  openSession,
+  signInGoogle,
+  signOut,
+  takeLinkConflict,
+  updateProfile,
+  type Account,
+  type Db,
+  type ProfileChange,
+} from './client'
 import {
   settingsFromRow,
   settingsToRow,
@@ -30,6 +41,7 @@ export interface Repo {
   replaceStats(stats: Stats): Promise<void>
   saveSettings(patch: Partial<Settings>): Promise<void>
   account(): Promise<Account>
+  updateProfile(change: ProfileChange): Promise<void>
   /** Goes to Google to attach it to the current user; the page is left. */
   linkAccount(): Promise<void>
   /** Goes to Google to sign in to the user that owns the account, leaving the current user's data behind. */
@@ -147,6 +159,11 @@ export function createRepo(getDb: () => Db): Repo {
     async linkAccount() {
       const { db } = await open()
       await linkGoogle(db)
+    },
+
+    async updateProfile(change) {
+      const { db, userId } = await open()
+      await updateProfile(db, userId, change)
     },
 
     async signInToAccount() {

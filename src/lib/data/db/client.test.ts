@@ -24,12 +24,28 @@ const google = (identity_data: Record<string, string>) => ({
 describe('accountOf', () => {
   it('takes the name and photo from the Google identity', () => {
     const account = accountOf(user({ identities: [google({ full_name: 'Ana Sato', avatar_url: 'https://photo' })] }))
-    expect(account).toEqual({ anonymous: false, email: 'ana@example.com', name: 'Ana Sato', avatarUrl: 'https://photo' })
+    expect(account).toEqual({
+      anonymous: false,
+      email: 'ana@example.com',
+      name: 'Ana Sato',
+      avatarUrl: 'https://photo',
+      googleAvatarUrl: 'https://photo',
+      customAvatar: false,
+    })
   })
 
   it('falls back to the user metadata', () => {
     const account = accountOf(user({ user_metadata: { name: 'Ana', picture: 'https://pic' } }))
     expect(account).toMatchObject({ name: 'Ana', avatarUrl: 'https://pic' })
+  })
+
+  it('prefers the name and photo saved in Edit profile', () => {
+    const account = accountOf(
+      user({
+        user_metadata: { full_name: 'Ana Sato', avatar_url: 'https://photo', display_name: 'Ana', photo_url: 'https://mine' },
+      }),
+    )
+    expect(account).toMatchObject({ name: 'Ana', avatarUrl: 'https://mine', googleAvatarUrl: 'https://photo', customAvatar: true })
   })
 
   it('has no name or photo for an anonymous user', () => {
@@ -38,6 +54,8 @@ describe('accountOf', () => {
       email: null,
       name: null,
       avatarUrl: null,
+      googleAvatarUrl: null,
+      customAvatar: false,
     })
   })
 

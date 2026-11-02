@@ -2,7 +2,7 @@ import { getContext, setContext } from 'svelte'
 import { kanaKey, type KanaScript } from './core/kana'
 import type { Stats, Verdict, Word } from './core/types'
 import { clearLegacy, readLegacy } from './data/db/legacy'
-import type { Account } from './data/db/client'
+import type { Account, ProfileChange } from './data/db/client'
 import type { Repo, Stored } from './data/db/repo'
 import type { Recorder, WordsFocus } from './data/practice-modes'
 import { DEFAULT_SETTINGS, type Settings } from './data/settings'
@@ -46,7 +46,14 @@ export class App {
   settings = $state<Settings>({ ...DEFAULT_SETTINGS, theme: readThemeCache() })
   status = $state<'loading' | 'ready' | 'failed'>('loading')
   error = $state('')
-  account = $state<Account>({ anonymous: true, email: null, name: null, avatarUrl: null })
+  account = $state<Account>({
+    anonymous: true,
+    email: null,
+    name: null,
+    avatarUrl: null,
+    googleAvatarUrl: null,
+    customAvatar: false,
+  })
   // Google sent the user back because that account already has data; waits for them to choose
   conflict = $state(false)
   // words of the writing sheet being printed; it renders hidden and only shows up in the print dialog
@@ -115,6 +122,12 @@ export class App {
     } catch (e) {
       this.error = `Could not sign in: ${messageOf(e)}`
     }
+  }
+
+  /** Saves a change made in Edit profile; a failure is thrown for the dialog to show. */
+  async updateProfile(change: ProfileChange): Promise<void> {
+    await this.#repo.updateProfile(change)
+    this.account = await this.#repo.account()
   }
 
   async signOut(): Promise<void> {

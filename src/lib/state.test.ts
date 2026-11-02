@@ -36,7 +36,17 @@ function fakeRepo(stored: Partial<Stored> = {}, conflict = false) {
     saveSettings: vi.fn(async (patch) => {
       calls.push(`settings ${JSON.stringify(patch)}`)
     }),
-    account: vi.fn(async () => ({ anonymous: true, email: null, name: null, avatarUrl: null })),
+    account: vi.fn(async () => ({
+      anonymous: true,
+      email: null,
+      name: null,
+      avatarUrl: null,
+      googleAvatarUrl: null,
+      customAvatar: false,
+    })),
+    updateProfile: vi.fn(async (change) => {
+      calls.push(`profile ${change.name}`)
+    }),
     linkAccount: vi.fn(async () => {
       calls.push('link')
     }),
@@ -254,6 +264,13 @@ describe('legacy localStorage import', () => {
       await app.signOut()
       expect(calls).toEqual(['signout'])
       expect(repo.load).toHaveBeenCalledTimes(2)
+    })
+
+    it('reloads the account after a profile change', async () => {
+      const { app, calls, repo } = await ready()
+      await app.updateProfile({ name: 'Ana' })
+      expect(calls).toEqual(['profile Ana'])
+      expect(repo.account).toHaveBeenCalledTimes(2)
     })
   })
 })

@@ -5,7 +5,6 @@
   import ChartColumn from '@lucide/svelte/icons/chart-column'
   import Languages from '@lucide/svelte/icons/languages'
   import LogIn from '@lucide/svelte/icons/log-in'
-  import LogOut from '@lucide/svelte/icons/log-out'
   import PencilLine from '@lucide/svelte/icons/pencil-line'
   import RotateCw from '@lucide/svelte/icons/rotate-cw'
   import Settings from '@lucide/svelte/icons/settings'
@@ -13,6 +12,7 @@
   import { goto } from '$app/navigation'
   import { resolve } from '$app/paths'
   import { navigating, page } from '$app/state'
+  import AccountMenu from '#lib/components/account/AccountMenu.svelte'
   import Loading from '#lib/components/Loading.svelte'
   import PrintSheet from '#lib/components/print/PrintSheet.svelte'
   import { getDb } from '#lib/data/db/client.ts'
@@ -24,8 +24,6 @@
 
   const app = setApp(new App(createRepo(getDb)))
   onMount(() => app.init())
-
-  let avatarFailed = $state(false)
 
   // 0 with overlay scrollbars; the probe picks up the thin scrollbar app.css gives every element
   onMount(() => {
@@ -128,32 +126,7 @@
             <LogIn /><span class="max-md:sr-only">Sign in</span>
           </button>
         {:else}
-          {@const label = app.account.name ?? app.account.email ?? ''}
-          <div class="flex items-center gap-2 max-md:flex-col md:pl-4" title={app.account.email}>
-            {#if app.account.avatarUrl && !avatarFailed}
-              <!-- Google's photo host refuses some requests that carry a referrer -->
-              <img
-                class="size-8 shrink-0 rounded-pill"
-                src={app.account.avatarUrl}
-                alt=""
-                referrerpolicy="no-referrer"
-                onerror={() => (avatarFailed = true)}
-              />
-            {:else}
-              <span class="flex size-8 shrink-0 items-center justify-center rounded-pill bg-tint text-sm" aria-hidden="true">
-                {label.charAt(0).toUpperCase()}
-              </span>
-            {/if}
-            <p class="min-w-0 flex-1 truncate text-sm max-md:hidden">{label}</p>
-            <button
-              class="icon rounded-pill"
-              onclick={() => confirm('Sign out? This browser will start empty until you sign in again.') && app.signOut()}
-              title="Sign out of {app.account.email}"
-              aria-label="Sign out"
-            >
-              <LogOut />
-            </button>
-          </div>
+          <AccountMenu />
         {/if}
       </div>
     {/if}
