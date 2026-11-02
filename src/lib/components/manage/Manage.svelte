@@ -236,7 +236,7 @@
   const WIDE = `${ROW} *:flex-1 *:text-center`
   const DIM = 'opacity-45'
   // the badge lingers a moment after the pointer reaches the row, so it is seen going away rather than just missing
-  const badgeOut = $derived({ delay: 800, duration: prefersReducedMotion.current ? 0 : 300 })
+  const badgeOut = $derived({ delay: 300, duration: prefersReducedMotion.current ? 0 : 300 })
 </script>
 
 <div>
