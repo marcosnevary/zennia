@@ -11,11 +11,9 @@
     type StatsSort,
     type StatsSortDirection,
   } from '../../data/stats'
-  import { paginate } from '../../data/pagination'
   import { buildRows, filterRows } from '../../data/stats-rows'
   import type { Tally } from '../../core/types'
   import { getApp } from '../../state.svelte'
-  import Pagination from '../Pagination.svelte'
   import StatTile from '../StatTile.svelte'
 
   const LEVEL_STYLES = { high: 'text-on', low: 'text-off', '': '' }
@@ -27,16 +25,15 @@
   let query = $state('')
   const sort = $derived(app.settings.statsSort)
   const direction = $derived(app.settings.statsSortDirection)
+  let listEl = $state<HTMLUListElement>()
 
   function setSort(next: StatsSort, nextDirection: StatsSortDirection) {
     app.setStatsSort(next, nextDirection)
-    pageNumber = 1
+    listEl?.scrollTo({ top: 0 })
   }
 
   const rows = $derived(buildRows(stats, words))
   const visibleRows = $derived(filterRows(rows, { query, sort, direction }))
-  let pageNumber = $state(1)
-  const current = $derived(paginate(visibleRows, pageNumber))
 
   const total = $derived(totalTally(stats))
 </script>
@@ -63,7 +60,7 @@
       placeholder="Search by word, reading, romaji or meaning"
       aria-label="Search stats"
       bind:value={query}
-      oninput={() => (pageNumber = 1)}
+      oninput={() => listEl?.scrollTo({ top: 0 })}
     />
     <div class="flex items-center gap-2">
       <select
@@ -89,9 +86,9 @@
   {#if visibleRows.length === 0}
     <p class="my-4 text-muted">Nothing matches your search.</p>
   {/if}
-  <ul>
-    {#each current.items as row (row.key)}
-      <li class="flex items-center gap-3 py-2">
+  <ul class="scroll-list-10" bind:this={listEl}>
+    {#each visibleRows as row (row.key)}
+      <li class="flex min-h-10 items-center gap-3">
         <span class="text-lg" lang="ja">{row.symbol}</span>
         <span class="text-sm text-muted" lang={row.ja ? 'ja' : undefined}>{row.reading}</span>
         <!-- runs from the symbol to the counts on the other side -->
@@ -105,5 +102,4 @@
       </li>
     {/each}
   </ul>
-  <Pagination page={current.page} pageCount={current.pageCount} label="Stats pages" onchange={(n) => (pageNumber = n)} />
 {/if}

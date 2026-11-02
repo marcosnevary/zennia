@@ -12,13 +12,11 @@
   import Trash from '@lucide/svelte/icons/trash'
   import { closeOnBackdrop } from './dialog'
   import KanaSelector from './KanaSelector.svelte'
-  import Pagination from '../Pagination.svelte'
   import RomajiWordsDialog from './RomajiWordsDialog.svelte'
   import Switch from '../Switch.svelte'
   import TagChip from './TagChip.svelte'
   import TagInput from './TagInput.svelte'
   import TagsDialog from './TagsDialog.svelte'
-  import { paginate } from '../../data/pagination'
   import { toDisplayRomaji } from '../../core/romaji'
   import { defaultKanaSelection } from '../../core/kana'
   import type { Word } from '../../core/types'
@@ -116,12 +114,11 @@
   const filterTags = $derived(activeTags.filter((a) => tags.some((t) => sameTag(t, a))))
   const visibleWords = $derived(sortWords(searchWords(filterByTags(words, filterTags), query), sortKey, sortDirection))
   const activeWordCount = $derived(visibleWords.filter((w) => !w.disabled).length)
-  let pageNumber = $state(1)
-  const current = $derived(paginate(visibleWords, pageNumber))
+  let listEl = $state<HTMLUListElement>()
 
   function setSort(key: SortKey, direction: SortDirection) {
     app.setWordsSort(key, direction)
-    pageNumber = 1
+    listEl?.scrollTo({ top: 0 })
   }
 
   const selectedWords = $derived(words.filter((w) => selected.has(w.id)))
@@ -130,13 +127,13 @@
   // bulk actions only ever touch what the user can see, so changing the filter clears the selection
   function onSearch() {
     selected = new Set()
-    pageNumber = 1
+    listEl?.scrollTo({ top: 0 })
   }
 
   function toggleFilterTag(tag: string) {
     activeTags = filterTags.some((t) => sameTag(t, tag)) ? filterTags.filter((t) => !sameTag(t, tag)) : [...filterTags, tag]
     selected = new Set()
-    pageNumber = 1
+    listEl?.scrollTo({ top: 0 })
   }
 
   function onSearchKeydown(event: KeyboardEvent) {
@@ -164,7 +161,7 @@
     // the list may grow if a tag was filtering it, so the selection must not outlive it
     activeTags = activeTags.filter((t) => !gone.some((g) => sameTag(t, g)))
     selected = new Set()
-    pageNumber = 1
+    listEl?.scrollTo({ top: 0 })
   }
 
   // tags on the selected words, from a dialog opened by the tag button; a tag counts as on only when
@@ -382,8 +379,8 @@
   {#if visibleWords.length === 0}
     <p class="my-4 text-muted">No words match your search or tag filter.</p>
   {/if}
-  <ul class="grid gap-2">
-    {#each current.items as word (word.id)}
+  <ul class="scroll-list-12" bind:this={listEl}>
+    {#each visibleWords as word (word.id)}
       <li>
         <div
           class={[
@@ -415,7 +412,6 @@
       </li>
     {/each}
   </ul>
-  <Pagination page={current.page} pageCount={current.pageCount} label="Word pages" onchange={(n) => (pageNumber = n)} />
 {/if}
 </div>
 </div>

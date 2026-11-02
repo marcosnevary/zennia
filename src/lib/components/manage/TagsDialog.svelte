@@ -1,11 +1,9 @@
 <script lang="ts">
   import Check from '@lucide/svelte/icons/check'
   import Trash from '@lucide/svelte/icons/trash'
-  import Pagination from '../Pagination.svelte'
   import TagChip, { CHIP } from './TagChip.svelte'
   import { closeOnBackdrop } from './dialog'
   import type { Word } from '../../core/types'
-  import { paginate } from '../../data/pagination'
   import { filterByTags, matchTags, sameTag, tagHue, validateTag } from '../../data/words'
 
   let {
@@ -23,8 +21,7 @@
   let dialogEl = $state<HTMLDialogElement>()
   let query = $state('')
   const visibleTags = $derived(matchTags(tags, query))
-  let pageNumber = $state(1)
-  const current = $derived(paginate(visibleTags, pageNumber))
+  let listEl = $state<HTMLUListElement>()
 
   // selection (tags that no longer exist are ignored)
   let selected = $state<string[]>([])
@@ -37,10 +34,10 @@
 
   export function open() {
     query = ''
-    pageNumber = 1
     selected = []
     renaming = null
     dialogEl?.showModal()
+    listEl?.scrollTo({ top: 0 })
   }
 
   function isSelected(tag: string): boolean {
@@ -58,7 +55,7 @@
   // bulk actions only ever touch what the user can see, so changing the search clears the selection
   function onSearch() {
     selected = []
-    pageNumber = 1
+    listEl?.scrollTo({ top: 0 })
   }
 
   function startRename(tag: string) {
@@ -153,8 +150,8 @@
       {#if visibleTags.length === 0}
         <p class="my-4 text-muted">No tags match your search.</p>
       {/if}
-      <ul class="grid gap-2">
-        {#each current.items as tag (tag)}
+      <ul class="scroll-list-10 [--scroll-list-cap:50dvh]" bind:this={listEl}>
+        {#each visibleTags as tag (tag)}
           <li>
             <div
               class={[
@@ -199,7 +196,6 @@
         {/each}
       </ul>
       {#if renaming !== null && renameError}<p class="text-bad" role="alert">{renameError}</p>{/if}
-      <Pagination page={current.page} pageCount={current.pageCount} label="Tag pages" onchange={(n) => (pageNumber = n)} />
     {/if}
     <div class="dialog-actions">
       <button class="action" type="button" onclick={() => dialogEl?.close()}><Check />Done</button>

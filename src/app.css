@@ -216,6 +216,19 @@
   gap: 8px;
 }
 
+/* a list that scrolls on its own, ten rows at a time; the value is the row height on the spacing scale (scroll-list-10
+   for 40px rows). The padding keeps the rows' focus outline inside the scroll area, which would clip it, and the
+   negative margin keeps the rows lined up with the content around the list. Where ten rows may not fit, such as in a
+   dialog, --scroll-list-cap lowers the limit */
+@utility scroll-list-* {
+  display: grid;
+  gap: 8px;
+  overflow-y: auto;
+  padding: 4px;
+  margin: -4px;
+  max-height: min(calc(10 * var(--spacing) * --value(integer) + 9 * 8px + 8px), var(--scroll-list-cap, 100dvh));
+}
+
 @utility section-title {
   padding-bottom: 8px;
   margin-bottom: 12px;

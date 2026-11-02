@@ -16,7 +16,7 @@ ADR 5 added a _practice scope_ (kana scripts, word tags, untagged words) chosen 
 - When there is nothing to draw, Practice says so and links to the Words and Kana tabs.
 - The words focus (romaji, meaning or both) moves to Settings, since it is a preference and not part of a session. Practice reads it from the settings.
 - The `PracticeScope` type, `settings.practice_scope` and the pruning of tags are removed. Migration `0003_drop_practice_scope.sql` drops the column; the app no longer reads or writes it, so it works before and after the migration is run.
-- Manage is no longer one page with inner tabs: Words and Kana are top-level tabs, each with its own route (`/words`, `/kana`). `/manage` no longer exists. Tags have no screen of their own: the Tags button in the Words toolbar opens a dialog that lists every tag with its word count, paginated and selectable like the word cards: clicking a tag renames it in place, and the selected tags can be removed from all words together (the button is disabled while no word has a tag). Clicking a tag on a word filters the list by it.
+- Manage is no longer one page with inner tabs: Words and Kana are top-level tabs, each with its own route (`/words`, `/kana`). `/manage` no longer exists. Tags have no screen of their own: the Tags button in the Words toolbar opens a dialog that lists every tag with its word count in a block that scrolls ten at a time, selectable like the word cards: clicking a tag renames it in place, and the selected tags can be removed from all words together (the button is disabled while no word has a tag). Clicking a tag on a word filters the list by it.
 
 ## Consequences
 
