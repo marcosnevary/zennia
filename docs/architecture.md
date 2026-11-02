@@ -28,3 +28,5 @@ SvelteKit static SPA (see [ADR 1](adr/0001-sveltekit.md)). There is no server of
 - `npm run check`: type-check.
 - `npm test`: unit tests.
 - `npm run build`: static build into `build/`.
+
+Every pull request runs `check`, `test` and `build` in GitHub Actions (`.github/workflows/ci.yml`). Vercel deploys only `main`, so pull requests get no preview ([ADR 8](adr/0008-ci-without-previews.md)).
