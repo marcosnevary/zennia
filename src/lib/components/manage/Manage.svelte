@@ -369,7 +369,7 @@
       {#each visibleWords as word (word.id)}
         <li>
           <div
-            class="select-row"
+            class="select-row relative"
             role="checkbox"
             tabindex="0"
             aria-checked={selected.has(word.id)}
@@ -378,7 +378,12 @@
             ondblclick={(event) => onCardDoubleClick(event, word)}
             onmousedown={onCardMouseDown}
             onkeydown={(event) => onCardKey(event, word)}
+            onpointerenter={() => app.markSeen(word.id)}
           >
+            {#if app.newWordIds.has(word.id)}
+              <!-- half over the 8px gap above the row, right above the word -->
+              <span class="absolute -top-2 left-3 rounded-pill bg-action px-2 text-sm leading-4 font-medium text-on-action">new!</span>
+            {/if}
             <span class={["text-lg", word.disabled && DIM]} lang="ja">{word.japanese}</span>
             <span class={["text-sm text-muted", word.disabled && DIM]} lang="ja">{wordReading(word)}</span>
             {#if needsMeaning(word)}
