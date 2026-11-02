@@ -1,8 +1,6 @@
 <script lang="ts">
   import Check from '@lucide/svelte/icons/check'
   import Download from '@lucide/svelte/icons/download'
-  import LogIn from '@lucide/svelte/icons/log-in'
-  import LogOut from '@lucide/svelte/icons/log-out'
   import RotateCcw from '@lucide/svelte/icons/rotate-ccw'
   import Upload from '@lucide/svelte/icons/upload'
   import X from '@lucide/svelte/icons/x'
@@ -116,18 +114,8 @@
   {/if}
 {/snippet}
 
-<!-- with the rows' 12px padding, the first title starts 24px below the tabs, like on the other screens -->
+<!-- with the rows' 12px padding, the first title starts 24px below the top of the content, like on the other screens -->
 <div class="mt-3 divide-y divide-line/40">
-  {#if app.account.anonymous}
-    <SettingRow title="Account" description="Your data lives in this browser only. Sign in to keep it and use it on other devices.">
-      <button class="action" onclick={() => app.signIn()}><LogIn />Sign in with Google</button>
-    </SettingRow>
-  {:else}
-    <SettingRow title="Account" description={`Signed in as ${app.account.email}.`}>
-      <button onclick={() => confirm('Sign out? This browser will start empty until you sign in again.') && app.signOut()}><LogOut />Sign out</button>
-    </SettingRow>
-  {/if}
-
   <SettingRow title="Theme" description="Light, dark, or the same as your system.">
     <select
       class="field chevron"
