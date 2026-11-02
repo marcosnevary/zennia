@@ -139,6 +139,11 @@
     pageNumber = 1
   }
 
+  function onSearchKeydown(event: KeyboardEvent) {
+    const last = filterTags.at(-1)
+    if (event.key === 'Backspace' && query === '' && last) toggleFilterTag(last)
+  }
+
   // clicking a tag on a word narrows the list to it (it never undoes: the active filter has the X)
   function filterByTag(tag: string) {
     if (!filterTags.some((t) => sameTag(t, tag))) toggleFilterTag(tag)
@@ -310,14 +315,21 @@
   <p class="my-4 text-muted">No words yet.</p>
 {:else}
   <div class="mb-2 flex flex-wrap items-center gap-2">
-    <input
-      type="search"
-      class="field min-w-50 flex-1 appearance-none"
-      placeholder="Search by word, reading, romaji or meaning"
-      aria-label="Search words"
-      bind:value={query}
-      oninput={onSearch}
-    />
+    <!-- a label, so clicking beside the chips focuses the input -->
+    <label class="field flex min-h-10 min-w-50 flex-1 cursor-text flex-wrap items-center gap-1 px-3 py-1">
+      {#each filterTags as tag (tag)}
+        <TagChip {tag} onremove={() => toggleFilterTag(tag)} />
+      {/each}
+      <input
+        type="search"
+        class="min-w-30 flex-1 appearance-none bg-transparent p-0 outline-none"
+        placeholder="Search by word, reading, romaji or meaning"
+        aria-label="Search words"
+        bind:value={query}
+        oninput={onSearch}
+        onkeydown={onSearchKeydown}
+      />
+    </label>
     <div class="flex items-center gap-2">
       <button class="field" onclick={() => tagsDialog?.open()}><Tags />Tags</button>
       <select
@@ -332,14 +344,6 @@
       </select>
     </div>
   </div>
-  {#if filterTags.length > 0}
-    <div class="mb-2 flex flex-wrap items-center gap-2" role="group" aria-label="Active tag filter">
-      <span class="text-muted">Tagged:</span>
-      {#each filterTags as tag (tag)}
-        <TagChip {tag} onremove={() => toggleFilterTag(tag)} />
-      {/each}
-    </div>
-  {/if}
   <div class="{ROW} mb-2">
     <label class="flex items-center gap-2">
       <input type="checkbox" checked={allSelected} onchange={toggleSelectAll} />

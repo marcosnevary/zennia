@@ -150,7 +150,9 @@
   }
 
   /* the shadow doubles the border outwards without changing the field's size, in whatever color the state below sets */
-  &:focus-visible {
+  /* a field wrapping an input (the Words search with its tag chips) shows the focus of that input */
+  &:focus-visible,
+  &:has(> input:focus-visible) {
     outline: none;
     --field-border: var(--action);
     box-shadow: 0 0 0 1px var(--field-border);
