@@ -98,6 +98,31 @@ describe('App', () => {
     expect([...app.newWordIds]).toEqual(['c'])
   })
 
+  it('saves a colour for each new tag and frees the colours of tags no longer in use', async () => {
+    const { app, calls } = await ready({ words: [word('a', 1, { tags: ['food'] })] })
+    expect(Object.keys(app.settings.tagColors)).toEqual(['food'])
+    app.setWords([{ ...app.words[0], tags: ['verbs'] }])
+    await app.flush()
+    expect(Object.keys(app.settings.tagColors)).toEqual(['verbs'])
+    expect(calls.at(-1)).toBe(`settings ${JSON.stringify({ tagColors: app.settings.tagColors })}`)
+  })
+
+  it('keeps the colour of a renamed tag', async () => {
+    const tagColors = { food: { hue: 10, tone: 0 } }
+    const { app } = await ready({ words: [word('a', 1, { tags: ['food'] })], settings: { ...DEFAULT_SETTINGS, tagColors } })
+    app.renameTag('food', 'Meals')
+    expect(app.words[0].tags).toEqual(['Meals'])
+    expect(app.settings.tagColors).toEqual({ meals: { hue: 10, tone: 0 } })
+  })
+
+  it('keeps the colour of the tag a rename merges into', async () => {
+    const tagColors = { food: { hue: 10, tone: 0 }, meals: { hue: 200, tone: 1 } }
+    const words = [word('a', 1, { tags: ['food'] }), word('b', 2, { tags: ['meals'] })]
+    const { app } = await ready({ words, settings: { ...DEFAULT_SETTINGS, tagColors } })
+    app.renameTag('food', 'meals')
+    expect(app.settings.tagColors).toEqual({ meals: { hue: 200, tone: 1 } })
+  })
+
   it('drops the stats of a deleted word', async () => {
     const stats: Stats = { words: { a: { hits: 1, misses: 0 } }, kana: {} }
     const { app } = await ready({ words: [word('a', 1)], stats })

@@ -21,7 +21,6 @@ import {
   searchWords,
   setDisabled,
   sortWords,
-  tagHue,
   updateWord,
   withAnyTag,
   validateTag,
@@ -427,21 +426,6 @@ describe('tag operations', () => {
     expect(ids([])).toEqual([])
     expect(ids(['N5'])).toEqual(['1'])
     expect(ids(['n5', 'FRUIT'])).toEqual(['1', '4'])
-  })
-})
-
-describe('tagHue', () => {
-  it('gives a tag the same hue every time, ignoring case and surrounding spaces', () => {
-    expect(tagHue('Food')).toBe(tagHue(' food '))
-  })
-  it('stays within the colour wheel and tells different tags apart', () => {
-    const hues = ['food', 'verbs', 'JLPT N5', 'animals', 'travel'].map(tagHue)
-    for (const h of hues) {
-      expect(Number.isInteger(h)).toBe(true)
-      expect(h).toBeGreaterThanOrEqual(0)
-      expect(h).toBeLessThan(360)
-    }
-    expect(new Set(hues).size).toBeGreaterThan(3)
   })
 })
 

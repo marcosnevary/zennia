@@ -2,6 +2,7 @@ import type { KanaScript } from '../../core/kana'
 import type { Stats, Tally, Word } from '../../core/types'
 import { DEFAULT_SETTINGS, type Settings } from '../settings'
 import { STATS_SORT_OPTIONS } from '../stats'
+import { isTagColor, type TagColor } from '../tag-colors'
 import { SORT_OPTIONS } from '../words'
 
 export interface WordRow {
@@ -32,6 +33,7 @@ export interface SettingsRow {
   words_sort_direction: string
   stats_sort: string
   stats_sort_direction: string
+  tag_colors: unknown
 }
 
 function oneOf<T extends string>(value: string, allowed: readonly T[], fallback: T): T {
@@ -39,6 +41,11 @@ function oneOf<T extends string>(value: string, allowed: readonly T[], fallback:
 }
 
 const DIRECTIONS = ['asc', 'desc'] as const
+
+function tagColorsFrom(value: unknown): Record<string, TagColor> {
+  if (typeof value !== 'object' || value === null) return {}
+  return Object.fromEntries(Object.entries(value).filter(([, color]) => isTagColor(color)))
+}
 
 export function wordFromRow(row: WordRow): Word {
   const word: Word = {
@@ -95,6 +102,7 @@ export function settingsFromRow(row: SettingsRow | null): Settings {
     wordsSortDirection: oneOf(row.words_sort_direction, DIRECTIONS, DEFAULT_SETTINGS.wordsSortDirection),
     statsSort: oneOf(row.stats_sort, STATS_SORT_OPTIONS.map((o) => o.key), DEFAULT_SETTINGS.statsSort),
     statsSortDirection: oneOf(row.stats_sort_direction, DIRECTIONS, DEFAULT_SETTINGS.statsSortDirection),
+    tagColors: tagColorsFrom(row.tag_colors),
   }
 }
 
@@ -107,5 +115,6 @@ export function settingsToRow(patch: Partial<Settings>): Partial<SettingsRow> {
   if (patch.wordsSortDirection !== undefined) row.words_sort_direction = patch.wordsSortDirection
   if (patch.statsSort !== undefined) row.stats_sort = patch.statsSort
   if (patch.statsSortDirection !== undefined) row.stats_sort_direction = patch.statsSortDirection
+  if (patch.tagColors !== undefined) row.tag_colors = patch.tagColors
   return row
 }

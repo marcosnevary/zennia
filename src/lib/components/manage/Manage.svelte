@@ -35,7 +35,6 @@
     makeWord,
     needsMeaning,
     removeTag,
-    renameTag,
     sameTag,
     searchWords,
     SORT_OPTIONS,
@@ -147,7 +146,7 @@
   let romajiDialog = $state<RomajiWordsDialog>()
 
   function renameTagEverywhere(from: string, to: string) {
-    app.setWords(renameTag(words, from, to))
+    app.renameTag(from, to)
     // a merge keeps the spelling already in use, so read the final name back from the pool
     const name = findTag(allTags(words), to) ?? to
     activeTags = cleanTags(filterTags.map((t) => (sameTag(t, from) ? name : t)))

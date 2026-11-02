@@ -1,6 +1,7 @@
 import type { WordsFocus } from './practice-modes'
 import type { StatsSort, StatsSortDirection } from './stats'
 import type { ThemePreference } from './theme'
+import type { TagColor } from './tag-colors'
 import type { SortDirection, SortKey } from './words'
 
 export interface Settings {
@@ -12,6 +13,8 @@ export interface Settings {
   wordsSortDirection: SortDirection
   statsSort: StatsSort
   statsSortDirection: StatsSortDirection
+  /** The colour of each tag in use, by `tagKey`. */
+  tagColors: Record<string, TagColor>
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -22,4 +25,5 @@ export const DEFAULT_SETTINGS: Settings = {
   wordsSortDirection: 'asc',
   statsSort: 'accuracy',
   statsSortDirection: 'desc',
+  tagColors: {},
 }
