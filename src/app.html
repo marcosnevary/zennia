@@ -2,7 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="%sveltekit.assets%/favicon.png" />
+    <link rel="icon" type="image/png" href="%sveltekit.assets%/favicon.png" media="(prefers-color-scheme: light)" />
+    <link rel="icon" type="image/png" href="%sveltekit.assets%/favicon-dark.png" media="(prefers-color-scheme: dark)" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>zennia</title>
     <meta name="description" content="Practice Japanese vocabulary: see a word, type its reading in romaji and get instant feedback." />
@@ -18,7 +19,6 @@
         var saved = JSON.parse(localStorage.getItem('zennia:theme'))
         var dark = saved === 'dark' || (saved !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)
         document.documentElement.dataset.theme = dark ? 'dark' : 'light'
-        document.querySelector('link[rel="icon"]').href = dark ? '%sveltekit.assets%/favicon-dark.png' : '%sveltekit.assets%/favicon.png'
       } catch (e) {
         document.documentElement.dataset.theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
       }
