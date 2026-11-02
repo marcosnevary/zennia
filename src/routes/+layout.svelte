@@ -132,8 +132,9 @@
     {/if}
   </aside>
 
-  <!-- sized on 100vw, which counts a classic scrollbar, so the content does not shrink or shift when one appears; 1568px is the 1376px content plus the widest side padding -->
-  <div class="w-[calc(100vw-64px)] md:w-[calc(100vw-224px)]">
+  <!-- sized on 100vw, which counts a classic scrollbar, so the content does not shrink or shift when one appears (shrink-0, or the
+       flex row would take the scrollbar's width back out of it); 1568px is the 1376px content plus the widest side padding -->
+  <div class="w-[calc(100vw-64px)] shrink-0 md:w-[calc(100vw-224px)]">
     <div class="mx-auto max-w-[1568px] px-4 py-6 sm:px-8 lg:px-16 xl:px-24">
       <main>
         {#if app.status === 'ready'}
