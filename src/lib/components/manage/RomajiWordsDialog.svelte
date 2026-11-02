@@ -5,6 +5,7 @@
   import TagChip from './TagChip.svelte'
   import TagInput from './TagInput.svelte'
   import { closeOnBackdrop } from './dialog'
+  import { plural } from '../../core/plural'
   import { toDisplayRomaji } from '../../core/romaji'
   import { loadDictionary, lookUp, parseRomajiList, type Candidate, type RomajiItem } from '../../data/dictionary'
   import { importSummary, makeWord } from '../../data/words'
@@ -139,7 +140,7 @@
       {/if}
       <p class="text-sm text-muted">Dictionary data: JMdict (EDRDG), CC BY-SA 4.0.</p>
       <div class="dialog-actions">
-        <button class="action" type="button" onclick={add} disabled={chosen.length === 0}><Plus />Add {chosen.length} word(s)</button>
+        <button class="action" type="button" onclick={add} disabled={chosen.length === 0}><Plus />Add {chosen.length} {plural(chosen.length, 'word')}</button>
         <button type="button" onclick={() => (rows = [])}>Back</button>
       </div>
     {/if}

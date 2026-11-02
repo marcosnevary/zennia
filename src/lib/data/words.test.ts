@@ -244,7 +244,10 @@ describe('importSummary', () => {
 
   it('mentions the invalid items that were ignored', () => {
     expect(importSummary({ words: [], added: 0, updated: 0, duplicates: 2 }, 4)).toBe(
-      '0 added, 2 already existed. 4 invalid item(s) ignored.',
+      '0 added, 2 already existed. 4 invalid items ignored.',
+    )
+    expect(importSummary({ words: [], added: 1, updated: 0, duplicates: 0 }, 1)).toBe(
+      '1 added, 0 already existed. 1 invalid item ignored.',
     )
   })
 })

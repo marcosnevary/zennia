@@ -18,6 +18,7 @@
   import TagInput from './TagInput.svelte'
   import TagsDialog from './TagsDialog.svelte'
   import { defaultKanaSelection } from '../../core/kana'
+  import { plural } from '../../core/plural'
   import type { Word } from '../../core/types'
   import { getApp } from '../../state.svelte'
   import {
@@ -230,7 +231,7 @@
 
   function removeSelected() {
     const count = selectedWords.length
-    if (!confirm(`Delete ${count} selected word(s)?`)) return
+    if (!confirm(`Delete ${count} selected ${plural(count, 'word')}?`)) return
     app.setWords(words.filter((w) => !selected.has(w.id)))
     selected = new Set()
   }
@@ -264,7 +265,7 @@
 
 <dialog class="w-[min(420px,calc(100vw-32px))]" bind:this={tagDialogEl} use:closeOnBackdrop aria-label="Tag selected words">
   <div class="grid gap-2">
-    <h2 class="mt-0 mb-2">Tag {selectedWords.length} selected {selectedWords.length === 1 ? 'word' : 'words'}</h2>
+    <h2 class="mt-0 mb-2">Tag {selectedWords.length} selected {plural(selectedWords.length, 'word')}</h2>
     <TagInput bind:tags={() => commonTags, setCommonTags} suggestions={dialogChoices} />
     <div class="dialog-actions">
       <button class="action" type="button" onclick={() => tagDialogEl?.close()}><Check />Done</button>
@@ -345,7 +346,7 @@
   <div class="{ROW} relative z-10 mb-2">
     <label class="flex items-center gap-2">
       <input type="checkbox" checked={allSelected} onchange={toggleSelectAll} />
-      Select all {visibleWords.length} {visibleWords.length === words.length ? 'words' : 'results'}
+      Select all {visibleWords.length} {plural(visibleWords.length, visibleWords.length === words.length ? 'word' : 'result')}
     </label>
     <span class="text-muted">{activeWordCount} active · {selectedWords.length} selected</span>
     <!-- keeps the space reserved so the layout does not shift when a selection appears; the icons are 20px in 40px buttons -->

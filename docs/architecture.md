@@ -5,7 +5,7 @@ SvelteKit static SPA (see [ADR 1](adr/0001-sveltekit.md)). There is no server of
 ## Layout
 
 - `src/routes/`: one folder per tab (`practice`, `vocabulary`, `kana`, `stats`, `settings`, see [ADR 6](adr/0006-practice-follows-manage.md)), plus the shell in `+layout.svelte`. The shell preloads every tab's code as soon as the nav renders, and a click switches the tab at once, showing `Loading` while that tab's code is still loading. Outside the fields, the keys 1 to 5 switch to the tabs in nav order (Escape takes the focus off a text field first), and in Practice, Enter brings the focus back to the answer field.
-- `src/lib/core/`: pure logic (kana tables, answer checking, meaning matching, furigana, writing sheet).
+- `src/lib/core/`: pure logic (kana tables, answer checking, meaning matching, furigana, writing sheet, plurals of the counts shown in the UI).
 - `src/lib/data/`: data model, sanitizing, import/export and the dictionary lookup (`dictionary.ts`).
 - `src/lib/data/db/`: database access: the Supabase client (`client.ts`), the `Repo` that reads and writes the rows (`repo.ts`, `rows.ts`) and the one-time import of the old `localStorage` data (`legacy.ts`).
 - `supabase/migrations/`: the database schema.

@@ -1,4 +1,5 @@
 import { isKana } from 'wanakana'
+import { plural } from '../core/plural'
 import { toDisplayRomaji } from '../core/romaji'
 import type { Word } from '../core/types'
 
@@ -156,7 +157,7 @@ export interface MergeResult {
 /** The message shown after importing: what was added, what got a new meaning and what was ignored. */
 export function importSummary({ added, updated, duplicates }: MergeResult, skipped: number): string {
   const updatedNote = updated ? `, ${updated} updated` : ''
-  const skippedNote = skipped ? ` ${skipped} invalid item(s) ignored.` : ''
+  const skippedNote = skipped ? ` ${skipped} invalid ${plural(skipped, 'item')} ignored.` : ''
   return `${added} added${updatedNote}, ${duplicates} already existed.${skippedNote}`
 }
 

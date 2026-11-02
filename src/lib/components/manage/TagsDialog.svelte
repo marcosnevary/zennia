@@ -3,6 +3,7 @@
   import Trash from '@lucide/svelte/icons/trash'
   import TagChip, { CHIP } from './TagChip.svelte'
   import { closeOnBackdrop } from './dialog'
+  import { plural } from '../../core/plural'
   import type { Word } from '../../core/types'
   import { filterByTags, matchTags, sameTag, tagHue, validateTag } from '../../data/words'
 
@@ -96,7 +97,7 @@
   }
 
   function removeSelected() {
-    if (!confirm(`Remove ${selectedTags.length} selected tag(s) from all words?`)) return
+    if (!confirm(`Remove ${selectedTags.length} selected ${plural(selectedTags.length, 'tag')} from all words?`)) return
     ondelete(selectedTags)
     selected = []
   }
@@ -134,7 +135,7 @@
       <div class="relative z-10 flex flex-wrap items-center gap-2">
         <label class="flex items-center gap-2">
           <input type="checkbox" checked={allSelected} onchange={toggleSelectAll} />
-          Select all {visibleTags.length} {visibleTags.length === tags.length ? 'tags' : 'results'}
+          Select all {visibleTags.length} {plural(visibleTags.length, visibleTags.length === tags.length ? 'tag' : 'result')}
         </label>
         <span class="text-muted">{selectedTags.length} selected</span>
         <!-- keeps the space reserved so the layout does not shift when a selection appears; the icon is 20px in a 40px button -->
@@ -193,7 +194,7 @@
                 <TagChip {tag} title="Rename tag" onclick={() => startRename(tag)} />
               {/if}
               <span class="min-w-4 flex-1" aria-hidden="true"></span>
-              <span class="text-sm text-muted">{count} {count === 1 ? 'word' : 'words'}</span>
+              <span class="text-sm text-muted">{count} {plural(count, 'word')}</span>
             </div>
           </li>
         {/each}
