@@ -47,12 +47,24 @@ export function validateTag(tag: string): string {
   const t = tag.trim()
   if (!t) return 'Type a tag name.'
   if (t.length > MAX_TAG_LENGTH) return `A tag can have at most ${MAX_TAG_LENGTH} characters.`
+  // a space would end a `#` search term and `#` would start one, so a name holds neither
+  if (!/^[\p{L}\p{M}\p{N}_-]+$/u.test(t)) return 'A tag can only have letters, numbers, - and _.'
   return ''
 }
 
 /** Whether two tag names are the same tag: equal ignoring case and surrounding spaces. */
 export function sameTag(a: string, b: string): boolean {
   return a.trim().toLowerCase() === b.trim().toLowerCase()
+}
+
+/** The spelling the list uses for the tag, if it has it. */
+export function findTag(tags: string[], name: string): string | undefined {
+  return tags.find((t) => sameTag(t, name))
+}
+
+/** Whether the tags include every wanted one. */
+export function hasEveryTag(tags: string[], wanted: string[]): boolean {
+  return wanted.every((w) => tags.some((t) => sameTag(t, w)))
 }
 
 /** The tags that contain the typed text, ignoring case and surrounding spaces; all of them when it is blank. */
@@ -88,12 +100,37 @@ export function updateWord(word: Word, { japanese, hiragana, meaning, tags }: Wo
   return { ...word, japanese: japanese.trim(), hiragana: hiragana.trim(), meaning: meaning.trim(), tags: cleanTags(tags) }
 }
 
-/** The words matching the search in the word, the reading, its romaji or the meaning; everything for a blank search. */
+export interface SearchQuery {
+  /** The plain text to look for, lowercase */
+  text: string
+  /** The `#` terms, lowercase and without the `#` */
+  tags: string[]
+}
+
+/** Splits a search into its `#tag` terms and the rest of the text. A bare `#` counts as neither. */
+export function parseSearch(query: string): SearchQuery {
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean)
+  return {
+    text: terms.filter((t) => !t.startsWith('#')).join(' '),
+    tags: terms.filter((t) => t.startsWith('#') && t.length > 1).map((t) => t.slice(1)),
+  }
+}
+
+/** Whether every `#` term is contained in one of the tags, ignoring case. */
+export function hasSearchTags(tags: string[], terms: string[]): boolean {
+  return terms.every((term) => matchTags(tags, term).length > 0)
+}
+
+/**
+ * The words matching the search in the word, the reading, its romaji or the meaning, and having a tag for
+ * every `#` term; everything for a blank search.
+ */
 export function searchWords(words: Word[], query: string): Word[] {
-  const q = query.trim().toLowerCase()
-  if (!q) return words
-  return words.filter((w) =>
-    [w.japanese, w.hiragana, toDisplayRomaji(w.hiragana), w.meaning].some((field) => field.toLowerCase().includes(q)),
+  const { text, tags } = parseSearch(query)
+  return words.filter(
+    (w) =>
+      hasSearchTags(w.tags, tags) &&
+      [w.japanese, w.hiragana, toDisplayRomaji(w.hiragana), w.meaning].some((field) => field.toLowerCase().includes(text)),
   )
 }
 
@@ -233,7 +270,7 @@ export function allTags(words: Word[]): string[] {
 
 /** The spelling the pool already uses for the tag, or the typed one when it is new. */
 function spellingOf(words: Word[], tag: string): string {
-  return allTags(words).find((t) => sameTag(t, tag)) ?? tag.trim()
+  return findTag(allTags(words), tag) ?? tag.trim()
 }
 
 /** The words with the tag added to the chosen ones; the tag keeps the spelling already in use. */
@@ -267,7 +304,7 @@ export function renameTag(words: Word[], from: string, to: string): Word[] {
 
 /** The words that have every one of the tags; all of them when no tag is chosen. */
 export function filterByTags(words: Word[], tags: string[]): Word[] {
-  return words.filter((w) => tags.every((tag) => w.tags.some((t) => sameTag(t, tag))))
+  return words.filter((w) => hasEveryTag(w.tags, tags))
 }
 
 /** The words that have at least one of the tags: the ones deleting those tags would change. */

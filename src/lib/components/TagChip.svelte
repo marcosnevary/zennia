@@ -5,7 +5,7 @@
 </script>
 
 <script lang="ts">
-  import { tagHue } from '../../data/words'
+  import { tagHue } from '../data/words'
 
   // `onclick` makes the chip a button; `selected` makes it a toggle, faded while off. With neither it is plain text.
   let { tag, onclick, selected, title }: { tag: string; onclick?: () => void; selected?: boolean; title?: string } = $props()

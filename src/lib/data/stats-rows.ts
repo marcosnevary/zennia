@@ -1,7 +1,7 @@
 import { toRomaji } from 'wanakana'
-import { parseKanaKey, symbolOf } from '../core/kana'
+import { SCRIPT_LABELS, parseKanaKey, symbolOf } from '../core/kana'
 import type { Stats, Tally, Word } from '../core/types'
-import { wordReading } from './words'
+import { hasEveryTag, hasSearchTags, parseSearch, wordReading } from './words'
 import { sortTallies, type StatsSort, type StatsSortDirection } from './stats'
 
 export interface StatsRow {
@@ -15,6 +15,8 @@ export interface StatsRow {
   search: string
   /** Whether `symbol` is Japanese text of a saved word (shown in the word font) */
   ja: boolean
+  /** The word's tags; for kana, the system tag of its script */
+  tags: string[]
   tally: Tally
 }
 
@@ -32,6 +34,7 @@ export function buildRows(stats: Stats, words: Word[]): StatsRow[] {
       meaning: word.meaning ?? '',
       search: `${word.japanese} ${word.hiragana} ${toRomaji(word.hiragana)} ${word.meaning ?? ''}`.toLowerCase(),
       ja: true,
+      tags: word.tags,
       tally,
     })
   }
@@ -48,6 +51,7 @@ export function buildRows(stats: Stats, words: Word[]): StatsRow[] {
       meaning: '',
       search: `${symbol} ${hiragana} ${romaji}`.toLowerCase(),
       ja: false,
+      tags: [SCRIPT_LABELS[script]],
       tally,
     })
   }
@@ -56,14 +60,16 @@ export function buildRows(stats: Stats, words: Word[]): StatsRow[] {
 
 export interface StatsFilter {
   query: string
+  /** The tag chips of the search bar: a row needs every one */
+  tags: string[]
   sort: StatsSort
   direction: StatsSortDirection
 }
 
-/** The rows to show: matching the search text, in the chosen order. */
-export function filterRows(rows: StatsRow[], { query, sort, direction }: StatsFilter): StatsRow[] {
-  const q = query.trim().toLowerCase()
-  const matches = rows.filter((r) => !q || r.search.includes(q))
+/** The rows to show: having the chosen tags and matching the search text and its `#` terms, in the chosen order. */
+export function filterRows(rows: StatsRow[], { query, tags, sort, direction }: StatsFilter): StatsRow[] {
+  const search = parseSearch(query)
+  const matches = rows.filter((r) => hasEveryTag(r.tags, tags) && r.search.includes(search.text) && hasSearchTags(r.tags, search.tags))
   const byKey = new Map(matches.map((r) => [r.key, r]))
   return sortTallies(matches.map((r) => [r.key, r.tally]), sort, direction).map(([key]) => byKey.get(key)!)
 }

@@ -5,12 +5,16 @@ import {
   cleanTags,
   deleteTag,
   filterByTags,
+  findTag,
+  hasEveryTag,
+  hasSearchTags,
   importBrief,
   importSummary,
   makeWord,
   matchTags,
   mergeWords,
   needsMeaning,
+  parseSearch,
   removeTag,
   renameTag,
   sanitizeWords,
@@ -230,6 +234,50 @@ describe('searchWords', () => {
     expect(ids('a')).toEqual(['2', '3'])
     expect(ids('nothing like this')).toEqual([])
   })
+
+  it('keeps only the words with a tag containing each # term, along with the text', () => {
+    const tagged = [
+      { ...word('1', '犬', 'いぬ', 'Dog'), tags: ['Animals', 'N5'] },
+      { ...word('2', '猫', 'ねこ', 'cat'), tags: ['animals'] },
+      word('3', '食べる', 'たべる', 'to eat'),
+    ]
+    const tagIds = (query: string) => searchWords(tagged, query).map((w) => w.id)
+    expect(tagIds('#anim')).toEqual(['1', '2'])
+    expect(tagIds('#ANIMALS #n5')).toEqual(['1'])
+    expect(tagIds('#animals cat')).toEqual(['2'])
+    expect(tagIds('#')).toEqual(['1', '2', '3'])
+    expect(tagIds('#verbs')).toEqual([])
+  })
+})
+
+describe('parseSearch', () => {
+  it('splits the # terms from the text, lowercase', () => {
+    expect(parseSearch('  To  #N5 eat #Verbs ')).toEqual({ text: 'to eat', tags: ['n5', 'verbs'] })
+    expect(parseSearch('#')).toEqual({ text: '', tags: [] })
+    expect(parseSearch('')).toEqual({ text: '', tags: [] })
+  })
+})
+
+describe('hasSearchTags', () => {
+  it('needs a tag containing every term', () => {
+    expect(hasSearchTags(['Hiragana'], ['gana'])).toBe(true)
+    expect(hasSearchTags(['Hiragana'], ['gana', 'kata'])).toBe(false)
+    expect(hasSearchTags([], [])).toBe(true)
+    expect(hasSearchTags([], ['n5'])).toBe(false)
+  })
+})
+
+describe('findTag and hasEveryTag', () => {
+  it('finds the spelling in use, ignoring case', () => {
+    expect(findTag(['Genki-1', 'N5'], 'genki-1')).toBe('Genki-1')
+    expect(findTag(['Genki-1'], 'genki')).toBeUndefined()
+  })
+
+  it('needs every wanted tag, ignoring case', () => {
+    expect(hasEveryTag(['Genki-1', 'N5'], ['n5', 'GENKI-1'])).toBe(true)
+    expect(hasEveryTag(['Genki-1'], ['Genki-1', 'N5'])).toBe(false)
+    expect(hasEveryTag([], [])).toBe(true)
+  })
 })
 
 describe('importSummary', () => {
@@ -269,7 +317,7 @@ describe('importBrief', () => {
 
 describe('tag names', () => {
   it('cleanTags trims, drops blanks and repeats (ignoring case) and keeps the first spelling', () => {
-    expect(cleanTags([' Food ', 'food', '', '  ', 'JLPT N5', 'Food'])).toEqual(['Food', 'JLPT N5'])
+    expect(cleanTags([' Food ', 'food', '', '  ', 'JLPT-N5', 'JLPT N5', 'Food'])).toEqual(['Food', 'JLPT-N5'])
   })
   it('validateTag rejects blank and over-long names', () => {
     expect(validateTag('  ')).not.toBe('')
@@ -277,10 +325,14 @@ describe('tag names', () => {
     expect(validateTag('a'.repeat(30))).toBe('')
     expect(validateTag(' food ')).toBe('')
   })
+  it('validateTag allows only letters of any script, numbers, - and _', () => {
+    for (const ok of ['genki-1', '動詞', 'n5_vocab', 'カタカナ']) expect(validateTag(ok)).toBe('')
+    for (const bad of ['genki 1', '#n5', 'a.b', 'x/y', 'a,b']) expect(validateTag(bad)).toBe('A tag can only have letters, numbers, - and _.')
+  })
   it('matchTags keeps the tags containing the text, ignoring case and spaces, and all of them for blank text', () => {
-    const tags = ['Food', 'JLPT N5', 'seafood', 'verbs']
+    const tags = ['Food', 'JLPT-N5', 'seafood', 'verbs']
     expect(matchTags(tags, ' FOO ')).toEqual(['Food', 'seafood'])
-    expect(matchTags(tags, 'n5')).toEqual(['JLPT N5'])
+    expect(matchTags(tags, 'n5')).toEqual(['JLPT-N5'])
     expect(matchTags(tags, '  ')).toEqual(tags)
     expect(matchTags(tags, 'kanji')).toEqual([])
   })

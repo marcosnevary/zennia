@@ -1,6 +1,6 @@
 <script lang="ts">
-  import TagChip from './TagChip.svelte'
-  import { cleanTags, sameTag, validateTag } from '../../data/words'
+  import TagChip from '../TagChip.svelte'
+  import { cleanTags, findTag, sameTag, validateTag } from '../../data/words'
 
   let { tags = $bindable(), suggestions }: { tags: string[]; suggestions: string[] } = $props()
 
@@ -27,7 +27,7 @@
     }
     error = validateTag(draft)
     if (error) return
-    const spelling = choices.find((c) => sameTag(c, draft)) ?? draft
+    const spelling = findTag(choices, draft) ?? draft
     tags = cleanTags([...tags, spelling])
     draft = ''
   }

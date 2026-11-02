@@ -14,8 +14,9 @@
   import KanaSelector from './KanaSelector.svelte'
   import RomajiWordsDialog from './RomajiWordsDialog.svelte'
   import Switch from '../Switch.svelte'
-  import TagChip from './TagChip.svelte'
+  import TagChip from '../TagChip.svelte'
   import TagInput from './TagInput.svelte'
+  import TagSearch from '../TagSearch.svelte'
   import TagsDialog from './TagsDialog.svelte'
   import { defaultKanaSelection } from '../../core/kana'
   import { plural } from '../../core/plural'
@@ -27,6 +28,7 @@
     cleanTags,
     deleteTag,
     filterByTags,
+    findTag,
     makeWord,
     needsMeaning,
     removeTag,
@@ -131,20 +133,11 @@
     listEl?.scrollTo({ top: 0 })
   }
 
-  function toggleFilterTag(tag: string) {
-    activeTags = filterTags.some((t) => sameTag(t, tag)) ? filterTags.filter((t) => !sameTag(t, tag)) : [...filterTags, tag]
-    selected = new Set()
-    listEl?.scrollTo({ top: 0 })
-  }
-
-  function onSearchKeydown(event: KeyboardEvent) {
-    const last = filterTags.at(-1)
-    if (event.key === 'Backspace' && query === '' && last) toggleFilterTag(last)
-  }
-
   // clicking a tag on a word narrows the list to it (it never undoes: clicking the chip in the search bar does)
   function filterByTag(tag: string) {
-    if (!filterTags.some((t) => sameTag(t, tag))) toggleFilterTag(tag)
+    if (findTag(filterTags, tag)) return
+    activeTags = [...filterTags, tag]
+    onSearch()
   }
 
   let tagsDialog = $state<TagsDialog>()
@@ -153,7 +146,7 @@
   function renameTagEverywhere(from: string, to: string) {
     app.setWords(renameTag(words, from, to))
     // a merge keeps the spelling already in use, so read the final name back from the pool
-    const name = allTags(words).find((t) => sameTag(t, to)) ?? to
+    const name = findTag(allTags(words), to) ?? to
     activeTags = cleanTags(filterTags.map((t) => (sameTag(t, from) ? name : t)))
   }
 
@@ -311,23 +304,15 @@
   <p class="my-4 text-muted">No words yet.</p>
 {:else}
   <div class="mb-2 flex flex-wrap items-center gap-2">
-    <!-- a label, so clicking beside the chips focuses the input; without `for` it would label the first chip
-         button instead, which then turns hovered and clicked along with the whole bar -->
-    <label for="word-search" class="field flex min-h-10 min-w-50 flex-1 cursor-text flex-wrap items-center gap-1 px-3 py-1">
-      {#each filterTags as tag (tag)}
-        <TagChip {tag} selected onclick={() => toggleFilterTag(tag)} />
-      {/each}
-      <input
-        id="word-search"
-        type="search"
-        class="min-w-30 flex-1 appearance-none bg-transparent p-0 outline-none"
-        placeholder="Search by word, reading or meaning"
-        aria-label="Search words"
-        bind:value={query}
-        oninput={onSearch}
-        onkeydown={onSearchKeydown}
-      />
-    </label>
+    <TagSearch
+      id="word-search"
+      placeholder="Search by word, reading, meaning or #tag"
+      label="Search words"
+      bind:query
+      bind:tags={() => filterTags, (next) => (activeTags = next)}
+      suggestions={tags}
+      onchange={onSearch}
+    />
     <div class="flex items-center gap-2">
       <button class="field" onclick={() => tagsDialog?.open()} disabled={tags.length === 0}><Tags />Tags</button>
       <select
