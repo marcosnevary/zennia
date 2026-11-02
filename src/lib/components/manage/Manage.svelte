@@ -333,7 +333,7 @@
       />
     </label>
     <div class="flex items-center gap-2">
-      <button class="field" onclick={() => tagsDialog?.open()}><Tags />Tags</button>
+      <button class="field" onclick={() => tagsDialog?.open()} disabled={tags.length === 0}><Tags />Tags</button>
       <select
         class="field chevron"
         value={sortKey}
