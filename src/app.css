@@ -216,6 +216,143 @@
   gap: 8px;
 }
 
+/* a list that scrolls on its own, ten rows at a time; the value is the row height on the spacing scale (scroll-list-10
+   for 40px rows). The padding keeps the rows' focus outline inside the scroll area, which would clip it, and the
+   negative margin keeps the rows lined up with the content around the list. Where ten rows may not fit, such as in a
+   dialog, --scroll-list-cap lowers the limit. --scroll-list-under stretches the scroll area up behind the content right
+   above the list (which must sit on top, with relative z-10), so the rows fade out behind it instead of below it */
+@utility scroll-list-* {
+  --scroll-list-fade: 36px;
+  /* how much scrolling turns an edge fade fully on or off: less than a mouse wheel step, so the first one shows it */
+  --scroll-list-fade-scroll: 16px;
+  --scroll-list-top-fade: calc(var(--scroll-list-under, 0px) + var(--scroll-list-fade));
+  /* the rows stay fully hidden behind the content above the list, down to its last 16px, so they never cross its text */
+  --scroll-list-clear: max(0px, var(--scroll-list-under, 0px) - 16px);
+  /* flex rather than grid, so the negative margins below can take the edge covers out of the flow, gap included */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  padding: calc(4px + var(--scroll-list-under, 0px)) 4px 4px;
+  margin: calc(-4px - var(--scroll-list-under, 0px)) -4px -4px;
+  scroll-padding-top: var(--scroll-list-under, 0px);
+  max-height: min(
+    calc(10 * var(--spacing) * --value(integer) + 9 * 8px + 8px + var(--scroll-list-under, 0px)),
+    var(--scroll-list-cap, 100dvh)
+  );
+
+  /* the fades are covers in the page colour pinned to each edge, not a mask on the list, which would fade the scrollbar
+     too; the scrollbar is drawn over the list's content, covers included. Smootherstep stops instead of a straight
+     ramp, whose sudden end shows as a line where the rows turn solid, and twelve of them keep the kinks too small to see */
+  &::before,
+  &::after {
+    content: '';
+    position: sticky;
+    z-index: 1;
+    flex: none;
+    pointer-events: none;
+    background: var(--bg);
+  }
+
+  /* pulled up to the top of the scroll area, and back out of the flow so the first row stays where it was */
+  &::before {
+    /* the ramp ends at the animated --scroll-list-fade-top and starts where it leaves the clear part, once scrolled */
+    --scroll-list-ramp-start: max(0px, var(--scroll-list-fade-top) - var(--scroll-list-top-fade) + var(--scroll-list-clear));
+    --scroll-list-ramp: calc(var(--scroll-list-fade-top) - var(--scroll-list-ramp-start));
+    /* sticky offsets count from inside the list's padding, so this takes it back to reach the very edge (and -4px below) */
+    top: calc(-4px - var(--scroll-list-under, 0px));
+    height: var(--scroll-list-top-fade);
+    margin-top: calc(-4px - var(--scroll-list-under, 0px));
+    margin-bottom: calc(4px + var(--scroll-list-under, 0px) - var(--scroll-list-top-fade) - 8px);
+    mask-image: linear-gradient(
+      to bottom,
+      black var(--scroll-list-ramp-start),
+      rgb(0 0 0 / 0.995) calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.0833),
+      rgb(0 0 0 / 0.965) calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.1667),
+      rgb(0 0 0 / 0.896) calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.25),
+      rgb(0 0 0 / 0.79) calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.3333),
+      rgb(0 0 0 / 0.653) calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.4167),
+      rgb(0 0 0 / 0.5) calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.5),
+      rgb(0 0 0 / 0.347) calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.5833),
+      rgb(0 0 0 / 0.21) calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.6667),
+      rgb(0 0 0 / 0.104) calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.75),
+      rgb(0 0 0 / 0.035) calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.8333),
+      rgb(0 0 0 / 0.005) calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.9167),
+      transparent var(--scroll-list-fade-top)
+    );
+  }
+
+  &::after {
+    bottom: -4px;
+    height: var(--scroll-list-fade);
+    margin-top: calc(-8px - var(--scroll-list-fade));
+    mask-image: linear-gradient(
+      to top,
+      black,
+      rgb(0 0 0 / 0.995) calc(var(--scroll-list-fade-bottom) * 0.0833),
+      rgb(0 0 0 / 0.965) calc(var(--scroll-list-fade-bottom) * 0.1667),
+      rgb(0 0 0 / 0.896) calc(var(--scroll-list-fade-bottom) * 0.25),
+      rgb(0 0 0 / 0.79) calc(var(--scroll-list-fade-bottom) * 0.3333),
+      rgb(0 0 0 / 0.653) calc(var(--scroll-list-fade-bottom) * 0.4167),
+      rgb(0 0 0 / 0.5) calc(var(--scroll-list-fade-bottom) * 0.5),
+      rgb(0 0 0 / 0.347) calc(var(--scroll-list-fade-bottom) * 0.5833),
+      rgb(0 0 0 / 0.21) calc(var(--scroll-list-fade-bottom) * 0.6667),
+      rgb(0 0 0 / 0.104) calc(var(--scroll-list-fade-bottom) * 0.75),
+      rgb(0 0 0 / 0.035) calc(var(--scroll-list-fade-bottom) * 0.8333),
+      rgb(0 0 0 / 0.005) calc(var(--scroll-list-fade-bottom) * 0.9167),
+      transparent var(--scroll-list-fade-bottom)
+    );
+  }
+
+  /* each edge fades in only while there is more to scroll that way; a list that does not scroll has no timeline, so no
+     fade. Without scroll-driven animations the animation would run once and leave the top faded, hence the guard.
+     Longhands, as the minifier expands the shorthand with a 0s duration, which would make the fades jump */
+  @supports (animation-timeline: scroll()) {
+    &::before,
+    &::after {
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: scroll(nearest);
+    }
+
+    &::before {
+      animation-name: scroll-list-fade-top;
+      animation-range: 0 var(--scroll-list-fade-scroll);
+    }
+
+    &::after {
+      animation-name: scroll-list-fade-bottom;
+      animation-range: calc(100% - var(--scroll-list-fade-scroll)) 100%;
+    }
+  }
+}
+
+/* registered so the animations can interpolate them as lengths */
+@property --scroll-list-fade-top {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --scroll-list-fade-bottom {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@keyframes scroll-list-fade-top {
+  to {
+    --scroll-list-fade-top: var(--scroll-list-top-fade);
+  }
+}
+
+@keyframes scroll-list-fade-bottom {
+  from {
+    --scroll-list-fade-bottom: var(--scroll-list-fade);
+  }
+}
+
 @utility section-title {
   padding-bottom: 8px;
   margin-bottom: 12px;
