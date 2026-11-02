@@ -400,7 +400,9 @@
           {:else}
             <span class={["min-w-0 truncate", word.disabled && DIM]}>{word.meaning}</span>
           {/if}
-          {#each word.tags as tag (tag)}<TagChip {tag} onclick={() => filterByTag(tag)} />{/each}
+          {#if word.tags.length > 0}
+            <span class="flex gap-1">{#each word.tags as tag (tag)}<TagChip {tag} onclick={() => filterByTag(tag)} />{/each}</span>
+          {/if}
           <span class="min-w-4 flex-1" aria-hidden="true"></span>
           <Switch checked={!word.disabled} onchange={() => toggle(word)} label="Enabled" title={word.disabled ? 'Enable' : 'Disable'} />
         </div>
