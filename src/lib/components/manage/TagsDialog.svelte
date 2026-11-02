@@ -154,6 +154,7 @@
       <!-- reaches up behind the 40px select-all row and the 8px gap below it -->
       <ul class="scroll-list-10 [--scroll-list-cap:50dvh] [--scroll-list-under:48px]" bind:this={listEl}>
         {#each visibleTags as tag (tag)}
+          {@const count = filterByTags(words, [tag]).length}
           <li>
             <div
               class={[
@@ -192,7 +193,7 @@
                 <TagChip {tag} title="Rename tag" onclick={() => startRename(tag)} />
               {/if}
               <span class="min-w-4 flex-1" aria-hidden="true"></span>
-              <span class="text-sm text-muted">{filterByTags(words, [tag]).length} word(s)</span>
+              <span class="text-sm text-muted">{count} {count === 1 ? 'word' : 'words'}</span>
             </div>
           </li>
         {/each}
