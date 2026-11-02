@@ -47,12 +47,24 @@ export function validateTag(tag: string): string {
   const t = tag.trim()
   if (!t) return 'Type a tag name.'
   if (t.length > MAX_TAG_LENGTH) return `A tag can have at most ${MAX_TAG_LENGTH} characters.`
+  // a space would end a `#` search term and `#` would start one, so a name holds neither
+  if (!/^[\p{L}\p{M}\p{N}_-]+$/u.test(t)) return 'A tag can only have letters, numbers, - and _.'
   return ''
 }
 
 /** Whether two tag names are the same tag: equal ignoring case and surrounding spaces. */
 export function sameTag(a: string, b: string): boolean {
   return a.trim().toLowerCase() === b.trim().toLowerCase()
+}
+
+/** The spelling the list uses for the tag, if it has it. */
+export function findTag(tags: string[], name: string): string | undefined {
+  return tags.find((t) => sameTag(t, name))
+}
+
+/** Whether the tags include every wanted one. */
+export function hasEveryTag(tags: string[], wanted: string[]): boolean {
+  return wanted.every((w) => tags.some((t) => sameTag(t, w)))
 }
 
 /** The tags that contain the typed text, ignoring case and surrounding spaces; all of them when it is blank. */
@@ -104,14 +116,9 @@ export function parseSearch(query: string): SearchQuery {
   }
 }
 
-/** The `#` term that finds a tag: a search term ends at a space, so the spaces inside a tag name are left out. */
-export function tagTerm(tag: string): string {
-  return `#${tag.replace(/\s+/g, '').toLowerCase()}`
-}
-
-/** Whether every `#` term is contained in one of the tags, ignoring case and the spaces inside tag names. */
+/** Whether every `#` term is contained in one of the tags, ignoring case. */
 export function hasSearchTags(tags: string[], terms: string[]): boolean {
-  return terms.every((term) => tags.some((tag) => tagTerm(tag).slice(1).includes(term)))
+  return terms.every((term) => matchTags(tags, term).length > 0)
 }
 
 /**
@@ -263,7 +270,7 @@ export function allTags(words: Word[]): string[] {
 
 /** The spelling the pool already uses for the tag, or the typed one when it is new. */
 function spellingOf(words: Word[], tag: string): string {
-  return allTags(words).find((t) => sameTag(t, tag)) ?? tag.trim()
+  return findTag(allTags(words), tag) ?? tag.trim()
 }
 
 /** The words with the tag added to the chosen ones; the tag keeps the spelling already in use. */
@@ -297,7 +304,7 @@ export function renameTag(words: Word[], from: string, to: string): Word[] {
 
 /** The words that have every one of the tags; all of them when no tag is chosen. */
 export function filterByTags(words: Word[], tags: string[]): Word[] {
-  return words.filter((w) => tags.every((tag) => w.tags.some((t) => sameTag(t, tag))))
+  return words.filter((w) => hasEveryTag(w.tags, tags))
 }
 
 /** The words that have at least one of the tags: the ones deleting those tags would change. */

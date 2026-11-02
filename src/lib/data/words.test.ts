@@ -5,6 +5,8 @@ import {
   cleanTags,
   deleteTag,
   filterByTags,
+  findTag,
+  hasEveryTag,
   hasSearchTags,
   importBrief,
   importSummary,
@@ -20,7 +22,6 @@ import {
   setDisabled,
   sortWords,
   tagHue,
-  tagTerm,
   updateWord,
   withAnyTag,
   validateTag,
@@ -264,17 +265,18 @@ describe('hasSearchTags', () => {
     expect(hasSearchTags([], [])).toBe(true)
     expect(hasSearchTags([], ['n5'])).toBe(false)
   })
-
-  it('leaves out the spaces inside a tag name, which a term cannot hold', () => {
-    expect(hasSearchTags(['JLPT N5'], ['jlptn5'])).toBe(true)
-    expect(hasSearchTags(['JLPT N5'], ['tn'])).toBe(true)
-  })
 })
 
-describe('tagTerm', () => {
-  it('is the tag after a #, lowercase and without spaces', () => {
-    expect(tagTerm(' JLPT  N5 ')).toBe('#jlptn5')
-    expect(tagTerm('Verbs')).toBe('#verbs')
+describe('findTag and hasEveryTag', () => {
+  it('finds the spelling in use, ignoring case', () => {
+    expect(findTag(['Genki-1', 'N5'], 'genki-1')).toBe('Genki-1')
+    expect(findTag(['Genki-1'], 'genki')).toBeUndefined()
+  })
+
+  it('needs every wanted tag, ignoring case', () => {
+    expect(hasEveryTag(['Genki-1', 'N5'], ['n5', 'GENKI-1'])).toBe(true)
+    expect(hasEveryTag(['Genki-1'], ['Genki-1', 'N5'])).toBe(false)
+    expect(hasEveryTag([], [])).toBe(true)
   })
 })
 
@@ -315,7 +317,7 @@ describe('importBrief', () => {
 
 describe('tag names', () => {
   it('cleanTags trims, drops blanks and repeats (ignoring case) and keeps the first spelling', () => {
-    expect(cleanTags([' Food ', 'food', '', '  ', 'JLPT N5', 'Food'])).toEqual(['Food', 'JLPT N5'])
+    expect(cleanTags([' Food ', 'food', '', '  ', 'JLPT-N5', 'JLPT N5', 'Food'])).toEqual(['Food', 'JLPT-N5'])
   })
   it('validateTag rejects blank and over-long names', () => {
     expect(validateTag('  ')).not.toBe('')
@@ -323,10 +325,14 @@ describe('tag names', () => {
     expect(validateTag('a'.repeat(30))).toBe('')
     expect(validateTag(' food ')).toBe('')
   })
+  it('validateTag allows only letters of any script, numbers, - and _', () => {
+    for (const ok of ['genki-1', '動詞', 'n5_vocab', 'カタカナ']) expect(validateTag(ok)).toBe('')
+    for (const bad of ['genki 1', '#n5', 'a.b', 'x/y', 'a,b']) expect(validateTag(bad)).toBe('A tag can only have letters, numbers, - and _.')
+  })
   it('matchTags keeps the tags containing the text, ignoring case and spaces, and all of them for blank text', () => {
-    const tags = ['Food', 'JLPT N5', 'seafood', 'verbs']
+    const tags = ['Food', 'JLPT-N5', 'seafood', 'verbs']
     expect(matchTags(tags, ' FOO ')).toEqual(['Food', 'seafood'])
-    expect(matchTags(tags, 'n5')).toEqual(['JLPT N5'])
+    expect(matchTags(tags, 'n5')).toEqual(['JLPT-N5'])
     expect(matchTags(tags, '  ')).toEqual(tags)
     expect(matchTags(tags, 'kanji')).toEqual([])
   })
