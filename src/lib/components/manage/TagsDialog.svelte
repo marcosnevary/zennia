@@ -3,8 +3,9 @@
   import Trash from '@lucide/svelte/icons/trash'
   import TagChip, { CHIP } from './TagChip.svelte'
   import { closeOnBackdrop } from './dialog'
+  import { plural } from '../../core/plural'
   import type { Word } from '../../core/types'
-  import { filterByTags, matchTags, sameTag, tagHue, validateTag } from '../../data/words'
+  import { filterByTags, matchTags, sameTag, tagHue, validateTag, withAnyTag } from '../../data/words'
 
   let {
     tags,
@@ -27,6 +28,10 @@
   let selected = $state<string[]>([])
   const selectedTags = $derived(tags.filter((t) => isSelected(t)))
   const allSelected = $derived(visibleTags.length > 0 && visibleTags.every((t) => isSelected(t)))
+  const affectedCount = $derived(withAnyTag(words, selectedTags).length)
+  const removeLabel = $derived(
+    `Remove ${selectedTags.length} selected ${plural(selectedTags.length, 'tag')} from ${affectedCount} ${plural(affectedCount, 'word')}`,
+  )
 
   let renaming = $state<string | null>(null)
   let renameDraft = $state('')
@@ -71,7 +76,8 @@
     renameError = validateTag(to)
     if (renameError) return
     const merges = !sameTag(from, to) && tags.some((t) => sameTag(t, to))
-    if (merges && !confirm(`"${to}" already exists. Merge "${from}" into it?`)) {
+    const moved = filterByTags(words, [from]).length
+    if (merges && !confirm(`"${to}" already exists. Merge "${from}" into it? Its ${moved} ${plural(moved, 'word')} will be tagged "${to}".`)) {
       renaming = null
       return
     }
@@ -96,7 +102,7 @@
   }
 
   function removeSelected() {
-    if (!confirm(`Remove ${selectedTags.length} selected tag(s) from all words?`)) return
+    if (!confirm(`${removeLabel}?`)) return
     ondelete(selectedTags)
     selected = []
   }
@@ -134,7 +140,7 @@
       <div class="relative z-10 flex flex-wrap items-center gap-2">
         <label class="flex items-center gap-2">
           <input type="checkbox" checked={allSelected} onchange={toggleSelectAll} />
-          Select all {visibleTags.length} {visibleTags.length === tags.length ? 'tags' : 'results'}
+          {visibleTags.length === 1 ? 'Select' : 'Select all'} {visibleTags.length} {plural(visibleTags.length, visibleTags.length === tags.length ? 'tag' : 'result')}
         </label>
         <span class="text-muted">{selectedTags.length} selected</span>
         <!-- keeps the space reserved so the layout does not shift when a selection appears; the icon is 20px in a 40px button -->
@@ -142,8 +148,8 @@
           class="danger icon ml-auto size-10 items-center justify-center [&_svg]:size-5"
           class:invisible={selectedTags.length === 0}
           onclick={removeSelected}
-          aria-label="Remove selected tags from all words"
-          title="Remove selected tags from all words"
+          aria-label={removeLabel}
+          title={removeLabel}
         >
           <Trash />
         </button>
@@ -154,6 +160,7 @@
       <!-- reaches up behind the 40px select-all row and the 8px gap below it -->
       <ul class="scroll-list-10 [--scroll-list-cap:50dvh] [--scroll-list-under:48px]" bind:this={listEl}>
         {#each visibleTags as tag (tag)}
+          {@const count = filterByTags(words, [tag]).length}
           <li>
             <div
               class={[
@@ -192,7 +199,7 @@
                 <TagChip {tag} title="Rename tag" onclick={() => startRename(tag)} />
               {/if}
               <span class="min-w-4 flex-1" aria-hidden="true"></span>
-              <span class="text-sm text-muted">{filterByTags(words, [tag]).length} word(s)</span>
+              <span class="text-sm text-muted">{count} {plural(count, 'word')}</span>
             </div>
           </li>
         {/each}

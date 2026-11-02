@@ -19,6 +19,7 @@ import {
   sortWords,
   tagHue,
   updateWord,
+  withAnyTag,
   validateTag,
   validateWord,
   wordReading,
@@ -244,7 +245,10 @@ describe('importSummary', () => {
 
   it('mentions the invalid items that were ignored', () => {
     expect(importSummary({ words: [], added: 0, updated: 0, duplicates: 2 }, 4)).toBe(
-      '0 added, 2 already existed. 4 invalid item(s) ignored.',
+      '0 added, 2 already existed. 4 invalid items ignored.',
+    )
+    expect(importSummary({ words: [], added: 1, updated: 0, duplicates: 0 }, 1)).toBe(
+      '1 added, 0 already existed. 1 invalid item ignored.',
     )
   })
 })
@@ -364,6 +368,13 @@ describe('tag operations', () => {
     expect(ids(['food'])).toEqual(['1', '2', '4'])
     expect(ids(['FOOD', 'n5'])).toEqual(['1'])
     expect(ids(['food', 'fruit'])).toEqual(['4'])
+  })
+
+  it('withAnyTag keeps the words that have at least one of the tags, and nothing for no tags', () => {
+    const ids = (tags: string[]) => withAnyTag(list, tags).map((x) => x.id)
+    expect(ids([])).toEqual([])
+    expect(ids(['N5'])).toEqual(['1'])
+    expect(ids(['n5', 'FRUIT'])).toEqual(['1', '4'])
   })
 })
 

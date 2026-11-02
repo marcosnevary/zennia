@@ -1,4 +1,5 @@
 import { isKana } from 'wanakana'
+import { plural } from '../core/plural'
 import { toDisplayRomaji } from '../core/romaji'
 import type { Word } from '../core/types'
 
@@ -156,7 +157,7 @@ export interface MergeResult {
 /** The message shown after importing: what was added, what got a new meaning and what was ignored. */
 export function importSummary({ added, updated, duplicates }: MergeResult, skipped: number): string {
   const updatedNote = updated ? `, ${updated} updated` : ''
-  const skippedNote = skipped ? ` ${skipped} invalid item(s) ignored.` : ''
+  const skippedNote = skipped ? ` ${skipped} invalid ${plural(skipped, 'item')} ignored.` : ''
   return `${added} added${updatedNote}, ${duplicates} already existed.${skippedNote}`
 }
 
@@ -267,6 +268,11 @@ export function renameTag(words: Word[], from: string, to: string): Word[] {
 /** The words that have every one of the tags; all of them when no tag is chosen. */
 export function filterByTags(words: Word[], tags: string[]): Word[] {
   return words.filter((w) => tags.every((tag) => w.tags.some((t) => sameTag(t, tag))))
+}
+
+/** The words that have at least one of the tags: the ones deleting those tags would change. */
+export function withAnyTag(words: Word[], tags: string[]): Word[] {
+  return words.filter((w) => tags.some((tag) => w.tags.some((t) => sameTag(t, tag))))
 }
 
 export type SortKey = 'list' | 'japanese' | 'reading' | 'meaning' | 'status'
