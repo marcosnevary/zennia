@@ -556,7 +556,8 @@
     margin: 0;
     border: 0;
     min-width: 192px;
-    padding: 4px;
+    /* 8px is the panel radius minus the items' control radius, so their corners follow the menu's */
+    padding: 8px;
     border-radius: var(--radius-panel);
     background: var(--bg);
     color: inherit;
