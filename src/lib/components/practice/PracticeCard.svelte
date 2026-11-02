@@ -1,6 +1,7 @@
 <script lang="ts">
   import ArrowRight from '@lucide/svelte/icons/arrow-right'
   import Check from '@lucide/svelte/icons/check'
+  import CircleSmall from '@lucide/svelte/icons/circle-small'
   import X from '@lucide/svelte/icons/x'
   import type { Verdict } from '../../core/types'
   import type { RightAnswer } from '../../data/practice-modes'
@@ -73,7 +74,7 @@
 {#snippet verdictIcon(fieldVerdict: Verdict | null)}
   {#if fieldVerdict}
     <!-- top-2 puts the 24px icon on the text line of the 40px field -->
-    {@const VerdictIcon = fieldVerdict === 'correct' ? Check : X}
+    {@const VerdictIcon = fieldVerdict === 'correct' ? CircleSmall : X}
     <VerdictIcon class="pointer-events-none absolute top-2 right-3 {VERDICT_TEXT[fieldVerdict]}" />
   {/if}
 {/snippet}
