@@ -22,7 +22,9 @@
   --color-on-bg: var(--on-bg);
   --color-off: var(--off);
   --color-off-bg: var(--off-bg);
-  /* the fill of secondary buttons, fields and checkboxes, a little darker on hover; pressed only for the word cards */
+  /* the fill of secondary buttons, fields and checkboxes, a little darker on hover; pressed only for the word cards;
+     soft, lighter, only for a hovered tab */
+  --color-tint-soft: color-mix(in srgb, var(--surface) 96%, var(--text));
   --color-tint: color-mix(in srgb, var(--surface) 92%, var(--text));
   --color-tint-hover: color-mix(in srgb, var(--surface) 90%, var(--text));
   --color-tint-pressed: color-mix(in srgb, var(--surface) 84%, var(--text));
@@ -36,6 +38,8 @@
 
   /* the only font sizes: Tailwind's defaults are dropped so nothing falls outside the scale */
   --text-*: initial;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
   --text-lg: 1.25rem;
@@ -84,7 +88,7 @@
   --muted: #78716c;
   /* the lightest gray that keeps the 3:1 against the page that borders need */
   --border: #9a938e;
-  --action: #0062a3;
+  --action: #292524;
   --action-text: #ffffff;
   --ok: #15803d;
   --ok-bg: #dcfce7;
@@ -111,7 +115,7 @@
   --muted: #a3a3a3;
   /* the dimmest gray that keeps the 3:1 against the page that borders need */
   --border: #6b6b6b;
-  --action: #7ec4f0;
+  --action: #d4d4d4;
   --action-text: #111111;
   --ok: #86efac;
   --ok-bg: #14532d;
@@ -593,8 +597,7 @@
     background: transparent;
   }
 
-  button.action,
-  .tab[aria-current='page'] {
+  button.action {
     background: var(--action);
     color: var(--action-text);
   }
@@ -604,14 +607,20 @@
   }
 
   button:not(:disabled):hover,
-  .file:hover,
-  .tab:hover {
+  .file:hover {
     background: var(--action);
     color: var(--action-text);
   }
 
-  button.action:not(:disabled):hover,
-  .tab[aria-current='page']:hover {
+  .tab:hover {
+    background: var(--color-tint-soft);
+  }
+
+  .tab[aria-current='page'] {
+    background: var(--color-tint);
+  }
+
+  button.action:not(:disabled):hover {
     background: color-mix(in srgb, var(--action) 80%, var(--text));
   }
 
