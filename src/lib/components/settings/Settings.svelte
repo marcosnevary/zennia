@@ -6,7 +6,7 @@
   import RotateCcw from '@lucide/svelte/icons/rotate-ccw'
   import Upload from '@lucide/svelte/icons/upload'
   import X from '@lucide/svelte/icons/x'
-  import type { Component } from 'svelte'
+  import { tick, type Component } from 'svelte'
   import type { Attachment } from 'svelte/attachments'
   import { prefersReducedMotion } from 'svelte/motion'
   import { importAnkiDeck } from '../../data/anki'
@@ -39,19 +39,31 @@
 
   function flash(key: string, ok: boolean, text: string, detail?: string) {
     clearTimeout(feedbackTimer)
-    feedback = { key, ok, text, detail }
-    feedbackTimer = setTimeout(() => (feedback = null), FEEDBACK_MS)
+    void show({ key, ok, text, detail })
+    feedbackTimer = setTimeout(() => void show(null), FEEDBACK_MS)
   }
 
-  // the content swaps at once and then fades in by its color, so the button's own fill never blinks
-  function fadeOnFeedback(key: string): Attachment {
-    let shown: typeof feedback = null
+  const controls = new Map<string, Element>()
+
+  function control(key: string): Attachment {
     return (element) => {
-      const current = feedback?.key === key ? feedback : null
-      if (current === shown) return
-      shown = current
-      if (!prefersReducedMotion.current) element.animate([{ color: 'transparent' }], { duration: 200, easing: 'ease-out' })
+      controls.set(key, element)
+      return () => controls.delete(key)
     }
+  }
+
+  // the old content fades out before the new one fades in, so they never share the button;
+  // only the content fades, not the control, so its fill stays put
+  async function show(next: typeof feedback) {
+    const keys = [feedback?.key, next?.key]
+    const contents = () => keys.flatMap((key) => [...(controls.get(key ?? '')?.children ?? [])])
+    const animate = !prefersReducedMotion.current
+    const fadingOut = animate ? contents().map((child) => child.animate([{ opacity: 0 }], { duration: 100, fill: 'forwards' })) : []
+    await Promise.all(fadingOut.map((animation) => animation.finished))
+    feedback = next
+    await tick()
+    fadingOut.forEach((animation) => animation.cancel())
+    if (animate) contents().forEach((child) => child.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150, easing: 'ease-out' }))
   }
 
   function describe(key: string, description: string): string {
@@ -90,9 +102,9 @@
 
 {#snippet action(key: string, Icon: Component, label: string)}
   {#if feedback?.key === key}
-    {#if feedback.ok}<Check class="outcome" />{:else}<X class="outcome" />{/if}{feedback.text}
+    {#if feedback.ok}<Check class="outcome" />{:else}<X class="outcome" />{/if}<span>{feedback.text}</span>
   {:else}
-    <Icon />{label}
+    <Icon /><span>{label}</span>
   {/if}
 {/snippet}
 
@@ -144,10 +156,10 @@
 </div>
 <div class="divide-y divide-line/40">
   <SettingRow title="Export words" description="Download all your words as a JSON file, as a backup or to move them elsewhere.">
-    <button onclick={exportWords} disabled={app.words.length === 0} {@attach fadeOnFeedback('export')}>{@render action('export', Upload, 'Export JSON')}</button>
+    <button onclick={exportWords} disabled={app.words.length === 0} {@attach control('export')}>{@render action('export', Upload, 'Export JSON')}</button>
   </SettingRow>
   <SettingRow title="Import words" description={describe('json', 'Add the words of a file made by Export JSON.')}>
-    <label class="file" {@attach fadeOnFeedback('json')}>
+    <label class="file" {@attach control('json')}>
       {@render action('json', Download, 'Import JSON')}
       <input type="file" accept="application/json,.json" onchange={(e) => runImport(e, 'json', importJSON)} hidden />
     </label>
@@ -156,7 +168,7 @@
     <label
       class="file text-center"
       title="Anki: Export → Notes in Plain Text. Columns: word, hiragana, meaning"
-      {@attach fadeOnFeedback('anki')}
+      {@attach control('anki')}
     >
       {@render action('anki', Download, 'Import .txt')}
       <input type="file" accept="text/plain,.txt,.tsv" onchange={(e) => runImport(e, 'anki', importAnkiDeck)} hidden />
@@ -165,7 +177,7 @@
   <!-- the row outlives the reset until its confirmation on the button is over -->
   {#if attempts(totalTally(app.stats)) || feedback?.key === 'reset'}
     <SettingRow title="Reset statistics" description="Erase every practice result. This cannot be undone.">
-      <button class="danger" onclick={resetStats} {@attach fadeOnFeedback('reset')}>{@render action('reset', RotateCcw, 'Reset stats')}</button>
+      <button class="danger" onclick={resetStats} {@attach control('reset')}>{@render action('reset', RotateCcw, 'Reset stats')}</button>
     </SettingRow>
   {/if}
 </div>
