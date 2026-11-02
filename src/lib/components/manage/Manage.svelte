@@ -343,7 +343,8 @@
       </select>
     </div>
   </div>
-  <div class="{ROW} mb-2">
+  <!-- on top of the list, which scrolls up behind it -->
+  <div class="{ROW} relative z-10 mb-2">
     <label class="flex items-center gap-2">
       <input type="checkbox" checked={allSelected} onchange={toggleSelectAll} />
       Select all {visibleWords.length} {visibleWords.length === words.length ? 'words' : 'results'}
@@ -379,7 +380,8 @@
   {#if visibleWords.length === 0}
     <p class="my-4 text-muted">No words match your search or tag filter.</p>
   {/if}
-  <ul class="scroll-list-12" bind:this={listEl}>
+  <!-- reaches up behind the 40px select-all row and the 8px below it -->
+  <ul class="scroll-list-12 [--scroll-list-under:48px]" bind:this={listEl}>
     {#each visibleWords as word (word.id)}
       <li>
         <div

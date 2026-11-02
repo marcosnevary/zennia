@@ -130,7 +130,8 @@
         bind:value={query}
         oninput={onSearch}
       />
-      <div class="flex flex-wrap items-center gap-2">
+      <!-- on top of the list, which scrolls up behind it -->
+      <div class="relative z-10 flex flex-wrap items-center gap-2">
         <label class="flex items-center gap-2">
           <input type="checkbox" checked={allSelected} onchange={toggleSelectAll} />
           Select all {visibleTags.length} {visibleTags.length === tags.length ? 'tags' : 'results'}
@@ -150,7 +151,8 @@
       {#if visibleTags.length === 0}
         <p class="my-4 text-muted">No tags match your search.</p>
       {/if}
-      <ul class="scroll-list-10 [--scroll-list-cap:50dvh]" bind:this={listEl}>
+      <!-- reaches up behind the 40px select-all row and the 8px gap below it -->
+      <ul class="scroll-list-10 [--scroll-list-cap:50dvh] [--scroll-list-under:48px]" bind:this={listEl}>
         {#each visibleTags as tag (tag)}
           <li>
             <div
