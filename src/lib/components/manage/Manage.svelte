@@ -264,7 +264,7 @@
 
 <dialog class="w-[min(420px,calc(100vw-32px))]" bind:this={tagDialogEl} use:closeOnBackdrop aria-label="Tag selected words">
   <div class="grid gap-2">
-    <h2 class="mt-0 mb-2">Tag {selectedWords.length} selected word(s)</h2>
+    <h2 class="mt-0 mb-2">Tag {selectedWords.length} selected {selectedWords.length === 1 ? 'word' : 'words'}</h2>
     <TagInput bind:tags={() => commonTags, setCommonTags} suggestions={dialogChoices} />
     <div class="dialog-actions">
       <button class="action" type="button" onclick={() => tagDialogEl?.close()}><Check />Done</button>
