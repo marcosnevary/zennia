@@ -10,7 +10,7 @@
     symbolOf,
     toggleKeys,
     type KanaScript,
-  } from "../../core/kana";
+  } from "#lib/core/kana.ts";
 
   let {
     selected,

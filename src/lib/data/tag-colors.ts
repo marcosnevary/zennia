@@ -1,3 +1,5 @@
+import { tagKey } from "./tags";
+
 /** A tag's saved color: a hue on the color wheel and one of the `TAG_TONES`. */
 export interface TagColor {
   hue: number;
@@ -14,11 +16,6 @@ export const TAG_TONES = [
 const HUE_STEP = 5;
 // the OKLab distance from which two chips read as clearly different colors, not shades of one
 const DISTINCT = 0.07;
-
-/** The key a tag's color is saved under, the same for every spelling of the tag. */
-export function tagKey(tag: string): string {
-  return tag.trim().toLowerCase();
-}
 
 function hash(text: string): number {
   let h = 0x811c9dc5;

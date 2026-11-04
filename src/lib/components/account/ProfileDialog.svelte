@@ -1,10 +1,10 @@
 <script lang="ts">
   import ImageUp from "@lucide/svelte/icons/image-up";
   import Save from "@lucide/svelte/icons/save";
-  import { messageOf } from "../../core/errors";
-  import Dialog from "../Dialog.svelte";
-  import { toAvatar } from "../../data/avatar";
-  import { getApp } from "../../state.svelte";
+  import { messageOf } from "#lib/core/errors.ts";
+  import Dialog from "#lib/components/Dialog.svelte";
+  import { toAvatar } from "#lib/data/avatar.ts";
+  import { getApp } from "#lib/state.svelte.ts";
   import Avatar from "./Avatar.svelte";
 
   const app = getApp();

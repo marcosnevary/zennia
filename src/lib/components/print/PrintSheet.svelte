@@ -1,12 +1,12 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
-  import { sheetRow, SHEET, type CellKind } from "../../core/sheet";
+  import { sheetRow, SHEET, type CellKind } from "#lib/core/sheet.ts";
   import {
     loadStrokes,
     type CharStrokes,
     type StrokeData,
-  } from "../../data/strokes";
-  import type { Word } from "../../core/types";
+  } from "#lib/data/strokes.ts";
+  import type { Word } from "#lib/core/types.ts";
 
   let { words, onclose }: { words: Word[]; onclose: () => void } = $props();
 

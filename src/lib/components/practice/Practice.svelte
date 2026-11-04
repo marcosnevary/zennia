@@ -1,18 +1,12 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
-  import type { Verdict } from "../../core/types";
   import PracticeCard from "./PracticeCard.svelte";
-  import {
-    checkParts,
-    joinAnswers,
-    mixedMode,
-    rightAnswer,
-  } from "../../data/practice-modes";
+  import { mixedMode, rightAnswer } from "#lib/data/practice-modes.ts";
   import {
     nextRound,
     submit as submitAnswer,
-  } from "../../data/practice-session";
-  import { getApp } from "../../state.svelte";
+  } from "#lib/data/practice-session.ts";
+  import { getApp } from "#lib/state.svelte.ts";
 
   const app = getApp();
 
@@ -31,34 +25,13 @@
   const askReading = $derived(current?.kind === "kana" || focus !== "meaning");
   const askMeaning = $derived(current?.kind === "word" && focus !== "reading");
 
-  /** What the session checks: the typed texts of the fields shown. */
-  const typed = $derived(
-    current?.kind !== "word" || focus === "reading"
-      ? answer
-      : focus === "both"
-        ? joinAnswers(answer, meaningAnswer)
-        : meaningAnswer,
-  );
-
-  /** The outcome of each field once checked, shown on the field itself. */
-  const parts = $derived.by(
-    (): { reading: Verdict | null; meaning: Verdict | null } => {
-      if (!current || !app.practice.verdict)
-        return { reading: null, meaning: null };
-      if (current.kind === "kana")
-        return { reading: app.practice.verdict, meaning: null };
-      const { reading, meaning } = checkParts(typed, current.word, focus);
-      return {
-        reading,
-        meaning: meaning === null ? null : meaning ? "correct" : "incorrect",
-      };
-    },
-  );
+  const outcome = $derived(app.practice.outcome);
+  const verdict = $derived(outcome?.verdict ?? null);
 
   // the fields show the parts by color, so screen readers get them in words when both are practiced
   const note = $derived(
-    parts.reading && parts.meaning
-      ? `Reading: ${parts.reading} · Meaning: ${parts.meaning}`
+    outcome?.reading && outcome.meaning
+      ? `Reading: ${outcome.reading} · Meaning: ${outcome.meaning}`
       : undefined,
   );
 
@@ -70,8 +43,12 @@
 
   function submit(event: Event) {
     event.preventDefault();
-    const advancing = app.practice.verdict !== null;
-    app.practice = submitAnswer(app.practice, typed, mode);
+    const advancing = verdict !== null;
+    app.practice = submitAnswer(
+      app.practice,
+      { reading: answer, meaning: meaningAnswer },
+      mode,
+    );
     if (advancing) {
       answer = "";
       meaningAnswer = "";
@@ -86,12 +63,9 @@
   // before Check, Enter on the page brings the focus back to the answer
   function onWindowKeydown(event: KeyboardEvent) {
     if (event.target !== document.body) return;
-    if (
-      app.practice.verdict !== null &&
-      (event.key === " " || event.key === "Enter")
-    ) {
+    if (verdict !== null && (event.key === " " || event.key === "Enter")) {
       submit(event);
-    } else if (app.practice.verdict === null && event.key === "Enter") {
+    } else if (verdict === null && event.key === "Enter") {
       event.preventDefault();
       focusField();
     }
@@ -101,11 +75,7 @@
   // either moves on to the meaning, which is where a typed answer ends. A meaning keeps its spaces.
   function onkeydown(event: KeyboardEvent) {
     if (event.key !== " " && event.key !== "Enter") return;
-    if (
-      focus === "both" &&
-      current?.kind === "word" &&
-      app.practice.verdict === null
-    ) {
+    if (focus === "both" && current?.kind === "word" && verdict === null) {
       event.preventDefault();
       meaningEl?.focus();
     } else {
@@ -134,11 +104,11 @@
     prompt={current.kind === "word"
       ? current.word.japanese
       : current.kana.symbol}
-    verdict={app.practice.verdict}
+    {verdict}
     rightAnswer={rightAnswer(current)}
     {note}
-    readingVerdict={parts.reading}
-    meaningVerdict={parts.meaning}
+    readingVerdict={outcome?.reading ?? null}
+    meaningVerdict={outcome?.meaning ?? null}
     hits={app.practice.hits}
     answers={app.practice.answers}
     {askReading}

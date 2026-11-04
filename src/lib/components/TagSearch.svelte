@@ -1,7 +1,7 @@
 <script lang="ts">
   import { tick } from "svelte";
   import TagChip from "./TagChip.svelte";
-  import { findTag, sameTag } from "../data/words";
+  import { findTag, sameTag } from "#lib/data/tags.ts";
 
   // `tags` are the chips before the text; `suggestions` are the tags a typed `#term` can turn into a chip
   let {

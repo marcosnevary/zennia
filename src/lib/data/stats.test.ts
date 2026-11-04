@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { SortDirection } from "./words";
 import {
   accuracy,
   accuracyLevel,
@@ -9,8 +10,9 @@ import {
   recordAnswer,
   recordKana,
   sortTallies,
+  type StatsSort,
 } from "./stats";
-import type { Word } from "../core/types";
+import type { Word } from "#lib/core/types.ts";
 
 const word: Word = {
   id: "w1",
@@ -75,31 +77,17 @@ describe("accuracy and sorting", () => {
     expect(accuracy({ hits: 3, misses: 1 })).toBe(0.75);
   });
   it("sorts by misses, accuracy and hits in either direction", () => {
-    const entries: [string, { hits: number; misses: number }][] = [
-      ["a", { hits: 9, misses: 3 }],
-      ["b", { hits: 1, misses: 2 }],
-      ["c", { hits: 5, misses: 0 }],
+    const entries = [
+      { key: "a", tally: { hits: 9, misses: 3 } },
+      { key: "b", tally: { hits: 1, misses: 2 } },
+      { key: "c", tally: { hits: 5, misses: 0 } },
     ];
-    expect(sortTallies(entries, "misses").map(([k]) => k)).toEqual([
-      "a",
-      "b",
-      "c",
-    ]);
-    expect(sortTallies(entries, "accuracy", "asc").map(([k]) => k)).toEqual([
-      "b",
-      "a",
-      "c",
-    ]);
-    expect(sortTallies(entries, "hits").map(([k]) => k)).toEqual([
-      "a",
-      "c",
-      "b",
-    ]);
-    expect(sortTallies(entries, "misses", "asc").map(([k]) => k)).toEqual([
-      "c",
-      "b",
-      "a",
-    ]);
+    const keys = (sort: StatsSort, direction: SortDirection) =>
+      sortTallies(entries, sort, direction).map((e) => e.key);
+    expect(keys("misses", "desc")).toEqual(["a", "b", "c"]);
+    expect(keys("accuracy", "asc")).toEqual(["b", "a", "c"]);
+    expect(keys("hits", "desc")).toEqual(["a", "c", "b"]);
+    expect(keys("misses", "asc")).toEqual(["c", "b", "a"]);
   });
 });
 

@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { checkAnswer, toDisplayRomaji } from "../core/romaji";
+import { checkAnswer, toDisplayRomaji } from "#lib/core/romaji.ts";
 import {
   indexDictionary,
   lookUp,

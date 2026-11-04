@@ -1,19 +1,19 @@
 <script lang="ts">
   import Check from "@lucide/svelte/icons/check";
   import Trash from "@lucide/svelte/icons/trash";
-  import TagChip, { CHIP, useTagStyle } from "../TagChip.svelte";
-  import Dialog from "../Dialog.svelte";
-  import SelectAll from "../SelectAll.svelte";
-  import { selectRow } from "../select-row";
-  import { plural } from "../../core/plural";
-  import type { Word } from "../../core/types";
+  import TagChip, { CHIP, useTagStyle } from "#lib/components/TagChip.svelte";
+  import Dialog from "#lib/components/Dialog.svelte";
+  import SelectAll from "#lib/components/SelectAll.svelte";
+  import { selectRow } from "#lib/components/select-row.ts";
+  import { plural } from "#lib/core/plural.ts";
+  import type { Word } from "#lib/core/types.ts";
   import {
     filterByTags,
     matchTags,
     sameTag,
     validateTag,
     withAnyTag,
-  } from "../../data/words";
+  } from "#lib/data/tags.ts";
 
   let {
     tags,

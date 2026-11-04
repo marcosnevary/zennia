@@ -1,6 +1,6 @@
 <script lang="ts">
   import CircleQuestionMark from "@lucide/svelte/icons/circle-question-mark";
-  import Dialog from "../Dialog.svelte";
+  import Dialog from "#lib/components/Dialog.svelte";
 
   let helpEl = $state<HTMLDialogElement>();
 </script>

@@ -3,8 +3,8 @@
   import Check from "@lucide/svelte/icons/check";
   import CircleSmall from "@lucide/svelte/icons/circle-small";
   import X from "@lucide/svelte/icons/x";
-  import type { Verdict } from "../../core/types";
-  import type { RightAnswer } from "../../data/practice-modes";
+  import type { Verdict } from "#lib/core/types.ts";
+  import type { RightAnswer } from "#lib/data/practice-modes.ts";
   import ResultPanel from "./ResultPanel.svelte";
   import Scoreboard from "./Scoreboard.svelte";
 

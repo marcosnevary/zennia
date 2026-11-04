@@ -1,6 +1,6 @@
 <script lang="ts" module>
-  import { getApp } from "../state.svelte";
-  import { tagChipStyle, tagColorOf } from "../data/tag-colors";
+  import { getApp } from "#lib/state.svelte.ts";
+  import { tagChipStyle, tagColorOf } from "#lib/data/tag-colors.ts";
 
   // the fill is the tag's color, dimmer in dark mode; the text stays dark so it reads in both themes
   export const CHIP =

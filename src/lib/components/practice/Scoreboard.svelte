@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { accuracy, percent } from "../../data/stats";
-  import StatTile from "../StatTile.svelte";
+  import { accuracy, percent } from "#lib/data/stats.ts";
+  import StatTile from "#lib/components/StatTile.svelte";
 
   let { hits, answers }: { hits: number; answers: number } = $props();
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildRows, filterRows, type StatsFilter } from "./stats-rows";
-import type { Stats, Word } from "../core/types";
+import type { Stats, Word } from "#lib/core/types.ts";
 
 const word = (id: string, extra: Partial<Word> = {}): Word => ({
   id,

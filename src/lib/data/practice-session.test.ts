@@ -5,9 +5,12 @@ import {
   submit,
   type PracticeMode,
 } from "./practice-session";
-import type { Verdict } from "../core/types";
+import type { Verdict } from "#lib/core/types.ts";
 
 type Item = { id: string };
+
+const typed = { reading: "x", meaning: "" };
+const blank = { reading: "   ", meaning: "" };
 
 /** A mode over plain items whose check is scripted by the test. */
 function fakeMode(ids: string[], verdicts: Verdict[] = []) {
@@ -16,7 +19,11 @@ function fakeMode(ids: string[], verdicts: Verdict[] = []) {
     pool: ids.map((id) => ({ id })),
     keyOf: (item) => item.id,
     weightOf: () => 1,
-    check: () => verdicts.shift() ?? "correct",
+    check: ({ reading }) => {
+      if (!reading.trim()) return null;
+      const verdict = verdicts.shift() ?? "correct";
+      return { verdict, reading: verdict, meaning: null };
+    },
     record: (item, verdict) => recorded.push([item.id, verdict]),
   };
   return { mode, recorded };
@@ -39,9 +46,9 @@ describe("nextRound", () => {
 
   it("keeps the score and clears the verdict", () => {
     const { mode } = fakeMode(["a", "b"]);
-    const answered = submit(nextRound(startSession<Item>(), mode), "x", mode);
+    const answered = submit(nextRound(startSession<Item>(), mode), typed, mode);
     expect(nextRound(answered, mode)).toMatchObject({
-      verdict: null,
+      outcome: null,
       hits: 1,
       answers: 1,
     });
@@ -56,8 +63,12 @@ describe("nextRound", () => {
 describe("submit", () => {
   it("counts a correct answer and records it", () => {
     const { mode, recorded } = fakeMode(["a"], ["correct"]);
-    const session = submit(nextRound(startSession<Item>(), mode), "x", mode);
-    expect(session).toMatchObject({ verdict: "correct", hits: 1, answers: 1 });
+    const session = submit(nextRound(startSession<Item>(), mode), typed, mode);
+    expect(session).toMatchObject({
+      outcome: { verdict: "correct" },
+      hits: 1,
+      answers: 1,
+    });
     expect(recorded).toEqual([["a", "correct"]]);
   });
 
@@ -68,22 +79,22 @@ describe("submit", () => {
     );
     let session = nextRound(startSession<Item>(), mode);
     for (let i = 0; i < 4; i++)
-      session = submit(submit(session, "x", mode), "", mode);
+      session = submit(submit(session, typed, mode), blank, mode);
     expect(session).toMatchObject({ hits: 2, answers: 4 });
   });
 
   it("moves on to the next item when submitted after a verdict, without counting again", () => {
     const { mode, recorded } = fakeMode(["a"]);
-    const checked = submit(nextRound(startSession<Item>(), mode), "x", mode);
-    const moved = submit(checked, "", mode);
-    expect(moved).toMatchObject({ verdict: null, hits: 1, answers: 1 });
+    const checked = submit(nextRound(startSession<Item>(), mode), typed, mode);
+    const moved = submit(checked, blank, mode);
+    expect(moved).toMatchObject({ outcome: null, hits: 1, answers: 1 });
     expect(recorded).toHaveLength(1);
   });
 
   it("ignores an empty answer without counting or recording it", () => {
     const { mode, recorded } = fakeMode(["a"]);
     const before = nextRound(startSession<Item>(), mode);
-    expect(submit(before, "   ", mode)).toEqual(before);
+    expect(submit(before, blank, mode)).toEqual(before);
     expect(recorded).toEqual([]);
   });
 });

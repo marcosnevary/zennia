@@ -1,6 +1,6 @@
 <script lang="ts">
-  import TagChip from "../TagChip.svelte";
-  import { cleanTags, findTag, sameTag, validateTag } from "../../data/words";
+  import TagChip from "#lib/components/TagChip.svelte";
+  import { cleanTags, findTag, sameTag, validateTag } from "#lib/data/tags.ts";
 
   let {
     tags = $bindable(),

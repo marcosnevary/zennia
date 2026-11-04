@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { SortDirection } from "../../data/words";
+  import type { SortDirection } from "#lib/data/words.ts";
   import ArrowDown from "@lucide/svelte/icons/arrow-down";
   import ArrowUp from "@lucide/svelte/icons/arrow-up";
   import {
@@ -10,13 +10,13 @@
     percent,
     totalTally,
     type StatsSort,
-  } from "../../data/stats";
-  import { buildRows, filterRows } from "../../data/stats-rows";
-  import { cleanTags, findTag } from "../../data/words";
-  import { getApp } from "../../state.svelte";
-  import StatTile from "../StatTile.svelte";
-  import TagChip from "../TagChip.svelte";
-  import TagSearch from "../TagSearch.svelte";
+  } from "#lib/data/stats.ts";
+  import { buildRows, filterRows } from "#lib/data/stats-rows.ts";
+  import { cleanTags, findTag } from "#lib/data/tags.ts";
+  import { getApp } from "#lib/state.svelte.ts";
+  import StatTile from "#lib/components/StatTile.svelte";
+  import TagChip from "#lib/components/TagChip.svelte";
+  import TagSearch from "#lib/components/TagSearch.svelte";
 
   const LEVEL_STYLES = { high: "text-on", low: "text-off", "": "" };
 

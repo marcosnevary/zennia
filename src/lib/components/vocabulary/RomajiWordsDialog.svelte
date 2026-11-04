@@ -3,19 +3,19 @@
   import Plus from "@lucide/svelte/icons/plus";
   import Search from "@lucide/svelte/icons/search";
   import TagInput from "./TagInput.svelte";
-  import Dialog from "../Dialog.svelte";
-  import SelectAll from "../SelectAll.svelte";
-  import { selectRow } from "../select-row";
-  import { plural } from "../../core/plural";
+  import Dialog from "#lib/components/Dialog.svelte";
+  import SelectAll from "#lib/components/SelectAll.svelte";
+  import { selectRow } from "#lib/components/select-row.ts";
+  import { plural } from "#lib/core/plural.ts";
   import {
     loadDictionary,
     lookUp,
     parseRomajiList,
     type Candidate,
     type RomajiItem,
-  } from "../../data/dictionary";
-  import { importSummary, makeWord, wordReading } from "../../data/words";
-  import { getApp } from "../../state.svelte";
+  } from "#lib/data/dictionary.ts";
+  import { importSummary, makeWord, wordReading } from "#lib/data/words.ts";
+  import { getApp } from "#lib/state.svelte.ts";
 
   let { tags }: { tags: string[] } = $props();
 
