@@ -14,4 +14,4 @@ labels: ["bug"]
 
 ## Notes
 
-<!-- Screenshots, logs, related ADRs or data sources -->
+<!-- Screenshots, logs, related docs or data sources -->
