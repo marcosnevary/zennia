@@ -62,11 +62,6 @@ export function validateEdit(
   return errors;
 }
 
-/** Whether the word was saved before the meaning became required and still has none. */
-export function needsMeaning(word: Word): boolean {
-  return !word.meaning.trim();
-}
-
 /** The muted line next to a word: its hiragana and romaji, or only the romaji when the word is written in hiragana. */
 export function wordReading({
   japanese,
@@ -210,15 +205,11 @@ export interface SanitizeResult {
 }
 
 /**
- * Validates external data (an imported file or the old localStorage data).
- * Accepts a list of words or an object { words: [...] }.
- * Items without `japanese` or `hiragana` are ignored and counted in `skipped`, and so are
- * items without a meaning when `requireMeaning` is set (new entries; words already saved keep theirs empty).
+ * Validates an imported file. Accepts a list of words or an object { words: [...] }.
+ * Items without `japanese`, `hiragana` or `meaning` are ignored and counted in `skipped`.
+ * A word with no valid activation time counts as activated now.
  */
-export function sanitizeWords(
-  raw: unknown,
-  { requireMeaning = false } = {},
-): SanitizeResult {
+export function sanitizeWords(raw: unknown): SanitizeResult {
   const list = Array.isArray(raw)
     ? raw
     : raw &&
@@ -242,7 +233,7 @@ export function sanitizeWords(
     const japanese = typeof o.japanese === "string" ? o.japanese.trim() : "";
     const hiragana = typeof o.hiragana === "string" ? o.hiragana.trim() : "";
     const meaning = typeof o.meaning === "string" ? o.meaning.trim() : "";
-    if (!japanese || !hiragana || (requireMeaning && !meaning)) {
+    if (!japanese || !hiragana || !meaning) {
       skipped++;
       continue;
     }
@@ -250,17 +241,18 @@ export function sanitizeWords(
     if (seenIds.has(id)) id = newId();
     seenIds.add(id);
     const tags = Array.isArray(o.tags) ? cleanTags(o.tags) : [];
-    const word: Word = {
+    words.push({
       id,
       japanese,
       hiragana,
       meaning,
       disabled: o.disabled === true,
+      activatedAt:
+        typeof o.activatedAt === "number" && Number.isFinite(o.activatedAt)
+          ? o.activatedAt
+          : Date.now(),
       tags,
-    };
-    if (typeof o.activatedAt === "number" && Number.isFinite(o.activatedAt))
-      word.activatedAt = o.activatedAt;
-    words.push(word);
+    });
   }
 
   return { words, skipped };
@@ -444,7 +436,7 @@ const collator = new Intl.Collator("ja");
 
 /**
  * Returns a sorted copy of the list. `list` keeps the stored order (newest additions first)
- * `status` puts active words first when ascending, oldest activation first (undated words count as oldest). Remaining ties keep the stored order
+ * `status` puts active words first when ascending, oldest activation first. Remaining ties keep the stored order
  * (the direction flips the criterion, including the activation order, but not that tie-break).
  */
 export function sortWords(
@@ -462,14 +454,11 @@ export function sortWords(
       case "reading":
         return collator.compare(a.hiragana, b.hiragana);
       case "meaning":
-        // words without a meaning go last in either direction (pre-multiplied to cancel the outer sign)
-        if (!a.meaning || !b.meaning)
-          return sign * (Number(!a.meaning) - Number(!b.meaning));
         return collator.compare(a.meaning, b.meaning);
       case "status":
         return (
           Number(!!a.disabled) - Number(!!b.disabled) ||
-          (a.disabled ? 0 : (a.activatedAt ?? 0) - (b.activatedAt ?? 0))
+          (a.disabled ? 0 : a.activatedAt - b.activatedAt)
         );
     }
   };

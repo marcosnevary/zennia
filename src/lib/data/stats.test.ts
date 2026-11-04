@@ -8,7 +8,6 @@ import {
   pickWeighted,
   recordAnswer,
   recordKana,
-  sanitizeStats,
   sortTallies,
 } from "./stats";
 import type { Word } from "../core/types";
@@ -19,6 +18,7 @@ const word: Word = {
   hiragana: "たべる",
   meaning: "",
   disabled: false,
+  activatedAt: 0,
   tags: [],
 };
 
@@ -66,21 +66,6 @@ describe("accuracyLevel", () => {
   });
   it("is neutral without answers", () => {
     expect(accuracyLevel({ hits: 0, misses: 0 })).toBe("");
-  });
-});
-
-describe("sanitizeStats", () => {
-  it("accepts valid data and drops malformed entries", () => {
-    const stats = sanitizeStats({
-      words: { a: { hits: 2, misses: 1 }, b: { hits: "x" }, c: null },
-      kana: { "hiragana:あ": { hits: -3, misses: 4.9 } },
-    });
-    expect(stats.words).toEqual({ a: { hits: 2, misses: 1 } });
-    expect(stats.kana).toEqual({ "hiragana:あ": { hits: 0, misses: 4 } });
-  });
-  it("turns garbage into empty stats", () => {
-    expect(sanitizeStats(null)).toEqual(emptyStats());
-    expect(sanitizeStats("nope")).toEqual(emptyStats());
   });
 });
 

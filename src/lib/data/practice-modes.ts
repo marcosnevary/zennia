@@ -9,7 +9,6 @@ import {
 import type { Stats, Verdict, Word } from "../core/types";
 import type { PracticeMode } from "./practice-session";
 import { drawWeight, recordAnswer, recordKana } from "./stats";
-import { needsMeaning } from "./words";
 
 /** What is typed for a word: its reading, its meaning or both. */
 export type WordsFocus = "reading" | "meaning" | "both";
@@ -60,10 +59,7 @@ export function statsRecorder(stats: Stats): Recorder {
   };
 }
 
-/**
- * Word practice: enabled words, weighted by past mistakes. "almost" is a real verdict here.
- * Words that still need a meaning are only drawn when the reading alone is practiced.
- */
+/** Word practice: enabled words, weighted by past mistakes. "almost" is a real verdict here. */
 export function wordsMode(
   words: Word[],
   stats: Stats,
@@ -71,9 +67,7 @@ export function wordsMode(
   recorder: Recorder = statsRecorder(stats),
 ): PracticeMode<Word> {
   return {
-    pool: words.filter(
-      (w) => !w.disabled && (focus === "reading" || !needsMeaning(w)),
-    ),
+    pool: words.filter((w) => !w.disabled),
     keyOf: (w) => w.id,
     weightOf: (w) => drawWeight(stats.words[w.id]),
     check: (answer, w) => checkWord(answer, w, focus),
@@ -111,10 +105,7 @@ export function rightAnswer(item: PracticeItem): RightAnswer {
   return {
     written: parts.map((part, i) => ({ ...part, romaji: romaji[i] })),
     romaji: toDisplayRomaji(hiragana),
-    meaning:
-      item.kind === "word"
-        ? item.word.meaning || "(no meaning saved)"
-        : undefined,
+    meaning: item.kind === "word" ? item.word.meaning : undefined,
   };
 }
 

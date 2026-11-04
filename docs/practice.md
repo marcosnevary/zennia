@@ -8,7 +8,7 @@ The session is in `src/lib/data/practice-session.ts` and the rules of each kind 
 
 The pool is the active words of the Vocabulary tab and the kana chosen in the Kana tab. Until the user chooses, the kana are the basic hiragana, everything before the dakuten block.
 
-Words with no meaning, saved before it became required, are only drawn when the focus is Reading. With an empty pool, Practice links to both tabs.
+With an empty pool, Practice links to both tabs.
 
 ## Draw weight
 

@@ -11,7 +11,7 @@ export interface WordRow {
   hiragana: string;
   meaning: string;
   disabled: boolean;
-  activated_at: string | null;
+  activated_at: string;
   tags: string[];
   created_at: string;
 }
@@ -57,17 +57,16 @@ function tagColorsFrom(value: unknown): Record<string, TagColor> {
 }
 
 export function wordFromRow(row: WordRow): Word {
-  const word: Word = {
+  return {
     id: row.id,
     japanese: row.japanese,
     hiragana: row.hiragana,
     meaning: row.meaning,
     disabled: row.disabled,
     tags: row.tags,
+    activatedAt: Date.parse(row.activated_at),
     createdAt: Date.parse(row.created_at),
   };
-  if (row.activated_at) word.activatedAt = Date.parse(row.activated_at);
-  return word;
 }
 
 export function wordToRow(word: Word, userId: string) {
@@ -78,10 +77,7 @@ export function wordToRow(word: Word, userId: string) {
     hiragana: word.hiragana,
     meaning: word.meaning,
     disabled: word.disabled,
-    activated_at:
-      word.activatedAt === undefined
-        ? null
-        : new Date(word.activatedAt).toISOString(),
+    activated_at: new Date(word.activatedAt).toISOString(),
     tags: word.tags,
     created_at: new Date(word.createdAt ?? Date.now()).toISOString(),
   };
@@ -100,25 +96,6 @@ export function statsFromRows(
       misses: r.misses,
     };
   return stats;
-}
-
-export function statsToRows(stats: Stats, userId: string) {
-  return {
-    words: Object.entries(stats.words).map(([word_id, t]) => ({
-      user_id: userId,
-      word_id,
-      ...t,
-    })),
-    kana: Object.entries(stats.kana).map(([key, t]) => {
-      const at = key.indexOf(":");
-      return {
-        user_id: userId,
-        script: key.slice(0, at),
-        hiragana: key.slice(at + 1),
-        ...t,
-      };
-    }),
-  };
 }
 
 export function settingsFromRow(row: SettingsRow | null): Settings {

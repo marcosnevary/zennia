@@ -5,7 +5,6 @@ import {
   settingsFromRow,
   settingsToRow,
   statsFromRows,
-  statsToRows,
   wordFromRow,
   wordToRow,
 } from "./rows";
@@ -27,30 +26,19 @@ describe("words", () => {
     expect(user_id).toBe("u1");
     expect(wordFromRow(row)).toEqual(word);
   });
-
-  it("stores a word that was never enabled with no activation time", () => {
-    const { activatedAt, ...never } = word;
-    const { user_id, ...row } = wordToRow(never, "u1");
-    expect(row.activated_at).toBeNull();
-    expect(wordFromRow(row).activatedAt).toBeUndefined();
-  });
 });
 
 describe("stats", () => {
-  const stats = {
-    words: { w1: { hits: 3, misses: 1 } },
-    kana: { "katakana:か": { hits: 2, misses: 0 } },
-  };
-
-  it("survives a round trip through rows", () => {
-    const rows = statsToRows(stats, "u1");
-    expect(rows.words).toEqual([
-      { user_id: "u1", word_id: "w1", hits: 3, misses: 1 },
-    ]);
-    expect(rows.kana).toEqual([
-      { user_id: "u1", script: "katakana", hiragana: "か", hits: 2, misses: 0 },
-    ]);
-    expect(statsFromRows(rows.words, rows.kana as never)).toEqual(stats);
+  it("reads the tallies of words and kana", () => {
+    expect(
+      statsFromRows(
+        [{ word_id: "w1", hits: 3, misses: 1 }],
+        [{ script: "katakana", hiragana: "か", hits: 2, misses: 0 }],
+      ),
+    ).toEqual({
+      words: { w1: { hits: 3, misses: 1 } },
+      kana: { "katakana:か": { hits: 2, misses: 0 } },
+    });
   });
 });
 

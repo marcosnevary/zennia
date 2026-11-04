@@ -17,6 +17,7 @@ const word = (id: string, extra: Partial<Word> = {}): Word => ({
   hiragana: "おう",
   meaning: "",
   disabled: false,
+  activatedAt: 0,
   tags: [],
   ...extra,
 });
@@ -67,21 +68,6 @@ describe("wordsMode focus", () => {
     const mode = wordsMode([aunt], stats, "both");
     expect(mode.check(joinAnswers("obaasan", "aunt"), aunt)).toBe("almost");
     expect(mode.check(joinAnswers("obaasan", "uncle"), aunt)).toBe("incorrect");
-  });
-
-  it("leaves words that still need a meaning out of the pool unless only the reading is practiced", () => {
-    const bare = word("bare");
-    const words = [dog, bare];
-    expect(wordsMode(words, stats, "reading").pool.map((w) => w.id)).toEqual([
-      "dog",
-      "bare",
-    ]);
-    expect(wordsMode(words, stats, "meaning").pool.map((w) => w.id)).toEqual([
-      "dog",
-    ]);
-    expect(wordsMode(words, stats, "both").pool.map((w) => w.id)).toEqual([
-      "dog",
-    ]);
   });
 
   it("reports the outcome of each part for the result", () => {
@@ -175,11 +161,6 @@ describe("mixedMode", () => {
     expect(stats.words.a).toEqual({ hits: 1, misses: 0 });
     expect(stats.kana["hiragana:お"]).toEqual({ hits: 0, misses: 1 });
   });
-
-  it("leaves out the words that need a meaning when the meaning is practiced", () => {
-    const mode = mixedMode([word("a")], kana, emptyStats(), "meaning");
-    expect(mode.pool.map((item) => item.kind)).toEqual(["kana"]);
-  });
 });
 
 describe("rightAnswer", () => {
@@ -196,14 +177,6 @@ describe("rightAnswer", () => {
       romaji: "taberu",
       meaning: "to eat",
     });
-  });
-
-  it("marks a missing meaning", () => {
-    const item = {
-      kind: "word",
-      word: word("たべる", { hiragana: "たべる" }),
-    } as const;
-    expect(rightAnswer(item).meaning).toBe("(no meaning saved)");
   });
 
   it("puts the hiragana above a katakana, and has no meaning for kana", () => {

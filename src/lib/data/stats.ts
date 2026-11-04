@@ -5,30 +5,6 @@ export function emptyStats(): Stats {
   return { words: {}, kana: {} };
 }
 
-function count(value: unknown): number {
-  return typeof value === "number" && Number.isFinite(value) && value > 0
-    ? Math.floor(value)
-    : 0;
-}
-
-function sanitizeTallies(raw: unknown): Record<string, Tally> {
-  const out: Record<string, Tally> = {};
-  if (!raw || typeof raw !== "object") return out;
-  for (const [key, value] of Object.entries(raw)) {
-    const o = value as Record<string, unknown> | null;
-    const tally = { hits: count(o?.hits), misses: count(o?.misses) };
-    if (tally.hits + tally.misses > 0) out[key] = tally;
-  }
-  return out;
-}
-
-/** Validates stats read from storage; anything malformed becomes empty. */
-export function sanitizeStats(raw: unknown): Stats {
-  const o =
-    raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
-  return { words: sanitizeTallies(o.words), kana: sanitizeTallies(o.kana) };
-}
-
 function bump(tallies: Record<string, Tally>, key: string, hit: boolean): void {
   const tally = tallies[key] ?? { hits: 0, misses: 0 };
   if (hit) tally.hits++;

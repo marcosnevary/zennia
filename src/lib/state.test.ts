@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { Stats, Word } from "./core/types";
 import type { Repo, Stored } from "./data/db/repo";
 import { DEFAULT_SETTINGS } from "./data/settings";
@@ -15,6 +15,7 @@ const word = (
   hiragana: "ひ",
   meaning: id,
   disabled: false,
+  activatedAt: createdAt,
   tags: [],
   createdAt,
   ...extra,
@@ -39,10 +40,8 @@ function fakeRepo(stored: Partial<Stored> = {}, conflict = false) {
     recordAnswer: vi.fn(async (kind, key, hit) => {
       calls.push(`answer ${kind} ${key} ${hit}`);
     }),
-    replaceStats: vi.fn(async (stats: Stats) => {
-      calls.push(
-        `stats ${Object.keys(stats.words).join(",")}|${Object.keys(stats.kana).join(",")}`,
-      );
+    resetStats: vi.fn(async () => {
+      calls.push("reset stats");
     }),
     saveSettings: vi.fn(async (patch) => {
       calls.push(`settings ${JSON.stringify(patch)}`);
@@ -205,15 +204,15 @@ describe("App", () => {
     ]);
   });
 
-  it("ignores imported tallies of words that do not exist", async () => {
-    const { app, calls } = await ready({ words: [word("a", 1)] });
-    app.replaceStats({
-      words: { a: { hits: 1, misses: 1 }, gone: { hits: 5, misses: 0 } },
-      kana: {},
+  it("resets the stats", async () => {
+    const { app, calls } = await ready({
+      words: [word("a", 1)],
+      stats: { words: { a: { hits: 1, misses: 1 } }, kana: {} },
     });
+    app.resetStats();
     await app.flush();
-    expect(Object.keys(app.stats.words)).toEqual(["a"]);
-    expect(calls).toEqual(["stats a|"]);
+    expect(app.stats).toEqual(emptyStats());
+    expect(calls).toEqual(["reset stats"]);
   });
 
   it("saves only the setting that changed", async () => {
@@ -257,101 +256,39 @@ describe("App", () => {
   });
 });
 
-describe("legacy localStorage import", () => {
-  const store = new Map<string, string>();
-
-  beforeEach(() => {
-    store.clear();
-    vi.stubGlobal("localStorage", {
-      getItem: (k: string) => store.get(k) ?? null,
-      setItem: (k: string, v: string) => void store.set(k, v),
-      removeItem: (k: string) => void store.delete(k),
-    });
-  });
-
-  afterEach(() => vi.unstubAllGlobals());
-
-  function saveLegacy() {
-    store.set(
-      "zennia:words",
-      JSON.stringify({ version: 2, words: [word("a", 0), word("b", 0)] }),
-    );
-    store.set(
-      "zennia:stats",
-      JSON.stringify({
-        version: 1,
-        stats: {
-          words: { a: { hits: 2, misses: 1 }, gone: { hits: 1, misses: 0 } },
-          kana: {},
-        },
-      }),
-    );
-    store.set("zennia:words-focus", JSON.stringify("both"));
-  }
-
-  it("uploads the old data once and removes it", async () => {
-    saveLegacy();
-    const { app, calls } = await ready();
-    expect(calls).toEqual([
-      "upsert a,b",
-      "stats a|",
-      "settings " + JSON.stringify({ ...DEFAULT_SETTINGS, wordsFocus: "both" }),
-    ]);
-    expect(store.has("zennia:words")).toBe(false);
-    expect(store.has("zennia:stats")).toBe(false);
-    expect(app.status).toBe("ready");
-  });
-
-  it("keeps the first word of the old list first", async () => {
-    saveLegacy();
-    const { repo } = fakeRepo();
-    const app = new App(repo);
-    await app.init();
-    const uploaded = vi.mocked(repo.upsertWords).mock.calls[0][0];
-    expect(uploaded[0].createdAt!).toBeGreaterThan(uploaded[1].createdAt!);
-  });
-
-  it("does nothing when the user already has data", async () => {
-    saveLegacy();
-    const { calls } = await ready({ words: [word("z", 1)] });
+describe("login", () => {
+  it("asks before discarding the data of a browser that already has some", async () => {
+    const { app, calls } = await ready({ words: [word("a", 1)] }, true);
+    expect(app.conflict).toBe(true);
     expect(calls).toEqual([]);
-    expect(store.has("zennia:words")).toBe(true);
+    await app.resolveConflict(true);
+    expect(calls).toEqual(["signin"]);
   });
 
-  describe("login", () => {
-    it("asks before discarding the data of a browser that already has some", async () => {
-      const { app, calls } = await ready({ words: [word("a", 1)] }, true);
-      expect(app.conflict).toBe(true);
-      expect(calls).toEqual([]);
-      await app.resolveConflict(true);
-      expect(calls).toEqual(["signin"]);
-    });
+  it("keeps the data when the user declines", async () => {
+    const { app, calls } = await ready({ words: [word("a", 1)] }, true);
+    await app.resolveConflict(false);
+    expect(app.conflict).toBe(false);
+    expect(calls).toEqual([]);
+  });
 
-    it("keeps the data when the user declines", async () => {
-      const { app, calls } = await ready({ words: [word("a", 1)] }, true);
-      await app.resolveConflict(false);
-      expect(app.conflict).toBe(false);
-      expect(calls).toEqual([]);
-    });
+  it("signs in to the existing account at once when the browser has no data", async () => {
+    const { app, calls } = await ready({}, true);
+    expect(app.conflict).toBe(false);
+    expect(calls).toEqual(["signin"]);
+  });
 
-    it("signs in to the existing account at once when the browser has no data", async () => {
-      const { app, calls } = await ready({}, true);
-      expect(app.conflict).toBe(false);
-      expect(calls).toEqual(["signin"]);
-    });
+  it("reloads the data after signing out", async () => {
+    const { app, calls, repo } = await ready({ words: [word("a", 1)] });
+    await app.signOut();
+    expect(calls).toEqual(["signout"]);
+    expect(repo.load).toHaveBeenCalledTimes(2);
+  });
 
-    it("reloads the data after signing out", async () => {
-      const { app, calls, repo } = await ready({ words: [word("a", 1)] });
-      await app.signOut();
-      expect(calls).toEqual(["signout"]);
-      expect(repo.load).toHaveBeenCalledTimes(2);
-    });
-
-    it("reloads the account after a profile change", async () => {
-      const { app, calls, repo } = await ready();
-      await app.updateProfile({ name: "Ana" });
-      expect(calls).toEqual(["profile Ana"]);
-      expect(repo.account).toHaveBeenCalledTimes(2);
-    });
+  it("reloads the account after a profile change", async () => {
+    const { app, calls, repo } = await ready();
+    await app.updateProfile({ name: "Ana" });
+    expect(calls).toEqual(["profile Ana"]);
+    expect(repo.account).toHaveBeenCalledTimes(2);
   });
 });

@@ -4,13 +4,13 @@ The rules for words and tags are in `src/lib/data/words.ts`. The add form and th
 
 ## Words
 
-A word needs a written form, a reading made only of kana, and a meaning. In the code and the export file, the written form is `japanese` and the reading is `hiragana`, although a reading may hold katakana. Older words may have an empty meaning, which keeps them out of practice unless the focus is Reading.
+A word needs a written form, a reading made only of kana, and a meaning. In the code and the export file, the written form is `japanese` and the reading is `hiragana`, although a reading may hold katakana.
 
 A word added by any route is marked as new until the pointer passes over it. The mark isn't stored, so a reload clears it.
 
 ## Merging
 
-Two words are the same when both the written form and the reading match. The app doesn't create a second copy of a word, but duplicates saved before this rule stay in the list.
+Two words are the same when both the written form and the reading match. The app doesn't create a second copy of a word.
 
 The add form, Add from romaji and every import go through `mergeWords`, which only ever adds.
 
@@ -32,7 +32,7 @@ The user pastes a list, and each item is looked up in the bundled dictionary (`s
 
 Export writes every word, including disabled ones, to a JSON file (`WordsFile`). Stats and settings aren't included.
 
-**JSON import** takes that file, or a plain list of words. Version 1 files have no tags, and are still read. An item with no written form, reading or meaning is skipped. The reading isn't checked to be kana here.
+**JSON import** takes that file, or a plain list of words. An item with no written form, reading or meaning is skipped. The reading isn't checked to be kana here.
 
 **Anki import** takes a "Notes in Plain Text" export (`src/lib/data/anki.ts`). The first three columns must be the word, its reading and its meaning, and any other column is ignored.
 
@@ -41,7 +41,7 @@ Export writes every word, including disabled ones, to a JSON file (`WordsFile`).
 - Rows with a reading that isn't kana, or with no meaning, are skipped.
 - Rows with the same word and reading become one word, with their meanings joined.
 
-An imported word's date is the time of the import, so it counts as the newest.
+An imported word's date is the time of the import, so it counts as the newest. Its activation time comes from the file, or is also the time of the import.
 
 ## Tags
 
@@ -66,7 +66,7 @@ The Vocabulary and Stats searches share a bar (`TagSearch`), with tag chips befo
 
 Bulk actions only touch what the user can see, so changing the search or the tag filter clears the selection. Select all covers every filtered word.
 
-Sorting by status puts active words first when ascending, oldest activation first. Sorting by meaning puts words with no meaning last in either direction. The sort is saved in the settings.
+Sorting by status puts active words first when ascending, oldest activation first. The sort is saved in the settings.
 
 ## Writing sheet
 
