@@ -13,7 +13,7 @@ export interface StatsRow {
   meaning: string;
   /** Lowercase text the search box matches against */
   search: string;
-  /** Whether `symbol` is Japanese text of a saved word (shown in the word font) */
+  /** Whether `reading` holds kana, which only a word's does */
   ja: boolean;
   /** The word's tags; for kana, the system tag of its script */
   tags: string[];
@@ -31,9 +31,9 @@ export function buildRows(stats: Stats, words: Word[]): StatsRow[] {
       key: `word:${id}`,
       symbol: word.japanese,
       reading: wordReading(word),
-      meaning: word.meaning ?? "",
+      meaning: word.meaning,
       search:
-        `${word.japanese} ${word.hiragana} ${toDisplayRomaji(word.hiragana)} ${word.meaning ?? ""}`.toLowerCase(),
+        `${word.japanese} ${word.hiragana} ${toDisplayRomaji(word.hiragana)} ${word.meaning}`.toLowerCase(),
       ja: true,
       tags: word.tags,
       tally,

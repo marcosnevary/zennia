@@ -1,17 +1,18 @@
 import js from "@eslint/js";
 import prettier from "eslint-config-prettier";
 import svelte from "eslint-plugin-svelte";
+import { defineConfig } from "eslint/config";
 import globals from "globals";
 import ts from "typescript-eslint";
 
-export default ts.config(
+export default defineConfig(
   // old git worktrees live under .claude/worktrees and carry their own copies of the code
   { ignores: [".svelte-kit/", "build/", ".claude/", "static/"] },
   js.configs.recommended,
-  ...ts.configs.recommended,
-  ...svelte.configs.recommended,
+  ts.configs.recommended,
+  svelte.configs.recommended,
   prettier,
-  ...svelte.configs.prettier,
+  svelte.configs.prettier,
   {
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },

@@ -138,11 +138,6 @@ export function lineKeys(
     .map((h) => kanaKey(script, h));
 }
 
-/** Keys of every kana of one script. */
-export function scriptKeys(script: KanaScript): string[] {
-  return KANA_SECTIONS.flatMap((s) => sectionKeys(script, s));
-}
-
 /** What is practiced the first time: the basic hiragana, everything before the dakuten block. */
 export function defaultKanaSelection(): string[] {
   const [main] = KANA_SECTIONS;

@@ -9,7 +9,7 @@
   import { prefersReducedMotion } from "svelte/motion";
   import { importAnkiDeck } from "../../data/anki";
   import {
-    downloadText,
+    downloadJSON,
     exportFilename,
     exportJSON,
     importJSON,
@@ -101,7 +101,7 @@
   }
 
   function exportWords() {
-    downloadText(exportFilename(), exportJSON(app.words));
+    downloadJSON(exportFilename(), exportJSON(app.words));
     error = "";
     flash("export", true, `${app.words.length} exported`);
   }

@@ -5,7 +5,6 @@
 
 /* the colors are CSS variables that data-theme redefines, so utilities like bg-surface switch themes by themselves */
 @theme inline {
-  --color-page: var(--bg);
   --color-surface: var(--surface);
   --color-ink: var(--text);
   --color-muted: var(--muted);
@@ -13,15 +12,11 @@
   --color-action: var(--action);
   --color-on-action: var(--action-text);
   --color-ok: var(--ok);
-  --color-ok-bg: var(--ok-bg);
   --color-warn: var(--warn);
-  --color-warn-bg: var(--warn-bg);
   --color-bad: var(--bad);
-  --color-bad-bg: var(--bad-bg);
   --color-on: var(--on);
   --color-on-bg: var(--on-bg);
   --color-off: var(--off);
-  --color-off-bg: var(--off-bg);
   /* the fill of secondary buttons, fields and checkboxes, a little darker on hover; pressed only for the word cards;
      soft, lighter, only for a hovered tab */
   --color-tint-soft: color-mix(in srgb, var(--surface) 96%, var(--text));
@@ -93,16 +88,12 @@
   --action: #292524;
   --action-text: #ffffff;
   --ok: #15803d;
-  --ok-bg: #dcfce7;
   --warn: #a16207;
-  --warn-bg: #fef9c3;
   --bad: #b91c1c;
-  --bad-bg: #fee2e2;
-  /* word state: blue vs orange (color-blind safe), always paired with a text badge */
+  /* on and off: blue vs orange (color-blind safe) */
   --on: #0062a3;
   --on-bg: #e3f1fb;
   --off: #a84300;
-  --off-bg: #fdeee0;
   font-family: var(--font-ui);
   color: var(--text);
   background: var(--bg);
@@ -120,15 +111,11 @@
   --action: #d4d4d4;
   --action-text: #111111;
   --ok: #86efac;
-  --ok-bg: #14532d;
   --warn: #fde047;
-  --warn-bg: #422006;
   --bad: #fca5a5;
-  --bad-bg: #450a0a;
   --on: #7ec4f0;
   --on-bg: #0c2d48;
   --off: #f4a261;
-  --off-bg: #4a2a0a;
 }
 
 /* filled with the secondary button tint and no visible border; the transparent border only shows focus and errors */
@@ -711,7 +698,6 @@
     color: inherit;
   }
 
-  /* one rule for every variant: darkening works whatever the background */
   /* an icon sits before its label, and centered in a button wider than both */
   button:has(> svg),
   .file:has(> svg),
@@ -731,6 +717,7 @@
     height: 20px;
   }
 
+  /* one rule for every variant: darkening works whatever the background */
   button:not(:disabled):active,
   .file:active,
   .tab:active {
@@ -825,11 +812,6 @@
       animation: icon-wiggle var(--icon-motion);
     }
 
-    &.lucide-pencil {
-      transform-origin: 15% 85%;
-      animation: icon-wiggle var(--icon-motion);
-    }
-
     &.lucide-printer > rect {
       animation: icon-nudge var(--icon-motion);
       --dy: 3px;
@@ -876,27 +858,6 @@
 
     &.lucide-arrow-right {
       animation: icon-launch var(--icon-motion);
-    }
-
-    /* pages: one chevron nudges, two spread apart */
-    &.lucide-chevron-right {
-      animation: icon-nudge var(--icon-motion);
-      --dx: 3px;
-    }
-
-    &.lucide-chevron-left {
-      animation: icon-nudge var(--icon-motion);
-      --dx: -3px;
-    }
-
-    &.lucide-chevrons-right > path:nth-child(2) {
-      animation: icon-nudge var(--icon-motion);
-      --dx: 3px;
-    }
-
-    &.lucide-chevrons-left > path:nth-child(1) {
-      animation: icon-nudge var(--icon-motion);
-      --dx: -3px;
     }
 
     /* settings and errors */

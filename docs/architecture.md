@@ -57,7 +57,7 @@ The description and Open Graph tags must stay static in `src/app.html`. The app 
 
 - **SvelteKit with `adapter-static`, SSR off.** Each tab gets a URL and browser history. Server rendering would add nothing with no backend, and the Supabase session lives in the browser.
 - **`#lib/*` instead of `$lib`, and no `svelte.config.js`.** SvelteKit 3 deprecates the alias and no longer reads that file, so its options are in the `sveltekit()` plugin in `vite.config.ts`.
-- **Theme colors are CSS variables that `data-theme` redefines.** Tailwind utilities such as `bg-surface` switch themes by themselves, with no `dark:` variants.
+- **Theme colors are CSS variables that `data-theme` redefines.** Tailwind utilities such as `bg-surface` switch themes by themselves. `dark:` variants are only for what isn't a theme color, such as the fill of a tag chip, which comes from the tag.
 - **`PrintSheet.svelte` keeps a scoped `<style>`.** It is print-only, sized in millimeters, and relies on `@page`.
 - **Lucide icons are imported one module at a time.** Importing from the package root would make the dev server and the build load the whole set.
 - **Prettier with its default options, and ESLint with the recommended rules, none type-aware.** The accepted convention wins over the style the code had before. `prettier-plugin-tailwindcss` isn't installed, so Tailwind classes keep their written order.
