@@ -14,7 +14,7 @@ The code style was kept by hand, nothing caught dead code, and the pull request 
 
 - Prettier formats the codebase with its default options, the most widely used convention, instead of the style the code had before. `prettier-plugin-svelte` covers the components.
 - ESLint runs the recommended rules of `@eslint/js`, `typescript-eslint` and `eslint-plugin-svelte`, without type-aware rules.
-- `svelte/prefer-svelte-reactivity` is off: state holding a `Set` or `Map` is replaced as a whole, which `$state` already tracks, and the other instances are local lookups.
+- `svelte/prefer-svelte-reactivity` stays on: a `Set` or `Map` that the UI reads is a `SvelteSet` or `SvelteMap`, changed in place. Instances that need no reactivity, such as lookups local to a function, stay plain and say why in an `eslint-disable` comment.
 - `npm run lint` runs both checks, `npm run format` applies Prettier, and CI runs `npm run lint` ([ADR 8](0008-ci-without-previews.md)).
 
 ## Consequences

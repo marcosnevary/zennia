@@ -1,4 +1,5 @@
 import { getContext, setContext } from "svelte";
+import { SvelteSet } from "svelte/reactivity";
 import { kanaKey, type KanaScript } from "./core/kana";
 import type { Stats, Verdict, Word } from "./core/types";
 import { clearLegacy, readLegacy } from "./data/db/legacy";
@@ -63,7 +64,7 @@ export class App {
   // words of the writing sheet being printed; it renders hidden and only shows up in the print dialog
   sheetWords = $state<Word[] | null>(null);
   // words added since the app loaded; the Vocabulary list marks them as new until they are pointed at
-  newWordIds = $state<ReadonlySet<string>>(new Set());
+  readonly newWordIds = new SvelteSet<string>();
 
   readonly recorder: Recorder = {
     word: (word, verdict) => this.recordWord(word, verdict),
@@ -80,7 +81,7 @@ export class App {
   async init(): Promise<void> {
     this.status = "loading";
     this.error = "";
-    this.newWordIds = new Set();
+    this.newWordIds.clear();
     try {
       let stored = await this.#repo.load();
       const isNew =
@@ -165,14 +166,16 @@ export class App {
         .map((w) => ({ ...w, createdAt: w.createdAt ?? now })),
     );
 
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity -- a lookup local to this function
     const before = new Map(previous.map((w) => [w.id, JSON.stringify(w)]));
     const changed = words.filter((w) => before.get(w.id) !== JSON.stringify(w));
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity -- a lookup local to this function
     const kept = new Set(words.map((w) => w.id));
     const removed = previous.filter((w) => !kept.has(w.id)).map((w) => w.id);
     const added = words.filter((w) => !before.has(w.id)).map((w) => w.id);
 
     this.words = words;
-    if (added.length) this.newWordIds = new Set([...this.newWordIds, ...added]);
+    for (const id of added) this.newWordIds.add(id);
     for (const id of removed) delete this.stats.words[id];
     this.#persist(async () => {
       if (changed.length) await this.#repo.upsertWords(changed);
@@ -195,10 +198,7 @@ export class App {
   }
 
   markSeen(id: string): void {
-    if (!this.newWordIds.has(id)) return;
-    const next = new Set(this.newWordIds);
-    next.delete(id);
-    this.newWordIds = next;
+    this.newWordIds.delete(id);
   }
 
   importWords(incoming: Word[]): MergeResult {
@@ -223,6 +223,7 @@ export class App {
 
   /** Replaces all the stats, e.g. when importing or resetting; tallies of words that do not exist are dropped. */
   replaceStats(stats: Stats): void {
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity -- a lookup local to this function
     const ids = new Set(this.words.map((w) => w.id));
     const next: Stats = {
       words: Object.fromEntries(
