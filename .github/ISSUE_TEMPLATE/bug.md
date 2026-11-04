@@ -1,24 +1,17 @@
 ---
 name: Bug
 about: Something works incorrectly or shows incorrect data
-title: "fix(scope): "
 labels: ["bug"]
 ---
 
-## What happens?
+## Problem
 
-Describe the incorrect behavior.
+<!-- Current behavior vs. expected behavior -->
 
-## What should happen?
+## Steps to Reproduce
 
-Describe the expected behavior.
-
-## How to reproduce?
-
-1. ...
-2. ...
-3. ...
+1.
 
 ## Notes
 
-Screenshots, logs, related ADRs or data sources.
+<!-- Screenshots, logs, related ADRs or data sources -->
