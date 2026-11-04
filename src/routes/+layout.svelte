@@ -122,8 +122,14 @@
       <div class="mt-auto flex flex-col gap-2">
         {#if app.account.anonymous}
           <!-- free to reach into the sidebar's padding, so the note never wraps -->
-          <p class="-mx-4 text-center text-xs whitespace-nowrap text-muted opacity-70 max-md:hidden">Sign in to sync across devices.</p>
-          <button class="action rounded-pill max-md:size-10 max-md:p-0" onclick={() => app.signIn()} title="Sign in with Google">
+          <p class="-mx-4 text-center text-xs whitespace-nowrap text-muted opacity-70 max-md:hidden">
+            Sign in to sync across devices.
+          </p>
+          <button
+            class="action rounded-pill max-md:size-10 max-md:p-0"
+            onclick={() => app.signIn()}
+            title="Sign in with Google"
+          >
             <LogIn /><span class="max-md:sr-only">Sign in</span>
           </button>
         {:else}

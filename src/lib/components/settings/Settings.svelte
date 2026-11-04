@@ -62,12 +62,17 @@
     const keys = [feedback?.key, next?.key]
     const contents = () => keys.flatMap((key) => [...(controls.get(key ?? '')?.children ?? [])])
     const animate = !prefersReducedMotion.current
-    const fadingOut = animate ? contents().map((child) => child.animate([{ opacity: 0 }], { duration: 100, fill: 'forwards' })) : []
+    const fadingOut = animate
+      ? contents().map((child) => child.animate([{ opacity: 0 }], { duration: 100, fill: 'forwards' }))
+      : []
     await Promise.all(fadingOut.map((animation) => animation.finished))
     feedback = next
     await tick()
     fadingOut.forEach((animation) => animation.cancel())
-    if (animate) contents().forEach((child) => child.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150, easing: 'ease-out' }))
+    if (animate)
+      contents().forEach((child) =>
+        child.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150, easing: 'ease-out' }),
+      )
   }
 
   function describe(key: string, description: string): string {
@@ -165,8 +170,13 @@
   <Help />
 </div>
 <div class="divide-y divide-line/40">
-  <SettingRow title="Export words" description="Download all your words as a JSON file, as a backup or to move them elsewhere.">
-    <button onclick={exportWords} disabled={app.words.length === 0} {@attach control('export')}>{@render action('export', Upload, 'Export JSON')}</button>
+  <SettingRow
+    title="Export words"
+    description="Download all your words as a JSON file, as a backup or to move them elsewhere."
+  >
+    <button onclick={exportWords} disabled={app.words.length === 0} {@attach control('export')}
+      >{@render action('export', Upload, 'Export JSON')}</button
+    >
   </SettingRow>
   <SettingRow title="Import words" description={describe('json', 'Add the words of a file made by Export JSON.')}>
     <label class="file" {@attach control('json')}>
@@ -174,7 +184,10 @@
       <input type="file" accept="application/json,.json" onchange={(e) => runImport(e, 'json', importJSON)} hidden />
     </label>
   </SettingRow>
-  <SettingRow title="Import an Anki deck" description={describe('anki', 'Add the words of Anki notes exported as plain text.')}>
+  <SettingRow
+    title="Import an Anki deck"
+    description={describe('anki', 'Add the words of Anki notes exported as plain text.')}
+  >
     <label
       class="file text-center"
       title="Anki: Export → Notes in Plain Text. Columns: word, reading, meaning"
@@ -187,7 +200,9 @@
   <!-- the row outlives the reset until its confirmation on the button is over -->
   {#if attempts(totalTally(app.stats)) || feedback?.key === 'reset'}
     <SettingRow title="Reset statistics" description="Erase every practice result. This cannot be undone.">
-      <button class="danger" onclick={resetStats} {@attach control('reset')}>{@render action('reset', RotateCcw, 'Reset stats')}</button>
+      <button class="danger" onclick={resetStats} {@attach control('reset')}
+        >{@render action('reset', RotateCcw, 'Reset stats')}</button
+      >
     </SettingRow>
   {/if}
 </div>

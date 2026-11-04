@@ -4,7 +4,15 @@ import { emptyStats } from './stats'
 import { kanaKey } from '../core/kana'
 import type { Word } from '../core/types'
 
-const word = (id: string, extra: Partial<Word> = {}): Word => ({ id, japanese: id, hiragana: 'おう', meaning: '', disabled: false, tags: [], ...extra })
+const word = (id: string, extra: Partial<Word> = {}): Word => ({
+  id,
+  japanese: id,
+  hiragana: 'おう',
+  meaning: '',
+  disabled: false,
+  tags: [],
+  ...extra,
+})
 
 describe('wordsMode', () => {
   it('draws only enabled words', () => {
@@ -132,7 +140,10 @@ describe('rightAnswer', () => {
   it('shows a word with furigana and romaji on each run, its romaji and meaning', () => {
     const item = { kind: 'word', word: word('食べる', { hiragana: 'たべる', meaning: 'to eat' }) } as const
     expect(rightAnswer(item)).toEqual({
-      written: [{ text: '食', reading: 'た', romaji: 'ta' }, { text: 'べる', romaji: 'beru' }],
+      written: [
+        { text: '食', reading: 'た', romaji: 'ta' },
+        { text: 'べる', romaji: 'beru' },
+      ],
       romaji: 'taberu',
       meaning: 'to eat',
     })
@@ -144,8 +155,16 @@ describe('rightAnswer', () => {
   })
 
   it('puts the hiragana above a katakana, and has no meaning for kana', () => {
-    const [hiragana, katakana] = mixedMode([], [kanaKey('hiragana', 'あ'), kanaKey('katakana', 'あ')], emptyStats()).pool
+    const [hiragana, katakana] = mixedMode(
+      [],
+      [kanaKey('hiragana', 'あ'), kanaKey('katakana', 'あ')],
+      emptyStats(),
+    ).pool
     expect(rightAnswer(hiragana)).toEqual({ written: [{ text: 'あ', romaji: 'a' }], romaji: 'a', meaning: undefined })
-    expect(rightAnswer(katakana)).toEqual({ written: [{ text: 'ア', reading: 'あ', romaji: 'a' }], romaji: 'a', meaning: undefined })
+    expect(rightAnswer(katakana)).toEqual({
+      written: [{ text: 'ア', reading: 'あ', romaji: 'a' }],
+      romaji: 'a',
+      meaning: undefined,
+    })
   })
 })

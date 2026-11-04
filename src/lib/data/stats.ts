@@ -45,10 +45,10 @@ export function recordKana(stats: Stats, script: KanaScript, hiragana: string, h
 
 /** Sum of every tally in a record. */
 export function sumTallies(tallies: Record<string, Tally>): Tally {
-  return Object.values(tallies).reduce(
-    (sum, t) => ({ hits: sum.hits + t.hits, misses: sum.misses + t.misses }),
-    { hits: 0, misses: 0 },
-  )
+  return Object.values(tallies).reduce((sum, t) => ({ hits: sum.hits + t.hits, misses: sum.misses + t.misses }), {
+    hits: 0,
+    misses: 0,
+  })
 }
 
 /** Words and kana together. */
@@ -125,7 +125,11 @@ export function drawWeight(tally: Tally | undefined): number {
 }
 
 /** Weighted random choice; `random` returns a number in [0, 1) and can be replaced in tests. */
-export function pickWeighted<T>(items: T[], weightOf: (item: T) => number, random: () => number = Math.random): T | null {
+export function pickWeighted<T>(
+  items: T[],
+  weightOf: (item: T) => number,
+  random: () => number = Math.random,
+): T | null {
   if (!items.length) return null
   const weights = items.map((item) => Math.max(0, weightOf(item)))
   let remaining = random() * weights.reduce((a, b) => a + b, 0)

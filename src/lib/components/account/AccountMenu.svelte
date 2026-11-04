@@ -57,7 +57,17 @@
   <ChevronsUpDown class="size-4 text-muted max-md:hidden" />
 </button>
 
-<div id="account-menu" class="menu" role="menu" aria-label="Account" tabindex="-1" popover="auto" bind:this={menuEl} {ontoggle} {onkeydown}>
+<div
+  id="account-menu"
+  class="menu"
+  role="menu"
+  aria-label="Account"
+  tabindex="-1"
+  popover="auto"
+  bind:this={menuEl}
+  {ontoggle}
+  {onkeydown}
+>
   <button class="menu-item" role="menuitem" onclick={editProfile}><UserPen />Edit profile</button>
   <button class="menu-item" role="menuitem" onclick={signOut}><LogOut />Sign out</button>
 </div>

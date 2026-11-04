@@ -88,7 +88,8 @@ export interface RightAnswer {
 }
 
 export function rightAnswer(item: PracticeItem): RightAnswer {
-  const [written, hiragana] = item.kind === 'word' ? [item.word.japanese, item.word.hiragana] : [item.kana.symbol, item.kana.hiragana]
+  const [written, hiragana] =
+    item.kind === 'word' ? [item.word.japanese, item.word.hiragana] : [item.kana.symbol, item.kana.hiragana]
   const parts = furigana(written, hiragana)
   const romaji = toDisplayRomajiRuns(parts.map((part) => part.reading ?? part.text))
   return {
@@ -116,12 +117,17 @@ export function mixedMode(
     keyOf: (item) => (item.kind === 'word' ? `word:${wordMode.keyOf(item.word)}` : `kana:${kana.keyOf(item.kana)}`),
     weightOf: (item) => (item.kind === 'word' ? wordMode.weightOf(item.word) : kana.weightOf(item.kana)),
     check: (answer, item) => (item.kind === 'word' ? wordMode.check(answer, item.word) : kana.check(answer, item.kana)),
-    record: (item, verdict) => (item.kind === 'word' ? wordMode.record(item.word, verdict) : kana.record(item.kana, verdict)),
+    record: (item, verdict) =>
+      item.kind === 'word' ? wordMode.record(item.word, verdict) : kana.record(item.kana, verdict),
   }
 }
 
 /** Kana practice over the selected keys (see `kanaKey`). Single sounds have no vowel-length ambiguity, so anything but a match is wrong. */
-export function kanaMode(selected: string[], stats: Stats, recorder: Recorder = statsRecorder(stats)): PracticeMode<Kana> {
+export function kanaMode(
+  selected: string[],
+  stats: Stats,
+  recorder: Recorder = statsRecorder(stats),
+): PracticeMode<Kana> {
   return {
     pool: buildKana(selected),
     keyOf: (k) => k.symbol,

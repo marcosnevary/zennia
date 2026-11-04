@@ -79,7 +79,12 @@
     if (renameError) return
     const merges = !sameTag(from, to) && tags.some((t) => sameTag(t, to))
     const moved = filterByTags(words, [from]).length
-    if (merges && !confirm(`"${to}" already exists. Merge "${from}" into it? Its ${moved} ${plural(moved, 'word')} will be tagged "${to}".`)) {
+    if (
+      merges &&
+      !confirm(
+        `"${to}" already exists. Merge "${from}" into it? Its ${moved} ${plural(moved, 'word')} will be tagged "${to}".`,
+      )
+    ) {
       renaming = null
       return
     }
@@ -126,9 +131,13 @@
 
 <dialog class="w-[min(420px,calc(100vw-32px))]" bind:this={dialogEl} use:closeOnBackdrop aria-label="Tags">
   <div class="grid gap-2">
-    <h2 class="mt-0 mb-2">Tags ({visibleTags.length === tags.length ? tags.length : `${visibleTags.length} of ${tags.length}`})</h2>
+    <h2 class="mt-0 mb-2">
+      Tags ({visibleTags.length === tags.length ? tags.length : `${visibleTags.length} of ${tags.length}`})
+    </h2>
     {#if tags.length === 0}
-      <p class="my-4 text-muted">No tags yet. Add them when you add or edit a word, or with the tag button on selected words.</p>
+      <p class="my-4 text-muted">
+        No tags yet. Add them when you add or edit a word, or with the tag button on selected words.
+      </p>
     {:else}
       <input
         type="search"
@@ -142,7 +151,9 @@
       <div class="relative z-10 flex flex-wrap items-center gap-2">
         <label class="flex items-center gap-2">
           <input type="checkbox" checked={allSelected} onchange={toggleSelectAll} />
-          {visibleTags.length === 1 ? 'Select' : 'Select all'} {visibleTags.length} {plural(visibleTags.length, visibleTags.length === tags.length ? 'tag' : 'result')}
+          {visibleTags.length === 1 ? 'Select' : 'Select all'}
+          {visibleTags.length}
+          {plural(visibleTags.length, visibleTags.length === tags.length ? 'tag' : 'result')}
         </label>
         <span class="text-muted">{selectedTags.length} selected</span>
         <!-- keeps the space reserved so the layout does not shift when a selection appears; the icon is 20px in a 40px button -->
@@ -175,7 +186,10 @@
               >
                 {#if renaming !== null && sameTag(renaming, tag)}
                   <!-- the hidden copy of the text sizes the chip as the name is typed, as a field cannot fit its content -->
-                  <span class="{CHIP} focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-action" style={tagStyle(tag)}>
+                  <span
+                    class="{CHIP} focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-action"
+                    style={tagStyle(tag)}
+                  >
                     <!-- out of the flow, so the field's default width (about 20 characters) does not widen the chip -->
                     <span class="relative min-w-1">
                       <span class="invisible whitespace-pre">{renameDraft}</span>

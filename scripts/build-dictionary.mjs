@@ -23,7 +23,10 @@ for (const entry of JSON.parse(readFileSync(file, 'utf8')).words) {
     const spellings = entry.kanji.filter((k) => applies(kana.appliesToKanji, k.text))
     const kanji = spellings.find((k) => k.common) ?? spellings[0]
     const japanese = kanji && !sense.misc.includes('uk') ? kanji.text : kana.text
-    const meaning = sense.gloss.slice(0, MAX_GLOSSES).map((g) => g.text).join('; ')
+    const meaning = sense.gloss
+      .slice(0, MAX_GLOSSES)
+      .map((g) => g.text)
+      .join('; ')
     rows.push([kana.text, japanese, meaning])
   }
 }

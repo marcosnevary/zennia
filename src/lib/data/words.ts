@@ -87,7 +87,16 @@ export function cleanTags(tags: unknown[]): string[] {
 
 /** A new enabled word from the form texts. */
 export function makeWord({ japanese, hiragana, meaning, tags }: WordFields): Word {
-  return { id: newId(), japanese: japanese.trim(), hiragana: hiragana.trim(), meaning: meaning.trim(), disabled: false, activatedAt: Date.now(), createdAt: Date.now(), tags: cleanTags(tags) }
+  return {
+    id: newId(),
+    japanese: japanese.trim(),
+    hiragana: hiragana.trim(),
+    meaning: meaning.trim(),
+    disabled: false,
+    activatedAt: Date.now(),
+    createdAt: Date.now(),
+    tags: cleanTags(tags),
+  }
 }
 
 /** The word enabled or disabled; enabling a disabled word stamps the time, which orders the status sort. */
@@ -98,7 +107,13 @@ export function setDisabled(word: Word, disabled: boolean, now = Date.now()): Wo
 
 /** The word with the form texts applied; the id and the enabled state stay. */
 export function updateWord(word: Word, { japanese, hiragana, meaning, tags }: WordFields): Word {
-  return { ...word, japanese: japanese.trim(), hiragana: hiragana.trim(), meaning: meaning.trim(), tags: cleanTags(tags) }
+  return {
+    ...word,
+    japanese: japanese.trim(),
+    hiragana: hiragana.trim(),
+    meaning: meaning.trim(),
+    tags: cleanTags(tags),
+  }
 }
 
 export interface SearchQuery {
@@ -131,7 +146,9 @@ export function searchWords(words: Word[], query: string): Word[] {
   return words.filter(
     (w) =>
       hasSearchTags(w.tags, tags) &&
-      [w.japanese, w.hiragana, toDisplayRomaji(w.hiragana), w.meaning].some((field) => field.toLowerCase().includes(text)),
+      [w.japanese, w.hiragana, toDisplayRomaji(w.hiragana), w.meaning].some((field) =>
+        field.toLowerCase().includes(text),
+      ),
   )
 }
 
@@ -338,7 +355,9 @@ export function sortWords(words: Word[], key: SortKey, direction: SortDirection)
         if (!a.meaning || !b.meaning) return sign * (Number(!a.meaning) - Number(!b.meaning))
         return collator.compare(a.meaning, b.meaning)
       case 'status':
-        return Number(!!a.disabled) - Number(!!b.disabled) || (a.disabled ? 0 : (a.activatedAt ?? 0) - (b.activatedAt ?? 0))
+        return (
+          Number(!!a.disabled) - Number(!!b.disabled) || (a.disabled ? 0 : (a.activatedAt ?? 0) - (b.activatedAt ?? 0))
+        )
     }
   }
   return [...words].sort((a, b) => sign * compare(a, b) || 0)

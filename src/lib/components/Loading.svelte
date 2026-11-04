@@ -24,7 +24,9 @@
   <div class="grid w-fit text-2xl text-muted" aria-hidden="true">
     {#each chars as char, i (i)}
       <span
-        class="animate-kana opacity-0 [grid-area:1/1] motion-reduce:animate-none {i === 0 ? 'motion-reduce:opacity-100' : ''}"
+        class="animate-kana opacity-0 [grid-area:1/1] motion-reduce:animate-none {i === 0
+          ? 'motion-reduce:opacity-100'
+          : ''}"
         style:animation-delay="{i * 0.5}s"
         onanimationiteration={() => replace(i)}>{char}</span
       >

@@ -32,7 +32,8 @@
 
 @theme {
   /* Geist has no Japanese glyphs, so kana and kanji fall back to the system's Japanese sans-serif */
-  --font-ui: 'Geist Variable', system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', sans-serif;
+  --font-ui:
+    'Geist Variable', system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', sans-serif;
   /* Libron only for the zennia logo; everything else is in the UI font */
   --font-logo: 'Libron', Georgia, serif;
 
@@ -312,7 +313,10 @@
   /* pulled up to the top of the scroll area, and back out of the flow so the first row stays where it was */
   &::before {
     /* the ramp ends at the animated --scroll-list-fade-top and starts where it leaves the clear part, once scrolled */
-    --scroll-list-ramp-start: max(0px, var(--scroll-list-fade-top) - var(--scroll-list-top-fade) + var(--scroll-list-clear));
+    --scroll-list-ramp-start: max(
+      0px,
+      var(--scroll-list-fade-top) - var(--scroll-list-top-fade) + var(--scroll-list-clear)
+    );
     --scroll-list-ramp: calc(var(--scroll-list-fade-top) - var(--scroll-list-ramp-start));
     /* sticky offsets count from inside the list's padding, so this takes it back to reach the very edge (and -4px below) */
     top: calc(-4px - var(--scroll-list-under, 0px));

@@ -94,7 +94,10 @@ describe('App', () => {
 
   it('shows imported words first, in the order of the file', async () => {
     const { app } = await ready({ words: [word('a', 1)] })
-    const { added } = app.importWords([word('x', undefined as never), { ...word('y', undefined as never), japanese: '別' }])
+    const { added } = app.importWords([
+      word('x', undefined as never),
+      { ...word('y', undefined as never), japanese: '別' },
+    ])
     expect(added).toBe(2)
     expect(app.words.map((w) => w.id)).toEqual(['x', 'y', 'a'])
   })
@@ -119,7 +122,10 @@ describe('App', () => {
 
   it('keeps the colour of a renamed tag', async () => {
     const tagColors = { food: { hue: 10, tone: 0 } }
-    const { app } = await ready({ words: [word('a', 1, { tags: ['food'] })], settings: { ...DEFAULT_SETTINGS, tagColors } })
+    const { app } = await ready({
+      words: [word('a', 1, { tags: ['food'] })],
+      settings: { ...DEFAULT_SETTINGS, tagColors },
+    })
     app.renameTag('food', 'Meals')
     expect(app.words[0].tags).toEqual(['Meals'])
     expect(app.settings.tagColors).toEqual({ meals: { hue: 10, tone: 0 } })
@@ -211,14 +217,24 @@ describe('legacy localStorage import', () => {
 
   function saveLegacy() {
     store.set('zennia:words', JSON.stringify({ version: 2, words: [word('a', 0), word('b', 0)] }))
-    store.set('zennia:stats', JSON.stringify({ version: 1, stats: { words: { a: { hits: 2, misses: 1 }, gone: { hits: 1, misses: 0 } }, kana: {} } }))
+    store.set(
+      'zennia:stats',
+      JSON.stringify({
+        version: 1,
+        stats: { words: { a: { hits: 2, misses: 1 }, gone: { hits: 1, misses: 0 } }, kana: {} },
+      }),
+    )
     store.set('zennia:words-focus', JSON.stringify('both'))
   }
 
   it('uploads the old data once and removes it', async () => {
     saveLegacy()
     const { app, calls } = await ready()
-    expect(calls).toEqual(['upsert a,b', 'stats a|', 'settings ' + JSON.stringify({ ...DEFAULT_SETTINGS, wordsFocus: 'both' })])
+    expect(calls).toEqual([
+      'upsert a,b',
+      'stats a|',
+      'settings ' + JSON.stringify({ ...DEFAULT_SETTINGS, wordsFocus: 'both' }),
+    ])
     expect(store.has('zennia:words')).toBe(false)
     expect(store.has('zennia:stats')).toBe(false)
     expect(app.status).toBe('ready')

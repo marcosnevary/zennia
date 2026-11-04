@@ -37,7 +37,8 @@ export interface ProfileChange {
 
 function readLinkConflict(): boolean {
   const { search, hash } = window.location
-  const found = new URLSearchParams(search).get('error_code') === 'identity_already_exists' ||
+  const found =
+    new URLSearchParams(search).get('error_code') === 'identity_already_exists' ||
     new URLSearchParams(hash.slice(1)).get('error_code') === 'identity_already_exists'
   if (found) history.replaceState(null, '', window.location.pathname)
   return found
@@ -97,7 +98,10 @@ export async function linkGoogle(db: Db): Promise<void> {
 
 /** Signs in to the user that owns the Google account; the data of the current anonymous user is left behind. */
 export async function signInGoogle(db: Db): Promise<void> {
-  const { error } = await db.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } })
+  const { error } = await db.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin },
+  })
   if (error) throw new Error(error.message)
 }
 

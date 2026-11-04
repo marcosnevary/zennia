@@ -24,7 +24,11 @@
   const duration = $derived(prefersReducedMotion.current ? 0 : 200)
 
   /** An answer with every part, for the invisible verdict that sets the height. */
-  const TALLEST: RightAnswer = { written: [{ text: '\u00a0', reading: '\u00a0', romaji: '\u00a0' }], romaji: '\u00a0', meaning: '\u00a0' }
+  const TALLEST: RightAnswer = {
+    written: [{ text: '\u00a0', reading: '\u00a0', romaji: '\u00a0' }],
+    romaji: '\u00a0',
+    meaning: '\u00a0',
+  }
 </script>
 
 <!-- sizes step down from what was asked to its reading, so the eye starts at the word -->

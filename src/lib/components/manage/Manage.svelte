@@ -160,7 +160,9 @@
   // tags on the selected words, from a dialog opened by the tag button; a tag counts as on only when
   // every selected word has it, and each change applies to the whole selection straight away
   let tagDialogEl = $state<HTMLDialogElement>()
-  const commonTags = $derived(tags.filter((t) => selectedWords.length > 0 && selectedWords.every((w) => w.tags.some((x) => sameTag(x, t)))))
+  const commonTags = $derived(
+    tags.filter((t) => selectedWords.length > 0 && selectedWords.every((w) => w.tags.some((x) => sameTag(x, t)))),
+  )
 
   // tags seen while the dialog is open stay listed after being taken off, so a click only deselects them
   let dialogTags = $state<string[]>([])
@@ -235,177 +237,265 @@
 </script>
 
 <div>
+  <dialog
+    class="w-[min(420px,calc(100vw-32px))]"
+    bind:this={dialogEl}
+    onclose={() => (editingId = null)}
+    use:closeOnBackdrop
+    aria-label="Edit word"
+  >
+    <form class="grid gap-2" onsubmit={saveEdit}>
+      <h2 class="mt-0 mb-2">Edit word</h2>
+      <input
+        type="text"
+        class="field"
+        lang="ja"
+        placeholder="Word (e.g. 食べる)"
+        bind:value={editJapanese}
+        aria-invalid={!!editErrors.japanese}
+        oninput={() => (editErrors.japanese = '')}
+      />
+      {@render fieldError(editErrors.japanese)}
+      <input
+        type="text"
+        class="field"
+        lang="ja"
+        placeholder="Reading in kana (e.g. たべる)"
+        bind:value={editHiragana}
+        aria-invalid={!!editErrors.hiragana}
+        oninput={() => (editErrors.hiragana = '')}
+      />
+      {@render fieldError(editErrors.hiragana)}
+      <input
+        type="text"
+        class="field"
+        placeholder="Meaning (e.g. to eat)"
+        bind:value={editMeaning}
+        aria-invalid={!!editErrors.meaning}
+        oninput={() => (editErrors.meaning = '')}
+      />
+      {@render fieldError(editErrors.meaning)}
+      {#key editingId}
+        <TagInput bind:tags={editTags} suggestions={tags} />
+      {/key}
+      <div class="dialog-actions">
+        <button class="action" type="submit"><Check />Save</button>
+        <button type="button" onclick={() => dialogEl?.close()}>Cancel</button>
+      </div>
+    </form>
+  </dialog>
 
-<dialog class="w-[min(420px,calc(100vw-32px))]" bind:this={dialogEl} onclose={() => (editingId = null)} use:closeOnBackdrop aria-label="Edit word">
-  <form class="grid gap-2" onsubmit={saveEdit}>
-    <h2 class="mt-0 mb-2">Edit word</h2>
-    <input type="text" class="field" lang="ja" placeholder="Word (e.g. 食べる)" bind:value={editJapanese} aria-invalid={!!editErrors.japanese} oninput={() => (editErrors.japanese = '')} />
-    {@render fieldError(editErrors.japanese)}
-    <input type="text" class="field" lang="ja" placeholder="Reading in kana (e.g. たべる)" bind:value={editHiragana} aria-invalid={!!editErrors.hiragana} oninput={() => (editErrors.hiragana = '')} />
-    {@render fieldError(editErrors.hiragana)}
-    <input type="text" class="field" placeholder="Meaning (e.g. to eat)" bind:value={editMeaning} aria-invalid={!!editErrors.meaning} oninput={() => (editErrors.meaning = '')} />
-    {@render fieldError(editErrors.meaning)}
-    {#key editingId}
-      <TagInput bind:tags={editTags} suggestions={tags} />
-    {/key}
-    <div class="dialog-actions">
-      <button class="action" type="submit"><Check />Save</button>
-      <button type="button" onclick={() => dialogEl?.close()}>Cancel</button>
+  <dialog
+    class="w-[min(420px,calc(100vw-32px))]"
+    bind:this={tagDialogEl}
+    use:closeOnBackdrop
+    aria-label="Tag selected words"
+  >
+    <div class="grid gap-2">
+      <h2 class="mt-0 mb-2">Tag {selectedWords.length} selected {plural(selectedWords.length, 'word')}</h2>
+      <TagInput bind:tags={() => commonTags, setCommonTags} suggestions={dialogChoices} />
+      <div class="dialog-actions">
+        <button class="action" type="button" onclick={() => tagDialogEl?.close()}><Check />Done</button>
+      </div>
     </div>
-  </form>
-</dialog>
+  </dialog>
 
-<dialog class="w-[min(420px,calc(100vw-32px))]" bind:this={tagDialogEl} use:closeOnBackdrop aria-label="Tag selected words">
-  <div class="grid gap-2">
-    <h2 class="mt-0 mb-2">Tag {selectedWords.length} selected {plural(selectedWords.length, 'word')}</h2>
-    <TagInput bind:tags={() => commonTags, setCommonTags} suggestions={dialogChoices} />
-    <div class="dialog-actions">
-      <button class="action" type="button" onclick={() => tagDialogEl?.close()}><Check />Done</button>
-    </div>
-  </div>
-</dialog>
+  <TagsDialog bind:this={tagsDialog} {tags} {words} onrename={renameTagEverywhere} ondelete={deleteTagsEverywhere} />
 
-<TagsDialog
-  bind:this={tagsDialog}
-  {tags}
-  {words}
-  onrename={renameTagEverywhere}
-  ondelete={deleteTagsEverywhere}
-/>
+  <RomajiWordsDialog bind:this={romajiDialog} {tags} />
 
-<RomajiWordsDialog bind:this={romajiDialog} {tags} />
+  {#snippet fieldError(message: string | undefined)}
+    {#if message}<p class="text-bad" role="alert">{message}</p>{/if}
+  {/snippet}
 
-{#snippet fieldError(message: string | undefined)}
-  {#if message}<p class="text-bad" role="alert">{message}</p>{/if}
-{/snippet}
-
-{#if section === 'vocabulary'}
-<div class="mt-6 grid items-start gap-x-8 gap-y-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]">
-<div>
-<form class="grid gap-2" onsubmit={save}>
-  <input type="text" class="field" lang="ja" placeholder="Word (e.g. 食べる)" bind:value={japanese} bind:this={japaneseEl} aria-invalid={!!errors.japanese} oninput={() => (errors.japanese = '')} />
-  {@render fieldError(errors.japanese)}
-  <input type="text" class="field" lang="ja" placeholder="Reading in kana (e.g. たべる)" bind:value={hiragana} aria-invalid={!!errors.hiragana} oninput={() => (errors.hiragana = '')} />
-  {@render fieldError(errors.hiragana)}
-  <input type="text" class="field" placeholder="Meaning (e.g. to eat)" bind:value={meaning} aria-invalid={!!errors.meaning} oninput={() => (errors.meaning = '')} />
-  {@render fieldError(errors.meaning)}
-  <TagInput bind:tags={newTags} suggestions={tags} />
-  <div class={WIDE}>
-    <button class="action" type="submit"><Plus />Add</button>
-  </div>
-</form>
-<div class="mt-2 {WIDE}">
-  <button type="button" class="field" onclick={() => romajiDialog?.open()}><ListPlus />Add from romaji</button>
-</div>
-</div>
-<div>
-{#if words.length === 0}
-  <p class="my-4 text-muted">No words yet.</p>
-{:else}
-  <div class="mb-2 flex flex-wrap items-center gap-2">
-    <TagSearch
-      id="word-search"
-      placeholder="Search by word, reading, meaning or #tag"
-      label="Search words"
-      bind:query
-      bind:tags={() => filterTags, (next) => (activeTags = next)}
-      suggestions={tags}
-      onchange={onSearch}
-    />
-    <div class="flex items-center gap-2">
-      <button class="field" onclick={() => tagsDialog?.open()} disabled={tags.length === 0}><Tags />Tags</button>
-      <select
-        class="field chevron"
-        value={sortKey}
-        onchange={(e) => setSort(e.currentTarget.value as SortKey, sortDirection)}
-        aria-label="Sort by"
-      >
-        {#each SORT_OPTIONS as option (option.key)}
-          <option value={option.key}>{option.label}</option>
-        {/each}
-      </select>
-      <button
-        class="icon"
-        onclick={() => setSort(sortKey, sortDirection === 'asc' ? 'desc' : 'asc')}
-        aria-label={sortDirection === 'asc' ? 'Ascending' : 'Descending'}
-        title={sortDirection === 'asc' ? 'Ascending (click to reverse)' : 'Descending (click to reverse)'}
-      >
-        {#if sortDirection === 'asc'}<ArrowUp />{:else}<ArrowDown />{/if}
-      </button>
-    </div>
-  </div>
-  <!-- on top of the list, which scrolls up behind it -->
-  <div class="{ROW} relative z-10 mb-2">
-    <label class="flex items-center gap-2">
-      <input type="checkbox" checked={allSelected} onchange={toggleSelectAll} />
-      {visibleWords.length === 1 ? 'Select' : 'Select all'} {visibleWords.length} {plural(visibleWords.length, visibleWords.length === words.length ? 'word' : 'result')}
-    </label>
-    <span class="text-muted">{activeWordCount} active · {selectedWords.length} selected</span>
-    <!-- keeps the space reserved so the layout does not shift when a selection appears; the icons are 20px in 40px buttons -->
-    <div class="ml-auto flex gap-2 *:size-10 *:items-center *:justify-center [&_svg]:size-5" class:invisible={selectedWords.length === 0}>
-      <button class="icon" onclick={() => (app.sheetWords = selectedWords)} aria-label="Print writing sheet" title="Print writing sheet">
-        <Printer />
-      </button>
-      <button class="icon" onclick={openTagDialog} aria-label="Tag selected" title="Tag selected">
-        <Tag />
-      </button>
-      <button class="icon" onclick={() => setSelectedDisabled(false)} aria-label="Enable selected" title="Enable selected">
-        <Eye />
-      </button>
-      <button class="icon" onclick={() => setSelectedDisabled(true)} aria-label="Disable selected" title="Disable selected">
-        <EyeOff />
-      </button>
-      <button class="danger icon" onclick={removeSelected} aria-label="Delete selected" title="Delete selected">
-        <Trash />
-      </button>
-    </div>
-  </div>
-  {#if visibleWords.length === 0}
-    <p class="my-4 text-muted">No words match your search or tag filter.</p>
-  {:else}
-    <!-- reaches up behind the 40px select-all row and the 8px below it -->
-    <ul class="scroll-list-12 [--scroll-list-rows:12] [--scroll-list-under:48px]" bind:this={listEl}>
-      {#each visibleWords as word (word.id)}
-        <li>
-          <div
-            class="select-row relative"
-            role="checkbox"
-            tabindex="0"
-            aria-checked={selected.has(word.id)}
-            aria-label={`Select ${word.japanese}`}
-            onclick={(event) => onCardClick(event, word.id)}
-            ondblclick={(event) => onCardDoubleClick(event, word)}
-            onmousedown={onCardMouseDown}
-            onkeydown={(event) => onCardKey(event, word)}
-            onpointerenter={() => app.markSeen(word.id)}
-          >
-            {#if app.newWordIds.has(word.id)}
-              <!-- on the row's corner; no further left than the list's 4px padding, which would clip it -->
-              <span class="absolute -top-2 -left-1 rounded-pill bg-action px-2 text-sm leading-4 font-medium text-on-action">new!</span>
-            {/if}
-            <span class={["text-lg", word.disabled && DIM]} lang="ja">{word.japanese}</span>
-            <span class={["text-sm text-muted", word.disabled && DIM]} lang="ja">{wordReading(word)}</span>
-            {#if needsMeaning(word)}
-              <span class={["min-w-0 truncate text-warn italic", word.disabled && DIM]} title="Add a meaning to practice this word by meaning">Needs meaning</span>
-            {:else}
-              <span class={["min-w-0 truncate", word.disabled && DIM]}>{word.meaning}</span>
-            {/if}
-            {#if word.tags.length > 0}
-              <span class="flex gap-1">{#each word.tags as tag (tag)}<TagChip {tag} onclick={() => filterByTag(tag)} />{/each}</span>
-            {/if}
-            <span class="min-w-4 flex-1" aria-hidden="true"></span>
-            <Switch checked={!word.disabled} onchange={() => toggle(word)} label="Enabled" title={word.disabled ? 'Enable' : 'Disable'} />
+  {#if section === 'vocabulary'}
+    <div class="mt-6 grid items-start gap-x-8 gap-y-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]">
+      <div>
+        <form class="grid gap-2" onsubmit={save}>
+          <input
+            type="text"
+            class="field"
+            lang="ja"
+            placeholder="Word (e.g. 食べる)"
+            bind:value={japanese}
+            bind:this={japaneseEl}
+            aria-invalid={!!errors.japanese}
+            oninput={() => (errors.japanese = '')}
+          />
+          {@render fieldError(errors.japanese)}
+          <input
+            type="text"
+            class="field"
+            lang="ja"
+            placeholder="Reading in kana (e.g. たべる)"
+            bind:value={hiragana}
+            aria-invalid={!!errors.hiragana}
+            oninput={() => (errors.hiragana = '')}
+          />
+          {@render fieldError(errors.hiragana)}
+          <input
+            type="text"
+            class="field"
+            placeholder="Meaning (e.g. to eat)"
+            bind:value={meaning}
+            aria-invalid={!!errors.meaning}
+            oninput={() => (errors.meaning = '')}
+          />
+          {@render fieldError(errors.meaning)}
+          <TagInput bind:tags={newTags} suggestions={tags} />
+          <div class={WIDE}>
+            <button class="action" type="submit"><Plus />Add</button>
           </div>
-        </li>
-      {/each}
-    </ul>
+        </form>
+        <div class="mt-2 {WIDE}">
+          <button type="button" class="field" onclick={() => romajiDialog?.open()}><ListPlus />Add from romaji</button>
+        </div>
+      </div>
+      <div>
+        {#if words.length === 0}
+          <p class="my-4 text-muted">No words yet.</p>
+        {:else}
+          <div class="mb-2 flex flex-wrap items-center gap-2">
+            <TagSearch
+              id="word-search"
+              placeholder="Search by word, reading, meaning or #tag"
+              label="Search words"
+              bind:query
+              bind:tags={() => filterTags, (next) => (activeTags = next)}
+              suggestions={tags}
+              onchange={onSearch}
+            />
+            <div class="flex items-center gap-2">
+              <button class="field" onclick={() => tagsDialog?.open()} disabled={tags.length === 0}><Tags />Tags</button
+              >
+              <select
+                class="field chevron"
+                value={sortKey}
+                onchange={(e) => setSort(e.currentTarget.value as SortKey, sortDirection)}
+                aria-label="Sort by"
+              >
+                {#each SORT_OPTIONS as option (option.key)}
+                  <option value={option.key}>{option.label}</option>
+                {/each}
+              </select>
+              <button
+                class="icon"
+                onclick={() => setSort(sortKey, sortDirection === 'asc' ? 'desc' : 'asc')}
+                aria-label={sortDirection === 'asc' ? 'Ascending' : 'Descending'}
+                title={sortDirection === 'asc' ? 'Ascending (click to reverse)' : 'Descending (click to reverse)'}
+              >
+                {#if sortDirection === 'asc'}<ArrowUp />{:else}<ArrowDown />{/if}
+              </button>
+            </div>
+          </div>
+          <!-- on top of the list, which scrolls up behind it -->
+          <div class="{ROW} relative z-10 mb-2">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" checked={allSelected} onchange={toggleSelectAll} />
+              {visibleWords.length === 1 ? 'Select' : 'Select all'}
+              {visibleWords.length}
+              {plural(visibleWords.length, visibleWords.length === words.length ? 'word' : 'result')}
+            </label>
+            <span class="text-muted">{activeWordCount} active · {selectedWords.length} selected</span>
+            <!-- keeps the space reserved so the layout does not shift when a selection appears; the icons are 20px in 40px buttons -->
+            <div
+              class="ml-auto flex gap-2 *:size-10 *:items-center *:justify-center [&_svg]:size-5"
+              class:invisible={selectedWords.length === 0}
+            >
+              <button
+                class="icon"
+                onclick={() => (app.sheetWords = selectedWords)}
+                aria-label="Print writing sheet"
+                title="Print writing sheet"
+              >
+                <Printer />
+              </button>
+              <button class="icon" onclick={openTagDialog} aria-label="Tag selected" title="Tag selected">
+                <Tag />
+              </button>
+              <button
+                class="icon"
+                onclick={() => setSelectedDisabled(false)}
+                aria-label="Enable selected"
+                title="Enable selected"
+              >
+                <Eye />
+              </button>
+              <button
+                class="icon"
+                onclick={() => setSelectedDisabled(true)}
+                aria-label="Disable selected"
+                title="Disable selected"
+              >
+                <EyeOff />
+              </button>
+              <button class="danger icon" onclick={removeSelected} aria-label="Delete selected" title="Delete selected">
+                <Trash />
+              </button>
+            </div>
+          </div>
+          {#if visibleWords.length === 0}
+            <p class="my-4 text-muted">No words match your search or tag filter.</p>
+          {:else}
+            <!-- reaches up behind the 40px select-all row and the 8px below it -->
+            <ul class="scroll-list-12 [--scroll-list-rows:12] [--scroll-list-under:48px]" bind:this={listEl}>
+              {#each visibleWords as word (word.id)}
+                <li>
+                  <div
+                    class="select-row relative"
+                    role="checkbox"
+                    tabindex="0"
+                    aria-checked={selected.has(word.id)}
+                    aria-label={`Select ${word.japanese}`}
+                    onclick={(event) => onCardClick(event, word.id)}
+                    ondblclick={(event) => onCardDoubleClick(event, word)}
+                    onmousedown={onCardMouseDown}
+                    onkeydown={(event) => onCardKey(event, word)}
+                    onpointerenter={() => app.markSeen(word.id)}
+                  >
+                    {#if app.newWordIds.has(word.id)}
+                      <!-- on the row's corner; no further left than the list's 4px padding, which would clip it -->
+                      <span
+                        class="absolute -top-2 -left-1 rounded-pill bg-action px-2 text-sm leading-4 font-medium text-on-action"
+                        >new!</span
+                      >
+                    {/if}
+                    <span class={['text-lg', word.disabled && DIM]} lang="ja">{word.japanese}</span>
+                    <span class={['text-sm text-muted', word.disabled && DIM]} lang="ja">{wordReading(word)}</span>
+                    {#if needsMeaning(word)}
+                      <span
+                        class={['min-w-0 truncate text-warn italic', word.disabled && DIM]}
+                        title="Add a meaning to practice this word by meaning">Needs meaning</span
+                      >
+                    {:else}
+                      <span class={['min-w-0 truncate', word.disabled && DIM]}>{word.meaning}</span>
+                    {/if}
+                    {#if word.tags.length > 0}
+                      <span class="flex gap-1"
+                        >{#each word.tags as tag (tag)}<TagChip {tag} onclick={() => filterByTag(tag)} />{/each}</span
+                      >
+                    {/if}
+                    <span class="min-w-4 flex-1" aria-hidden="true"></span>
+                    <Switch
+                      checked={!word.disabled}
+                      onchange={() => toggle(word)}
+                      label="Enabled"
+                      title={word.disabled ? 'Enable' : 'Disable'}
+                    />
+                  </div>
+                </li>
+              {/each}
+            </ul>
+          {/if}
+        {/if}
+      </div>
+    </div>
   {/if}
-{/if}
-</div>
-</div>
-{/if}
 
-{#if section === 'kana'}
-<KanaSelector selected={app.settings.kanaSelection ?? defaultKanaSelection()} onchange={(keys) => app.setKanaSelection(keys)} />
-{/if}
+  {#if section === 'kana'}
+    <KanaSelector
+      selected={app.settings.kanaSelection ?? defaultKanaSelection()}
+      onchange={(keys) => app.setKanaSelection(keys)}
+    />
+  {/if}
 </div>

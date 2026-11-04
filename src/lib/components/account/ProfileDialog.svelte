@@ -64,7 +64,13 @@
   }
 </script>
 
-<dialog class="w-[min(440px,calc(100vw-32px))]" bind:this={dialogEl} use:closeOnBackdrop aria-label="Edit profile" onclose={() => setPhoto(undefined)}>
+<dialog
+  class="w-[min(440px,calc(100vw-32px))]"
+  bind:this={dialogEl}
+  use:closeOnBackdrop
+  aria-label="Edit profile"
+  onclose={() => setPhoto(undefined)}
+>
   <form class="grid gap-4" onsubmit={save}>
     <h2 class="m-0">Edit profile</h2>
     <div class="flex flex-wrap items-center gap-4">

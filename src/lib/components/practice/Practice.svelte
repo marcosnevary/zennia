@@ -48,7 +48,9 @@
   })
 
   // the fields show the parts by color, so screen readers get them in words when both are practiced
-  const note = $derived(parts.reading && parts.meaning ? `Reading: ${parts.reading} · Meaning: ${parts.meaning}` : undefined)
+  const note = $derived(
+    parts.reading && parts.meaning ? `Reading: ${parts.reading} · Meaning: ${parts.meaning}` : undefined,
+  )
 
   function focusField() {
     queueMicrotask(() => (askReading ? inputEl : meaningEl)?.focus({ preventScroll: true }))
@@ -103,7 +105,8 @@
 
 {#if !current}
   <p class="mt-6 mb-4 text-muted">
-    Nothing to practice. Select kana in <a href={resolve('/kana')}>Kana</a> or activate words in <a href={resolve('/vocabulary')}>Vocabulary</a>.
+    Nothing to practice. Select kana in <a href={resolve('/kana')}>Kana</a> or activate words in
+    <a href={resolve('/vocabulary')}>Vocabulary</a>.
   </p>
 {:else}
   <PracticeCard

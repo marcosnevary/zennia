@@ -102,13 +102,22 @@ export function createRepo(getDb: () => Db): Repo {
         fetchAll<WordRow>((from, to) =>
           db.from('words').select('*').order('created_at', { ascending: false }).order('id').range(from, to),
         ),
-        fetchAll<WordStatRow>((from, to) => db.from('word_stats').select('word_id, hits, misses').order('word_id').range(from, to)),
+        fetchAll<WordStatRow>((from, to) =>
+          db.from('word_stats').select('word_id, hits, misses').order('word_id').range(from, to),
+        ),
         fetchAll<KanaStatRow>((from, to) =>
-          db.from('kana_stats').select('script, hiragana, hits, misses').order('script').order('hiragana').range(from, to),
+          db
+            .from('kana_stats')
+            .select('script, hiragana, hits, misses')
+            .order('script')
+            .order('hiragana')
+            .range(from, to),
         ),
         db
           .from('settings')
-          .select('theme, words_focus, kana_selection, words_sort, words_sort_direction, stats_sort, stats_sort_direction, number_key_tabs')
+          .select(
+            'theme, words_focus, kana_selection, words_sort, words_sort_direction, stats_sort, stats_sort_direction, number_key_tabs',
+          )
           .maybeSingle<SettingsRow>(),
       ])
       return {
@@ -121,7 +130,12 @@ export function createRepo(getDb: () => Db): Repo {
     async upsertWords(words) {
       const { db, userId } = await open()
       for (const chunk of chunks(words, WRITE_CHUNK)) {
-        unwrap(await db.from('words').upsert(chunk.map((w) => wordToRow(w, userId)), { onConflict: 'user_id,id' }))
+        unwrap(
+          await db.from('words').upsert(
+            chunk.map((w) => wordToRow(w, userId)),
+            { onConflict: 'user_id,id' },
+          ),
+        )
       }
     },
 

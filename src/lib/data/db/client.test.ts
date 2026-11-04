@@ -42,10 +42,20 @@ describe('accountOf', () => {
   it('prefers the name and photo saved in Edit profile', () => {
     const account = accountOf(
       user({
-        user_metadata: { full_name: 'Ana Sato', avatar_url: 'https://photo', display_name: 'Ana', photo_url: 'https://mine' },
+        user_metadata: {
+          full_name: 'Ana Sato',
+          avatar_url: 'https://photo',
+          display_name: 'Ana',
+          photo_url: 'https://mine',
+        },
       }),
     )
-    expect(account).toMatchObject({ name: 'Ana', avatarUrl: 'https://mine', googleAvatarUrl: 'https://photo', customAvatar: true })
+    expect(account).toMatchObject({
+      name: 'Ana',
+      avatarUrl: 'https://mine',
+      googleAvatarUrl: 'https://photo',
+      customAvatar: true,
+    })
   })
 
   it('has no name or photo for an anonymous user', () => {

@@ -41,8 +41,26 @@ describe('buildRows', () => {
       kana: { 'hiragana:か': { hits: 3, misses: 0 }, 'katakana:か': { hits: 0, misses: 2 } },
     }
     expect(buildRows(stats, [])).toEqual([
-      { key: 'hiragana:か', symbol: 'か', reading: 'ka', meaning: '', search: 'か か ka', ja: false, tags: ['Hiragana'], tally: { hits: 3, misses: 0 } },
-      { key: 'katakana:か', symbol: 'カ', reading: 'ka', meaning: '', search: 'カ か ka', ja: false, tags: ['Katakana'], tally: { hits: 0, misses: 2 } },
+      {
+        key: 'hiragana:か',
+        symbol: 'か',
+        reading: 'ka',
+        meaning: '',
+        search: 'か か ka',
+        ja: false,
+        tags: ['Hiragana'],
+        tally: { hits: 3, misses: 0 },
+      },
+      {
+        key: 'katakana:か',
+        symbol: 'カ',
+        reading: 'ka',
+        meaning: '',
+        search: 'カ か ka',
+        ja: false,
+        tags: ['Katakana'],
+        tally: { hits: 0, misses: 2 },
+      },
     ])
   })
 

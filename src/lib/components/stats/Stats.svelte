@@ -59,11 +59,15 @@
 {/snippet}
 
 {#if !attempts(total)}
-  <p class="mt-6 mb-4 text-muted">No statistics yet. Answer some words or kana in Practice and they will show up here.</p>
+  <p class="mt-6 mb-4 text-muted">
+    No statistics yet. Answer some words or kana in Practice and they will show up here.
+  </p>
 {:else}
   {@render summary(total)}
 
-  <h2 class="mb-0">Practiced ({visibleRows.length === rows.length ? rows.length : `${visibleRows.length} of ${rows.length}`})</h2>
+  <h2 class="mb-0">
+    Practiced ({visibleRows.length === rows.length ? rows.length : `${visibleRows.length} of ${rows.length}`})
+  </h2>
   <div class="mt-4 mb-2 flex flex-wrap items-center gap-2">
     <TagSearch
       id="stats-search"
@@ -100,14 +104,18 @@
   {:else}
     <ul class="scroll-list-12" bind:this={listEl}>
       {#each visibleRows as row (row.key)}
-        <li class="flex min-h-12 items-center gap-3 rounded-control px-3 py-1 transition-colors hover:bg-tint motion-reduce:transition-none">
+        <li
+          class="flex min-h-12 items-center gap-3 rounded-control px-3 py-1 transition-colors hover:bg-tint motion-reduce:transition-none"
+        >
           <span class="text-lg" lang="ja">{row.symbol}</span>
           <span class="text-sm text-muted" lang={row.ja ? 'ja' : undefined}>{row.reading}</span>
           {#if row.meaning}
             <span class="min-w-0 truncate">{row.meaning}</span>
           {/if}
           {#if row.tags.length > 0}
-            <span class="flex gap-1">{#each row.tags as tag (tag)}<TagChip {tag} onclick={() => filterByTag(tag)} />{/each}</span>
+            <span class="flex gap-1"
+              >{#each row.tags as tag (tag)}<TagChip {tag} onclick={() => filterByTag(tag)} />{/each}</span
+            >
           {/if}
           <span class="min-w-4 flex-1" aria-hidden="true"></span>
           <!-- both counts have a fixed width, the correct one right-aligned and the wrong one left-aligned, so they meet at the same
@@ -116,7 +124,9 @@
             <span class="justify-end"><span>○</span>{row.tally.hits}</span>
             <span><span>✗</span>{row.tally.misses}</span>
           </span>
-          <span class="w-16 flex-none text-center font-bold tabular-nums {LEVEL_STYLES[accuracyLevel(row.tally)]}">{percent(accuracy(row.tally))}</span>
+          <span class="w-16 flex-none text-center font-bold tabular-nums {LEVEL_STYLES[accuracyLevel(row.tally)]}"
+            >{percent(accuracy(row.tally))}</span
+          >
         </li>
       {/each}
     </ul>

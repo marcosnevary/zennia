@@ -136,7 +136,10 @@ export function scriptKeys(script: KanaScript): string[] {
 /** What is practiced the first time: the basic hiragana, everything before the dakuten block. */
 export function defaultKanaSelection(): string[] {
   const [main] = KANA_SECTIONS
-  const basic = main.rows.slice(0, main.rows.findIndex((r) => r.gap))
+  const basic = main.rows.slice(
+    0,
+    main.rows.findIndex((r) => r.gap),
+  )
   return basic.flatMap((r) => columnKeys('hiragana', r))
 }
 

@@ -69,7 +69,13 @@ export interface StatsFilter {
 /** The rows to show: having the chosen tags and matching the search text and its `#` terms, in the chosen order. */
 export function filterRows(rows: StatsRow[], { query, tags, sort, direction }: StatsFilter): StatsRow[] {
   const search = parseSearch(query)
-  const matches = rows.filter((r) => hasEveryTag(r.tags, tags) && r.search.includes(search.text) && hasSearchTags(r.tags, search.tags))
+  const matches = rows.filter(
+    (r) => hasEveryTag(r.tags, tags) && r.search.includes(search.text) && hasSearchTags(r.tags, search.tags),
+  )
   const byKey = new Map(matches.map((r) => [r.key, r]))
-  return sortTallies(matches.map((r) => [r.key, r.tally]), sort, direction).map(([key]) => byKey.get(key)!)
+  return sortTallies(
+    matches.map((r) => [r.key, r.tally]),
+    sort,
+    direction,
+  ).map(([key]) => byKey.get(key)!)
 }

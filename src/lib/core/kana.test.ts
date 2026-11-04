@@ -1,5 +1,19 @@
 import { describe, expect, it } from 'vitest'
-import { ALL_HIRAGANA, KANA_SECTIONS, acceptedReadings, buildKana, columnKeys, defaultKanaSelection, kanaKey, lineKeys, parseKanaKey, scriptKeys, sectionKeys, selectKeys, toggleKeys } from './kana'
+import {
+  ALL_HIRAGANA,
+  KANA_SECTIONS,
+  acceptedReadings,
+  buildKana,
+  columnKeys,
+  defaultKanaSelection,
+  kanaKey,
+  lineKeys,
+  parseKanaKey,
+  scriptKeys,
+  sectionKeys,
+  selectKeys,
+  toggleKeys,
+} from './kana'
 import { checkAnswer, toDisplayRomaji } from './romaji'
 
 describe('parseKanaKey', () => {
@@ -60,8 +74,7 @@ describe('buildKana', () => {
     expect(acceptedReadings('づ')).toEqual(['づ', 'ず'])
     expect(acceptedReadings('ぢょ')).toEqual(['ぢょ', 'じょ'])
     expect(acceptedReadings('か')).toEqual(['か'])
-    const ok = (answer: string, h: string) =>
-      acceptedReadings(h).some((r) => checkAnswer(answer, r) === 'correct')
+    const ok = (answer: string, h: string) => acceptedReadings(h).some((r) => checkAnswer(answer, r) === 'correct')
     expect(ok('di', 'ぢ')).toBe(true)
     expect(ok('ji', 'ぢ')).toBe(true)
     expect(ok('du', 'づ')).toBe(true)

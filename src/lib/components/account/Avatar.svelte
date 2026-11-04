@@ -15,7 +15,10 @@
   />
 {:else}
   <span
-    class={['flex shrink-0 items-center justify-center rounded-pill bg-tint', large ? 'size-16 text-xl' : 'size-8 text-sm']}
+    class={[
+      'flex shrink-0 items-center justify-center rounded-pill bg-tint',
+      large ? 'size-16 text-xl' : 'size-8 text-sm',
+    ]}
     aria-hidden="true"
   >
     {label.charAt(0).toUpperCase()}

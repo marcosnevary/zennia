@@ -74,7 +74,12 @@ describe('settings', () => {
         tag_colors: {},
         number_key_tabs: true,
       }),
-    ).toMatchObject({ wordsSort: 'reading', wordsSortDirection: 'desc', statsSort: 'misses', statsSortDirection: 'asc' })
+    ).toMatchObject({
+      wordsSort: 'reading',
+      wordsSortDirection: 'desc',
+      statsSort: 'misses',
+      statsSortDirection: 'asc',
+    })
   })
 
   it('reads the tag colours it can draw and drops the rest', () => {
@@ -120,7 +125,9 @@ describe('settings', () => {
       stats_sort: 'hits',
       stats_sort_direction: 'asc',
     })
-    expect(settingsToRow({ tagColors: { food: { hue: 10, tone: 1 } } })).toEqual({ tag_colors: { food: { hue: 10, tone: 1 } } })
+    expect(settingsToRow({ tagColors: { food: { hue: 10, tone: 1 } } })).toEqual({
+      tag_colors: { food: { hue: 10, tone: 1 } },
+    })
     expect(settingsToRow({ numberKeyTabs: false })).toEqual({ number_key_tabs: false })
   })
 })

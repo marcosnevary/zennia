@@ -1,8 +1,8 @@
 ---
 name: Bug
 about: Something works incorrectly or shows incorrect data
-title: "fix(scope): "
-labels: ["bug"]
+title: 'fix(scope): '
+labels: ['bug']
 ---
 
 ## What happens?

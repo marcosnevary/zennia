@@ -59,11 +59,7 @@
                   {#each section.rows as r, i (i)}
                     {@const colKeys = columnKeys(script.id, r)}
                     <th scope="col" class="text-sm font-normal text-muted" class:pl-5={r.gap}>
-                      <button
-                        class={HEADER}
-                        title="Toggle the whole column"
-                        onclick={() => toggle(colKeys)}
-                      >
+                      <button class={HEADER} title="Toggle the whole column" onclick={() => toggle(colKeys)}>
                         {r.label || '·'}
                       </button>
                     </th>
@@ -75,11 +71,7 @@
                   {@const line = lineKeys(script.id, section, c)}
                   <tr>
                     <th scope="row" class="text-sm font-normal text-muted">
-                      <button
-                        class={HEADER}
-                        title="Toggle the whole row"
-                        onclick={() => toggle(line)}
-                      >
+                      <button class={HEADER} title="Toggle the whole row" onclick={() => toggle(line)}>
                         {col}
                       </button>
                     </th>

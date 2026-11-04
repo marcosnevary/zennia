@@ -86,7 +86,12 @@ describe('sortWords', () => {
     disabled,
     tags: [],
   })
-  const list = [w('1', '犬', 'いぬ', 'dog'), w('2', '猫', 'ねこ', ''), w('3', '赤', 'あか', 'red', true), w('4', '木', 'き', 'tree')]
+  const list = [
+    w('1', '犬', 'いぬ', 'dog'),
+    w('2', '猫', 'ねこ', ''),
+    w('3', '赤', 'あか', 'red', true),
+    w('4', '木', 'き', 'tree'),
+  ]
   const ids = (xs: { id: string }[]) => xs.map((x) => x.id).join('')
 
   it('keeps or reverses the stored order', () => {
@@ -211,8 +216,14 @@ describe('makeWord and updateWord', () => {
 })
 
 describe('searchWords', () => {
-  const word = (id: string, japanese: string, hiragana: string, meaning: string) =>
-    ({ id, japanese, hiragana, meaning, disabled: false, tags: [] })
+  const word = (id: string, japanese: string, hiragana: string, meaning: string) => ({
+    id,
+    japanese,
+    hiragana,
+    meaning,
+    disabled: false,
+    tags: [],
+  })
   const list = [word('1', '犬', 'いぬ', 'Dog'), word('2', '猫', 'ねこ', 'cat'), word('3', '食べる', 'たべる', 'to eat')]
   const ids = (query: string) => searchWords(list, query).map((w) => w.id)
 
@@ -326,7 +337,8 @@ describe('tag names', () => {
   })
   it('validateTag allows only letters of any script, numbers, - and _', () => {
     for (const ok of ['genki-1', '動詞', 'n5_vocab', 'カタカナ']) expect(validateTag(ok)).toBe('')
-    for (const bad of ['genki 1', '#n5', 'a.b', 'x/y', 'a,b']) expect(validateTag(bad)).toBe('A tag can only have letters, numbers, - and _.')
+    for (const bad of ['genki 1', '#n5', 'a.b', 'x/y', 'a,b'])
+      expect(validateTag(bad)).toBe('A tag can only have letters, numbers, - and _.')
   })
   it('matchTags keeps the tags containing the text, ignoring case and spaces, and all of them for blank text', () => {
     const tags = ['Food', 'JLPT-N5', 'seafood', 'verbs']
@@ -364,14 +376,24 @@ describe('tags on words', () => {
   })
   it('mergeWords counts a word with nothing new as a duplicate', () => {
     const cur = sanitizeWords([{ id: '1', japanese: '犬', hiragana: 'いぬ', meaning: 'dog', tags: ['Pets'] }]).words
-    const r = mergeWords(cur, sanitizeWords([{ japanese: '犬', hiragana: 'いぬ', meaning: 'dog', tags: ['PETS'] }]).words)
+    const r = mergeWords(
+      cur,
+      sanitizeWords([{ japanese: '犬', hiragana: 'いぬ', meaning: 'dog', tags: ['PETS'] }]).words,
+    )
     expect(r.duplicates).toBe(1)
     expect(r.updated).toBe(0)
   })
 })
 
 describe('tag operations', () => {
-  const w = (id: string, ...tags: string[]) => ({ id, japanese: id, hiragana: 'あ', meaning: '', disabled: false, tags })
+  const w = (id: string, ...tags: string[]) => ({
+    id,
+    japanese: id,
+    hiragana: 'あ',
+    meaning: '',
+    disabled: false,
+    tags,
+  })
   const list = [w('1', 'Food', 'N5'), w('2', 'food'), w('3'), w('4', 'Fruit', 'Food')]
   const tagsOf = (words: { tags: string[] }[]) => words.map((x) => x.tags)
 
@@ -438,7 +460,9 @@ describe('required meaning', () => {
   })
 
   it('sanitizeWords can reject new entries without a meaning, counting them as skipped', () => {
-    const r = sanitizeWords([noMeaning, { ...withMeaning, id: 'c', meaning: '  ' }, withMeaning], { requireMeaning: true })
+    const r = sanitizeWords([noMeaning, { ...withMeaning, id: 'c', meaning: '  ' }, withMeaning], {
+      requireMeaning: true,
+    })
     expect(r.words.map((w) => w.id)).toEqual(['b'])
     expect(r.skipped).toBe(2)
   })
