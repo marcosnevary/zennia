@@ -10,7 +10,7 @@ A word added by any route is marked as new until the pointer passes over it. The
 
 ## Merging
 
-Two words are the same when both the written form and the reading match, and the list never holds the same word twice.
+Two words are the same when both the written form and the reading match. The app doesn't create a second copy of a word, but duplicates saved before this rule stay in the list.
 
 The add form, Add from romaji and every import go through `mergeWords`, which only ever adds.
 
@@ -18,11 +18,6 @@ The add form, Add from romaji and every import go through `mergeWords`, which on
 - An incoming word with the id of an existing but different word counts as already existing.
 
 The edit dialog refuses a change that would match another word.
-
-### Decisions
-
-- **The edit dialog refuses instead of merging.** Merging there would also have to combine the tallies of the two words.
-- **No database constraint.** The rule lives in the app; the `words` primary key is `user_id, id`.
 
 ## Add from romaji
 
@@ -56,7 +51,7 @@ A tag name has at most 30 characters: letters, numbers, `-` and `_`. Two names a
 
 Each tag has a pastel color: a hue and one of three tones, in OKLCH (`src/lib/data/tag-colors.ts`). A new tag gets the color farthest from those in use, in the softest tone that stays clearly apart from all of them (an OKLab distance of 0.07). Only colors both themes can show are candidates, so the measured distances are the ones seen.
 
-The rule meant to keep a tag's color for good, also through a rename, doesn't hold today. `Repo.load` doesn't select `tag_colors`, so every load starts with no saved colors and assigns them all again, in alphabetical order. The result is stable until the set of tags changes.
+A tag keeps its color from then on, also when renamed, unless the rename merges it into a tag that has its own. A color is freed when no word has the tag anymore.
 
 ## Search
 
@@ -84,6 +79,8 @@ The shell renders the sheet hidden, and opens the browser's print dialog once it
 
 ## Decisions
 
+- **The edit dialog refuses instead of merging.** Merging there would also have to combine the tallies of the two words.
+- **No database constraint.** The rule lives in the app; the `words` primary key is `user_id, id`.
 - **The dictionary is bundled, not an AI API.** The app should cost nothing to run, and JMdict is free ([integrations](integrations.md#bundled-data)).
 - **Tag names hold no spaces or `#`.** A space would end a `#` search term and a `#` would start one, so this way a `#term` can name any tag.
 - **Tag colors are saved rather than derived from the name.** Only a saved color can be picked to stand apart from the others, and survive a rename.
