@@ -31,6 +31,7 @@
     filterByTags,
     findTag,
     makeWord,
+    mergeNote,
     needsMeaning,
     removeTag,
     sameTag,
@@ -39,6 +40,7 @@
     setDisabled,
     sortWords,
     updateWord,
+    validateEdit,
     validateWord,
     wordReading,
     type SortDirection,
@@ -61,6 +63,7 @@
   let editErrors = $state<WordErrors>({});
   let dialogEl = $state<HTMLDialogElement>();
   let errors = $state<WordErrors>({});
+  let merged = $state("");
   let japaneseEl = $state<HTMLInputElement>();
 
   let { section }: { section: "vocabulary" | "kana" } = $props();
@@ -76,9 +79,11 @@
   function save(event: Event) {
     event.preventDefault();
     const fields = { japanese, hiragana, meaning, tags: newTags };
+    merged = "";
     errors = validateWord(fields);
     if (Object.keys(errors).length) return;
-    app.setWords([makeWord(fields), ...words]);
+    const word = makeWord(fields);
+    merged = mergeNote(word, app.importWords([word]));
     resetForm();
     japaneseEl?.focus();
   }
@@ -101,7 +106,7 @@
       meaning: editMeaning,
       tags: editTags,
     };
-    editErrors = validateWord(fields);
+    editErrors = validateEdit(fields, words, editingId);
     if (Object.keys(editErrors).length) return;
     app.setWords(
       words.map((w) => (w.id === editingId ? updateWord(w, fields) : w)),
@@ -286,8 +291,11 @@
         lang="ja"
         placeholder="Word (e.g. 食べる)"
         bind:value={editJapanese}
-        aria-invalid={!!editErrors.japanese}
-        oninput={() => (editErrors.japanese = "")}
+        aria-invalid={!!editErrors.japanese || !!editErrors.duplicate}
+        oninput={() => {
+          editErrors.japanese = "";
+          editErrors.duplicate = "";
+        }}
       />
       {@render fieldError(editErrors.japanese)}
       <input
@@ -296,10 +304,14 @@
         lang="ja"
         placeholder="Reading in kana (e.g. たべる)"
         bind:value={editHiragana}
-        aria-invalid={!!editErrors.hiragana}
-        oninput={() => (editErrors.hiragana = "")}
+        aria-invalid={!!editErrors.hiragana || !!editErrors.duplicate}
+        oninput={() => {
+          editErrors.hiragana = "";
+          editErrors.duplicate = "";
+        }}
       />
       {@render fieldError(editErrors.hiragana)}
+      {@render fieldError(editErrors.duplicate)}
       <input
         type="text"
         class="field"
@@ -374,7 +386,10 @@
             bind:value={japanese}
             bind:this={japaneseEl}
             aria-invalid={!!errors.japanese}
-            oninput={() => (errors.japanese = "")}
+            oninput={() => {
+              errors.japanese = "";
+              merged = "";
+            }}
           />
           {@render fieldError(errors.japanese)}
           <input
@@ -400,6 +415,7 @@
           <div class={WIDE}>
             <button class="action" type="submit"><Plus />Add</button>
           </div>
+          {#if merged}<p role="status">{merged}</p>{/if}
         </form>
         <div class="mt-2 {WIDE}">
           <button

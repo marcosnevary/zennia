@@ -12,6 +12,7 @@ import {
   importSummary,
   makeWord,
   matchTags,
+  mergeNote,
   mergeWords,
   needsMeaning,
   parseSearch,
@@ -23,6 +24,7 @@ import {
   sortWords,
   updateWord,
   withAnyTag,
+  validateEdit,
   validateTag,
   validateWord,
   wordReading,
@@ -519,6 +521,71 @@ describe("tags on words", () => {
     );
     expect(r.duplicates).toBe(1);
     expect(r.updated).toBe(0);
+  });
+});
+
+describe("words that are the same", () => {
+  const taberu = makeWord({
+    japanese: "食べる",
+    hiragana: "たべる",
+    meaning: "to eat",
+    tags: [],
+  });
+  const nomu = makeWord({
+    japanese: "飲む",
+    hiragana: "のむ",
+    meaning: "to drink",
+    tags: [],
+  });
+  const fields = (japanese: string, hiragana: string) => ({
+    japanese,
+    hiragana,
+    meaning: "x",
+    tags: [],
+  });
+
+  it("validateEdit refuses a change that matches another word", () => {
+    const errors = validateEdit(
+      fields(" 食べる ", " たべる "),
+      [taberu, nomu],
+      nomu.id,
+    );
+    expect(errors.duplicate).toBeTruthy();
+  });
+
+  it("validateEdit accepts a word keeping its own written form and reading", () => {
+    expect(
+      validateEdit(fields("食べる", "たべる"), [taberu, nomu], taberu.id),
+    ).toEqual({});
+  });
+
+  it("validateEdit accepts the same written form with another reading", () => {
+    expect(
+      validateEdit(fields("食べる", "くべる"), [taberu, nomu], nomu.id),
+    ).toEqual({});
+  });
+
+  it("mergeNote says nothing when the word was added", () => {
+    const result = mergeWords([], [taberu]);
+    expect(mergeNote(taberu, result)).toBe("");
+  });
+
+  it("mergeNote tells when the existing word gained something", () => {
+    const word = { ...taberu, id: "other", meaning: "to live on" };
+    const result = mergeWords([taberu], [word]);
+    expect(result.words).toHaveLength(1);
+    expect(result.words[0].meaning).toBe("to eat; to live on");
+    expect(mergeNote(word, result)).toBe(
+      "食べる already exists and was updated.",
+    );
+  });
+
+  it("mergeNote tells when the word had nothing new", () => {
+    const word = { ...taberu, id: "other" };
+    const result = mergeWords([taberu], [word]);
+    expect(mergeNote(word, result)).toBe(
+      "食べる already exists, nothing changed.",
+    );
   });
 });
 

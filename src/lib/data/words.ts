@@ -18,7 +18,7 @@ export interface WordFields {
 
 /** The message to show under each invalid field of the form. */
 export type WordErrors = Partial<
-  Record<"japanese" | "hiragana" | "meaning", string>
+  Record<"japanese" | "hiragana" | "meaning" | "duplicate", string>
 >;
 
 /** The errors of the form, empty when the word can be saved. */
@@ -35,6 +35,30 @@ export function validateWord({
     errors.hiragana =
       "The reading must contain only kana (hiragana, katakana or ー).";
   if (!meaning.trim()) errors.meaning = "Fill in the meaning.";
+  return errors;
+}
+
+/** What makes two words the same word: the written form and the reading. */
+function wordKey({
+  japanese,
+  hiragana,
+}: Pick<Word, "japanese" | "hiragana">): string {
+  return `${japanese.trim()}|${hiragana.trim()}`;
+}
+
+/**
+ * The errors of the edit form. Unlike a new word, an edited word can't merge into the one it would match,
+ * because their tallies would have to be combined.
+ */
+export function validateEdit(
+  fields: WordFields,
+  words: Word[],
+  id: string | null,
+): WordErrors {
+  const errors = validateWord(fields);
+  const key = wordKey(fields);
+  if (words.some((w) => w.id !== id && wordKey(w) === key))
+    errors.duplicate = "You already have this word with this reading.";
   return errors;
 }
 
@@ -269,6 +293,17 @@ export function importBrief({ added, updated }: MergeResult): string {
   return "Nothing new";
 }
 
+/** The message for a word of the add form that merged into an existing one, or '' when it was added. */
+export function mergeNote(
+  { japanese }: Pick<Word, "japanese">,
+  { added, updated }: MergeResult,
+): string {
+  if (added) return "";
+  return updated
+    ? `${japanese} already exists and was updated.`
+    : `${japanese} already exists, nothing changed.`;
+}
+
 const MEANING_SEPARATOR = "; ";
 
 /** Appends `meaning` to `current` unless it is empty or already one of its parts. */
@@ -287,13 +322,13 @@ export function mergeWords(current: Word[], incoming: Word[]): MergeResult {
   const words = [...current];
   const ids = new Set(current.map((w) => w.id));
   const byKey = new Map<string, number>();
-  words.forEach((w, i) => byKey.set(`${w.japanese}|${w.hiragana}`, i));
+  words.forEach((w, i) => byKey.set(wordKey(w), i));
   let added = 0;
   let updated = 0;
   let duplicates = 0;
 
   for (const w of incoming) {
-    const key = `${w.japanese}|${w.hiragana}`;
+    const key = wordKey(w);
     const at = byKey.get(key);
     if (at !== undefined) {
       const meaning = joinMeanings(words[at].meaning, w.meaning);

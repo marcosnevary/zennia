@@ -119,6 +119,18 @@ describe("App", () => {
     expect(app.words.map((w) => w.id)).toEqual(["x", "y", "a"]);
   });
 
+  it("merges a word that already exists without adding a row or a new mark", async () => {
+    const { app } = await ready({ words: [word("a", 1)] });
+    const { updated } = app.importWords([
+      word("b", 2, { japanese: "日a", meaning: "other" }),
+    ]);
+    expect(updated).toBe(1);
+    expect(app.words.map((w) => [w.id, w.meaning])).toEqual([
+      ["a", "a; other"],
+    ]);
+    expect(app.newWordIds.size).toBe(0);
+  });
+
   it("marks added words as new until they are seen", async () => {
     const { app } = await ready({ words: [word("a", 1)] });
     expect(app.newWordIds.size).toBe(0);
