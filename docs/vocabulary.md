@@ -4,7 +4,7 @@ The rules for words and tags are in `src/lib/data/words.ts`. The add form and th
 
 ## Words
 
-A word needs a written form, a reading made only of kana, and a meaning. Older words may have an empty meaning, which keeps them out of practice unless the focus is Reading.
+A word needs a written form, a reading made only of kana, and a meaning. In the code and the export file, the written form is `japanese` and the reading is `hiragana`, although a reading may hold katakana. Older words may have an empty meaning, which keeps them out of practice unless the focus is Reading.
 
 A word added by any route is marked as new until the pointer passes over it. The mark isn't stored, so a reload clears it.
 
