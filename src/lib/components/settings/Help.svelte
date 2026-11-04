@@ -25,9 +25,13 @@
   <h3 class="mt-4 mb-1 text-base font-bold">Export JSON</h3>
   <p class="mt-1 mb-2">
     Downloads all your words (including disabled ones) as a <code>.json</code> file.
-    Use it as a backup, or to move your words to another browser or device: your words
-    are stored only in this browser, so a new address or a cleared browser means an
-    empty list until you import the file again.
+    Use it as a backup, or to copy your words to another account.
+  </p>
+  <p class="mt-1 mb-2">
+    Your words are saved online. Until you sign in, they are tied to this
+    browser's session: another browser or device starts with an empty list, and
+    clearing this browser's data loses them unless you exported them first. Sign
+    in with Google to reach them from any device.
   </p>
 
   <h3 class="mt-4 mb-1 text-base font-bold">Import JSON</h3>
