@@ -16,7 +16,7 @@ const THEME_CACHE_KEY = "zennia:theme";
 export function readThemeCache(): ThemePreference {
   try {
     const saved = JSON.parse(localStorage.getItem(THEME_CACHE_KEY) ?? "null");
-    return saved === "light" || saved === "dark" ? saved : "system";
+    return THEMES.some((t) => t.id === saved) ? saved : "system";
   } catch {
     return "system";
   }
