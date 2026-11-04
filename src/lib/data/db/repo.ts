@@ -1,5 +1,5 @@
-import type { Stats, Word } from "../../core/types";
-import type { Settings } from "../settings";
+import type { Stats, Word } from "#lib/core/types.ts";
+import type { Settings } from "#lib/data/settings.ts";
 import {
   getAccount,
   linkGoogle,

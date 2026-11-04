@@ -11,30 +11,21 @@
   import Tag from "@lucide/svelte/icons/tag";
   import Tags from "@lucide/svelte/icons/tags";
   import Trash from "@lucide/svelte/icons/trash";
-  import Dialog from "../Dialog.svelte";
-  import SelectAll from "../SelectAll.svelte";
-  import { selectRow } from "../select-row";
-  import KanaSelector from "./KanaSelector.svelte";
+  import Dialog from "#lib/components/Dialog.svelte";
+  import SelectAll from "#lib/components/SelectAll.svelte";
+  import { selectRow } from "#lib/components/select-row.ts";
   import RomajiWordsDialog from "./RomajiWordsDialog.svelte";
-  import Switch from "../Switch.svelte";
-  import TagChip from "../TagChip.svelte";
+  import Switch from "#lib/components/Switch.svelte";
+  import TagChip from "#lib/components/TagChip.svelte";
   import TagInput from "./TagInput.svelte";
-  import TagSearch from "../TagSearch.svelte";
+  import TagSearch from "#lib/components/TagSearch.svelte";
   import TagsDialog from "./TagsDialog.svelte";
-  import { plural } from "../../core/plural";
-  import type { Word } from "../../core/types";
-  import { getApp } from "../../state.svelte";
+  import { plural } from "#lib/core/plural.ts";
+  import type { Word } from "#lib/core/types.ts";
+  import { getApp } from "#lib/state.svelte.ts";
   import {
-    addTag,
-    allTags,
-    cleanTags,
-    deleteTag,
-    filterByTags,
-    findTag,
     makeWord,
     mergeNote,
-    removeTag,
-    sameTag,
     searchWords,
     SORT_OPTIONS,
     setDisabled,
@@ -46,7 +37,17 @@
     type SortDirection,
     type SortKey,
     type WordErrors,
-  } from "../../data/words";
+  } from "#lib/data/words.ts";
+  import {
+    addTag,
+    allTags,
+    cleanTags,
+    deleteTag,
+    filterByTags,
+    findTag,
+    removeTag,
+    sameTag,
+  } from "#lib/data/tags.ts";
 
   const app = getApp();
   const words = $derived(app.words);
@@ -65,8 +66,6 @@
   let errors = $state<WordErrors>({});
   let merged = $state("");
   let japaneseEl = $state<HTMLInputElement>();
-
-  let { section }: { section: "vocabulary" | "kana" } = $props();
 
   function resetForm() {
     japanese = "";
@@ -344,230 +343,217 @@
     {#if message}<p class="text-bad" role="alert">{message}</p>{/if}
   {/snippet}
 
-  {#if section === "vocabulary"}
-    <div
-      class="mt-6 grid items-start gap-x-8 gap-y-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]"
-    >
-      <div>
-        <form class="grid gap-2" onsubmit={save}>
-          <input
-            type="text"
-            class="field"
-            lang="ja"
-            placeholder="Word (e.g. 食べる)"
-            bind:value={japanese}
-            bind:this={japaneseEl}
-            aria-invalid={!!errors.japanese}
-            oninput={() => {
-              errors.japanese = "";
-              merged = "";
-            }}
-          />
-          {@render fieldError(errors.japanese)}
-          <input
-            type="text"
-            class="field"
-            lang="ja"
-            placeholder="Reading in kana (e.g. たべる)"
-            bind:value={hiragana}
-            aria-invalid={!!errors.hiragana}
-            oninput={() => (errors.hiragana = "")}
-          />
-          {@render fieldError(errors.hiragana)}
-          <input
-            type="text"
-            class="field"
-            placeholder="Meaning (e.g. to eat)"
-            bind:value={meaning}
-            aria-invalid={!!errors.meaning}
-            oninput={() => (errors.meaning = "")}
-          />
-          {@render fieldError(errors.meaning)}
-          <TagInput bind:tags={newTags} suggestions={tags} />
-          <button class="action w-full" type="submit"><Plus />Add</button>
-          {#if merged}<p role="status">{merged}</p>{/if}
-        </form>
-        <button
-          type="button"
-          class="field mt-2 w-full"
-          onclick={() => romajiDialog?.open()}
-          ><ListPlus />Add from romaji</button
-        >
-      </div>
-      <div>
-        {#if words.length === 0}
-          <p class="my-4 text-muted">No words yet.</p>
-        {:else}
-          <div class="mb-2 flex flex-wrap items-center gap-2">
-            <TagSearch
-              id="word-search"
-              placeholder="Search by word, reading, meaning or #tag"
-              label="Search words"
-              bind:query
-              bind:tags={() => filterTags, (next) => (activeTags = next)}
-              suggestions={tags}
-              onchange={onSearch}
-            />
-            <div class="flex items-center gap-2">
-              <button
-                class="field"
-                onclick={() => tagsDialog?.open()}
-                disabled={tags.length === 0}><Tags />Tags</button
-              >
-              <select
-                class="field chevron"
-                value={sortKey}
-                onchange={(e) =>
-                  setSort(e.currentTarget.value as SortKey, sortDirection)}
-                aria-label="Sort by"
-              >
-                {#each SORT_OPTIONS as option (option.key)}
-                  <option value={option.key}>{option.label}</option>
-                {/each}
-              </select>
-              <button
-                class="icon"
-                onclick={() =>
-                  setSort(sortKey, sortDirection === "asc" ? "desc" : "asc")}
-                aria-label={sortDirection === "asc"
-                  ? "Ascending"
-                  : "Descending"}
-                title={sortDirection === "asc"
-                  ? "Ascending (click to reverse)"
-                  : "Descending (click to reverse)"}
-              >
-                {#if sortDirection === "asc"}<ArrowUp />{:else}<ArrowDown
-                  />{/if}
-              </button>
-            </div>
-          </div>
-          <SelectAll
-            class="mb-2"
-            checked={allSelected}
-            onchange={toggleSelectAll}
-            count={visibleWords.length}
-            noun={visibleWords.length === words.length ? "word" : "result"}
-            summary={`${activeWordCount} active · ${selectedWords.length} selected`}
-          >
-            <!-- keeps the space reserved so the layout does not shift when a selection appears; the icons are 20px in 40px buttons -->
-            <div
-              class="ml-auto flex gap-2 *:size-10 *:items-center *:justify-center [&_svg]:size-5"
-              class:invisible={selectedWords.length === 0}
-            >
-              <button
-                class="icon"
-                onclick={() => (app.sheetWords = selectedWords)}
-                aria-label="Print writing sheet"
-                title="Print writing sheet"
-              >
-                <Printer />
-              </button>
-              <button
-                class="icon"
-                onclick={openTagDialog}
-                aria-label="Tag selected"
-                title="Tag selected"
-              >
-                <Tag />
-              </button>
-              <button
-                class="icon"
-                onclick={() => setSelectedDisabled(false)}
-                aria-label="Activate selected"
-                title="Activate selected"
-              >
-                <Eye />
-              </button>
-              <button
-                class="icon"
-                onclick={() => setSelectedDisabled(true)}
-                aria-label="Deactivate selected"
-                title="Deactivate selected"
-              >
-                <EyeOff />
-              </button>
-              <button
-                class="danger icon"
-                onclick={removeSelected}
-                aria-label="Delete selected"
-                title="Delete selected"
-              >
-                <Trash />
-              </button>
-            </div>
-          </SelectAll>
-          {#if visibleWords.length === 0}
-            <p class="my-4 text-muted">
-              No words match your search or tag filter.
-            </p>
-          {:else}
-            <!-- reaches up behind the 40px select-all row and the 8px below it -->
-            <ul
-              class="scroll-list-12 [--scroll-list-rows:12] [--scroll-list-under:48px]"
-              bind:this={listEl}
-            >
-              {#each visibleWords as word (word.id)}
-                <li>
-                  <div
-                    class="select-row relative"
-                    role="checkbox"
-                    tabindex="0"
-                    aria-checked={selected.has(word.id)}
-                    aria-label={`Select ${word.japanese}`}
-                    {...selectRow({
-                      toggle: () => toggleSelected(word.id),
-                      enter: () => edit(word),
-                      controls: "button",
-                    })}
-                    ondblclick={(event) => onCardDoubleClick(event, word)}
-                    onpointerenter={() => app.markSeen(word.id)}
-                  >
-                    {#if app.newWordIds.has(word.id)}
-                      <!-- on the row's corner; no further left than the list's 4px padding, which would clip it -->
-                      <span
-                        class="absolute -top-2 -left-1 rounded-pill bg-action px-2 text-sm leading-4 font-medium text-on-action"
-                        >new!</span
-                      >
-                    {/if}
-                    <span class={["text-lg", word.disabled && DIM]} lang="ja"
-                      >{word.japanese}</span
-                    >
-                    <span
-                      class={["text-sm text-muted", word.disabled && DIM]}
-                      lang="ja">{wordReading(word)}</span
-                    >
-                    <span class={["min-w-0 truncate", word.disabled && DIM]}
-                      >{word.meaning}</span
-                    >
-                    {#if word.tags.length > 0}
-                      <span class="flex gap-1"
-                        >{#each word.tags as tag (tag)}<TagChip
-                            {tag}
-                            onclick={() => filterByTag(tag)}
-                          />{/each}</span
-                      >
-                    {/if}
-                    <span class="min-w-4 flex-1" aria-hidden="true"></span>
-                    <Switch
-                      checked={!word.disabled}
-                      onchange={() => toggle(word)}
-                      label="Active"
-                      title={word.disabled ? "Activate" : "Deactivate"}
-                    />
-                  </div>
-                </li>
-              {/each}
-            </ul>
-          {/if}
-        {/if}
-      </div>
+  <div
+    class="mt-6 grid items-start gap-x-8 gap-y-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]"
+  >
+    <div>
+      <form class="grid gap-2" onsubmit={save}>
+        <input
+          type="text"
+          class="field"
+          lang="ja"
+          placeholder="Word (e.g. 食べる)"
+          bind:value={japanese}
+          bind:this={japaneseEl}
+          aria-invalid={!!errors.japanese}
+          oninput={() => {
+            errors.japanese = "";
+            merged = "";
+          }}
+        />
+        {@render fieldError(errors.japanese)}
+        <input
+          type="text"
+          class="field"
+          lang="ja"
+          placeholder="Reading in kana (e.g. たべる)"
+          bind:value={hiragana}
+          aria-invalid={!!errors.hiragana}
+          oninput={() => (errors.hiragana = "")}
+        />
+        {@render fieldError(errors.hiragana)}
+        <input
+          type="text"
+          class="field"
+          placeholder="Meaning (e.g. to eat)"
+          bind:value={meaning}
+          aria-invalid={!!errors.meaning}
+          oninput={() => (errors.meaning = "")}
+        />
+        {@render fieldError(errors.meaning)}
+        <TagInput bind:tags={newTags} suggestions={tags} />
+        <button class="action w-full" type="submit"><Plus />Add</button>
+        {#if merged}<p role="status">{merged}</p>{/if}
+      </form>
+      <button
+        type="button"
+        class="field mt-2 w-full"
+        onclick={() => romajiDialog?.open()}><ListPlus />Add from romaji</button
+      >
     </div>
-  {/if}
-
-  {#if section === "kana"}
-    <KanaSelector
-      selected={app.kanaSelection}
-      onchange={(keys) => app.setKanaSelection(keys)}
-    />
-  {/if}
+    <div>
+      {#if words.length === 0}
+        <p class="my-4 text-muted">No words yet.</p>
+      {:else}
+        <div class="mb-2 flex flex-wrap items-center gap-2">
+          <TagSearch
+            id="word-search"
+            placeholder="Search by word, reading, meaning or #tag"
+            label="Search words"
+            bind:query
+            bind:tags={() => filterTags, (next) => (activeTags = next)}
+            suggestions={tags}
+            onchange={onSearch}
+          />
+          <div class="flex items-center gap-2">
+            <button
+              class="field"
+              onclick={() => tagsDialog?.open()}
+              disabled={tags.length === 0}><Tags />Tags</button
+            >
+            <select
+              class="field chevron"
+              value={sortKey}
+              onchange={(e) =>
+                setSort(e.currentTarget.value as SortKey, sortDirection)}
+              aria-label="Sort by"
+            >
+              {#each SORT_OPTIONS as option (option.key)}
+                <option value={option.key}>{option.label}</option>
+              {/each}
+            </select>
+            <button
+              class="icon"
+              onclick={() =>
+                setSort(sortKey, sortDirection === "asc" ? "desc" : "asc")}
+              aria-label={sortDirection === "asc" ? "Ascending" : "Descending"}
+              title={sortDirection === "asc"
+                ? "Ascending (click to reverse)"
+                : "Descending (click to reverse)"}
+            >
+              {#if sortDirection === "asc"}<ArrowUp />{:else}<ArrowDown />{/if}
+            </button>
+          </div>
+        </div>
+        <SelectAll
+          class="mb-2"
+          checked={allSelected}
+          onchange={toggleSelectAll}
+          count={visibleWords.length}
+          noun={visibleWords.length === words.length ? "word" : "result"}
+          summary={`${activeWordCount} active · ${selectedWords.length} selected`}
+        >
+          <!-- keeps the space reserved so the layout does not shift when a selection appears; the icons are 20px in 40px buttons -->
+          <div
+            class="ml-auto flex gap-2 *:size-10 *:items-center *:justify-center [&_svg]:size-5"
+            class:invisible={selectedWords.length === 0}
+          >
+            <button
+              class="icon"
+              onclick={() => (app.sheetWords = selectedWords)}
+              aria-label="Print writing sheet"
+              title="Print writing sheet"
+            >
+              <Printer />
+            </button>
+            <button
+              class="icon"
+              onclick={openTagDialog}
+              aria-label="Tag selected"
+              title="Tag selected"
+            >
+              <Tag />
+            </button>
+            <button
+              class="icon"
+              onclick={() => setSelectedDisabled(false)}
+              aria-label="Activate selected"
+              title="Activate selected"
+            >
+              <Eye />
+            </button>
+            <button
+              class="icon"
+              onclick={() => setSelectedDisabled(true)}
+              aria-label="Deactivate selected"
+              title="Deactivate selected"
+            >
+              <EyeOff />
+            </button>
+            <button
+              class="danger icon"
+              onclick={removeSelected}
+              aria-label="Delete selected"
+              title="Delete selected"
+            >
+              <Trash />
+            </button>
+          </div>
+        </SelectAll>
+        {#if visibleWords.length === 0}
+          <p class="my-4 text-muted">
+            No words match your search or tag filter.
+          </p>
+        {:else}
+          <!-- reaches up behind the 40px select-all row and the 8px below it -->
+          <ul
+            class="scroll-list-12 [--scroll-list-rows:12] [--scroll-list-under:48px]"
+            bind:this={listEl}
+          >
+            {#each visibleWords as word (word.id)}
+              <li>
+                <div
+                  class="select-row relative"
+                  role="checkbox"
+                  tabindex="0"
+                  aria-checked={selected.has(word.id)}
+                  aria-label={`Select ${word.japanese}`}
+                  {...selectRow({
+                    toggle: () => toggleSelected(word.id),
+                    enter: () => edit(word),
+                    controls: "button",
+                  })}
+                  ondblclick={(event) => onCardDoubleClick(event, word)}
+                  onpointerenter={() => app.markSeen(word.id)}
+                >
+                  {#if app.newWordIds.has(word.id)}
+                    <!-- on the row's corner; no further left than the list's 4px padding, which would clip it -->
+                    <span
+                      class="absolute -top-2 -left-1 rounded-pill bg-action px-2 text-sm leading-4 font-medium text-on-action"
+                      >new!</span
+                    >
+                  {/if}
+                  <span class={["text-lg", word.disabled && DIM]} lang="ja"
+                    >{word.japanese}</span
+                  >
+                  <span
+                    class={["text-sm text-muted", word.disabled && DIM]}
+                    lang="ja">{wordReading(word)}</span
+                  >
+                  <span class={["min-w-0 truncate", word.disabled && DIM]}
+                    >{word.meaning}</span
+                  >
+                  {#if word.tags.length > 0}
+                    <span class="flex gap-1"
+                      >{#each word.tags as tag (tag)}<TagChip
+                          {tag}
+                          onclick={() => filterByTag(tag)}
+                        />{/each}</span
+                    >
+                  {/if}
+                  <span class="min-w-4 flex-1" aria-hidden="true"></span>
+                  <Switch
+                    checked={!word.disabled}
+                    onchange={() => toggle(word)}
+                    label="Active"
+                    title={word.disabled ? "Activate" : "Deactivate"}
+                  />
+                </div>
+              </li>
+            {/each}
+          </ul>
+        {/if}
+      {/if}
+    </div>
+  </div>
 </div>

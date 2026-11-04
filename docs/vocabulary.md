@@ -1,6 +1,6 @@
 # Vocabulary
 
-The rules for words and tags are in `src/lib/data/words.ts`. The add form and the list are in the Vocabulary tab, and import and export in Settings.
+The rules for words are in `src/lib/data/words.ts` and those for tags in `src/lib/data/tags.ts`. The add form and the list are in the Vocabulary tab, and import and export in Settings.
 
 ## Words
 

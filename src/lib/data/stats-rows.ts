@@ -1,14 +1,14 @@
-import { SCRIPT_LABELS, parseKanaKey, symbolOf } from "../core/kana";
-import { toDisplayRomaji } from "../core/romaji";
-import type { Stats, Tally, Word } from "../core/types";
+import { SCRIPT_LABELS, parseKanaKey, symbolOf } from "#lib/core/kana.ts";
+import { toDisplayRomaji } from "#lib/core/romaji.ts";
+import type { Stats, Tally, Word } from "#lib/core/types.ts";
 import {
-  hasEveryTag,
   hasSearchTags,
   parseSearch,
   wordReading,
   wordSearchFields,
   type SortDirection,
 } from "./words";
+import { hasEveryTag } from "./tags";
 import { sortTallies, type StatsSort } from "./stats";
 
 export interface StatsRow {
@@ -85,10 +85,5 @@ export function filterRows(
       r.search.includes(search.text) &&
       hasSearchTags(r.tags, search.tags),
   );
-  const byKey = new Map(matches.map((r) => [r.key, r]));
-  return sortTallies(
-    matches.map((r) => [r.key, r.tally]),
-    sort,
-    direction,
-  ).map(([key]) => byKey.get(key)!);
+  return sortTallies(matches, sort, direction);
 }

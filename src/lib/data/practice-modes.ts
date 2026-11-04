@@ -1,13 +1,18 @@
-import { furigana, type FuriganaPart } from "../core/furigana";
-import { buildKana, kanaKey, type Kana, type KanaScript } from "../core/kana";
-import { checkMeaning } from "../core/meaning";
+import { furigana, type FuriganaPart } from "#lib/core/furigana.ts";
+import {
+  buildKana,
+  kanaKey,
+  type Kana,
+  type KanaScript,
+} from "#lib/core/kana.ts";
+import { checkMeaning } from "#lib/core/meaning.ts";
 import {
   checkAnswer,
   toDisplayRomaji,
   toDisplayRomajiRuns,
-} from "../core/romaji";
-import type { Stats, Verdict, Word } from "../core/types";
-import type { PracticeMode } from "./practice-session";
+} from "#lib/core/romaji.ts";
+import type { Stats, Verdict, Word } from "#lib/core/types.ts";
+import type { Outcome, PracticeMode, TypedAnswer } from "./practice-session";
 import { drawWeight } from "./stats";
 
 /** What is typed for a word: its reading, its meaning or both. */
@@ -19,36 +24,27 @@ export const WORDS_FOCUSES: { id: WordsFocus; label: string }[] = [
   { id: "both", label: "Both" },
 ];
 
-/** The two typed answers of the "both" focus as the single string a practice session takes (an input never holds a newline). */
-export function joinAnswers(reading: string, meaning: string): string {
-  return `${reading}\n${meaning}`;
-}
-
-/** The outcome of each part of an answer; a part that is not practiced is null. */
-export interface PartsResult {
-  reading: Verdict | null;
-  meaning: boolean | null;
-}
-
-/** Checks the parts of `answer` that the focus asks for (with "both", `answer` comes from `joinAnswers`). */
-export function checkParts(
-  answer: string,
+function checkWord(
+  answer: TypedAnswer,
   word: Word,
   focus: WordsFocus,
-): PartsResult {
-  const [reading = "", meaning = ""] =
-    focus === "both" ? answer.split("\n") : [answer, answer];
-  return {
-    reading: focus === "meaning" ? null : checkAnswer(reading, word.hiragana),
-    meaning: focus === "reading" ? null : checkMeaning(meaning, word.meaning),
-  };
-}
-
-/** The verdict of an answer: with "both", correct only when the reading and the meaning are, "almost" when the reading is. */
-function checkWord(answer: string, word: Word, focus: WordsFocus): Verdict {
-  const { reading, meaning } = checkParts(answer, word, focus);
-  if (meaning === false) return "incorrect";
-  return reading ?? "correct";
+): Outcome | null {
+  const asked = [
+    focus !== "meaning" && answer.reading,
+    focus !== "reading" && answer.meaning,
+  ];
+  if (!asked.some((text) => text && text.trim())) return null;
+  const reading =
+    focus === "meaning" ? null : checkAnswer(answer.reading, word.hiragana);
+  const meaning =
+    focus === "reading"
+      ? null
+      : checkMeaning(answer.meaning, word.meaning)
+        ? "correct"
+        : "incorrect";
+  // with "both", correct only when the reading and the meaning are, "almost" when the reading is
+  const verdict = meaning === "incorrect" ? meaning : (reading ?? "correct");
+  return { verdict, reading, meaning };
 }
 
 /** Where the answers of a practice go. */
@@ -151,8 +147,14 @@ export function kanaMode(
     pool: buildKana(selected),
     keyOf: (k) => k.symbol,
     weightOf: (k) => drawWeight(stats.kana[kanaKey(k.script, k.hiragana)]),
-    check: (answer, k) =>
-      checkAnswer(answer, k.hiragana) === "correct" ? "correct" : "incorrect",
+    check: ({ reading }, k) => {
+      if (!reading.trim()) return null;
+      const verdict =
+        checkAnswer(reading, k.hiragana) === "correct"
+          ? "correct"
+          : "incorrect";
+      return { verdict, reading: verdict, meaning: null };
+    },
     record: (k, verdict) =>
       recorder.kana(k.script, k.hiragana, verdict === "correct"),
   };

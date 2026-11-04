@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { ClassValue } from "svelte/elements";
   import type { Snippet } from "svelte";
-  import { plural } from "../core/plural";
+  import { plural } from "#lib/core/plural.ts";
 
   let {
     checked,

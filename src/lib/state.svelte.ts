@@ -16,21 +16,20 @@ import {
   totalTally,
   type StatsSort,
 } from "./data/stats";
-import { assignTagColors, tagKey } from "./data/tag-colors";
+import { assignTagColors } from "./data/tag-colors";
+import { tagKey } from "./data/tags";
 import {
   readThemeCache,
   writeThemeCache,
   type ThemePreference,
 } from "./data/theme";
 import {
-  allTags,
-  findTag,
   mergeWords,
-  renameTag,
   type MergeResult,
   type SortDirection,
   type SortKey,
 } from "./data/words";
+import { allTags, findTag, renameTag } from "./data/tags";
 
 function newestFirst(words: Word[]): Word[] {
   return [...words].sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));

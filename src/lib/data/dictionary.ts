@@ -1,6 +1,6 @@
 import { asset } from "$app/paths";
-import { checkAnswer, soundKeys, typedSoundKeys } from "../core/romaji";
-import type { Verdict } from "../core/types";
+import { checkAnswer, soundKeys, typedSoundKeys } from "#lib/core/romaji.ts";
+import type { Verdict } from "#lib/core/types.ts";
 
 /** One reading of a JMdict word, as stored in `static/dictionary.json`. */
 export type DictionaryRow = [

@@ -1,6 +1,6 @@
 import type { SortDirection } from "./words";
-import { kanaKey, type KanaScript } from "../core/kana";
-import type { Stats, Tally, Verdict, Word } from "../core/types";
+import { kanaKey, type KanaScript } from "#lib/core/kana.ts";
+import type { Stats, Tally, Verdict, Word } from "#lib/core/types.ts";
 
 export function emptyStats(): Stats {
   return { words: {}, kana: {} };
@@ -75,26 +75,26 @@ export const STATS_SORT_OPTIONS: { key: StatsSort; label: string }[] = [
 ];
 
 /**
- * Sorts [key, tally] entries by the chosen value (`desc` = highest first). Ties fall back to more
- * answers, then key order, whatever the direction.
+ * Sorts by the chosen value (`desc` = highest first). Ties fall back to more answers, then key order,
+ * whatever the direction.
  */
-export function sortTallies(
-  entries: [string, Tally][],
+export function sortTallies<T extends { key: string; tally: Tally }>(
+  items: T[],
   sort: StatsSort,
-  direction: SortDirection = "desc",
-): [string, Tally][] {
-  const score = ([, t]: [string, Tally]) =>
+  direction: SortDirection,
+): T[] {
+  const score = ({ tally }: T) =>
     sort === "misses"
-      ? t.misses
+      ? tally.misses
       : sort === "hits"
-        ? t.hits
-        : (accuracy(t) ?? 1);
+        ? tally.hits
+        : (accuracy(tally) ?? 1);
   const sign = direction === "asc" ? 1 : -1;
-  return [...entries].sort(
+  return [...items].sort(
     (a, b) =>
       sign * (score(a) - score(b)) ||
-      answerCount(b[1]) - answerCount(a[1]) ||
-      a[0].localeCompare(b[0], "ja"),
+      answerCount(b.tally) - answerCount(a.tally) ||
+      a.key.localeCompare(b.key, "ja"),
   );
 }
 

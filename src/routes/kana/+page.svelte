@@ -1,5 +1,11 @@
 <script lang="ts">
-  import Manage from "#lib/components/manage/Manage.svelte";
+  import KanaSelector from "#lib/components/kana/KanaSelector.svelte";
+  import { getApp } from "#lib/state.svelte.ts";
+
+  const app = getApp();
 </script>
 
-<Manage section="kana" />
+<KanaSelector
+  selected={app.kanaSelection}
+  onchange={(keys) => app.setKanaSelection(keys)}
+/>

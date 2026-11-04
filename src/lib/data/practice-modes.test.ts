@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  checkParts,
-  joinAnswers,
   kanaMode as buildKanaMode,
   mixedMode as buildMixedMode,
   rightAnswer,
@@ -10,8 +8,10 @@ import {
   type WordsFocus,
 } from "./practice-modes";
 import { emptyStats, recordAnswer, recordKana } from "./stats";
-import { kanaKey } from "../core/kana";
-import type { Stats, Word } from "../core/types";
+import { kanaKey } from "#lib/core/kana.ts";
+import type { Stats, Word } from "#lib/core/types.ts";
+
+const typed = (reading: string, meaning = "") => ({ reading, meaning });
 
 const recorderOf = (stats: Stats): Recorder => ({
   word: (word, verdict) => recordAnswer(stats, word, verdict),
@@ -57,8 +57,8 @@ describe("wordsMode", () => {
   it('reports "almost" when only the vowel length differs', () => {
     const mode = wordsMode([word("a", { hiragana: "おばさん" })], emptyStats());
     const [w] = mode.pool;
-    expect(mode.check("obaasan", w)).toBe("almost");
-    expect(mode.check("obasan", w)).toBe("correct");
+    expect(mode.check(typed("obaasan"), w)?.verdict).toBe("almost");
+    expect(mode.check(typed("obasan"), w)?.verdict).toBe("correct");
   });
 
   it("records the verdict per word id", () => {
@@ -75,37 +75,57 @@ describe("wordsMode focus", () => {
 
   it("checks only the meaning when that is the focus", () => {
     const mode = wordsMode([dog], stats, "meaning");
-    expect(mode.check("Hound", dog)).toBe("correct");
-    expect(mode.check("inu", dog)).toBe("incorrect");
+    expect(mode.check(typed("", "Hound"), dog)?.verdict).toBe("correct");
+    expect(mode.check(typed("", "inu"), dog)?.verdict).toBe("incorrect");
   });
 
   it("needs both answers to be right with the both focus", () => {
     const mode = wordsMode([dog], stats, "both");
-    expect(mode.check(joinAnswers("inu", "dog"), dog)).toBe("correct");
-    expect(mode.check(joinAnswers("inu", "cat"), dog)).toBe("incorrect");
-    expect(mode.check(joinAnswers("neko", "dog"), dog)).toBe("incorrect");
+    expect(mode.check(typed("inu", "dog"), dog)?.verdict).toBe("correct");
+    expect(mode.check(typed("inu", "cat"), dog)?.verdict).toBe("incorrect");
+    expect(mode.check(typed("neko", "dog"), dog)?.verdict).toBe("incorrect");
   });
 
   it('is "almost" with both only when the reading is almost and the meaning is right', () => {
     const aunt = word("aunt", { hiragana: "おばさん", meaning: "aunt" });
     const mode = wordsMode([aunt], stats, "both");
-    expect(mode.check(joinAnswers("obaasan", "aunt"), aunt)).toBe("almost");
-    expect(mode.check(joinAnswers("obaasan", "uncle"), aunt)).toBe("incorrect");
+    expect(mode.check(typed("obaasan", "aunt"), aunt)?.verdict).toBe("almost");
+    expect(mode.check(typed("obaasan", "uncle"), aunt)?.verdict).toBe(
+      "incorrect",
+    );
   });
 
   it("reports the outcome of each part for the result", () => {
-    expect(checkParts(joinAnswers("inu", "cat"), dog, "both")).toEqual({
+    const both = wordsMode([dog], stats, "both");
+    expect(both.check(typed("inu", "cat"), dog)).toEqual({
+      verdict: "incorrect",
       reading: "correct",
-      meaning: false,
+      meaning: "incorrect",
     });
-    expect(checkParts("hound", dog, "meaning")).toEqual({
+    const meaning = wordsMode([dog], stats, "meaning");
+    expect(meaning.check(typed("", "hound"), dog)).toEqual({
+      verdict: "correct",
       reading: null,
-      meaning: true,
+      meaning: "correct",
     });
-    expect(checkParts("inu", dog, "reading")).toEqual({
+    const reading = wordsMode([dog], stats, "reading");
+    expect(reading.check(typed("inu"), dog)).toEqual({
+      verdict: "correct",
       reading: "correct",
       meaning: null,
     });
+  });
+
+  it("checks nothing when what the focus asks for is blank", () => {
+    const blank = typed("  ", " ");
+    for (const focus of ["reading", "meaning", "both"] as const)
+      expect(wordsMode([dog], stats, focus).check(blank, dog)).toBeNull();
+    expect(
+      wordsMode([dog], stats, "meaning").check(typed("inu"), dog),
+    ).toBeNull();
+    expect(
+      wordsMode([dog], stats, "both").check(typed("", "dog"), dog),
+    ).not.toBeNull();
   });
 });
 
@@ -122,15 +142,15 @@ describe("kanaMode", () => {
   it('counts "almost" as incorrect: a single sound has no vowel-length ambiguity', () => {
     const mode = kanaMode(selected, emptyStats());
     const [o] = mode.pool;
-    expect(mode.check("o", o)).toBe("correct");
-    expect(mode.check("oo", o)).toBe("incorrect");
+    expect(mode.check(typed("o"), o)?.verdict).toBe("correct");
+    expect(mode.check(typed("oo"), o)?.verdict).toBe("incorrect");
   });
 
   it("accepts either spelling of ぢ and づ", () => {
     const mode = kanaMode([kanaKey("hiragana", "ぢ")], emptyStats());
     const [di] = mode.pool;
-    expect(mode.check("ji", di)).toBe("correct");
-    expect(mode.check("di", di)).toBe("correct");
+    expect(mode.check(typed("ji"), di)?.verdict).toBe("correct");
+    expect(mode.check(typed("di"), di)?.verdict).toBe("correct");
   });
 
   it("accepts o and wo for を, and only ha for a lone は", () => {
@@ -140,10 +160,10 @@ describe("kanaMode", () => {
     );
     const wo = mode.pool.find((k) => k.symbol === "を")!;
     const ha = mode.pool.find((k) => k.symbol === "は")!;
-    expect(mode.check("o", wo)).toBe("correct");
-    expect(mode.check("wo", wo)).toBe("correct");
-    expect(mode.check("ha", ha)).toBe("correct");
-    expect(mode.check("wa", ha)).toBe("incorrect");
+    expect(mode.check(typed("o"), wo)?.verdict).toBe("correct");
+    expect(mode.check(typed("wo"), wo)?.verdict).toBe("correct");
+    expect(mode.check(typed("ha"), ha)?.verdict).toBe("correct");
+    expect(mode.check(typed("wa"), ha)?.verdict).toBe("incorrect");
   });
 
   it("records per script, so hiragana and katakana stay apart", () => {
@@ -171,9 +191,9 @@ describe("mixedMode", () => {
       emptyStats(),
     );
     const [w, k] = mode.pool;
-    expect(mode.check("obaasan", w)).toBe("almost");
-    expect(mode.check("o", k)).toBe("correct");
-    expect(mode.check("oo", k)).toBe("incorrect");
+    expect(mode.check(typed("obaasan"), w)?.verdict).toBe("almost");
+    expect(mode.check(typed("o"), k)?.verdict).toBe("correct");
+    expect(mode.check(typed("oo"), k)?.verdict).toBe("incorrect");
   });
 
   it("records words and kana in their own stats", () => {

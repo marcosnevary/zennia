@@ -56,7 +56,7 @@ The description and Open Graph tags must stay static in `src/app.html`. The app 
 ## Decisions
 
 - **SvelteKit with `adapter-static`, SSR off.** Each tab gets a URL and browser history. Server rendering would add nothing with no backend, and the Supabase session lives in the browser.
-- **`#lib/*` instead of `$lib`, and no `svelte.config.js`.** SvelteKit 3 deprecates the alias and no longer reads that file, so its options are in the `sveltekit()` plugin in `vite.config.ts`.
+- **`#lib/*` instead of `$lib`, and no `svelte.config.js`.** SvelteKit 3 deprecates the alias and no longer reads that file, so its options are in the `sveltekit()` plugin in `vite.config.ts`. Imports between folders use `#lib/*` with the file extension, as Node resolves it literally, and files in the same folder import each other by relative path.
 - **Theme colors are CSS variables that `data-theme` redefines.** Tailwind utilities such as `bg-surface` switch themes by themselves. `dark:` variants are only for what isn't a theme color, such as the fill of a tag chip, which comes from the tag.
 - **`PrintSheet.svelte` keeps a scoped `<style>`.** It is print-only, sized in millimeters, and relies on `@page`.
 - **Lucide icons are imported one module at a time.** Importing from the package root would make the dev server and the build load the whole set.

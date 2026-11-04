@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { Word } from "../../core/types";
-import { DEFAULT_SETTINGS } from "../settings";
+import type { Word } from "#lib/core/types.ts";
+import { DEFAULT_SETTINGS } from "#lib/data/settings.ts";
 import {
   settingsFromRow,
   settingsToRow,

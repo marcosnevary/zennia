@@ -1,11 +1,11 @@
-import { kanaKey, type KanaScript } from "../../core/kana";
-import type { Stats, Tally, Word } from "../../core/types";
-import { WORDS_FOCUSES } from "../practice-modes";
-import { DEFAULT_SETTINGS, type Settings } from "../settings";
-import { STATS_SORT_OPTIONS } from "../stats";
-import { isTagColor, type TagColor } from "../tag-colors";
-import { THEMES } from "../theme";
-import { SORT_OPTIONS } from "../words";
+import { kanaKey, type KanaScript } from "#lib/core/kana.ts";
+import type { Stats, Tally, Word } from "#lib/core/types.ts";
+import { WORDS_FOCUSES } from "#lib/data/practice-modes.ts";
+import { DEFAULT_SETTINGS, type Settings } from "#lib/data/settings.ts";
+import { STATS_SORT_OPTIONS } from "#lib/data/stats.ts";
+import { isTagColor, type TagColor } from "#lib/data/tag-colors.ts";
+import { THEMES } from "#lib/data/theme.ts";
+import { SORT_OPTIONS } from "#lib/data/words.ts";
 
 export interface WordRow {
   id: string;

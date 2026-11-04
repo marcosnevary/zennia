@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Manage from "#lib/components/manage/Manage.svelte";
+  import Vocabulary from "#lib/components/vocabulary/Vocabulary.svelte";
 </script>
 
-<Manage section="vocabulary" />
+<Vocabulary />

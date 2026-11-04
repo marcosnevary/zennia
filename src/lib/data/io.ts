@@ -1,4 +1,4 @@
-import type { Word, WordsFile } from "../core/types";
+import type { Word, WordsFile } from "#lib/core/types.ts";
 import { sanitizeWords, type SanitizeResult } from "./words";
 
 /** Name of the exported file, with the date of the export. */

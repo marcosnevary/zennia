@@ -5,7 +5,6 @@ import {
   TAG_TONES,
   tagChipStyle,
   tagColorOf,
-  tagKey,
   type TagColor,
 } from "./tag-colors";
 
@@ -29,12 +28,6 @@ function closestPair(colors: TagColor[]): number {
 }
 
 const names = (n: number) => Array.from({ length: n }, (_, i) => `tag${i}`);
-
-describe("tagKey", () => {
-  it("is the same for every spelling of a tag", () => {
-    expect(tagKey(" Food ")).toBe(tagKey("food"));
-  });
-});
 
 describe("assignTagColors", () => {
   it("keeps the saved colors and drops the ones of tags no longer in use", () => {

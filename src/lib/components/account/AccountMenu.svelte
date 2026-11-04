@@ -2,7 +2,7 @@
   import ChevronsUpDown from "@lucide/svelte/icons/chevrons-up-down";
   import LogOut from "@lucide/svelte/icons/log-out";
   import UserPen from "@lucide/svelte/icons/user-pen";
-  import { getApp } from "../../state.svelte";
+  import { getApp } from "#lib/state.svelte.ts";
   import Avatar from "./Avatar.svelte";
   import ProfileDialog from "./ProfileDialog.svelte";
 

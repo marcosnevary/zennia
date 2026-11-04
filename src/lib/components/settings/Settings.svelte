@@ -7,26 +7,26 @@
   import { tick, type Component } from "svelte";
   import type { Attachment } from "svelte/attachments";
   import { prefersReducedMotion } from "svelte/motion";
-  import { messageOf } from "../../core/errors";
-  import { importAnkiDeck } from "../../data/anki";
+  import { messageOf } from "#lib/core/errors.ts";
+  import { importAnkiDeck } from "#lib/data/anki.ts";
   import {
     downloadJSON,
     exportFilename,
     exportJSON,
     importJSON,
-  } from "../../data/io";
-  import { answerCount, totalTally } from "../../data/stats";
+  } from "#lib/data/io.ts";
+  import { answerCount, totalTally } from "#lib/data/stats.ts";
   import {
     importBrief,
     importSummary,
     type SanitizeResult,
-  } from "../../data/words";
+  } from "#lib/data/words.ts";
   import Help from "./Help.svelte";
   import SettingRow from "./SettingRow.svelte";
-  import Switch from "../Switch.svelte";
-  import { WORDS_FOCUSES, type WordsFocus } from "../../data/practice-modes";
-  import { THEMES, type ThemePreference } from "../../data/theme";
-  import { getApp } from "../../state.svelte";
+  import Switch from "#lib/components/Switch.svelte";
+  import { WORDS_FOCUSES, type WordsFocus } from "#lib/data/practice-modes.ts";
+  import { THEMES, type ThemePreference } from "#lib/data/theme.ts";
+  import { getApp } from "#lib/state.svelte.ts";
 
   const app = getApp();
 
