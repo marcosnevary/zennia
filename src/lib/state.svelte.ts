@@ -5,7 +5,8 @@ import type { Stats, Verdict, Word } from "./core/types";
 import { clearLegacy, readLegacy } from "./data/db/legacy";
 import type { Account, ProfileChange } from "./data/db/client";
 import type { Repo, Stored } from "./data/db/repo";
-import type { Recorder, WordsFocus } from "./data/practice-modes";
+import type { PracticeItem, Recorder, WordsFocus } from "./data/practice-modes";
+import { startSession, type Session } from "./data/practice-session";
 import { DEFAULT_SETTINGS, type Settings } from "./data/settings";
 import {
   attempts,
@@ -48,6 +49,8 @@ function newestFirst(words: Word[]): Word[] {
 export class App {
   words = $state<Word[]>([]);
   stats = $state<Stats>(emptyStats());
+  // lives here rather than in Practice, which is destroyed when the user switches tabs
+  practice = $state<Session<PracticeItem>>(startSession());
   settings = $state<Settings>({ ...DEFAULT_SETTINGS, theme: readThemeCache() });
   status = $state<"loading" | "ready" | "failed">("loading");
   error = $state("");
@@ -82,6 +85,7 @@ export class App {
     this.status = "loading";
     this.error = "";
     this.newWordIds.clear();
+    this.practice = startSession();
     try {
       let stored = await this.#repo.load();
       const isNew =

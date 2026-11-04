@@ -15,7 +15,7 @@ Every row belongs to a Supabase user, anonymous or signed in ([integrations](int
 | `kana_stats` | `user_id`, `script`, `hiragana` | One tally per kana and script. `hiragana` holds the sound even for katakana, and the app joins the two as the key `script:hiragana` (`kanaKey`).                                                                                                              |
 | `settings`   | `user_id`                       | At most one row, created by the first change. With no row, or with a value the app doesn't know, it falls back to `DEFAULT_SETTINGS`. `kana_selection` is null until the user chooses, which means the basic hiragana. `tag_colors` maps `tagKey` to a color. |
 
-Tallies are lifetime counts. The score of a practice session lives only in memory.
+Tallies are lifetime counts. The score of a practice session lives only in memory, in `App`: it survives switching tabs and starts over when the app loads or the user signs out.
 
 `record_answer` counts an answer with `hits = hits + 1` in the database rather than writing a new total. Resetting the statistics deletes the user's rows in both stats tables.
 

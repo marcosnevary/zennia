@@ -185,6 +185,13 @@ describe("App", () => {
     expect(app.settings.tagColors).toEqual({ meals: { hue: 200, tone: 1 } });
   });
 
+  it("starts the practice score over when the app loads again", async () => {
+    const { app } = await ready();
+    app.practice = { ...app.practice, hits: 2, total: 3 };
+    await app.signOut();
+    expect(app.practice).toMatchObject({ hits: 0, total: 0 });
+  });
+
   it("drops the stats of a deleted word", async () => {
     const stats: Stats = { words: { a: { hits: 1, misses: 0 } }, kana: {} };
     const { app } = await ready({ words: [word("a", 1)], stats });

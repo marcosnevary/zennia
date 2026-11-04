@@ -8,11 +8,9 @@
     joinAnswers,
     mixedMode,
     rightAnswer,
-    type PracticeItem,
   } from "../../data/practice-modes";
   import {
     nextRound,
-    startSession,
     submit as submitAnswer,
   } from "../../data/practice-session";
   import { getApp } from "../../state.svelte";
@@ -27,14 +25,13 @@
     mixedMode(app.words, kanaSelection, app.stats, focus, app.recorder),
   );
 
-  let session = $state(startSession<PracticeItem>());
   let answer = $state("");
   let meaningAnswer = $state("");
   let inputEl = $state<HTMLInputElement>();
   let meaningEl = $state<HTMLInputElement>();
 
   // the focus only applies to words: a kana is always answered by its reading
-  const current = $derived(session.current);
+  const current = $derived(app.practice.current);
   const askReading = $derived(current?.kind === "kana" || focus !== "meaning");
   const askMeaning = $derived(current?.kind === "word" && focus !== "reading");
 
@@ -50,9 +47,10 @@
   /** The outcome of each field once checked, shown on the field itself. */
   const parts = $derived.by(
     (): { reading: Verdict | null; meaning: Verdict | null } => {
-      if (!current || !session.verdict) return { reading: null, meaning: null };
+      if (!current || !app.practice.verdict)
+        return { reading: null, meaning: null };
       if (current.kind === "kana")
-        return { reading: session.verdict, meaning: null };
+        return { reading: app.practice.verdict, meaning: null };
       const { reading, meaning } = checkParts(typed, current.word, focus);
       return {
         reading,
@@ -76,8 +74,8 @@
 
   function submit(event: Event) {
     event.preventDefault();
-    const advancing = session.verdict !== null;
-    session = submitAnswer(session, typed, mode);
+    const advancing = app.practice.verdict !== null;
+    app.practice = submitAnswer(app.practice, typed, mode);
     if (advancing) {
       answer = "";
       meaningAnswer = "";
@@ -93,11 +91,11 @@
   function onWindowKeydown(event: KeyboardEvent) {
     if (event.target !== document.body) return;
     if (
-      session.verdict !== null &&
+      app.practice.verdict !== null &&
       (event.key === " " || event.key === "Enter")
     ) {
       submit(event);
-    } else if (session.verdict === null && event.key === "Enter") {
+    } else if (app.practice.verdict === null && event.key === "Enter") {
       event.preventDefault();
       focusField();
     }
@@ -110,7 +108,7 @@
     if (
       focus === "both" &&
       current?.kind === "word" &&
-      session.verdict === null
+      app.practice.verdict === null
     ) {
       event.preventDefault();
       meaningEl?.focus();
@@ -120,9 +118,10 @@
   }
 
   function draw() {
-    session = nextRound(session, mode);
+    app.practice = nextRound(app.practice, mode);
   }
 
+  // an item left behind in another tab is not picked up again: coming back draws a new one, keeping the score
   draw();
 </script>
 
@@ -139,13 +138,13 @@
     prompt={current.kind === "word"
       ? current.word.japanese
       : current.kana.symbol}
-    verdict={session.verdict}
+    verdict={app.practice.verdict}
     rightAnswer={rightAnswer(current)}
     {note}
     readingVerdict={parts.reading}
     meaningVerdict={parts.meaning}
-    hits={session.hits}
-    total={session.total}
+    hits={app.practice.hits}
+    total={app.practice.total}
     {askReading}
     {askMeaning}
     bind:answer
