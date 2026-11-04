@@ -1,54 +1,68 @@
 <script lang="ts">
-  import Check from '@lucide/svelte/icons/check'
-  import Download from '@lucide/svelte/icons/download'
-  import RotateCcw from '@lucide/svelte/icons/rotate-ccw'
-  import Upload from '@lucide/svelte/icons/upload'
-  import X from '@lucide/svelte/icons/x'
-  import { tick, type Component } from 'svelte'
-  import type { Attachment } from 'svelte/attachments'
-  import { prefersReducedMotion } from 'svelte/motion'
-  import { importAnkiDeck } from '../../data/anki'
-  import { downloadText, exportFilename, exportJSON, importJSON } from '../../data/io'
-  import { emptyStats, attempts, totalTally } from '../../data/stats'
-  import { importBrief, importSummary, type SanitizeResult } from '../../data/words'
-  import Help from './Help.svelte'
-  import SettingRow from './SettingRow.svelte'
-  import Switch from '../Switch.svelte'
-  import type { WordsFocus } from '../../data/practice-modes'
-  import { THEMES, type ThemePreference } from '../../data/theme'
-  import { getApp } from '../../state.svelte'
+  import Check from "@lucide/svelte/icons/check";
+  import Download from "@lucide/svelte/icons/download";
+  import RotateCcw from "@lucide/svelte/icons/rotate-ccw";
+  import Upload from "@lucide/svelte/icons/upload";
+  import X from "@lucide/svelte/icons/x";
+  import { tick, type Component } from "svelte";
+  import type { Attachment } from "svelte/attachments";
+  import { prefersReducedMotion } from "svelte/motion";
+  import { importAnkiDeck } from "../../data/anki";
+  import {
+    downloadText,
+    exportFilename,
+    exportJSON,
+    importJSON,
+  } from "../../data/io";
+  import { emptyStats, attempts, totalTally } from "../../data/stats";
+  import {
+    importBrief,
+    importSummary,
+    type SanitizeResult,
+  } from "../../data/words";
+  import Help from "./Help.svelte";
+  import SettingRow from "./SettingRow.svelte";
+  import Switch from "../Switch.svelte";
+  import type { WordsFocus } from "../../data/practice-modes";
+  import { THEMES, type ThemePreference } from "../../data/theme";
+  import { getApp } from "../../state.svelte";
 
-  const app = getApp()
+  const app = getApp();
 
   const FOCUSES: { id: WordsFocus; label: string }[] = [
-    { id: 'reading', label: 'Reading' },
-    { id: 'meaning', label: 'Meaning' },
-    { id: 'both', label: 'Both' },
-  ]
+    { id: "reading", label: "Reading" },
+    { id: "meaning", label: "Meaning" },
+    { id: "both", label: "Both" },
+  ];
 
-  const FEEDBACK_MS = 4000
+  const FEEDBACK_MS = 4000;
 
-  let error = $state('')
+  let error = $state("");
 
   // the outcome of an action replaces the icon and label of the button that ran it for a moment, like "Copied!";
   // the button only fits a few words, so the full detail takes the place of the row's description
-  let feedback = $state<{ key: string; ok: boolean; text: string; detail?: string } | null>(null)
-  let feedbackTimer: ReturnType<typeof setTimeout> | undefined
-  $effect(() => () => clearTimeout(feedbackTimer))
+  let feedback = $state<{
+    key: string;
+    ok: boolean;
+    text: string;
+    detail?: string;
+  } | null>(null);
+  let feedbackTimer: ReturnType<typeof setTimeout> | undefined;
+  $effect(() => () => clearTimeout(feedbackTimer));
 
   function flash(key: string, ok: boolean, text: string, detail?: string) {
-    clearTimeout(feedbackTimer)
-    void show({ key, ok, text, detail })
-    feedbackTimer = setTimeout(() => void show(null), FEEDBACK_MS)
+    clearTimeout(feedbackTimer);
+    void show({ key, ok, text, detail });
+    feedbackTimer = setTimeout(() => void show(null), FEEDBACK_MS);
   }
 
-  const controls = new Map<string, Element>()
+  const controls = new Map<string, Element>();
 
   function control(key: string): Attachment {
     return (element) => {
-      controls.set(key, element)
-      return () => controls.delete(key)
-    }
+      controls.set(key, element);
+      return () => controls.delete(key);
+    };
   }
 
   // the old content fades out before the new one fades in, so they never share the button;
@@ -56,63 +70,75 @@
   // A new outcome on a button that already shows one only redraws its icon
   async function show(next: typeof feedback) {
     if (next && next.key === feedback?.key) {
-      feedback = next
-      return
+      feedback = next;
+      return;
     }
-    const keys = [feedback?.key, next?.key]
-    const contents = () => keys.flatMap((key) => [...(controls.get(key ?? '')?.children ?? [])])
-    const animate = !prefersReducedMotion.current
+    const keys = [feedback?.key, next?.key];
+    const contents = () =>
+      keys.flatMap((key) => [...(controls.get(key ?? "")?.children ?? [])]);
+    const animate = !prefersReducedMotion.current;
     const fadingOut = animate
-      ? contents().map((child) => child.animate([{ opacity: 0 }], { duration: 100, fill: 'forwards' }))
-      : []
-    await Promise.all(fadingOut.map((animation) => animation.finished))
-    feedback = next
-    await tick()
-    fadingOut.forEach((animation) => animation.cancel())
+      ? contents().map((child) =>
+          child.animate([{ opacity: 0 }], { duration: 100, fill: "forwards" }),
+        )
+      : [];
+    await Promise.all(fadingOut.map((animation) => animation.finished));
+    feedback = next;
+    await tick();
+    fadingOut.forEach((animation) => animation.cancel());
     if (animate)
       contents().forEach((child) =>
-        child.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150, easing: 'ease-out' }),
-      )
+        child.animate([{ opacity: 0 }, { opacity: 1 }], {
+          duration: 150,
+          easing: "ease-out",
+        }),
+      );
   }
 
   function describe(key: string, description: string): string {
-    return (feedback?.key === key && feedback.detail) || description
+    return (feedback?.key === key && feedback.detail) || description;
   }
 
   function exportWords() {
-    downloadText(exportFilename(), exportJSON(app.words))
-    error = ''
-    flash('export', true, `${app.words.length} exported`)
+    downloadText(exportFilename(), exportJSON(app.words));
+    error = "";
+    flash("export", true, `${app.words.length} exported`);
   }
 
-  async function runImport(event: Event, key: string, parse: (text: string) => SanitizeResult) {
-    const input = event.currentTarget as HTMLInputElement
-    const file = input.files?.[0]
-    input.value = ''
-    if (!file) return
-    error = ''
+  async function runImport(
+    event: Event,
+    key: string,
+    parse: (text: string) => SanitizeResult,
+  ) {
+    const input = event.currentTarget as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = "";
+    if (!file) return;
+    error = "";
     try {
-      const { words: incoming, skipped } = parse(await file.text())
-      const result = app.importWords(incoming)
-      flash(key, true, importBrief(result), importSummary(result, skipped))
+      const { words: incoming, skipped } = parse(await file.text());
+      const result = app.importWords(incoming);
+      flash(key, true, importBrief(result), importSummary(result, skipped));
     } catch (e) {
-      error = e instanceof Error ? e.message : 'Could not import the file.'
-      flash(key, false, 'Import failed')
+      error = e instanceof Error ? e.message : "Could not import the file.";
+      flash(key, false, "Import failed");
     }
   }
 
   function resetStats() {
-    if (!confirm('Reset all statistics? This cannot be undone.')) return
-    app.replaceStats(emptyStats())
-    error = ''
-    flash('reset', true, 'Stats reset')
+    if (!confirm("Reset all statistics? This cannot be undone.")) return;
+    app.replaceStats(emptyStats());
+    error = "";
+    flash("reset", true, "Stats reset");
   }
 </script>
 
 {#snippet action(key: string, Icon: Component, label: string)}
   {#if feedback?.key === key}
     {#key feedback}
-      {#if feedback.ok}<Check class="outcome" />{:else}<X class="outcome" />{/if}
+      {#if feedback.ok}<Check class="outcome" />{:else}<X
+          class="outcome"
+        />{/if}
     {/key}
     <span>{feedback.text}</span>
   {:else}
@@ -122,7 +148,10 @@
 
 <!-- with the rows' 12px padding, the first title starts 24px below the top of the content, like on the other screens -->
 <div class="mt-3 divide-y divide-line/40">
-  <SettingRow title="Theme" description="Light, dark, or the same as your system.">
+  <SettingRow
+    title="Theme"
+    description="Light, dark, or the same as your system."
+  >
     <select
       class="field chevron"
       value={app.settings.theme}
@@ -174,38 +203,63 @@
     title="Export words"
     description="Download all your words as a JSON file, as a backup or to move them elsewhere."
   >
-    <button onclick={exportWords} disabled={app.words.length === 0} {@attach control('export')}
-      >{@render action('export', Upload, 'Export JSON')}</button
+    <button
+      onclick={exportWords}
+      disabled={app.words.length === 0}
+      {@attach control("export")}
+      >{@render action("export", Upload, "Export JSON")}</button
     >
   </SettingRow>
-  <SettingRow title="Import words" description={describe('json', 'Add the words of a file made by Export JSON.')}>
-    <label class="file" {@attach control('json')}>
-      {@render action('json', Download, 'Import JSON')}
-      <input type="file" accept="application/json,.json" onchange={(e) => runImport(e, 'json', importJSON)} hidden />
+  <SettingRow
+    title="Import words"
+    description={describe(
+      "json",
+      "Add the words of a file made by Export JSON.",
+    )}
+  >
+    <label class="file" {@attach control("json")}>
+      {@render action("json", Download, "Import JSON")}
+      <input
+        type="file"
+        accept="application/json,.json"
+        onchange={(e) => runImport(e, "json", importJSON)}
+        hidden
+      />
     </label>
   </SettingRow>
   <SettingRow
     title="Import an Anki deck"
-    description={describe('anki', 'Add the words of Anki notes exported as plain text.')}
+    description={describe(
+      "anki",
+      "Add the words of Anki notes exported as plain text.",
+    )}
   >
     <label
       class="file text-center"
       title="Anki: Export → Notes in Plain Text. Columns: word, reading, meaning"
-      {@attach control('anki')}
+      {@attach control("anki")}
     >
-      {@render action('anki', Download, 'Import .txt')}
-      <input type="file" accept="text/plain,.txt,.tsv" onchange={(e) => runImport(e, 'anki', importAnkiDeck)} hidden />
+      {@render action("anki", Download, "Import .txt")}
+      <input
+        type="file"
+        accept="text/plain,.txt,.tsv"
+        onchange={(e) => runImport(e, "anki", importAnkiDeck)}
+        hidden
+      />
     </label>
   </SettingRow>
   <!-- the row outlives the reset until its confirmation on the button is over -->
-  {#if attempts(totalTally(app.stats)) || feedback?.key === 'reset'}
-    <SettingRow title="Reset statistics" description="Erase every practice result. This cannot be undone.">
-      <button class="danger" onclick={resetStats} {@attach control('reset')}
-        >{@render action('reset', RotateCcw, 'Reset stats')}</button
+  {#if attempts(totalTally(app.stats)) || feedback?.key === "reset"}
+    <SettingRow
+      title="Reset statistics"
+      description="Erase every practice result. This cannot be undone."
+    >
+      <button class="danger" onclick={resetStats} {@attach control("reset")}
+        >{@render action("reset", RotateCcw, "Reset stats")}</button
       >
     </SettingRow>
   {/if}
 </div>
 {#if error}<p class="my-4 text-bad" role="alert">{error}</p>{/if}
 <!-- a label change is not announced, so the outcome is also read from here -->
-<p class="sr-only" role="status">{feedback?.detail ?? feedback?.text ?? ''}</p>
+<p class="sr-only" role="status">{feedback?.detail ?? feedback?.text ?? ""}</p>

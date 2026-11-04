@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from "vitest";
 import {
   addTag,
   allTags,
@@ -26,455 +26,634 @@ import {
   validateTag,
   validateWord,
   wordReading,
-} from './words'
+} from "./words";
 
-describe('sanitizeWords and mergeWords', () => {
-  it('accepts a list or an object with words and ignores invalid items', () => {
-    const a = sanitizeWords([{ japanese: '犬', hiragana: 'いぬ', meaning: 'dog' }, { japanese: '' }, 5])
-    expect(a.words).toHaveLength(1)
-    expect(a.skipped).toBe(2)
-    expect(a.words[0].id).toBeTruthy()
-    const b = sanitizeWords({ version: 1, words: [{ id: 'x', japanese: '猫', hiragana: 'ねこ', meaning: 'cat' }] })
-    expect(b.words[0].id).toBe('x')
-  })
-  it('rejects invalid format', () => {
-    expect(() => sanitizeWords({ foo: 1 })).toThrow()
+describe("sanitizeWords and mergeWords", () => {
+  it("accepts a list or an object with words and ignores invalid items", () => {
+    const a = sanitizeWords([
+      { japanese: "犬", hiragana: "いぬ", meaning: "dog" },
+      { japanese: "" },
+      5,
+    ]);
+    expect(a.words).toHaveLength(1);
+    expect(a.skipped).toBe(2);
+    expect(a.words[0].id).toBeTruthy();
+    const b = sanitizeWords({
+      version: 1,
+      words: [{ id: "x", japanese: "猫", hiragana: "ねこ", meaning: "cat" }],
+    });
+    expect(b.words[0].id).toBe("x");
+  });
+  it("rejects invalid format", () => {
+    expect(() => sanitizeWords({ foo: 1 })).toThrow();
     const c = sanitizeWords([
-      { japanese: '犬', hiragana: 'いぬ', disabled: true },
-      { japanese: '猫', hiragana: 'ねこ', disabled: 'yes' },
-    ])
-    expect(c.words[0].disabled).toBe(true)
-    expect(c.words[1].disabled).toBe(false)
-  })
-  it('always stores disabled as a boolean, false when it was missing', () => {
+      { japanese: "犬", hiragana: "いぬ", disabled: true },
+      { japanese: "猫", hiragana: "ねこ", disabled: "yes" },
+    ]);
+    expect(c.words[0].disabled).toBe(true);
+    expect(c.words[1].disabled).toBe(false);
+  });
+  it("always stores disabled as a boolean, false when it was missing", () => {
     const { words } = sanitizeWords([
-      { japanese: '犬', hiragana: 'いぬ' },
-      { japanese: '猫', hiragana: 'ねこ', disabled: false },
-    ])
-    expect(words.map((w) => w.disabled)).toEqual([false, false])
-  })
-  it('merge appends a new meaning to an existing word', () => {
-    const cur = sanitizeWords([{ id: '1', japanese: '犬', hiragana: 'いぬ', meaning: 'dog' }]).words
-    const r = mergeWords(cur, sanitizeWords([{ japanese: '犬', hiragana: 'いぬ', meaning: 'hound' }]).words)
-    expect(r.updated).toBe(1)
-    expect(r.words).toHaveLength(1)
-    expect(r.words[0].meaning).toBe('dog; hound')
-    expect(cur[0].meaning).toBe('dog')
-    const again = mergeWords(r.words, sanitizeWords([{ japanese: '犬', hiragana: 'いぬ', meaning: 'hound' }]).words)
-    expect(again.updated).toBe(0)
-    expect(again.duplicates).toBe(1)
-  })
-  it('merge ignores duplicates', () => {
-    const cur = sanitizeWords([{ id: '1', japanese: '犬', hiragana: 'いぬ', meaning: 'dog' }]).words
+      { japanese: "犬", hiragana: "いぬ" },
+      { japanese: "猫", hiragana: "ねこ", disabled: false },
+    ]);
+    expect(words.map((w) => w.disabled)).toEqual([false, false]);
+  });
+  it("merge appends a new meaning to an existing word", () => {
+    const cur = sanitizeWords([
+      { id: "1", japanese: "犬", hiragana: "いぬ", meaning: "dog" },
+    ]).words;
+    const r = mergeWords(
+      cur,
+      sanitizeWords([{ japanese: "犬", hiragana: "いぬ", meaning: "hound" }])
+        .words,
+    );
+    expect(r.updated).toBe(1);
+    expect(r.words).toHaveLength(1);
+    expect(r.words[0].meaning).toBe("dog; hound");
+    expect(cur[0].meaning).toBe("dog");
+    const again = mergeWords(
+      r.words,
+      sanitizeWords([{ japanese: "犬", hiragana: "いぬ", meaning: "hound" }])
+        .words,
+    );
+    expect(again.updated).toBe(0);
+    expect(again.duplicates).toBe(1);
+  });
+  it("merge ignores duplicates", () => {
+    const cur = sanitizeWords([
+      { id: "1", japanese: "犬", hiragana: "いぬ", meaning: "dog" },
+    ]).words;
     const inc = sanitizeWords([
-      { id: '2', japanese: '犬', hiragana: 'いぬ', meaning: 'dog' },
-      { id: '3', japanese: '猫', hiragana: 'ねこ', meaning: 'cat' },
-    ]).words
-    const r = mergeWords(cur, inc)
-    expect(r.added).toBe(1)
-    expect(r.duplicates).toBe(1)
-    expect(r.words).toHaveLength(2)
-  })
-})
+      { id: "2", japanese: "犬", hiragana: "いぬ", meaning: "dog" },
+      { id: "3", japanese: "猫", hiragana: "ねこ", meaning: "cat" },
+    ]).words;
+    const r = mergeWords(cur, inc);
+    expect(r.added).toBe(1);
+    expect(r.duplicates).toBe(1);
+    expect(r.words).toHaveLength(2);
+  });
+});
 
-describe('sortWords', () => {
-  const w = (id: string, japanese: string, hiragana: string, meaning = '', disabled = false) => ({
+describe("sortWords", () => {
+  const w = (
+    id: string,
+    japanese: string,
+    hiragana: string,
+    meaning = "",
+    disabled = false,
+  ) => ({
     id,
     japanese,
     hiragana,
     meaning,
     disabled,
     tags: [],
-  })
+  });
   const list = [
-    w('1', '犬', 'いぬ', 'dog'),
-    w('2', '猫', 'ねこ', ''),
-    w('3', '赤', 'あか', 'red', true),
-    w('4', '木', 'き', 'tree'),
-  ]
-  const ids = (xs: { id: string }[]) => xs.map((x) => x.id).join('')
+    w("1", "犬", "いぬ", "dog"),
+    w("2", "猫", "ねこ", ""),
+    w("3", "赤", "あか", "red", true),
+    w("4", "木", "き", "tree"),
+  ];
+  const ids = (xs: { id: string }[]) => xs.map((x) => x.id).join("");
 
-  it('keeps or reverses the stored order', () => {
-    expect(ids(sortWords(list, 'list', 'asc'))).toBe('1234')
-    expect(ids(sortWords(list, 'list', 'desc'))).toBe('4321')
-  })
+  it("keeps or reverses the stored order", () => {
+    expect(ids(sortWords(list, "list", "asc"))).toBe("1234");
+    expect(ids(sortWords(list, "list", "desc"))).toBe("4321");
+  });
 
-  it('sorts by reading in gojūon order', () => {
-    expect(ids(sortWords(list, 'reading', 'asc'))).toBe('3142')
-    expect(ids(sortWords(list, 'reading', 'desc'))).toBe('2413')
-  })
+  it("sorts by reading in gojūon order", () => {
+    expect(ids(sortWords(list, "reading", "asc"))).toBe("3142");
+    expect(ids(sortWords(list, "reading", "desc"))).toBe("2413");
+  });
 
-  it('puts words without a meaning last in both directions', () => {
-    expect(ids(sortWords(list, 'meaning', 'asc'))).toBe('1342')
-    expect(ids(sortWords(list, 'meaning', 'desc'))).toBe('4312')
-  })
+  it("puts words without a meaning last in both directions", () => {
+    expect(ids(sortWords(list, "meaning", "asc"))).toBe("1342");
+    expect(ids(sortWords(list, "meaning", "desc"))).toBe("4312");
+  });
 
-  it('sorts by status keeping ties in stored order, and does not mutate the input', () => {
-    expect(ids(sortWords(list, 'status', 'asc'))).toBe('1243')
-    expect(ids(sortWords(list, 'status', 'desc'))).toBe('3124')
-    expect(ids(list)).toBe('1234')
-  })
+  it("sorts by status keeping ties in stored order, and does not mutate the input", () => {
+    expect(ids(sortWords(list, "status", "asc"))).toBe("1243");
+    expect(ids(sortWords(list, "status", "desc"))).toBe("3124");
+    expect(ids(list)).toBe("1234");
+  });
 
-  it('orders active words by when they were activated, oldest first, with undated ones oldest', () => {
+  it("orders active words by when they were activated, oldest first, with undated ones oldest", () => {
     const dated = [
-      { ...w('1', '犬', 'いぬ'), activatedAt: 300 },
-      { ...w('2', '猫', 'ねこ'), activatedAt: 100 },
-      w('3', '赤', 'あか', '', true),
-      w('4', '木', 'き'),
-      { ...w('5', '山', 'やま'), activatedAt: 200 },
-    ]
-    expect(ids(sortWords(dated, 'status', 'asc'))).toBe('42513')
-    expect(ids(sortWords(dated, 'status', 'desc'))).toBe('31524')
-  })
-})
+      { ...w("1", "犬", "いぬ"), activatedAt: 300 },
+      { ...w("2", "猫", "ねこ"), activatedAt: 100 },
+      w("3", "赤", "あか", "", true),
+      w("4", "木", "き"),
+      { ...w("5", "山", "やま"), activatedAt: 200 },
+    ];
+    expect(ids(sortWords(dated, "status", "asc"))).toBe("42513");
+    expect(ids(sortWords(dated, "status", "desc"))).toBe("31524");
+  });
+});
 
-describe('sanitizeWords activatedAt', () => {
-  it('keeps a numeric activatedAt and drops anything else', () => {
+describe("sanitizeWords activatedAt", () => {
+  it("keeps a numeric activatedAt and drops anything else", () => {
     const { words } = sanitizeWords([
-      { id: '1', japanese: '犬', hiragana: 'いぬ', activatedAt: 42 },
-      { id: '2', japanese: '猫', hiragana: 'ねこ', activatedAt: 'x' },
-    ])
-    expect(words[0].activatedAt).toBe(42)
-    expect(words[1]).not.toHaveProperty('activatedAt')
-  })
-})
+      { id: "1", japanese: "犬", hiragana: "いぬ", activatedAt: 42 },
+      { id: "2", japanese: "猫", hiragana: "ねこ", activatedAt: "x" },
+    ]);
+    expect(words[0].activatedAt).toBe(42);
+    expect(words[1]).not.toHaveProperty("activatedAt");
+  });
+});
 
-describe('setDisabled', () => {
-  const base = { id: '1', japanese: '犬', hiragana: 'いぬ', meaning: '', disabled: true, tags: [] }
+describe("setDisabled", () => {
+  const base = {
+    id: "1",
+    japanese: "犬",
+    hiragana: "いぬ",
+    meaning: "",
+    disabled: true,
+    tags: [],
+  };
 
-  it('stamps the activation time when a word is enabled', () => {
-    expect(setDisabled(base, false, 500)).toMatchObject({ disabled: false, activatedAt: 500 })
-  })
+  it("stamps the activation time when a word is enabled", () => {
+    expect(setDisabled(base, false, 500)).toMatchObject({
+      disabled: false,
+      activatedAt: 500,
+    });
+  });
 
-  it('keeps the activation time when a word is already enabled or gets disabled', () => {
-    const on = { ...base, disabled: false, activatedAt: 100 }
-    expect(setDisabled(on, false, 500).activatedAt).toBe(100)
-    expect(setDisabled(on, true, 500)).toMatchObject({ disabled: true, activatedAt: 100 })
-  })
-})
+  it("keeps the activation time when a word is already enabled or gets disabled", () => {
+    const on = { ...base, disabled: false, activatedAt: 100 };
+    expect(setDisabled(on, false, 500).activatedAt).toBe(100);
+    expect(setDisabled(on, true, 500)).toMatchObject({
+      disabled: true,
+      activatedAt: 100,
+    });
+  });
+});
 
-describe('validateWord', () => {
-  const fields = { japanese: '食べる', hiragana: 'たべる', meaning: 'to eat', tags: [] }
+describe("validateWord", () => {
+  const fields = {
+    japanese: "食べる",
+    hiragana: "たべる",
+    meaning: "to eat",
+    tags: [],
+  };
 
-  it('accepts a word with a kana reading and a meaning', () => {
-    expect(validateWord(fields)).toEqual({})
-  })
+  it("accepts a word with a kana reading and a meaning", () => {
+    expect(validateWord(fields)).toEqual({});
+  });
 
-  it('asks for a meaning, ignoring surrounding spaces', () => {
-    const errors = { meaning: 'Fill in the meaning.' }
-    expect(validateWord({ ...fields, meaning: '' })).toEqual(errors)
-    expect(validateWord({ ...fields, meaning: '   ' })).toEqual(errors)
-  })
+  it("asks for a meaning, ignoring surrounding spaces", () => {
+    const errors = { meaning: "Fill in the meaning." };
+    expect(validateWord({ ...fields, meaning: "" })).toEqual(errors);
+    expect(validateWord({ ...fields, meaning: "   " })).toEqual(errors);
+  });
 
-  it('asks for the word and the reading, each on its own field, ignoring surrounding spaces', () => {
-    expect(validateWord({ ...fields, japanese: '' })).toEqual({ japanese: 'Fill in the word.' })
-    expect(validateWord({ ...fields, japanese: '   ' })).toEqual({ japanese: 'Fill in the word.' })
-    expect(validateWord({ ...fields, hiragana: '' })).toEqual({ hiragana: 'Fill in the reading.' })
-  })
+  it("asks for the word and the reading, each on its own field, ignoring surrounding spaces", () => {
+    expect(validateWord({ ...fields, japanese: "" })).toEqual({
+      japanese: "Fill in the word.",
+    });
+    expect(validateWord({ ...fields, japanese: "   " })).toEqual({
+      japanese: "Fill in the word.",
+    });
+    expect(validateWord({ ...fields, hiragana: "" })).toEqual({
+      hiragana: "Fill in the reading.",
+    });
+  });
 
-  it('reports every invalid field at once', () => {
-    expect(validateWord({ japanese: '', hiragana: '', meaning: '', tags: [] })).toEqual({
-      japanese: 'Fill in the word.',
-      hiragana: 'Fill in the reading.',
-      meaning: 'Fill in the meaning.',
-    })
-  })
+  it("reports every invalid field at once", () => {
+    expect(
+      validateWord({ japanese: "", hiragana: "", meaning: "", tags: [] }),
+    ).toEqual({
+      japanese: "Fill in the word.",
+      hiragana: "Fill in the reading.",
+      meaning: "Fill in the meaning.",
+    });
+  });
 
-  it('only takes kana as the reading: hiragana, katakana and the long vowel mark', () => {
-    const errors = { hiragana: 'The reading must contain only kana (hiragana, katakana or ー).' }
-    expect(validateWord({ ...fields, hiragana: 'taberu' })).toEqual(errors)
-    expect(validateWord({ ...fields, hiragana: '食べる' })).toEqual(errors)
-    expect(validateWord({ ...fields, hiragana: ' コーヒー ' })).toEqual({})
-  })
-})
+  it("only takes kana as the reading: hiragana, katakana and the long vowel mark", () => {
+    const errors = {
+      hiragana:
+        "The reading must contain only kana (hiragana, katakana or ー).",
+    };
+    expect(validateWord({ ...fields, hiragana: "taberu" })).toEqual(errors);
+    expect(validateWord({ ...fields, hiragana: "食べる" })).toEqual(errors);
+    expect(validateWord({ ...fields, hiragana: " コーヒー " })).toEqual({});
+  });
+});
 
-describe('makeWord and updateWord', () => {
-  const typed = { japanese: ' 食べる ', hiragana: ' たべる ', meaning: ' to eat ', tags: [] }
+describe("makeWord and updateWord", () => {
+  const typed = {
+    japanese: " 食べる ",
+    hiragana: " たべる ",
+    meaning: " to eat ",
+    tags: [],
+  };
 
-  it('makeWord trims the fields and starts the word enabled with a fresh id', () => {
-    const a = makeWord(typed)
-    expect(a).toMatchObject({ japanese: '食べる', hiragana: 'たべる', meaning: 'to eat', disabled: false })
-    expect(a.id).toBeTruthy()
-    expect(makeWord(typed).id).not.toBe(a.id)
-    expect(a.activatedAt).toBeGreaterThan(0)
-  })
+  it("makeWord trims the fields and starts the word enabled with a fresh id", () => {
+    const a = makeWord(typed);
+    expect(a).toMatchObject({
+      japanese: "食べる",
+      hiragana: "たべる",
+      meaning: "to eat",
+      disabled: false,
+    });
+    expect(a.id).toBeTruthy();
+    expect(makeWord(typed).id).not.toBe(a.id);
+    expect(a.activatedAt).toBeGreaterThan(0);
+  });
 
-  it('updateWord replaces the texts but keeps the id and whether the word is disabled', () => {
-    const word = { ...makeWord({ japanese: '犬', hiragana: 'いぬ', meaning: 'dog', tags: [] }), disabled: true }
+  it("updateWord replaces the texts but keeps the id and whether the word is disabled", () => {
+    const word = {
+      ...makeWord({
+        japanese: "犬",
+        hiragana: "いぬ",
+        meaning: "dog",
+        tags: [],
+      }),
+      disabled: true,
+    };
     expect(updateWord(word, typed)).toEqual({
       id: word.id,
-      japanese: '食べる',
-      hiragana: 'たべる',
-      meaning: 'to eat',
+      japanese: "食べる",
+      hiragana: "たべる",
+      meaning: "to eat",
       disabled: true,
       activatedAt: word.activatedAt,
       createdAt: word.createdAt,
       tags: [],
-    })
-    expect(word.japanese).toBe('犬')
-  })
-})
+    });
+    expect(word.japanese).toBe("犬");
+  });
+});
 
-describe('searchWords', () => {
-  const word = (id: string, japanese: string, hiragana: string, meaning: string) => ({
+describe("searchWords", () => {
+  const word = (
+    id: string,
+    japanese: string,
+    hiragana: string,
+    meaning: string,
+  ) => ({
     id,
     japanese,
     hiragana,
     meaning,
     disabled: false,
     tags: [],
-  })
-  const list = [word('1', '犬', 'いぬ', 'Dog'), word('2', '猫', 'ねこ', 'cat'), word('3', '食べる', 'たべる', 'to eat')]
-  const ids = (query: string) => searchWords(list, query).map((w) => w.id)
+  });
+  const list = [
+    word("1", "犬", "いぬ", "Dog"),
+    word("2", "猫", "ねこ", "cat"),
+    word("3", "食べる", "たべる", "to eat"),
+  ];
+  const ids = (query: string) => searchWords(list, query).map((w) => w.id);
 
-  it('returns everything for an empty or blank search', () => {
-    expect(ids('')).toEqual(['1', '2', '3'])
-    expect(ids('   ')).toEqual(['1', '2', '3'])
-  })
+  it("returns everything for an empty or blank search", () => {
+    expect(ids("")).toEqual(["1", "2", "3"]);
+    expect(ids("   ")).toEqual(["1", "2", "3"]);
+  });
 
-  it('matches the word, the reading, the romaji and the meaning', () => {
-    expect(ids('猫')).toEqual(['2'])
-    expect(ids('たべ')).toEqual(['3'])
-    expect(ids('inu')).toEqual(['1'])
-    expect(ids('eat')).toEqual(['3'])
-  })
+  it("matches the word, the reading, the romaji and the meaning", () => {
+    expect(ids("猫")).toEqual(["2"]);
+    expect(ids("たべ")).toEqual(["3"]);
+    expect(ids("inu")).toEqual(["1"]);
+    expect(ids("eat")).toEqual(["3"]);
+  });
 
-  it('ignores case and surrounding spaces, and keeps the list order', () => {
-    expect(ids('  DOG ')).toEqual(['1'])
-    expect(ids('a')).toEqual(['2', '3'])
-    expect(ids('nothing like this')).toEqual([])
-  })
+  it("ignores case and surrounding spaces, and keeps the list order", () => {
+    expect(ids("  DOG ")).toEqual(["1"]);
+    expect(ids("a")).toEqual(["2", "3"]);
+    expect(ids("nothing like this")).toEqual([]);
+  });
 
-  it('keeps only the words with a tag containing each # term, along with the text', () => {
+  it("keeps only the words with a tag containing each # term, along with the text", () => {
     const tagged = [
-      { ...word('1', '犬', 'いぬ', 'Dog'), tags: ['Animals', 'N5'] },
-      { ...word('2', '猫', 'ねこ', 'cat'), tags: ['animals'] },
-      word('3', '食べる', 'たべる', 'to eat'),
-    ]
-    const tagIds = (query: string) => searchWords(tagged, query).map((w) => w.id)
-    expect(tagIds('#anim')).toEqual(['1', '2'])
-    expect(tagIds('#ANIMALS #n5')).toEqual(['1'])
-    expect(tagIds('#animals cat')).toEqual(['2'])
-    expect(tagIds('#')).toEqual(['1', '2', '3'])
-    expect(tagIds('#verbs')).toEqual([])
-  })
-})
+      { ...word("1", "犬", "いぬ", "Dog"), tags: ["Animals", "N5"] },
+      { ...word("2", "猫", "ねこ", "cat"), tags: ["animals"] },
+      word("3", "食べる", "たべる", "to eat"),
+    ];
+    const tagIds = (query: string) =>
+      searchWords(tagged, query).map((w) => w.id);
+    expect(tagIds("#anim")).toEqual(["1", "2"]);
+    expect(tagIds("#ANIMALS #n5")).toEqual(["1"]);
+    expect(tagIds("#animals cat")).toEqual(["2"]);
+    expect(tagIds("#")).toEqual(["1", "2", "3"]);
+    expect(tagIds("#verbs")).toEqual([]);
+  });
+});
 
-describe('parseSearch', () => {
-  it('splits the # terms from the text, lowercase', () => {
-    expect(parseSearch('  To  #N5 eat #Verbs ')).toEqual({ text: 'to eat', tags: ['n5', 'verbs'] })
-    expect(parseSearch('#')).toEqual({ text: '', tags: [] })
-    expect(parseSearch('')).toEqual({ text: '', tags: [] })
-  })
-})
+describe("parseSearch", () => {
+  it("splits the # terms from the text, lowercase", () => {
+    expect(parseSearch("  To  #N5 eat #Verbs ")).toEqual({
+      text: "to eat",
+      tags: ["n5", "verbs"],
+    });
+    expect(parseSearch("#")).toEqual({ text: "", tags: [] });
+    expect(parseSearch("")).toEqual({ text: "", tags: [] });
+  });
+});
 
-describe('hasSearchTags', () => {
-  it('needs a tag containing every term', () => {
-    expect(hasSearchTags(['Hiragana'], ['gana'])).toBe(true)
-    expect(hasSearchTags(['Hiragana'], ['gana', 'kata'])).toBe(false)
-    expect(hasSearchTags([], [])).toBe(true)
-    expect(hasSearchTags([], ['n5'])).toBe(false)
-  })
-})
+describe("hasSearchTags", () => {
+  it("needs a tag containing every term", () => {
+    expect(hasSearchTags(["Hiragana"], ["gana"])).toBe(true);
+    expect(hasSearchTags(["Hiragana"], ["gana", "kata"])).toBe(false);
+    expect(hasSearchTags([], [])).toBe(true);
+    expect(hasSearchTags([], ["n5"])).toBe(false);
+  });
+});
 
-describe('findTag and hasEveryTag', () => {
-  it('finds the spelling in use, ignoring case', () => {
-    expect(findTag(['Genki-1', 'N5'], 'genki-1')).toBe('Genki-1')
-    expect(findTag(['Genki-1'], 'genki')).toBeUndefined()
-  })
+describe("findTag and hasEveryTag", () => {
+  it("finds the spelling in use, ignoring case", () => {
+    expect(findTag(["Genki-1", "N5"], "genki-1")).toBe("Genki-1");
+    expect(findTag(["Genki-1"], "genki")).toBeUndefined();
+  });
 
-  it('needs every wanted tag, ignoring case', () => {
-    expect(hasEveryTag(['Genki-1', 'N5'], ['n5', 'GENKI-1'])).toBe(true)
-    expect(hasEveryTag(['Genki-1'], ['Genki-1', 'N5'])).toBe(false)
-    expect(hasEveryTag([], [])).toBe(true)
-  })
-})
+  it("needs every wanted tag, ignoring case", () => {
+    expect(hasEveryTag(["Genki-1", "N5"], ["n5", "GENKI-1"])).toBe(true);
+    expect(hasEveryTag(["Genki-1"], ["Genki-1", "N5"])).toBe(false);
+    expect(hasEveryTag([], [])).toBe(true);
+  });
+});
 
-describe('importSummary', () => {
-  it('counts what was added and what already existed', () => {
-    expect(importSummary({ words: [], added: 3, updated: 0, duplicates: 1 }, 0)).toBe('3 added, 1 already existed.')
-  })
+describe("importSummary", () => {
+  it("counts what was added and what already existed", () => {
+    expect(
+      importSummary({ words: [], added: 3, updated: 0, duplicates: 1 }, 0),
+    ).toBe("3 added, 1 already existed.");
+  });
 
-  it('mentions the words that were updated', () => {
-    expect(importSummary({ words: [], added: 2, updated: 1, duplicates: 0 }, 0)).toBe(
-      '2 added, 1 updated, 0 already existed.',
-    )
-  })
+  it("mentions the words that were updated", () => {
+    expect(
+      importSummary({ words: [], added: 2, updated: 1, duplicates: 0 }, 0),
+    ).toBe("2 added, 1 updated, 0 already existed.");
+  });
 
-  it('mentions the invalid items that were ignored', () => {
-    expect(importSummary({ words: [], added: 0, updated: 0, duplicates: 2 }, 4)).toBe(
-      '0 added, 2 already existed. 4 invalid items ignored.',
-    )
-    expect(importSummary({ words: [], added: 1, updated: 0, duplicates: 0 }, 1)).toBe(
-      '1 added, 0 already existed. 1 invalid item ignored.',
-    )
-  })
-})
+  it("mentions the invalid items that were ignored", () => {
+    expect(
+      importSummary({ words: [], added: 0, updated: 0, duplicates: 2 }, 4),
+    ).toBe("0 added, 2 already existed. 4 invalid items ignored.");
+    expect(
+      importSummary({ words: [], added: 1, updated: 0, duplicates: 0 }, 1),
+    ).toBe("1 added, 0 already existed. 1 invalid item ignored.");
+  });
+});
 
-describe('importBrief', () => {
-  it('names the words added', () => {
-    expect(importBrief({ words: [], added: 3, updated: 1, duplicates: 5 })).toBe('3 added')
-  })
+describe("importBrief", () => {
+  it("names the words added", () => {
+    expect(
+      importBrief({ words: [], added: 3, updated: 1, duplicates: 5 }),
+    ).toBe("3 added");
+  });
 
-  it('names the words updated when none was added', () => {
-    expect(importBrief({ words: [], added: 0, updated: 2, duplicates: 5 })).toBe('2 updated')
-  })
+  it("names the words updated when none was added", () => {
+    expect(
+      importBrief({ words: [], added: 0, updated: 2, duplicates: 5 }),
+    ).toBe("2 updated");
+  });
 
-  it('says nothing is new when every word already existed', () => {
-    expect(importBrief({ words: [], added: 0, updated: 0, duplicates: 5 })).toBe('Nothing new')
-  })
-})
+  it("says nothing is new when every word already existed", () => {
+    expect(
+      importBrief({ words: [], added: 0, updated: 0, duplicates: 5 }),
+    ).toBe("Nothing new");
+  });
+});
 
-describe('tag names', () => {
-  it('cleanTags trims, drops blanks and repeats (ignoring case) and keeps the first spelling', () => {
-    expect(cleanTags([' Food ', 'food', '', '  ', 'JLPT-N5', 'JLPT N5', 'Food'])).toEqual(['Food', 'JLPT-N5'])
-  })
-  it('validateTag rejects blank and over-long names', () => {
-    expect(validateTag('  ')).not.toBe('')
-    expect(validateTag('a'.repeat(31))).not.toBe('')
-    expect(validateTag('a'.repeat(30))).toBe('')
-    expect(validateTag(' food ')).toBe('')
-  })
-  it('validateTag allows only letters of any script, numbers, - and _', () => {
-    for (const ok of ['genki-1', '動詞', 'n5_vocab', 'カタカナ']) expect(validateTag(ok)).toBe('')
-    for (const bad of ['genki 1', '#n5', 'a.b', 'x/y', 'a,b'])
-      expect(validateTag(bad)).toBe('A tag can only have letters, numbers, - and _.')
-  })
-  it('matchTags keeps the tags containing the text, ignoring case and spaces, and all of them for blank text', () => {
-    const tags = ['Food', 'JLPT-N5', 'seafood', 'verbs']
-    expect(matchTags(tags, ' FOO ')).toEqual(['Food', 'seafood'])
-    expect(matchTags(tags, 'n5')).toEqual(['JLPT-N5'])
-    expect(matchTags(tags, '  ')).toEqual(tags)
-    expect(matchTags(tags, 'kanji')).toEqual([])
-  })
-})
+describe("tag names", () => {
+  it("cleanTags trims, drops blanks and repeats (ignoring case) and keeps the first spelling", () => {
+    expect(
+      cleanTags([" Food ", "food", "", "  ", "JLPT-N5", "JLPT N5", "Food"]),
+    ).toEqual(["Food", "JLPT-N5"]);
+  });
+  it("validateTag rejects blank and over-long names", () => {
+    expect(validateTag("  ")).not.toBe("");
+    expect(validateTag("a".repeat(31))).not.toBe("");
+    expect(validateTag("a".repeat(30))).toBe("");
+    expect(validateTag(" food ")).toBe("");
+  });
+  it("validateTag allows only letters of any script, numbers, - and _", () => {
+    for (const ok of ["genki-1", "動詞", "n5_vocab", "カタカナ"])
+      expect(validateTag(ok)).toBe("");
+    for (const bad of ["genki 1", "#n5", "a.b", "x/y", "a,b"])
+      expect(validateTag(bad)).toBe(
+        "A tag can only have letters, numbers, - and _.",
+      );
+  });
+  it("matchTags keeps the tags containing the text, ignoring case and spaces, and all of them for blank text", () => {
+    const tags = ["Food", "JLPT-N5", "seafood", "verbs"];
+    expect(matchTags(tags, " FOO ")).toEqual(["Food", "seafood"]);
+    expect(matchTags(tags, "n5")).toEqual(["JLPT-N5"]);
+    expect(matchTags(tags, "  ")).toEqual(tags);
+    expect(matchTags(tags, "kanji")).toEqual([]);
+  });
+});
 
-describe('tags on words', () => {
-  it('sanitizeWords stores tags as a clean list, empty when missing or malformed', () => {
+describe("tags on words", () => {
+  it("sanitizeWords stores tags as a clean list, empty when missing or malformed", () => {
     const { words } = sanitizeWords([
-      { japanese: '犬', hiragana: 'いぬ', tags: [' Animals ', 'animals', 5, ''] },
-      { japanese: '猫', hiragana: 'ねこ' },
-      { japanese: '鳥', hiragana: 'とり', tags: 'birds' },
-    ])
-    expect(words.map((w) => w.tags)).toEqual([['Animals'], [], []])
-  })
-  it('makeWord and updateWord apply the form tags', () => {
-    const word = makeWord({ japanese: '犬', hiragana: 'いぬ', meaning: '', tags: [' Pets ', 'pets'] })
-    expect(word.tags).toEqual(['Pets'])
-    const updated = updateWord(word, { japanese: '犬', hiragana: 'いぬ', meaning: '', tags: ['Animals'] })
-    expect(updated.tags).toEqual(['Animals'])
-    expect(updated.id).toBe(word.id)
-  })
-  it('mergeWords unites the tags of a word that already exists', () => {
-    const cur = sanitizeWords([{ id: '1', japanese: '犬', hiragana: 'いぬ', meaning: 'dog', tags: ['Pets'] }]).words
-    const incoming = sanitizeWords([{ japanese: '犬', hiragana: 'いぬ', meaning: 'dog', tags: ['pets', 'N5'] }]).words
-    const r = mergeWords(cur, incoming)
-    expect(r.words[0].tags).toEqual(['Pets', 'N5'])
-    expect(r.updated).toBe(1)
-    expect(r.duplicates).toBe(0)
-    expect(cur[0].tags).toEqual(['Pets'])
-  })
-  it('mergeWords counts a word with nothing new as a duplicate', () => {
-    const cur = sanitizeWords([{ id: '1', japanese: '犬', hiragana: 'いぬ', meaning: 'dog', tags: ['Pets'] }]).words
+      {
+        japanese: "犬",
+        hiragana: "いぬ",
+        tags: [" Animals ", "animals", 5, ""],
+      },
+      { japanese: "猫", hiragana: "ねこ" },
+      { japanese: "鳥", hiragana: "とり", tags: "birds" },
+    ]);
+    expect(words.map((w) => w.tags)).toEqual([["Animals"], [], []]);
+  });
+  it("makeWord and updateWord apply the form tags", () => {
+    const word = makeWord({
+      japanese: "犬",
+      hiragana: "いぬ",
+      meaning: "",
+      tags: [" Pets ", "pets"],
+    });
+    expect(word.tags).toEqual(["Pets"]);
+    const updated = updateWord(word, {
+      japanese: "犬",
+      hiragana: "いぬ",
+      meaning: "",
+      tags: ["Animals"],
+    });
+    expect(updated.tags).toEqual(["Animals"]);
+    expect(updated.id).toBe(word.id);
+  });
+  it("mergeWords unites the tags of a word that already exists", () => {
+    const cur = sanitizeWords([
+      {
+        id: "1",
+        japanese: "犬",
+        hiragana: "いぬ",
+        meaning: "dog",
+        tags: ["Pets"],
+      },
+    ]).words;
+    const incoming = sanitizeWords([
+      {
+        japanese: "犬",
+        hiragana: "いぬ",
+        meaning: "dog",
+        tags: ["pets", "N5"],
+      },
+    ]).words;
+    const r = mergeWords(cur, incoming);
+    expect(r.words[0].tags).toEqual(["Pets", "N5"]);
+    expect(r.updated).toBe(1);
+    expect(r.duplicates).toBe(0);
+    expect(cur[0].tags).toEqual(["Pets"]);
+  });
+  it("mergeWords counts a word with nothing new as a duplicate", () => {
+    const cur = sanitizeWords([
+      {
+        id: "1",
+        japanese: "犬",
+        hiragana: "いぬ",
+        meaning: "dog",
+        tags: ["Pets"],
+      },
+    ]).words;
     const r = mergeWords(
       cur,
-      sanitizeWords([{ japanese: '犬', hiragana: 'いぬ', meaning: 'dog', tags: ['PETS'] }]).words,
-    )
-    expect(r.duplicates).toBe(1)
-    expect(r.updated).toBe(0)
-  })
-})
+      sanitizeWords([
+        { japanese: "犬", hiragana: "いぬ", meaning: "dog", tags: ["PETS"] },
+      ]).words,
+    );
+    expect(r.duplicates).toBe(1);
+    expect(r.updated).toBe(0);
+  });
+});
 
-describe('tag operations', () => {
+describe("tag operations", () => {
   const w = (id: string, ...tags: string[]) => ({
     id,
     japanese: id,
-    hiragana: 'あ',
-    meaning: '',
+    hiragana: "あ",
+    meaning: "",
     disabled: false,
     tags,
-  })
-  const list = [w('1', 'Food', 'N5'), w('2', 'food'), w('3'), w('4', 'Fruit', 'Food')]
-  const tagsOf = (words: { tags: string[] }[]) => words.map((x) => x.tags)
+  });
+  const list = [
+    w("1", "Food", "N5"),
+    w("2", "food"),
+    w("3"),
+    w("4", "Fruit", "Food"),
+  ];
+  const tagsOf = (words: { tags: string[] }[]) => words.map((x) => x.tags);
 
-  it('allTags lists each tag once, ordered ignoring case', () => {
-    expect(allTags([w('1', 'b', 'A'), w('2', 'B', 'c')])).toEqual(['A', 'b', 'c'])
-  })
+  it("allTags lists each tag once, ordered ignoring case", () => {
+    expect(allTags([w("1", "b", "A"), w("2", "B", "c")])).toEqual([
+      "A",
+      "b",
+      "c",
+    ]);
+  });
 
-  it('addTag gives the tag to the chosen words only, reusing the spelling already in use', () => {
-    const next = addTag(list, new Set(['3', '4']), ' FOOD ')
-    expect(tagsOf(next)).toEqual([['Food', 'N5'], ['food'], ['Food'], ['Fruit', 'Food']])
-    expect(tagsOf(list)[2]).toEqual([])
-  })
+  it("addTag gives the tag to the chosen words only, reusing the spelling already in use", () => {
+    const next = addTag(list, new Set(["3", "4"]), " FOOD ");
+    expect(tagsOf(next)).toEqual([
+      ["Food", "N5"],
+      ["food"],
+      ["Food"],
+      ["Fruit", "Food"],
+    ]);
+    expect(tagsOf(list)[2]).toEqual([]);
+  });
 
-  it('removeTag takes the tag off the chosen words only, ignoring case', () => {
-    expect(tagsOf(removeTag(list, new Set(['1', '2']), 'FOOD'))).toEqual([['N5'], [], [], ['Fruit', 'Food']])
-  })
+  it("removeTag takes the tag off the chosen words only, ignoring case", () => {
+    expect(tagsOf(removeTag(list, new Set(["1", "2"]), "FOOD"))).toEqual([
+      ["N5"],
+      [],
+      [],
+      ["Fruit", "Food"],
+    ]);
+  });
 
-  it('deleteTag takes the tag off every word and keeps the words', () => {
-    const next = deleteTag(list, 'food')
-    expect(tagsOf(next)).toEqual([['N5'], [], [], ['Fruit']])
-    expect(next).toHaveLength(4)
-  })
+  it("deleteTag takes the tag off every word and keeps the words", () => {
+    const next = deleteTag(list, "food");
+    expect(tagsOf(next)).toEqual([["N5"], [], [], ["Fruit"]]);
+    expect(next).toHaveLength(4);
+  });
 
-  it('renameTag changes the tag on every word that has it', () => {
-    expect(tagsOf(renameTag(list, 'food', 'Meals'))).toEqual([['Meals', 'N5'], ['Meals'], [], ['Fruit', 'Meals']])
-  })
+  it("renameTag changes the tag on every word that has it", () => {
+    expect(tagsOf(renameTag(list, "food", "Meals"))).toEqual([
+      ["Meals", "N5"],
+      ["Meals"],
+      [],
+      ["Fruit", "Meals"],
+    ]);
+  });
 
-  it('renameTag to an existing tag merges the two without repeating it on a word', () => {
-    const next = renameTag([w('1', 'food', 'fruit'), w('2', 'Fruit'), w('3', 'food')], 'food', 'Fruit')
-    expect(tagsOf(next)).toEqual([['fruit'], ['fruit'], ['fruit']])
-  })
+  it("renameTag to an existing tag merges the two without repeating it on a word", () => {
+    const next = renameTag(
+      [w("1", "food", "fruit"), w("2", "Fruit"), w("3", "food")],
+      "food",
+      "Fruit",
+    );
+    expect(tagsOf(next)).toEqual([["fruit"], ["fruit"], ["fruit"]]);
+  });
 
-  it('renameTag into an existing tag keeps the spelling already in use, whatever was typed', () => {
-    const next = renameTag([w('1', 'Noun'), w('2', 'Verb')], 'Noun', 'verb')
-    expect(tagsOf(next)).toEqual([['Verb'], ['Verb']])
-  })
+  it("renameTag into an existing tag keeps the spelling already in use, whatever was typed", () => {
+    const next = renameTag([w("1", "Noun"), w("2", "Verb")], "Noun", "verb");
+    expect(tagsOf(next)).toEqual([["Verb"], ["Verb"]]);
+  });
 
-  it('renameTag can change only the case of a tag', () => {
-    expect(tagsOf(renameTag([w('1', 'food')], 'food', 'Food'))).toEqual([['Food']])
-  })
+  it("renameTag can change only the case of a tag", () => {
+    expect(tagsOf(renameTag([w("1", "food")], "food", "Food"))).toEqual([
+      ["Food"],
+    ]);
+  });
 
-  it('filterByTags keeps the words that have every chosen tag, and everything for no tags', () => {
-    const ids = (tags: string[]) => filterByTags(list, tags).map((x) => x.id)
-    expect(ids([])).toEqual(['1', '2', '3', '4'])
-    expect(ids(['food'])).toEqual(['1', '2', '4'])
-    expect(ids(['FOOD', 'n5'])).toEqual(['1'])
-    expect(ids(['food', 'fruit'])).toEqual(['4'])
-  })
+  it("filterByTags keeps the words that have every chosen tag, and everything for no tags", () => {
+    const ids = (tags: string[]) => filterByTags(list, tags).map((x) => x.id);
+    expect(ids([])).toEqual(["1", "2", "3", "4"]);
+    expect(ids(["food"])).toEqual(["1", "2", "4"]);
+    expect(ids(["FOOD", "n5"])).toEqual(["1"]);
+    expect(ids(["food", "fruit"])).toEqual(["4"]);
+  });
 
-  it('withAnyTag keeps the words that have at least one of the tags, and nothing for no tags', () => {
-    const ids = (tags: string[]) => withAnyTag(list, tags).map((x) => x.id)
-    expect(ids([])).toEqual([])
-    expect(ids(['N5'])).toEqual(['1'])
-    expect(ids(['n5', 'FRUIT'])).toEqual(['1', '4'])
-  })
-})
+  it("withAnyTag keeps the words that have at least one of the tags, and nothing for no tags", () => {
+    const ids = (tags: string[]) => withAnyTag(list, tags).map((x) => x.id);
+    expect(ids([])).toEqual([]);
+    expect(ids(["N5"])).toEqual(["1"]);
+    expect(ids(["n5", "FRUIT"])).toEqual(["1", "4"]);
+  });
+});
 
-describe('required meaning', () => {
-  const noMeaning = { id: 'a', japanese: '犬', hiragana: 'いぬ' }
-  const withMeaning = { id: 'b', japanese: '猫', hiragana: 'ねこ', meaning: 'cat' }
+describe("required meaning", () => {
+  const noMeaning = { id: "a", japanese: "犬", hiragana: "いぬ" };
+  const withMeaning = {
+    id: "b",
+    japanese: "猫",
+    hiragana: "ねこ",
+    meaning: "cat",
+  };
 
-  it('sanitizeWords keeps words without a meaning by default, so saved words are not lost', () => {
-    expect(sanitizeWords([noMeaning, withMeaning]).words.map((w) => w.id)).toEqual(['a', 'b'])
-  })
+  it("sanitizeWords keeps words without a meaning by default, so saved words are not lost", () => {
+    expect(
+      sanitizeWords([noMeaning, withMeaning]).words.map((w) => w.id),
+    ).toEqual(["a", "b"]);
+  });
 
-  it('sanitizeWords can reject new entries without a meaning, counting them as skipped', () => {
-    const r = sanitizeWords([noMeaning, { ...withMeaning, id: 'c', meaning: '  ' }, withMeaning], {
-      requireMeaning: true,
-    })
-    expect(r.words.map((w) => w.id)).toEqual(['b'])
-    expect(r.skipped).toBe(2)
-  })
+  it("sanitizeWords can reject new entries without a meaning, counting them as skipped", () => {
+    const r = sanitizeWords(
+      [noMeaning, { ...withMeaning, id: "c", meaning: "  " }, withMeaning],
+      {
+        requireMeaning: true,
+      },
+    );
+    expect(r.words.map((w) => w.id)).toEqual(["b"]);
+    expect(r.skipped).toBe(2);
+  });
 
-  it('needsMeaning flags words saved without one', () => {
-    const [a, b] = sanitizeWords([noMeaning, withMeaning]).words
-    expect(needsMeaning(a)).toBe(true)
-    expect(needsMeaning(b)).toBe(false)
-  })
+  it("needsMeaning flags words saved without one", () => {
+    const [a, b] = sanitizeWords([noMeaning, withMeaning]).words;
+    expect(needsMeaning(a)).toBe(true);
+    expect(needsMeaning(b)).toBe(false);
+  });
 
-  it('wordReading shows the hiragana only when the word is not written in it', () => {
-    expect(wordReading({ japanese: '食べる', hiragana: 'たべる' })).toBe('たべる · taberu')
-    expect(wordReading({ japanese: 'すし', hiragana: 'すし' })).toBe('sushi')
-  })
-})
+  it("wordReading shows the hiragana only when the word is not written in it", () => {
+    expect(wordReading({ japanese: "食べる", hiragana: "たべる" })).toBe(
+      "たべる · taberu",
+    );
+    expect(wordReading({ japanese: "すし", hiragana: "すし" })).toBe("sushi");
+  });
+});

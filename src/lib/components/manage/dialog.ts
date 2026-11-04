@@ -6,31 +6,34 @@
  * the dialog's box, and it must have started there too, so dragging a text selection out of a field does not close it.
  */
 export function closeOnBackdrop(dialog: HTMLDialogElement) {
-  let pressedOnBackdrop = false
+  let pressedOnBackdrop = false;
 
   function onBackdrop(event: MouseEvent): boolean {
-    if (event.target !== dialog) return false
-    const box = dialog.getBoundingClientRect()
+    if (event.target !== dialog) return false;
+    const box = dialog.getBoundingClientRect();
     return (
-      event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom
-    )
+      event.clientX < box.left ||
+      event.clientX > box.right ||
+      event.clientY < box.top ||
+      event.clientY > box.bottom
+    );
   }
 
   function onMouseDown(event: MouseEvent) {
-    pressedOnBackdrop = onBackdrop(event)
+    pressedOnBackdrop = onBackdrop(event);
   }
 
   function onClick(event: MouseEvent) {
-    if (pressedOnBackdrop && onBackdrop(event)) dialog.close()
-    pressedOnBackdrop = false
+    if (pressedOnBackdrop && onBackdrop(event)) dialog.close();
+    pressedOnBackdrop = false;
   }
 
-  dialog.addEventListener('mousedown', onMouseDown)
-  dialog.addEventListener('click', onClick)
+  dialog.addEventListener("mousedown", onMouseDown);
+  dialog.addEventListener("click", onClick);
   return {
     destroy() {
-      dialog.removeEventListener('mousedown', onMouseDown)
-      dialog.removeEventListener('click', onClick)
+      dialog.removeEventListener("mousedown", onMouseDown);
+      dialog.removeEventListener("click", onClick);
     },
-  }
+  };
 }

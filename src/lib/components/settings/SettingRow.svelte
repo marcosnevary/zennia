@@ -1,7 +1,11 @@
 <script lang="ts">
-  import type { Snippet } from 'svelte'
+  import type { Snippet } from "svelte";
 
-  let { title, description, children }: { title: string; description: string; children: Snippet } = $props()
+  let {
+    title,
+    description,
+    children,
+  }: { title: string; description: string; children: Snippet } = $props();
 </script>
 
 <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-3">

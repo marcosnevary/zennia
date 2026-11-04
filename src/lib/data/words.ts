@@ -1,92 +1,110 @@
-import { isKana } from 'wanakana'
-import { plural } from '../core/plural'
-import { toDisplayRomaji } from '../core/romaji'
-import type { Word } from '../core/types'
-import { tagKey } from './tag-colors'
+import { isKana } from "wanakana";
+import { plural } from "../core/plural";
+import { toDisplayRomaji } from "../core/romaji";
+import type { Word } from "../core/types";
+import { tagKey } from "./tag-colors";
 
 export function newId(): string {
-  return crypto.randomUUID()
+  return crypto.randomUUID();
 }
 
 /** The texts of the add / edit form, as typed. */
 export interface WordFields {
-  japanese: string
-  hiragana: string
-  meaning: string
-  tags: string[]
+  japanese: string;
+  hiragana: string;
+  meaning: string;
+  tags: string[];
 }
 
 /** The message to show under each invalid field of the form. */
-export type WordErrors = Partial<Record<'japanese' | 'hiragana' | 'meaning', string>>
+export type WordErrors = Partial<
+  Record<"japanese" | "hiragana" | "meaning", string>
+>;
 
 /** The errors of the form, empty when the word can be saved. */
-export function validateWord({ japanese, hiragana, meaning }: WordFields): WordErrors {
-  const errors: WordErrors = {}
-  const h = hiragana.trim()
-  if (!japanese.trim()) errors.japanese = 'Fill in the word.'
-  if (!h) errors.hiragana = 'Fill in the reading.'
-  else if (!isKana(h)) errors.hiragana = 'The reading must contain only kana (hiragana, katakana or ー).'
-  if (!meaning.trim()) errors.meaning = 'Fill in the meaning.'
-  return errors
+export function validateWord({
+  japanese,
+  hiragana,
+  meaning,
+}: WordFields): WordErrors {
+  const errors: WordErrors = {};
+  const h = hiragana.trim();
+  if (!japanese.trim()) errors.japanese = "Fill in the word.";
+  if (!h) errors.hiragana = "Fill in the reading.";
+  else if (!isKana(h))
+    errors.hiragana =
+      "The reading must contain only kana (hiragana, katakana or ー).";
+  if (!meaning.trim()) errors.meaning = "Fill in the meaning.";
+  return errors;
 }
 
 /** Whether the word was saved before the meaning became required and still has none. */
 export function needsMeaning(word: Word): boolean {
-  return !word.meaning.trim()
+  return !word.meaning.trim();
 }
 
 /** The muted line next to a word: its hiragana and romaji, or only the romaji when the word is written in hiragana. */
-export function wordReading({ japanese, hiragana }: Pick<Word, 'japanese' | 'hiragana'>): string {
-  const romaji = toDisplayRomaji(hiragana)
-  return japanese === hiragana ? romaji : `${hiragana} · ${romaji}`
+export function wordReading({
+  japanese,
+  hiragana,
+}: Pick<Word, "japanese" | "hiragana">): string {
+  const romaji = toDisplayRomaji(hiragana);
+  return japanese === hiragana ? romaji : `${hiragana} · ${romaji}`;
 }
 
-export const MAX_TAG_LENGTH = 30
+export const MAX_TAG_LENGTH = 30;
 
 /** The message to show for an invalid tag name, or '' when it can be used. */
 export function validateTag(tag: string): string {
-  const t = tag.trim()
-  if (!t) return 'Type a tag name.'
-  if (t.length > MAX_TAG_LENGTH) return `A tag can have at most ${MAX_TAG_LENGTH} characters.`
+  const t = tag.trim();
+  if (!t) return "Type a tag name.";
+  if (t.length > MAX_TAG_LENGTH)
+    return `A tag can have at most ${MAX_TAG_LENGTH} characters.`;
   // a space would end a `#` search term and `#` would start one, so a name holds neither
-  if (!/^[\p{L}\p{M}\p{N}_-]+$/u.test(t)) return 'A tag can only have letters, numbers, - and _.'
-  return ''
+  if (!/^[\p{L}\p{M}\p{N}_-]+$/u.test(t))
+    return "A tag can only have letters, numbers, - and _.";
+  return "";
 }
 
 /** Whether two tag names are the same tag: equal ignoring case and surrounding spaces. */
 export function sameTag(a: string, b: string): boolean {
-  return tagKey(a) === tagKey(b)
+  return tagKey(a) === tagKey(b);
 }
 
 /** The spelling the list uses for the tag, if it has it. */
 export function findTag(tags: string[], name: string): string | undefined {
-  return tags.find((t) => sameTag(t, name))
+  return tags.find((t) => sameTag(t, name));
 }
 
 /** Whether the tags include every wanted one. */
 export function hasEveryTag(tags: string[], wanted: string[]): boolean {
-  return wanted.every((w) => tags.some((t) => sameTag(t, w)))
+  return wanted.every((w) => tags.some((t) => sameTag(t, w)));
 }
 
 /** The tags that contain the typed text, ignoring case and surrounding spaces; all of them when it is blank. */
 export function matchTags(tags: string[], query: string): string[] {
-  const q = query.trim().toLowerCase()
-  return tags.filter((t) => t.toLowerCase().includes(q))
+  const q = query.trim().toLowerCase();
+  return tags.filter((t) => t.toLowerCase().includes(q));
 }
 
 /** The valid tags of a list, trimmed and without repeats (ignoring case), keeping the first spelling. */
 export function cleanTags(tags: unknown[]): string[] {
-  const result: string[] = []
+  const result: string[] = [];
   for (const tag of tags) {
-    if (typeof tag !== 'string' || validateTag(tag)) continue
-    const t = tag.trim()
-    if (!result.some((r) => sameTag(r, t))) result.push(t)
+    if (typeof tag !== "string" || validateTag(tag)) continue;
+    const t = tag.trim();
+    if (!result.some((r) => sameTag(r, t))) result.push(t);
   }
-  return result
+  return result;
 }
 
 /** A new enabled word from the form texts. */
-export function makeWord({ japanese, hiragana, meaning, tags }: WordFields): Word {
+export function makeWord({
+  japanese,
+  hiragana,
+  meaning,
+  tags,
+}: WordFields): Word {
   return {
     id: newId(),
     japanese: japanese.trim(),
@@ -96,45 +114,55 @@ export function makeWord({ japanese, hiragana, meaning, tags }: WordFields): Wor
     activatedAt: Date.now(),
     createdAt: Date.now(),
     tags: cleanTags(tags),
-  }
+  };
 }
 
 /** The word enabled or disabled; enabling a disabled word stamps the time, which orders the status sort. */
-export function setDisabled(word: Word, disabled: boolean, now = Date.now()): Word {
-  if (!disabled && word.disabled) return { ...word, disabled, activatedAt: now }
-  return { ...word, disabled }
+export function setDisabled(
+  word: Word,
+  disabled: boolean,
+  now = Date.now(),
+): Word {
+  if (!disabled && word.disabled)
+    return { ...word, disabled, activatedAt: now };
+  return { ...word, disabled };
 }
 
 /** The word with the form texts applied; the id and the enabled state stay. */
-export function updateWord(word: Word, { japanese, hiragana, meaning, tags }: WordFields): Word {
+export function updateWord(
+  word: Word,
+  { japanese, hiragana, meaning, tags }: WordFields,
+): Word {
   return {
     ...word,
     japanese: japanese.trim(),
     hiragana: hiragana.trim(),
     meaning: meaning.trim(),
     tags: cleanTags(tags),
-  }
+  };
 }
 
 export interface SearchQuery {
   /** The plain text to look for, lowercase */
-  text: string
+  text: string;
   /** The `#` terms, lowercase and without the `#` */
-  tags: string[]
+  tags: string[];
 }
 
 /** Splits a search into its `#tag` terms and the rest of the text. A bare `#` counts as neither. */
 export function parseSearch(query: string): SearchQuery {
-  const terms = query.toLowerCase().split(/\s+/).filter(Boolean)
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
   return {
-    text: terms.filter((t) => !t.startsWith('#')).join(' '),
-    tags: terms.filter((t) => t.startsWith('#') && t.length > 1).map((t) => t.slice(1)),
-  }
+    text: terms.filter((t) => !t.startsWith("#")).join(" "),
+    tags: terms
+      .filter((t) => t.startsWith("#") && t.length > 1)
+      .map((t) => t.slice(1)),
+  };
 }
 
 /** Whether every `#` term is contained in one of the tags, ignoring case. */
 export function hasSearchTags(tags: string[], terms: string[]): boolean {
-  return terms.every((term) => matchTags(tags, term).length > 0)
+  return terms.every((term) => matchTags(tags, term).length > 0);
 }
 
 /**
@@ -142,19 +170,19 @@ export function hasSearchTags(tags: string[], terms: string[]): boolean {
  * every `#` term; everything for a blank search.
  */
 export function searchWords(words: Word[], query: string): Word[] {
-  const { text, tags } = parseSearch(query)
+  const { text, tags } = parseSearch(query);
   return words.filter(
     (w) =>
       hasSearchTags(w.tags, tags) &&
-      [w.japanese, w.hiragana, toDisplayRomaji(w.hiragana), w.meaning].some((field) =>
-        field.toLowerCase().includes(text),
+      [w.japanese, w.hiragana, toDisplayRomaji(w.hiragana), w.meaning].some(
+        (field) => field.toLowerCase().includes(text),
       ),
-  )
+  );
 }
 
 export interface SanitizeResult {
-  words: Word[]
-  skipped: number
+  words: Word[];
+  skipped: number;
 }
 
 /**
@@ -163,74 +191,92 @@ export interface SanitizeResult {
  * Items without `japanese` or `hiragana` are ignored and counted in `skipped`, and so are
  * items without a meaning when `requireMeaning` is set (new entries; words already saved keep theirs empty).
  */
-export function sanitizeWords(raw: unknown, { requireMeaning = false } = {}): SanitizeResult {
+export function sanitizeWords(
+  raw: unknown,
+  { requireMeaning = false } = {},
+): SanitizeResult {
   const list = Array.isArray(raw)
     ? raw
-    : raw && typeof raw === 'object' && Array.isArray((raw as { words?: unknown }).words)
+    : raw &&
+        typeof raw === "object" &&
+        Array.isArray((raw as { words?: unknown }).words)
       ? (raw as { words: unknown[] }).words
-      : null
+      : null;
 
-  if (!list) throw new Error('Invalid format: expected a list of words.')
+  if (!list) throw new Error("Invalid format: expected a list of words.");
 
-  const words: Word[] = []
-  let skipped = 0
-  const seenIds = new Set<string>()
+  const words: Word[] = [];
+  let skipped = 0;
+  const seenIds = new Set<string>();
 
   for (const item of list) {
-    if (!item || typeof item !== 'object') {
-      skipped++
-      continue
+    if (!item || typeof item !== "object") {
+      skipped++;
+      continue;
     }
-    const o = item as Record<string, unknown>
-    const japanese = typeof o.japanese === 'string' ? o.japanese.trim() : ''
-    const hiragana = typeof o.hiragana === 'string' ? o.hiragana.trim() : ''
-    const meaning = typeof o.meaning === 'string' ? o.meaning.trim() : ''
+    const o = item as Record<string, unknown>;
+    const japanese = typeof o.japanese === "string" ? o.japanese.trim() : "";
+    const hiragana = typeof o.hiragana === "string" ? o.hiragana.trim() : "";
+    const meaning = typeof o.meaning === "string" ? o.meaning.trim() : "";
     if (!japanese || !hiragana || (requireMeaning && !meaning)) {
-      skipped++
-      continue
+      skipped++;
+      continue;
     }
-    let id = typeof o.id === 'string' && o.id ? o.id : newId()
-    if (seenIds.has(id)) id = newId()
-    seenIds.add(id)
-    const tags = Array.isArray(o.tags) ? cleanTags(o.tags) : []
-    const word: Word = { id, japanese, hiragana, meaning, disabled: o.disabled === true, tags }
-    if (typeof o.activatedAt === 'number' && Number.isFinite(o.activatedAt)) word.activatedAt = o.activatedAt
-    words.push(word)
+    let id = typeof o.id === "string" && o.id ? o.id : newId();
+    if (seenIds.has(id)) id = newId();
+    seenIds.add(id);
+    const tags = Array.isArray(o.tags) ? cleanTags(o.tags) : [];
+    const word: Word = {
+      id,
+      japanese,
+      hiragana,
+      meaning,
+      disabled: o.disabled === true,
+      tags,
+    };
+    if (typeof o.activatedAt === "number" && Number.isFinite(o.activatedAt))
+      word.activatedAt = o.activatedAt;
+    words.push(word);
   }
 
-  return { words, skipped }
+  return { words, skipped };
 }
 
 export interface MergeResult {
-  words: Word[]
-  added: number
+  words: Word[];
+  added: number;
   /** Existing words that gained a new meaning or tag. */
-  updated: number
-  duplicates: number
+  updated: number;
+  duplicates: number;
 }
 
 /** The message shown after importing: what was added, what got a new meaning and what was ignored. */
-export function importSummary({ added, updated, duplicates }: MergeResult, skipped: number): string {
-  const updatedNote = updated ? `, ${updated} updated` : ''
-  const skippedNote = skipped ? ` ${skipped} invalid ${plural(skipped, 'item')} ignored.` : ''
-  return `${added} added${updatedNote}, ${duplicates} already existed.${skippedNote}`
+export function importSummary(
+  { added, updated, duplicates }: MergeResult,
+  skipped: number,
+): string {
+  const updatedNote = updated ? `, ${updated} updated` : "";
+  const skippedNote = skipped
+    ? ` ${skipped} invalid ${plural(skipped, "item")} ignored.`
+    : "";
+  return `${added} added${updatedNote}, ${duplicates} already existed.${skippedNote}`;
 }
 
 /** The main outcome of an import in a few words, short enough for a button label; `importSummary` has the rest. */
 export function importBrief({ added, updated }: MergeResult): string {
-  if (added) return `${added} added`
-  if (updated) return `${updated} updated`
-  return 'Nothing new'
+  if (added) return `${added} added`;
+  if (updated) return `${updated} updated`;
+  return "Nothing new";
 }
 
-const MEANING_SEPARATOR = '; '
+const MEANING_SEPARATOR = "; ";
 
 /** Appends `meaning` to `current` unless it is empty or already one of its parts. */
 function joinMeanings(current: string, meaning: string): string | null {
-  if (!meaning) return null
-  if (!current) return meaning
-  if (current.split(MEANING_SEPARATOR).includes(meaning)) return null
-  return current + MEANING_SEPARATOR + meaning
+  if (!meaning) return null;
+  if (!current) return meaning;
+  if (current.split(MEANING_SEPARATOR).includes(meaning)) return null;
+  return current + MEANING_SEPARATOR + meaning;
 }
 
 /**
@@ -238,66 +284,82 @@ function joinMeanings(current: string, meaning: string): string | null {
  * but a different meaning is appended to the existing one, separated by "; ", and the tags are united.
  */
 export function mergeWords(current: Word[], incoming: Word[]): MergeResult {
-  const words = [...current]
-  const ids = new Set(current.map((w) => w.id))
-  const byKey = new Map<string, number>()
-  words.forEach((w, i) => byKey.set(`${w.japanese}|${w.hiragana}`, i))
-  let added = 0
-  let updated = 0
-  let duplicates = 0
+  const words = [...current];
+  const ids = new Set(current.map((w) => w.id));
+  const byKey = new Map<string, number>();
+  words.forEach((w, i) => byKey.set(`${w.japanese}|${w.hiragana}`, i));
+  let added = 0;
+  let updated = 0;
+  let duplicates = 0;
 
   for (const w of incoming) {
-    const key = `${w.japanese}|${w.hiragana}`
-    const at = byKey.get(key)
+    const key = `${w.japanese}|${w.hiragana}`;
+    const at = byKey.get(key);
     if (at !== undefined) {
-      const meaning = joinMeanings(words[at].meaning, w.meaning)
-      const tags = cleanTags([...words[at].tags, ...w.tags])
-      if (meaning === null && tags.length === words[at].tags.length) duplicates++
+      const meaning = joinMeanings(words[at].meaning, w.meaning);
+      const tags = cleanTags([...words[at].tags, ...w.tags]);
+      if (meaning === null && tags.length === words[at].tags.length)
+        duplicates++;
       else {
-        words[at] = { ...words[at], meaning: meaning ?? words[at].meaning, tags }
-        updated++
+        words[at] = {
+          ...words[at],
+          meaning: meaning ?? words[at].meaning,
+          tags,
+        };
+        updated++;
       }
-      continue
+      continue;
     }
     if (ids.has(w.id)) {
-      duplicates++
-      continue
+      duplicates++;
+      continue;
     }
-    ids.add(w.id)
-    byKey.set(key, words.length)
-    words.push(w)
-    added++
+    ids.add(w.id);
+    byKey.set(key, words.length);
+    words.push(w);
+    added++;
   }
 
-  return { words, added, updated, duplicates }
+  return { words, added, updated, duplicates };
 }
 
-const tagCollator = new Intl.Collator(undefined, { sensitivity: 'base' })
+const tagCollator = new Intl.Collator(undefined, { sensitivity: "base" });
 
 /** Every tag in use, once each (the first spelling found), ordered ignoring case. */
 export function allTags(words: Word[]): string[] {
-  return cleanTags(words.flatMap((w) => w.tags)).sort(tagCollator.compare)
+  return cleanTags(words.flatMap((w) => w.tags)).sort(tagCollator.compare);
 }
 
 /** The spelling the pool already uses for the tag, or the typed one when it is new. */
 function spellingOf(words: Word[], tag: string): string {
-  return findTag(allTags(words), tag) ?? tag.trim()
+  return findTag(allTags(words), tag) ?? tag.trim();
 }
 
 /** The words with the tag added to the chosen ones; the tag keeps the spelling already in use. */
 export function addTag(words: Word[], ids: Set<string>, tag: string): Word[] {
-  const spelling = spellingOf(words, tag)
-  return words.map((w) => (ids.has(w.id) ? { ...w, tags: cleanTags([...w.tags, spelling]) } : w))
+  const spelling = spellingOf(words, tag);
+  return words.map((w) =>
+    ids.has(w.id) ? { ...w, tags: cleanTags([...w.tags, spelling]) } : w,
+  );
 }
 
 /** The words with the tag taken off the chosen ones. */
-export function removeTag(words: Word[], ids: Set<string>, tag: string): Word[] {
-  return words.map((w) => (ids.has(w.id) ? { ...w, tags: w.tags.filter((t) => !sameTag(t, tag)) } : w))
+export function removeTag(
+  words: Word[],
+  ids: Set<string>,
+  tag: string,
+): Word[] {
+  return words.map((w) =>
+    ids.has(w.id) ? { ...w, tags: w.tags.filter((t) => !sameTag(t, tag)) } : w,
+  );
 }
 
 /** The words with the tag taken off every one of them. */
 export function deleteTag(words: Word[], tag: string): Word[] {
-  return words.map((w) => ({ ...w, tags: w.tags.filter((t) => !sameTag(t, tag)) }))
+  return words.map((w) => ({
+    ...w,
+    tags: w.tags.filter((t) => !sameTag(t, tag)),
+  }));
 }
 
 /**
@@ -305,60 +367,76 @@ export function deleteTag(words: Word[], tag: string): Word[] {
  * and the merged tag keeps the spelling already in use.
  */
 export function renameTag(words: Word[], from: string, to: string): Word[] {
-  const existing = allTags(words).find((t) => sameTag(t, to) && !sameTag(t, from))
-  const name = existing ?? to.trim()
+  const existing = allTags(words).find(
+    (t) => sameTag(t, to) && !sameTag(t, from),
+  );
+  const name = existing ?? to.trim();
   return words.map((w) => {
-    if (!w.tags.some((t) => sameTag(t, from) || sameTag(t, name))) return w
-    return { ...w, tags: cleanTags(w.tags.map((t) => (sameTag(t, from) || sameTag(t, name) ? name : t))) }
-  })
+    if (!w.tags.some((t) => sameTag(t, from) || sameTag(t, name))) return w;
+    return {
+      ...w,
+      tags: cleanTags(
+        w.tags.map((t) => (sameTag(t, from) || sameTag(t, name) ? name : t)),
+      ),
+    };
+  });
 }
 
 /** The words that have every one of the tags; all of them when no tag is chosen. */
 export function filterByTags(words: Word[], tags: string[]): Word[] {
-  return words.filter((w) => hasEveryTag(w.tags, tags))
+  return words.filter((w) => hasEveryTag(w.tags, tags));
 }
 
 /** The words that have at least one of the tags: the ones deleting those tags would change. */
 export function withAnyTag(words: Word[], tags: string[]): Word[] {
-  return words.filter((w) => tags.some((tag) => w.tags.some((t) => sameTag(t, tag))))
+  return words.filter((w) =>
+    tags.some((tag) => w.tags.some((t) => sameTag(t, tag))),
+  );
 }
 
-export type SortKey = 'list' | 'japanese' | 'reading' | 'meaning' | 'status'
-export type SortDirection = 'asc' | 'desc'
+export type SortKey = "list" | "japanese" | "reading" | "meaning" | "status";
+export type SortDirection = "asc" | "desc";
 
 export const SORT_OPTIONS: { key: SortKey; label: string }[] = [
-  { key: 'list', label: 'List order' },
-  { key: 'japanese', label: 'Word' },
-  { key: 'reading', label: 'Reading' },
-  { key: 'meaning', label: 'Meaning' },
-  { key: 'status', label: 'Status' },
-]
+  { key: "list", label: "List order" },
+  { key: "japanese", label: "Word" },
+  { key: "reading", label: "Reading" },
+  { key: "meaning", label: "Meaning" },
+  { key: "status", label: "Status" },
+];
 
-const collator = new Intl.Collator('ja')
+const collator = new Intl.Collator("ja");
 
 /**
  * Returns a sorted copy of the list. `list` keeps the stored order (newest additions first)
  * `status` puts active words first when ascending, oldest activation first (undated words count as oldest). Remaining ties keep the stored order
  * (the direction flips the criterion, including the activation order, but not that tie-break).
  */
-export function sortWords(words: Word[], key: SortKey, direction: SortDirection): Word[] {
-  if (key === 'list') return direction === 'asc' ? [...words] : [...words].reverse()
-  const sign = direction === 'asc' ? 1 : -1
+export function sortWords(
+  words: Word[],
+  key: SortKey,
+  direction: SortDirection,
+): Word[] {
+  if (key === "list")
+    return direction === "asc" ? [...words] : [...words].reverse();
+  const sign = direction === "asc" ? 1 : -1;
   const compare = (a: Word, b: Word): number => {
     switch (key) {
-      case 'japanese':
-        return collator.compare(a.japanese, b.japanese)
-      case 'reading':
-        return collator.compare(a.hiragana, b.hiragana)
-      case 'meaning':
+      case "japanese":
+        return collator.compare(a.japanese, b.japanese);
+      case "reading":
+        return collator.compare(a.hiragana, b.hiragana);
+      case "meaning":
         // words without a meaning go last in either direction (pre-multiplied to cancel the outer sign)
-        if (!a.meaning || !b.meaning) return sign * (Number(!a.meaning) - Number(!b.meaning))
-        return collator.compare(a.meaning, b.meaning)
-      case 'status':
+        if (!a.meaning || !b.meaning)
+          return sign * (Number(!a.meaning) - Number(!b.meaning));
+        return collator.compare(a.meaning, b.meaning);
+      case "status":
         return (
-          Number(!!a.disabled) - Number(!!b.disabled) || (a.disabled ? 0 : (a.activatedAt ?? 0) - (b.activatedAt ?? 0))
-        )
+          Number(!!a.disabled) - Number(!!b.disabled) ||
+          (a.disabled ? 0 : (a.activatedAt ?? 0) - (b.activatedAt ?? 0))
+        );
     }
-  }
-  return [...words].sort((a, b) => sign * compare(a, b) || 0)
+  };
+  return [...words].sort((a, b) => sign * compare(a, b) || 0);
 }

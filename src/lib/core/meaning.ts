@@ -2,9 +2,9 @@
 function normalizeMeaning(text: string): string {
   return text
     .toLowerCase()
-    .replace(/[^\p{L}\p{N}\s]/gu, '')
-    .replace(/\s+/g, ' ')
-    .trim()
+    .replace(/[^\p{L}\p{N}\s]/gu, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 /**
@@ -12,7 +12,9 @@ function normalizeMeaning(text: string): string {
  * separated by ";" or ","; typing any one of them is correct.
  */
 export function checkMeaning(input: string, meaning: string): boolean {
-  const typed = normalizeMeaning(input)
-  if (!typed) return false
-  return meaning.split(/[;,]/).some((option) => normalizeMeaning(option) === typed)
+  const typed = normalizeMeaning(input);
+  if (!typed) return false;
+  return meaning
+    .split(/[;,]/)
+    .some((option) => normalizeMeaning(option) === typed);
 }

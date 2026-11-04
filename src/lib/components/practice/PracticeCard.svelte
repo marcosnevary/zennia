@@ -1,18 +1,18 @@
 <script lang="ts">
-  import ArrowRight from '@lucide/svelte/icons/arrow-right'
-  import Check from '@lucide/svelte/icons/check'
-  import CircleSmall from '@lucide/svelte/icons/circle-small'
-  import X from '@lucide/svelte/icons/x'
-  import type { Verdict } from '../../core/types'
-  import type { RightAnswer } from '../../data/practice-modes'
-  import ResultPanel from './ResultPanel.svelte'
-  import Scoreboard from './Scoreboard.svelte'
+  import ArrowRight from "@lucide/svelte/icons/arrow-right";
+  import Check from "@lucide/svelte/icons/check";
+  import CircleSmall from "@lucide/svelte/icons/circle-small";
+  import X from "@lucide/svelte/icons/x";
+  import type { Verdict } from "../../core/types";
+  import type { RightAnswer } from "../../data/practice-modes";
+  import ResultPanel from "./ResultPanel.svelte";
+  import Scoreboard from "./Scoreboard.svelte";
 
   const VERDICT_TEXT: Record<Verdict, string> = {
-    correct: 'text-ok',
-    almost: 'text-warn',
-    incorrect: 'text-bad',
-  }
+    correct: "text-ok",
+    almost: "text-warn",
+    incorrect: "text-bad",
+  };
 
   let {
     prompt,
@@ -27,55 +27,64 @@
     askMeaning = false,
     answer = $bindable(),
     inputEl = $bindable(),
-    meaningAnswer = $bindable(''),
+    meaningAnswer = $bindable(""),
     meaningEl = $bindable(),
     onsubmit,
     onkeydown,
   }: {
     /** The word or symbol being asked */
-    prompt: string
-    verdict: Verdict | null
+    prompt: string;
+    verdict: Verdict | null;
     /** Shown with the verdict */
-    rightAnswer: RightAnswer
+    rightAnswer: RightAnswer;
     /** Optional outcome of each part of the answer, for screen readers */
-    note?: string
+    note?: string;
     /** Outcome of the romaji field, shown on it once checked */
-    readingVerdict?: Verdict | null
+    readingVerdict?: Verdict | null;
     /** Outcome of the meaning field, shown on it once checked */
-    meaningVerdict?: Verdict | null
+    meaningVerdict?: Verdict | null;
     /** Session score, shown below the fields */
-    hits: number
-    total: number
+    hits: number;
+    total: number;
     /** Whether the romaji field is shown */
-    askReading?: boolean
+    askReading?: boolean;
     /** Whether the meaning field is shown */
-    askMeaning?: boolean
-    answer: string
-    inputEl?: HTMLInputElement
-    meaningAnswer?: string
-    meaningEl?: HTMLInputElement
-    onsubmit: (event: Event) => void
-    onkeydown: (event: KeyboardEvent) => void
-  } = $props()
+    askMeaning?: boolean;
+    answer: string;
+    inputEl?: HTMLInputElement;
+    meaningAnswer?: string;
+    meaningEl?: HTMLInputElement;
+    onsubmit: (event: Event) => void;
+    onkeydown: (event: KeyboardEvent) => void;
+  } = $props();
 
   function moveFocus(event: KeyboardEvent) {
-    const target = event.key === 'ArrowDown' ? meaningEl : event.key === 'ArrowUp' ? inputEl : undefined
-    if (!target || target === event.target) return
-    event.preventDefault()
-    target.focus()
+    const target =
+      event.key === "ArrowDown"
+        ? meaningEl
+        : event.key === "ArrowUp"
+          ? inputEl
+          : undefined;
+    if (!target || target === event.target) return;
+    event.preventDefault();
+    target.focus();
   }
 
   function onReadingKeydown(event: KeyboardEvent) {
-    moveFocus(event)
-    onkeydown(event)
+    moveFocus(event);
+    onkeydown(event);
   }
 </script>
 
 {#snippet verdictIcon(fieldVerdict: Verdict | null)}
   {#if fieldVerdict}
     <!-- top-2 puts the 24px icon on the text line of the 40px field -->
-    {@const VerdictIcon = fieldVerdict === 'correct' ? CircleSmall : X}
-    <VerdictIcon class="pointer-events-none absolute top-2 right-3 {VERDICT_TEXT[fieldVerdict]}" />
+    {@const VerdictIcon = fieldVerdict === "correct" ? CircleSmall : X}
+    <VerdictIcon
+      class="pointer-events-none absolute top-2 right-3 {VERDICT_TEXT[
+        fieldVerdict
+      ]}"
+    />
   {/if}
 {/snippet}
 
@@ -102,7 +111,9 @@
             type="text"
             class="field {readingVerdict ? 'pr-11' : ''}"
             data-verdict={readingVerdict}
-            aria-invalid={readingVerdict ? readingVerdict !== 'correct' : undefined}
+            aria-invalid={readingVerdict
+              ? readingVerdict !== "correct"
+              : undefined}
             bind:this={inputEl}
             bind:value={answer}
             onkeydown={onReadingKeydown}
@@ -122,7 +133,9 @@
             type="text"
             class="field {meaningVerdict ? 'pr-11' : ''}"
             data-verdict={meaningVerdict}
-            aria-invalid={meaningVerdict ? meaningVerdict !== 'correct' : undefined}
+            aria-invalid={meaningVerdict
+              ? meaningVerdict !== "correct"
+              : undefined}
             bind:this={meaningEl}
             bind:value={meaningAnswer}
             onkeydown={moveFocus}
