@@ -10,7 +10,7 @@ A word added by any route is marked as new until the pointer passes over it. The
 
 ## Merging
 
-Two words are the same when both the written form and the reading match, and the list never holds the same word twice.
+Two words are the same when both the written form and the reading match. The app doesn't create a second copy of a word, but duplicates saved before this rule stay in the list.
 
 The add form, Add from romaji and every import go through `mergeWords`, which only ever adds.
 
@@ -18,11 +18,6 @@ The add form, Add from romaji and every import go through `mergeWords`, which on
 - An incoming word with the id of an existing but different word counts as already existing.
 
 The edit dialog refuses a change that would match another word.
-
-### Decisions
-
-- **The edit dialog refuses instead of merging.** Merging there would also have to combine the tallies of the two words.
-- **No database constraint.** The rule lives in the app; the `words` primary key is `user_id, id`.
 
 ## Add from romaji
 
@@ -84,6 +79,8 @@ The shell renders the sheet hidden, and opens the browser's print dialog once it
 
 ## Decisions
 
+- **The edit dialog refuses instead of merging.** Merging there would also have to combine the tallies of the two words.
+- **No database constraint.** The rule lives in the app; the `words` primary key is `user_id, id`.
 - **The dictionary is bundled, not an AI API.** The app should cost nothing to run, and JMdict is free ([integrations](integrations.md#bundled-data)).
 - **Tag names hold no spaces or `#`.** A space would end a `#` search term and a `#` would start one, so this way a `#term` can name any tag.
 - **Tag colors are saved rather than derived from the name.** Only a saved color can be picked to stand apart from the others, and survive a rename.
