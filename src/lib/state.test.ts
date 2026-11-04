@@ -191,6 +191,17 @@ describe("App", () => {
     expect(app.practice).toMatchObject({ hits: 0, answers: 0 });
   });
 
+  it("gives the undated words of a batch distinct times that keep their order", async () => {
+    const { app } = await ready();
+    const undated = ["a", "b", "c"].map((id) => ({
+      ...word(id, 0),
+      createdAt: undefined,
+    }));
+    app.setWords(undated);
+    expect(app.words.map((w) => w.id)).toEqual(["a", "b", "c"]);
+    expect(new Set(app.words.map((w) => w.createdAt)).size).toBe(3);
+  });
+
   it("drops the stats of a deleted word", async () => {
     const stats: Stats = { words: { a: { hits: 1, misses: 0 } }, kana: {} };
     const { app } = await ready({ words: [word("a", 1)], stats });

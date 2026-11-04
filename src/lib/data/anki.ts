@@ -70,13 +70,15 @@ const ENTITIES: Record<string, string> = {
   apos: "'",
 };
 
+const MAX_CODE_POINT = 0x10ffff;
+
 function decodeEntities(s: string): string {
   return s.replace(
     /&(?:#(\d+)|#x([0-9a-f]+)|([a-z]+));/gi,
     (m, dec, hex, name) => {
-      if (dec) return String.fromCodePoint(Number(dec));
-      if (hex) return String.fromCodePoint(parseInt(hex, 16));
-      return ENTITIES[name.toLowerCase()] ?? m;
+      if (name) return ENTITIES[name.toLowerCase()] ?? m;
+      const code = dec ? Number(dec) : parseInt(hex, 16);
+      return code <= MAX_CODE_POINT ? String.fromCodePoint(code) : m;
     },
   );
 }

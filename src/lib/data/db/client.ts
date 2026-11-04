@@ -60,7 +60,8 @@ export function takeLinkConflict(): boolean {
 }
 
 export async function getAccount(db: Db): Promise<Account> {
-  const { data } = await db.auth.getUser();
+  const { data, error } = await db.auth.getUser();
+  if (error) throw error;
   return accountOf(data.user);
 }
 

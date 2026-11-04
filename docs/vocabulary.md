@@ -41,7 +41,7 @@ Export writes every word, including inactive ones, to a JSON file (`WordsFile`).
 - Rows with a reading that isn't kana, or with no meaning, are skipped.
 - Rows with the same word and reading become one word, with their meanings joined.
 
-An imported word's date is the time of the import, so it counts as the newest. Its activation time comes from the file, or is also the time of the import.
+An imported word's date is the time of the import, so it counts as the newest. The words of a batch are a millisecond apart, so reloading keeps their order. Its activation time comes from the file, or is also the time of the import.
 
 ## Tags
 
