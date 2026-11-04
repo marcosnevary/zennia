@@ -34,15 +34,18 @@ A never-answered item gets the top weight of 5, and no item drops to zero. Low a
 
 ### Reading
 
-Answers are compared by sound, in hiragana (`src/lib/core/romaji.ts`). Before comparing:
+Answers are compared by sound, written in romaji (`src/lib/core/romaji.ts`). Before comparing:
 
 1. The typed text is lowercased.
 2. Each macron expands to every spelling it can stand for (`ā` to `aa`, `ī` to `ii`, `ū` to `uu`, `ē` to `ei` or `ee`, `ō` to `ou` or `oo`), up to 256 combinations.
 3. A final `nn` is also tried as a single `n`, a common way to type ん.
-4. Spaces are dropped, and the text is converted to hiragana. Romaji variants such as `shi`/`si`, `chi`/`ti`, `tsu`/`tu` and `fu`/`hu` reach the same kana here.
+4. Spaces are dropped, and the text is converted to kana and back to romaji. Variants such as `shi`/`si`, `chi`/`ti`, `tsu`/`tu`, `fu`/`hu`, `ji`/`di` and `zu`/`du` reach the same sound here. The text as typed also counts, since `ti` converts to ち yet is how ティ is written.
 5. `ー` becomes the vowel of the kana before it, so こーひー and こおひい are the same sound.
+6. を counts as お.
 
-The saved reading goes through steps 4 and 5.
+The saved reading goes through steps 4 to 6, and a final は in a longer word also counts as わ, as in こんにちは. Words that end in a real は, such as はは, accept the same.
+
+The romaji the app shows is always accepted. wanakana spells foreign sounds kana by kana (ティ as `tei`), so `FOREIGN_SOUNDS` gives them one spelling, for the display and the comparison.
 
 | Verdict     | When                                                                                                         |
 | ----------- | ------------------------------------------------------------------------------------------------------------ |
@@ -52,11 +55,11 @@ The saved reading goes through steps 4 and 5.
 
 ### Kana
 
-A kana is always answered by its reading, and is either `correct` or `incorrect`. ぢ and づ also accept the romaji of じ and ず, since they sound the same.
+A kana is always answered by its reading, and is either `correct` or `incorrect`. A lone は is only `ha`.
 
 ### Meaning
 
-The meaning is compared ignoring case and punctuation, with single spaces (`src/lib/core/meaning.ts`). A saved meaning can list several answers separated by `;` or `,`, and typing any one of them is correct. A meaning is never `almost`.
+The meaning is compared ignoring case and punctuation, with single spaces (`src/lib/core/meaning.ts`). A saved meaning can list several answers separated by `;` or `,`, and typing any one of them is correct. A leading "to" and what is in parentheses are optional, and separators inside parentheses don't split the answer, so `cat` answers `cat (esp. the domestic cat, Felis catus)` and `eat` answers `to eat`. A meaning is never `almost`.
 
 ### Focus
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   checkAnswer,
-  soundKey,
+  soundKeys,
   toDisplayRomaji,
   toDisplayRomajiRuns,
   typedSoundKeys,
@@ -40,6 +40,29 @@ describe("checkAnswer: accepts spelling-system variations", () => {
     expect(checkAnswer("konnnichiha", "こんにちは")).toBe("incorrect");
     expect(checkAnswer("gakkou", "がっこう")).toBe("correct");
   });
+  it("kana with the same sound", () => {
+    expect(checkAnswer("tsuzuku", "つづく")).toBe("correct");
+    expect(checkAnswer("tsuduku", "つづく")).toBe("correct");
+    expect(checkAnswer("hanaji", "はなぢ")).toBe("correct");
+    expect(checkAnswer("hanadi", "はなぢ")).toBe("correct");
+    expect(checkAnswer("o", "を")).toBe("correct");
+    expect(checkAnswer("wo", "を")).toBe("correct");
+  });
+  it("the tch spelling of っち", () => {
+    expect(checkAnswer("kotchi", "こっち")).toBe("correct");
+    expect(checkAnswer("kocchi", "こっち")).toBe("correct");
+  });
+  it("foreign sounds", () => {
+    expect(checkAnswer("aatisuto", "アーティスト")).toBe("correct");
+    expect(checkAnswer("fairu", "ファイル")).toBe("correct");
+    expect(checkAnswer("wiiku", "ウィーク")).toBe("correct");
+  });
+  it("a final は as わ, only in a longer word", () => {
+    expect(checkAnswer("konnichiwa", "こんにちは")).toBe("correct");
+    expect(checkAnswer("konnichiha", "こんにちは")).toBe("correct");
+    expect(checkAnswer("wa", "は")).toBe("incorrect");
+    expect(checkAnswer("wana", "はな")).toBe("incorrect");
+  });
 });
 
 describe("checkAnswer: long vowel and errors", () => {
@@ -62,6 +85,17 @@ describe("toDisplayRomaji", () => {
     expect(toDisplayRomaji("がっこう")).toBe("gakkou");
     expect(toDisplayRomaji("コーヒー")).toBe("koohii");
   });
+  it("spells foreign sounds as one sound", () => {
+    expect(toDisplayRomaji("アーティスト")).toBe("aatisuto");
+    expect(toDisplayRomaji("ファイル")).toBe("fairu");
+    expect(toDisplayRomaji("ピッツァ")).toBe("pittsa");
+    expect(toDisplayRomaji("フィッティング")).toBe("fittingu");
+    expect(toDisplayRomaji("ゴールデンウィーク")).toBe("goorudenwiiku");
+  });
+  it("keeps the usual spelling of を and つづく", () => {
+    expect(toDisplayRomaji("を")).toBe("wo");
+    expect(toDisplayRomaji("つづく")).toBe("tsuzuku");
+  });
 });
 
 describe("toDisplayRomajiRuns", () => {
@@ -82,10 +116,15 @@ describe("toDisplayRomajiRuns", () => {
 });
 
 describe("typedSoundKeys", () => {
-  it("matches the soundKey of every reading that checkAnswer accepts as correct or almost", () => {
-    expect(typedSoundKeys("tōkyō")).toContain(soundKey("とうきょう"));
-    expect(typedSoundKeys("tokyo")).toContain(soundKey("とうきょう"));
-    expect(typedSoundKeys("koohii")).toContain(soundKey("コーヒー"));
-    expect(typedSoundKeys("neko")).not.toContain(soundKey("ねご"));
+  it("matches the soundKeys of every reading that checkAnswer accepts as correct or almost", () => {
+    const finds = (typed: string, reading: string) =>
+      typedSoundKeys(typed).some((key) => soundKeys(reading).includes(key));
+    expect(finds("tōkyō", "とうきょう")).toBe(true);
+    expect(finds("tokyo", "とうきょう")).toBe(true);
+    expect(finds("koohii", "コーヒー")).toBe(true);
+    expect(finds("tsuzuku", "つづく")).toBe(true);
+    expect(finds("konnichiwa", "こんにちは")).toBe(true);
+    expect(finds("aatisuto", "アーティスト")).toBe(true);
+    expect(finds("neko", "ねご")).toBe(false);
   });
 });

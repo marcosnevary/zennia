@@ -1,5 +1,5 @@
-import { toRomaji } from "wanakana";
 import { SCRIPT_LABELS, parseKanaKey, symbolOf } from "../core/kana";
+import { toDisplayRomaji } from "../core/romaji";
 import type { Stats, Tally, Word } from "../core/types";
 import { hasEveryTag, hasSearchTags, parseSearch, wordReading } from "./words";
 import { sortTallies, type StatsSort, type StatsSortDirection } from "./stats";
@@ -33,7 +33,7 @@ export function buildRows(stats: Stats, words: Word[]): StatsRow[] {
       reading: wordReading(word),
       meaning: word.meaning ?? "",
       search:
-        `${word.japanese} ${word.hiragana} ${toRomaji(word.hiragana)} ${word.meaning ?? ""}`.toLowerCase(),
+        `${word.japanese} ${word.hiragana} ${toDisplayRomaji(word.hiragana)} ${word.meaning ?? ""}`.toLowerCase(),
       ja: true,
       tags: word.tags,
       tally,
@@ -43,7 +43,7 @@ export function buildRows(stats: Stats, words: Word[]): StatsRow[] {
     const parsed = parseKanaKey(key);
     if (!parsed) continue;
     const { script, hiragana } = parsed;
-    const romaji = toRomaji(hiragana);
+    const romaji = toDisplayRomaji(hiragana);
     const symbol = symbolOf(script, hiragana);
     rows.push({
       key,

@@ -108,12 +108,6 @@ export const ALL_HIRAGANA: string[] = KANA_SECTIONS.flatMap((s) =>
   s.rows.flatMap((r) => r.cells.filter((c): c is string => c !== null)),
 );
 
-/** ぢ / づ sound exactly like じ / ず, so either romaji is right (di / ji, du / zu). */
-export function acceptedReadings(hiragana: string): string[] {
-  const alias = hiragana.replace(/ぢ/g, "じ").replace(/づ/g, "ず");
-  return alias === hiragana ? [hiragana] : [hiragana, alias];
-}
-
 const cellsOf = (cells: (string | null)[]): string[] =>
   cells.filter((c): c is string => c !== null);
 

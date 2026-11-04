@@ -1,11 +1,5 @@
 import { furigana, type FuriganaPart } from "../core/furigana";
-import {
-  acceptedReadings,
-  buildKana,
-  kanaKey,
-  type Kana,
-  type KanaScript,
-} from "../core/kana";
+import { buildKana, kanaKey, type Kana, type KanaScript } from "../core/kana";
 import { checkMeaning } from "../core/meaning";
 import {
   checkAnswer,
@@ -169,11 +163,7 @@ export function kanaMode(
     keyOf: (k) => k.symbol,
     weightOf: (k) => drawWeight(stats.kana[kanaKey(k.script, k.hiragana)]),
     check: (answer, k) =>
-      acceptedReadings(k.hiragana).some(
-        (h) => checkAnswer(answer, h) === "correct",
-      )
-        ? "correct"
-        : "incorrect",
+      checkAnswer(answer, k.hiragana) === "correct" ? "correct" : "incorrect",
     record: (k, verdict) =>
       recorder.kana(k.script, k.hiragana, verdict === "correct"),
   };

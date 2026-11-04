@@ -24,7 +24,7 @@ The edit dialog refuses a change that would match another word.
 The user pastes a list, and each item is looked up in the bundled dictionary (`src/lib/data/dictionary.ts`).
 
 - Items are separated by lines, commas or semicolons, and repeats are dropped. An item can carry a hint in parentheses, as in `hashi (chopsticks)`, whose own commas don't split it.
-- The dictionary is indexed by `soundKey`, the sound ignoring vowel length, which is what makes a lookup find the words `checkAnswer` would call `correct` or `almost`.
+- The dictionary is indexed by `soundKeys`, the sounds ignoring vowel length, which is what makes a lookup find the words `checkAnswer` would call `correct` or `almost`.
 - Candidates come in dictionary order, with the same sound before a different vowel length. A hint found in a candidate's meaning moves it to the front.
 - Every item with a candidate starts selected on its first candidate. A choice whose vowel length differs from what was typed is marked.
 

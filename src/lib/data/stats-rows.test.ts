@@ -13,6 +13,12 @@ const word = (id: string, extra: Partial<Word> = {}): Word => ({
 });
 
 describe("buildRows", () => {
+  it("searches a word by the romaji the app shows", () => {
+    const stats: Stats = { words: { w1: { hits: 1, misses: 0 } }, kana: {} };
+    const [row] = buildRows(stats, [word("w1", { hiragana: "こーひー" })]);
+    expect(row.search).toContain("koohii");
+  });
+
   it("describes a word with its reading and a lowercase search text covering every form", () => {
     const stats: Stats = { words: { w1: { hits: 2, misses: 1 } }, kana: {} };
     const [row] = buildRows(stats, [word("w1")]);
