@@ -56,6 +56,7 @@
     feedbackTimer = setTimeout(() => void show(null), FEEDBACK_MS);
   }
 
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity -- read only on demand, to animate a control's content
   const controls = new Map<string, Element>();
 
   function control(key: string): Attachment {

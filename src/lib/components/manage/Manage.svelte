@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { SvelteSet } from "svelte/reactivity";
   import ArrowDown from "@lucide/svelte/icons/arrow-down";
   import ArrowUp from "@lucide/svelte/icons/arrow-up";
   import Check from "@lucide/svelte/icons/check";
@@ -115,7 +116,7 @@
   }
 
   // selection (ids that no longer exist are ignored)
-  let selected = $state<Set<string>>(new Set());
+  const selected = new SvelteSet<string>();
   let query = $state("");
   const sortKey = $derived(app.settings.wordsSort);
   const sortDirection = $derived(app.settings.wordsSortDirection);
@@ -149,7 +150,7 @@
 
   // bulk actions only ever touch what the user can see, so changing the filter clears the selection
   function onSearch() {
-    selected = new Set();
+    selected.clear();
     listEl?.scrollTo({ top: 0 });
   }
 
@@ -176,7 +177,7 @@
     app.setWords(gone.reduce(deleteTag, words));
     // the list may grow if a tag was filtering it, so the selection must not outlive it
     activeTags = activeTags.filter((t) => !gone.some((g) => sameTag(t, g)));
-    selected = new Set();
+    selected.clear();
     listEl?.scrollTo({ top: 0 });
   }
 
@@ -211,10 +212,8 @@
   }
 
   function toggleSelected(id: string) {
-    const next = new Set(selected);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    selected = next;
+    if (selected.has(id)) selected.delete(id);
+    else selected.add(id);
   }
 
   // the buttons and tag chips inside a card do their own thing, so a click on them must not also select or edit it
@@ -246,21 +245,23 @@
   }
 
   function toggleSelectAll() {
-    selected = allSelected ? new Set() : new Set(visibleWords.map((w) => w.id));
+    const ids = allSelected ? [] : visibleWords.map((w) => w.id);
+    selected.clear();
+    for (const id of ids) selected.add(id);
   }
 
   function setSelectedDisabled(disabled: boolean) {
     app.setWords(
       words.map((w) => (selected.has(w.id) ? setDisabled(w, disabled) : w)),
     );
-    selected = new Set();
+    selected.clear();
   }
 
   function removeSelected() {
     const count = selectedWords.length;
     if (!confirm(`Delete ${count} selected ${plural(count, "word")}?`)) return;
     app.setWords(words.filter((w) => !selected.has(w.id)));
-    selected = new Set();
+    selected.clear();
   }
 
   const ROW = "flex flex-wrap items-center gap-2";
