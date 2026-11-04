@@ -128,10 +128,7 @@ export function settingsFromRow(row: SettingsRow | null): Settings {
       DEFAULT_SETTINGS.statsSortDirection,
     ),
     tagColors: tagColorsFrom(row.tag_colors),
-    numberKeyTabs:
-      typeof row.number_key_tabs === "boolean"
-        ? row.number_key_tabs
-        : DEFAULT_SETTINGS.numberKeyTabs,
+    numberKeyTabs: row.number_key_tabs,
   };
 }
 

@@ -29,13 +29,9 @@ export function importJSON(text: string): SanitizeResult {
   return sanitizeWords(parseJSON(text));
 }
 
-/** Downloads a text as a file through the browser. */
-export function downloadText(
-  filename: string,
-  text: string,
-  mime = "application/json",
-): void {
-  const blob = new Blob([text], { type: `${mime};charset=utf-8` });
+/** Downloads a JSON text as a file through the browser. */
+export function downloadJSON(filename: string, text: string): void {
+  const blob = new Blob([text], { type: "application/json;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;

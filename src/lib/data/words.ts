@@ -457,7 +457,7 @@ export function sortWords(
         return collator.compare(a.meaning, b.meaning);
       case "status":
         return (
-          Number(!!a.disabled) - Number(!!b.disabled) ||
+          Number(a.disabled) - Number(b.disabled) ||
           (a.disabled ? 0 : a.activatedAt - b.activatedAt)
         );
     }

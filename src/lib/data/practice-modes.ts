@@ -8,7 +8,7 @@ import {
 } from "../core/romaji";
 import type { Stats, Verdict, Word } from "../core/types";
 import type { PracticeMode } from "./practice-session";
-import { drawWeight, recordAnswer, recordKana } from "./stats";
+import { drawWeight } from "./stats";
 
 /** What is typed for a word: its reading, its meaning or both. */
 export type WordsFocus = "reading" | "meaning" | "both";
@@ -51,20 +51,12 @@ export interface Recorder {
   kana: (script: KanaScript, hiragana: string, hit: boolean) => void;
 }
 
-/** A recorder that only counts the answers in `stats`, in memory. */
-export function statsRecorder(stats: Stats): Recorder {
-  return {
-    word: (word, verdict) => recordAnswer(stats, word, verdict),
-    kana: (script, hiragana, hit) => recordKana(stats, script, hiragana, hit),
-  };
-}
-
 /** Word practice: enabled words, weighted by past mistakes. "almost" is a real verdict here. */
 export function wordsMode(
   words: Word[],
   stats: Stats,
-  focus: WordsFocus = "reading",
-  recorder: Recorder = statsRecorder(stats),
+  focus: WordsFocus,
+  recorder: Recorder,
 ): PracticeMode<Word> {
   return {
     pool: words.filter((w) => !w.disabled),
@@ -79,12 +71,12 @@ export function wordsMode(
 export type PracticeItem =
   { kind: "word"; word: Word } | { kind: "kana"; kana: Kana };
 
-/** The right answer of an item, shown with the verdict. */
 /** A run of the answer as written, with its furigana above it and its romaji below it. */
 export interface AnswerPart extends FuriganaPart {
   romaji: string;
 }
 
+/** The right answer of an item, shown with the verdict. */
 export interface RightAnswer {
   /** The word as written, or the kana symbol, with its reading above what is not hiragana */
   written: AnswerPart[];
@@ -114,8 +106,8 @@ export function mixedMode(
   words: Word[],
   selected: string[],
   stats: Stats,
-  focus: WordsFocus = "reading",
-  recorder: Recorder = statsRecorder(stats),
+  focus: WordsFocus,
+  recorder: Recorder,
 ): PracticeMode<PracticeItem> {
   const wordMode = wordsMode(words, stats, focus, recorder);
   const kana = kanaMode(selected, stats, recorder);
@@ -147,7 +139,7 @@ export function mixedMode(
 export function kanaMode(
   selected: string[],
   stats: Stats,
-  recorder: Recorder = statsRecorder(stats),
+  recorder: Recorder,
 ): PracticeMode<Kana> {
   return {
     pool: buildKana(selected),

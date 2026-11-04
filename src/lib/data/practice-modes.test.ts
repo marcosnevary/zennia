@@ -2,14 +2,37 @@ import { describe, expect, it } from "vitest";
 import {
   checkParts,
   joinAnswers,
-  kanaMode,
-  mixedMode,
+  kanaMode as buildKanaMode,
+  mixedMode as buildMixedMode,
   rightAnswer,
-  wordsMode,
+  wordsMode as buildWordsMode,
+  type Recorder,
+  type WordsFocus,
 } from "./practice-modes";
-import { emptyStats } from "./stats";
+import { emptyStats, recordAnswer, recordKana } from "./stats";
 import { kanaKey } from "../core/kana";
-import type { Word } from "../core/types";
+import type { Stats, Word } from "../core/types";
+
+const recorderOf = (stats: Stats): Recorder => ({
+  word: (word, verdict) => recordAnswer(stats, word, verdict),
+  kana: (script, hiragana, hit) => recordKana(stats, script, hiragana, hit),
+});
+
+const wordsMode = (
+  words: Word[],
+  stats: Stats,
+  focus: WordsFocus = "reading",
+) => buildWordsMode(words, stats, focus, recorderOf(stats));
+
+const kanaMode = (selected: string[], stats: Stats) =>
+  buildKanaMode(selected, stats, recorderOf(stats));
+
+const mixedMode = (
+  words: Word[],
+  selected: string[],
+  stats: Stats,
+  focus: WordsFocus = "reading",
+) => buildMixedMode(words, selected, stats, focus, recorderOf(stats));
 
 const word = (id: string, extra: Partial<Word> = {}): Word => ({
   id,

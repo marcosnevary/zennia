@@ -269,8 +269,6 @@
   }
 
   const ROW = "flex flex-wrap items-center gap-2";
-  // buttons share the whole row evenly
-  const WIDE = `${ROW} *:flex-1 *:text-center`;
   const DIM = "opacity-45";
 </script>
 
@@ -411,19 +409,15 @@
           />
           {@render fieldError(errors.meaning)}
           <TagInput bind:tags={newTags} suggestions={tags} />
-          <div class={WIDE}>
-            <button class="action" type="submit"><Plus />Add</button>
-          </div>
+          <button class="action w-full" type="submit"><Plus />Add</button>
           {#if merged}<p role="status">{merged}</p>{/if}
         </form>
-        <div class="mt-2 {WIDE}">
-          <button
-            type="button"
-            class="field"
-            onclick={() => romajiDialog?.open()}
-            ><ListPlus />Add from romaji</button
-          >
-        </div>
+        <button
+          type="button"
+          class="field mt-2 w-full"
+          onclick={() => romajiDialog?.open()}
+          ><ListPlus />Add from romaji</button
+        >
       </div>
       <div>
         {#if words.length === 0}

@@ -8,7 +8,6 @@ import {
   kanaKey,
   lineKeys,
   parseKanaKey,
-  scriptKeys,
   sectionKeys,
   selectKeys,
   toggleKeys,
@@ -137,13 +136,6 @@ describe("key lists", () => {
     expect(lineKeys("katakana", combo, 2)).toHaveLength(12);
   });
 
-  it("scriptKeys joins every section of one script, without mixing in the other", () => {
-    const keys = scriptKeys("katakana");
-    expect(keys).toHaveLength(107);
-    expect(new Set(keys).size).toBe(107);
-    expect(keys.every((k) => k.startsWith("katakana:"))).toBe(true);
-  });
-
   it("defaultKanaSelection is the basic hiragana, without dakuten, combinations or katakana", () => {
     const keys = defaultKanaSelection();
     expect(keys).toHaveLength(46);
@@ -155,7 +147,10 @@ describe("key lists", () => {
   });
 
   it("every key is a kana the practice can draw", () => {
-    const keys = [...scriptKeys("hiragana"), ...scriptKeys("katakana")];
+    const keys = KANA_SECTIONS.flatMap((s) => [
+      ...sectionKeys("hiragana", s),
+      ...sectionKeys("katakana", s),
+    ]);
     expect(buildKana(keys)).toHaveLength(keys.length);
   });
 });

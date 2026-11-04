@@ -13,7 +13,6 @@
   } from "../../data/stats";
   import { buildRows, filterRows } from "../../data/stats-rows";
   import { cleanTags, findTag } from "../../data/words";
-  import type { Tally } from "../../core/types";
   import { getApp } from "../../state.svelte";
   import StatTile from "../StatTile.svelte";
   import TagChip from "../TagChip.svelte";
@@ -51,22 +50,18 @@
   const total = $derived(totalTally(stats));
 </script>
 
-{#snippet summary(tally: Tally)}
-  <section class="mt-6 mb-4 grid grid-cols-4 gap-2">
-    <StatTile value={tally.hits} label="Correct" />
-    <StatTile value={tally.misses} label="Wrong" />
-    <StatTile value={percent(accuracy(tally))} label="Accuracy" />
-    <StatTile value={attempts(tally)} label="Answers" />
-  </section>
-{/snippet}
-
 {#if !attempts(total)}
   <p class="mt-6 mb-4 text-muted">
     No statistics yet. Answer some words or kana in Practice and they will show
     up here.
   </p>
 {:else}
-  {@render summary(total)}
+  <section class="mt-6 mb-4 grid grid-cols-4 gap-2">
+    <StatTile value={total.hits} label="Correct" />
+    <StatTile value={total.misses} label="Wrong" />
+    <StatTile value={percent(accuracy(total))} label="Accuracy" />
+    <StatTile value={attempts(total)} label="Answers" />
+  </section>
 
   <h2 class="mb-0">
     Practiced ({visibleRows.length === rows.length
