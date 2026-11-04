@@ -1,6 +1,6 @@
 <script lang="ts">
   import CircleQuestionMark from "@lucide/svelte/icons/circle-question-mark";
-  import { closeOnBackdrop } from "../manage/dialog";
+  import Dialog from "../Dialog.svelte";
 
   let helpEl = $state<HTMLDialogElement>();
 </script>
@@ -14,17 +14,12 @@
   <CircleQuestionMark class="size-4" />
 </button>
 
-<dialog
-  class="w-[min(560px,calc(100vw-32px))]"
-  bind:this={helpEl}
-  use:closeOnBackdrop
-  aria-label="Help: import and export"
->
+<Dialog bind:el={helpEl} label="Help: import and export" width={560}>
   <h2 class="mt-0">Import and export</h2>
 
   <h3 class="mt-4 mb-1 text-base font-bold">Export JSON</h3>
   <p class="mt-1 mb-2">
-    Downloads all your words (including disabled ones) as a <code>.json</code> file.
+    Downloads all your words (including inactive ones) as a <code>.json</code> file.
     Use it as a backup, or to copy your words to another account.
   </p>
   <p class="mt-1 mb-2">
@@ -66,4 +61,4 @@
       >Close</button
     >
   </div>
-</dialog>
+</Dialog>

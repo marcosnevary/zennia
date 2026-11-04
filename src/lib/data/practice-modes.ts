@@ -13,6 +13,12 @@ import { drawWeight } from "./stats";
 /** What is typed for a word: its reading, its meaning or both. */
 export type WordsFocus = "reading" | "meaning" | "both";
 
+export const WORDS_FOCUSES: { id: WordsFocus; label: string }[] = [
+  { id: "reading", label: "Reading" },
+  { id: "meaning", label: "Meaning" },
+  { id: "both", label: "Both" },
+];
+
 /** The two typed answers of the "both" focus as the single string a practice session takes (an input never holds a newline). */
 export function joinAnswers(reading: string, meaning: string): string {
   return `${reading}\n${meaning}`;
@@ -51,7 +57,7 @@ export interface Recorder {
   kana: (script: KanaScript, hiragana: string, hit: boolean) => void;
 }
 
-/** Word practice: enabled words, weighted by past mistakes. "almost" is a real verdict here. */
+/** Word practice: active words, weighted by past mistakes. "almost" is a real verdict here. */
 export function wordsMode(
   words: Word[],
   stats: Stats,

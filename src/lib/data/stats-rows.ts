@@ -1,8 +1,15 @@
 import { SCRIPT_LABELS, parseKanaKey, symbolOf } from "../core/kana";
 import { toDisplayRomaji } from "../core/romaji";
 import type { Stats, Tally, Word } from "../core/types";
-import { hasEveryTag, hasSearchTags, parseSearch, wordReading } from "./words";
-import { sortTallies, type StatsSort, type StatsSortDirection } from "./stats";
+import {
+  hasEveryTag,
+  hasSearchTags,
+  parseSearch,
+  wordReading,
+  wordSearchFields,
+  type SortDirection,
+} from "./words";
+import { sortTallies, type StatsSort } from "./stats";
 
 export interface StatsRow {
   key: string;
@@ -32,8 +39,7 @@ export function buildRows(stats: Stats, words: Word[]): StatsRow[] {
       symbol: word.japanese,
       reading: wordReading(word),
       meaning: word.meaning,
-      search:
-        `${word.japanese} ${word.hiragana} ${toDisplayRomaji(word.hiragana)} ${word.meaning}`.toLowerCase(),
+      search: wordSearchFields(word).join(" ").toLowerCase(),
       ja: true,
       tags: word.tags,
       tally,
@@ -64,7 +70,7 @@ export interface StatsFilter {
   /** The tag chips of the search bar: a row needs every one */
   tags: string[];
   sort: StatsSort;
-  direction: StatsSortDirection;
+  direction: SortDirection;
 }
 
 /** The rows to show: having the chosen tags and matching the search text and its `#` terms, in the chosen order. */

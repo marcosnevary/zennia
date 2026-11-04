@@ -1,15 +1,15 @@
 <script lang="ts">
+  import type { SortDirection } from "../../data/words";
   import ArrowDown from "@lucide/svelte/icons/arrow-down";
   import ArrowUp from "@lucide/svelte/icons/arrow-up";
   import {
     STATS_SORT_OPTIONS,
     accuracy,
     accuracyLevel,
-    attempts,
+    answerCount,
     percent,
     totalTally,
     type StatsSort,
-    type StatsSortDirection,
   } from "../../data/stats";
   import { buildRows, filterRows } from "../../data/stats-rows";
   import { cleanTags, findTag } from "../../data/words";
@@ -29,7 +29,7 @@
   const direction = $derived(app.settings.statsSortDirection);
   let listEl = $state<HTMLUListElement>();
 
-  function setSort(next: StatsSort, nextDirection: StatsSortDirection) {
+  function setSort(next: StatsSort, nextDirection: SortDirection) {
     app.setStatsSort(next, nextDirection);
     listEl?.scrollTo({ top: 0 });
   }
@@ -50,7 +50,7 @@
   const total = $derived(totalTally(stats));
 </script>
 
-{#if !attempts(total)}
+{#if !answerCount(total)}
   <p class="mt-6 mb-4 text-muted">
     No statistics yet. Answer some words or kana in Practice and they will show
     up here.
@@ -60,7 +60,7 @@
     <StatTile value={total.hits} label="Correct" />
     <StatTile value={total.misses} label="Wrong" />
     <StatTile value={percent(accuracy(total))} label="Accuracy" />
-    <StatTile value={attempts(total)} label="Answers" />
+    <StatTile value={answerCount(total)} label="Answers" />
   </section>
 
   <h2 class="mb-0">

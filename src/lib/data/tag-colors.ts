@@ -1,4 +1,4 @@
-/** A tag's saved colour: a hue on the colour wheel and one of the `TAG_TONES`. */
+/** A tag's saved color: a hue on the color wheel and one of the `TAG_TONES`. */
 export interface TagColor {
   hue: number;
   tone: number;
@@ -12,10 +12,10 @@ export const TAG_TONES = [
 ] as const;
 
 const HUE_STEP = 5;
-// the OKLab distance from which two chips read as clearly different colours, not shades of one
+// the OKLab distance from which two chips read as clearly different colors, not shades of one
 const DISTINCT = 0.07;
 
-/** The key a tag's colour is saved under, the same for every spelling of the tag. */
+/** The key a tag's color is saved under, the same for every spelling of the tag. */
 export function tagKey(tag: string): string {
   return tag.trim().toLowerCase();
 }
@@ -54,7 +54,7 @@ function distance(x: Lab, y: Lab): number {
   return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]);
 }
 
-// only colours both themes can show as they are, so the distances measured are the ones seen
+// only colors both themes can show as they are, so the distances measured are the ones seen
 const CANDIDATES: TagColor[][] = TAG_TONES.map((_, tone) =>
   Array.from({ length: 360 / HUE_STEP }, (_, i) => ({
     hue: i * HUE_STEP,
@@ -65,8 +65,8 @@ const CANDIDATES: TagColor[][] = TAG_TONES.map((_, tone) =>
 );
 
 /**
- * The colour farthest from the ones in use, in the softest tone that still keeps it clearly apart from
- * all of them. The seed sets which hue is tried first, so ties do not always fall on the same colour.
+ * The color farthest from the ones in use, in the softest tone that still keeps it clearly apart from
+ * all of them. The seed sets which hue is tried first, so ties do not always fall on the same color.
  */
 function farthest(used: TagColor[], seed: number): TagColor {
   const usedFills = used.map((color) => fill(color, "light"));
@@ -84,8 +84,8 @@ function farthest(used: TagColor[], seed: number): TagColor {
 }
 
 /**
- * The colours of the tags: the saved ones are kept, the ones of tags no longer in use are dropped, and each
- * new tag gets the colour farthest from the rest. Returns `saved` itself when nothing changes.
+ * The colors of the tags: the saved ones are kept, the ones of tags no longer in use are dropped, and each
+ * new tag gets the color farthest from the rest. Returns `saved` itself when nothing changes.
  */
 export function assignTagColors(
   tags: string[],
@@ -103,7 +103,7 @@ export function assignTagColors(
   return changed ? colors : saved;
 }
 
-/** The saved colour of a tag, or one picked from its name while it has none (a tag still being typed). */
+/** The saved color of a tag, or one picked from its name while it has none (a tag still being typed). */
 export function tagColorOf(
   colors: Record<string, TagColor>,
   tag: string,
@@ -122,7 +122,7 @@ export function tagChipStyle(color: TagColor): string {
   return `--tag-fill: ${css("light")}; --tag-fill-dark: ${css("dark")}; --tag-text: oklch(0.32 0.07 ${color.hue})`;
 }
 
-/** Whether a stored value is a colour this version can draw. */
+/** Whether a stored value is a color this version can draw. */
 export function isTagColor(value: unknown): value is TagColor {
   if (typeof value !== "object" || value === null) return false;
   const { hue, tone } = value as Record<string, unknown>;

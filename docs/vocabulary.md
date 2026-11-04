@@ -30,7 +30,7 @@ The user pastes a list, and each item is looked up in the bundled dictionary (`s
 
 ## Import and export
 
-Export writes every word, including disabled ones, to a JSON file (`WordsFile`). Stats and settings aren't included.
+Export writes every word, including inactive ones, to a JSON file (`WordsFile`). Stats and settings aren't included.
 
 **JSON import** takes that file, or a plain list of words. An item with no written form, reading or meaning is skipped. The reading isn't checked to be kana here.
 

@@ -37,14 +37,14 @@ describe("tagKey", () => {
 });
 
 describe("assignTagColors", () => {
-  it("keeps the saved colours and drops the ones of tags no longer in use", () => {
+  it("keeps the saved colors and drops the ones of tags no longer in use", () => {
     const saved = { food: { hue: 10, tone: 0 }, gone: { hue: 200, tone: 1 } };
     expect(assignTagColors(["Food"], saved)).toEqual({
       food: { hue: 10, tone: 0 },
     });
   });
 
-  it("returns the saved colours themselves when nothing changes", () => {
+  it("returns the saved colors themselves when nothing changes", () => {
     const saved = { food: { hue: 10, tone: 0 } };
     expect(assignTagColors(["food"], saved)).toBe(saved);
   });
@@ -72,21 +72,21 @@ describe("assignTagColors", () => {
     }
   });
 
-  it("uses the softest tone while the colours still fit in it", () => {
+  it("uses the softest tone while the colors still fit in it", () => {
     const colors = Object.values(assignTagColors(names(3), {}));
     expect(colors.every((c) => c.tone === 0)).toBe(true);
   });
 });
 
 describe("tagColorOf", () => {
-  it("gives the saved colour of the tag, whatever its spelling", () => {
+  it("gives the saved color of the tag, whatever its spelling", () => {
     expect(tagColorOf({ food: { hue: 10, tone: 2 } }, "Food")).toEqual({
       hue: 10,
       tone: 2,
     });
   });
 
-  it("picks the same colour every time for a tag with none saved", () => {
+  it("picks the same color every time for a tag with none saved", () => {
     expect(tagColorOf({}, "draft")).toEqual(tagColorOf({}, " Draft"));
     expect(isTagColor(tagColorOf({}, "draft"))).toBe(true);
   });

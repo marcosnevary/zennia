@@ -46,7 +46,7 @@ const word = (id: string, extra: Partial<Word> = {}): Word => ({
 });
 
 describe("wordsMode", () => {
-  it("draws only enabled words", () => {
+  it("draws only active words", () => {
     const mode = wordsMode(
       [word("a"), word("b", { disabled: true })],
       emptyStats(),

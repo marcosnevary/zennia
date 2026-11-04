@@ -70,7 +70,7 @@ describe("accuracyLevel", () => {
 });
 
 describe("accuracy and sorting", () => {
-  it("accuracy is null without attempts", () => {
+  it("accuracy is null without answers", () => {
     expect(accuracy({ hits: 0, misses: 0 })).toBeNull();
     expect(accuracy({ hits: 3, misses: 1 })).toBe(0.75);
   });

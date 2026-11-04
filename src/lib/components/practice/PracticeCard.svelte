@@ -22,7 +22,7 @@
     readingVerdict = null,
     meaningVerdict = null,
     hits,
-    total,
+    answers,
     askReading = true,
     askMeaning = false,
     answer = $bindable(),
@@ -45,7 +45,7 @@
     meaningVerdict?: Verdict | null;
     /** Session score, shown below the fields */
     hits: number;
-    total: number;
+    answers: number;
     /** Whether the romaji field is shown */
     askReading?: boolean;
     /** Whether the meaning field is shown */
@@ -156,5 +156,5 @@
     >
   </form>
 
-  <Scoreboard {hits} {total} />
+  <Scoreboard {hits} {answers} />
 </section>

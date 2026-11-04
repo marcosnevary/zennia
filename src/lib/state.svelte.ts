@@ -1,6 +1,7 @@
 import { getContext, setContext } from "svelte";
 import { SvelteSet } from "svelte/reactivity";
-import { kanaKey, type KanaScript } from "./core/kana";
+import { messageOf } from "./core/errors";
+import { defaultKanaSelection, kanaKey, type KanaScript } from "./core/kana";
 import type { Stats, Verdict, Word } from "./core/types";
 import type { Account, ProfileChange } from "./data/db/client";
 import type { Repo, Stored } from "./data/db/repo";
@@ -8,13 +9,12 @@ import type { PracticeItem, Recorder, WordsFocus } from "./data/practice-modes";
 import { startSession, type Session } from "./data/practice-session";
 import { DEFAULT_SETTINGS, type Settings } from "./data/settings";
 import {
-  attempts,
+  answerCount,
   emptyStats,
   recordAnswer,
   recordKana,
   totalTally,
   type StatsSort,
-  type StatsSortDirection,
 } from "./data/stats";
 import { assignTagColors, tagKey } from "./data/tag-colors";
 import {
@@ -31,10 +31,6 @@ import {
   type SortDirection,
   type SortKey,
 } from "./data/words";
-
-function messageOf(error: unknown): string {
-  return error instanceof Error ? error.message : "Unknown error.";
-}
 
 function newestFirst(words: Word[]): Word[] {
   return [...words].sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
@@ -80,6 +76,11 @@ export class App {
     this.#repo = repo;
   }
 
+  /** The kana included in practice. */
+  get kanaSelection(): string[] {
+    return this.settings.kanaSelection ?? defaultKanaSelection();
+  }
+
   async init(): Promise<void> {
     this.status = "loading";
     this.error = "";
@@ -88,7 +89,7 @@ export class App {
     try {
       const stored = await this.#repo.load();
       const isNew =
-        stored.words.length === 0 && !attempts(totalTally(stored.stats));
+        stored.words.length === 0 && !answerCount(totalTally(stored.stats));
       this.account = await this.#repo.account();
       if (this.#repo.takeLinkConflict()) {
         if (isNew) {
@@ -179,7 +180,7 @@ export class App {
     this.#syncTagColors();
   }
 
-  /** Renames the tag on every word; the tag keeps its colour, unless it merges into one that already has its own. */
+  /** Renames the tag on every word; the tag keeps its color, unless it merges into one that already has its own. */
   renameTag(from: string, to: string): void {
     const merged = findTag(allTags(this.words), to);
     const colors = this.settings.tagColors;
@@ -234,10 +235,7 @@ export class App {
     this.#setSettings({ wordsSort, wordsSortDirection });
   }
 
-  setStatsSort(
-    statsSort: StatsSort,
-    statsSortDirection: StatsSortDirection,
-  ): void {
+  setStatsSort(statsSort: StatsSort, statsSortDirection: SortDirection): void {
     this.#setSettings({ statsSort, statsSortDirection });
   }
 
@@ -261,7 +259,7 @@ export class App {
     writeThemeCache(stored.settings.theme);
   }
 
-  // gives new tags a colour and frees the colours of tags no longer in use
+  // gives new tags a color and frees the colors of tags no longer in use
   #syncTagColors(): void {
     const saved = $state.snapshot(this.settings.tagColors);
     const tagColors = assignTagColors(allTags(this.words), saved);

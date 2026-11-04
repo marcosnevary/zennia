@@ -187,14 +187,14 @@ describe("setDisabled", () => {
     tags: [],
   };
 
-  it("stamps the activation time when a word is enabled", () => {
+  it("stamps the activation time when a word is activated", () => {
     expect(setDisabled(base, false, 500)).toMatchObject({
       disabled: false,
       activatedAt: 500,
     });
   });
 
-  it("keeps the activation time when a word is already enabled or gets disabled", () => {
+  it("keeps the activation time when a word is already active or gets deactivated", () => {
     const on = { ...base, disabled: false, activatedAt: 100 };
     expect(setDisabled(on, false, 500).activatedAt).toBe(100);
     expect(setDisabled(on, true, 500)).toMatchObject({
@@ -263,7 +263,7 @@ describe("makeWord and updateWord", () => {
     tags: [],
   };
 
-  it("makeWord trims the fields and starts the word enabled with a fresh id", () => {
+  it("makeWord trims the fields and starts the word active with a fresh id", () => {
     const a = makeWord(typed);
     expect(a).toMatchObject({
       japanese: "食べる",
@@ -276,7 +276,7 @@ describe("makeWord and updateWord", () => {
     expect(a.activatedAt).toBeGreaterThan(0);
   });
 
-  it("updateWord replaces the texts but keeps the id and whether the word is disabled", () => {
+  it("updateWord replaces the texts but keeps the id and whether the word is active", () => {
     const word = {
       ...makeWord({
         japanese: "犬",

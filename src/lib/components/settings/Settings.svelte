@@ -7,6 +7,7 @@
   import { tick, type Component } from "svelte";
   import type { Attachment } from "svelte/attachments";
   import { prefersReducedMotion } from "svelte/motion";
+  import { messageOf } from "../../core/errors";
   import { importAnkiDeck } from "../../data/anki";
   import {
     downloadJSON,
@@ -14,7 +15,7 @@
     exportJSON,
     importJSON,
   } from "../../data/io";
-  import { attempts, totalTally } from "../../data/stats";
+  import { answerCount, totalTally } from "../../data/stats";
   import {
     importBrief,
     importSummary,
@@ -23,17 +24,11 @@
   import Help from "./Help.svelte";
   import SettingRow from "./SettingRow.svelte";
   import Switch from "../Switch.svelte";
-  import type { WordsFocus } from "../../data/practice-modes";
+  import { WORDS_FOCUSES, type WordsFocus } from "../../data/practice-modes";
   import { THEMES, type ThemePreference } from "../../data/theme";
   import { getApp } from "../../state.svelte";
 
   const app = getApp();
-
-  const FOCUSES: { id: WordsFocus; label: string }[] = [
-    { id: "reading", label: "Reading" },
-    { id: "meaning", label: "Meaning" },
-    { id: "both", label: "Both" },
-  ];
 
   const FEEDBACK_MS = 4000;
 
@@ -121,7 +116,7 @@
       const result = app.importWords(incoming);
       flash(key, true, importBrief(result), importSummary(result, skipped));
     } catch (e) {
-      error = e instanceof Error ? e.message : "Could not import the file.";
+      error = messageOf(e, "Could not import the file.");
       flash(key, false, "Import failed");
     }
   }
@@ -175,7 +170,7 @@
       onchange={(e) => app.setWordsFocus(e.currentTarget.value as WordsFocus)}
       aria-label="Answer words by"
     >
-      {#each FOCUSES as f (f.id)}
+      {#each WORDS_FOCUSES as f (f.id)}
         <option value={f.id}>{f.label}</option>
       {/each}
     </select>
@@ -250,7 +245,7 @@
     </label>
   </SettingRow>
   <!-- the row outlives the reset until its confirmation on the button is over -->
-  {#if attempts(totalTally(app.stats)) || feedback?.key === "reset"}
+  {#if answerCount(totalTally(app.stats)) || feedback?.key === "reset"}
     <SettingRow
       title="Reset statistics"
       description="Erase every practice result. This cannot be undone."

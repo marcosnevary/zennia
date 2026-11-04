@@ -3,7 +3,9 @@
   import Plus from "@lucide/svelte/icons/plus";
   import Search from "@lucide/svelte/icons/search";
   import TagInput from "./TagInput.svelte";
-  import { closeOnBackdrop } from "./dialog";
+  import Dialog from "../Dialog.svelte";
+  import SelectAll from "../SelectAll.svelte";
+  import { selectRow } from "../select-row";
   import { plural } from "../../core/plural";
   import {
     loadDictionary,
@@ -44,23 +46,6 @@
   function toggleSelectAll() {
     const next = !allSelected;
     for (const row of found) row.selected = next;
-  }
-
-  // the candidate select inside a row does its own thing, so a click on it must not also toggle the row
-  function onRowClick(event: MouseEvent, row: Row) {
-    if (!(event.target as Element).closest("select"))
-      row.selected = !row.selected;
-  }
-
-  // a double click would otherwise highlight the word under the pointer
-  function onRowMouseDown(event: MouseEvent) {
-    if (event.detail > 1) event.preventDefault();
-  }
-
-  function onRowKey(event: KeyboardEvent, row: Row) {
-    if (event.target !== event.currentTarget || event.key !== " ") return;
-    row.selected = !row.selected;
-    event.preventDefault();
   }
 
   export function open() {
@@ -104,12 +89,7 @@
   }
 </script>
 
-<dialog
-  class="w-[min(720px,calc(100vw-32px))]"
-  bind:this={dialogEl}
-  use:closeOnBackdrop
-  aria-label="Add from romaji"
->
+<Dialog bind:el={dialogEl} label="Add from romaji" width={720}>
   <div class="grid gap-2">
     <h2 class="mt-0 mb-2">Add from romaji</h2>
     {#if rows.length === 0}
@@ -139,20 +119,13 @@
       </form>
     {:else}
       {#if found.length}
-        <!-- on top of the list, which scrolls up behind it -->
-        <div class="relative z-10 flex flex-wrap items-center gap-2">
-          <label class="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={allSelected}
-              onchange={toggleSelectAll}
-            />
-            {found.length === 1 ? "Select" : "Select all"}
-            {found.length}
-            {plural(found.length, "word")}
-          </label>
-          <span class="text-muted">{chosen.length} selected</span>
-        </div>
+        <SelectAll
+          checked={allSelected}
+          onchange={toggleSelectAll}
+          count={found.length}
+          noun="word"
+          summary={`${chosen.length} selected`}
+        />
         <!-- reaches up behind the 40px select-all row and the 8px gap below it -->
         <ul
           class="scroll-list-12 [--scroll-list-cap:50dvh] [--scroll-list-under:48px]"
@@ -170,9 +143,10 @@
                 tabindex="0"
                 aria-checked={row.selected}
                 aria-label={`Add ${candidate.japanese}${warn ? " (vowel length differs from what you typed)" : ""}`}
-                onclick={(event) => onRowClick(event, row)}
-                onmousedown={onRowMouseDown}
-                onkeydown={(event) => onRowKey(event, row)}
+                {...selectRow({
+                  toggle: () => (row.selected = !row.selected),
+                  controls: "select",
+                })}
               >
                 <span class="text-lg" lang="ja">{candidate.japanese}</span>
                 <span class="text-sm text-muted" lang="ja"
@@ -243,4 +217,4 @@
       </div>
     {/if}
   </div>
-</dialog>
+</Dialog>
