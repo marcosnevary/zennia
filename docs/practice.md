@@ -59,7 +59,7 @@ A kana is always answered by its reading, and is either `correct` or `incorrect`
 
 ### Meaning
 
-The meaning is compared ignoring case and punctuation, with single spaces (`src/lib/core/meaning.ts`). A saved meaning can list several answers separated by `;` or `,`, and typing any one of them is correct. A leading "to" and what is in parentheses are optional, and separators inside parentheses don't split the answer, so `cat` answers `cat (esp. the domestic cat, Felis catus)` and `eat` answers `to eat`. A meaning is never `almost`.
+The meaning is compared ignoring case and punctuation, with single spaces (`src/lib/core/meaning.ts`). A saved meaning can list several answers separated by `;` or `,`, and typing any one of them is correct. A comma may also belong to a phrase, so what lies between two `;` counts as an answer too: both `food` and `food, clothing and shelter` answer `food, clothing and shelter`. A leading "to" and what is in parentheses are optional, and separators inside parentheses don't split the answer, so `cat` answers `cat (esp. the domestic cat, Felis catus)` and `eat` answers `to eat`. A meaning is never `almost`.
 
 ### Focus
 

@@ -10,17 +10,21 @@ function normalizeMeaning(text: string): string {
 
 /**
  * Whether the typed text is the saved meaning. A meaning can list several answers
- * separated by ";" or ","; typing any one of them is correct. What is in parentheses
- * is a note, as in "cat (esp. the domestic cat, Felis catus)": it holds no separators, and is optional.
+ * separated by ";" or ","; typing any one of them is correct. A comma may also belong to a phrase,
+ * as in "food, clothing and shelter", and the text can't tell which, so what lies between two ";" is
+ * an answer as well. What is in parentheses is a note, as in "cat (esp. the domestic cat, Felis catus)":
+ * it holds no separators, and is optional.
  */
 export function checkMeaning(input: string, meaning: string): boolean {
   const typed = normalizeMeaning(input);
   if (!typed) return false;
-  return meaning
-    .split(/[;,](?![^(]*\))/)
-    .some(
-      (option) =>
-        normalizeMeaning(option) === typed ||
-        normalizeMeaning(option.replace(/\([^)]*\)/g, " ")) === typed,
-    );
+  const options = [
+    ...meaning.split(/;(?![^(]*\))/),
+    ...meaning.split(/[;,](?![^(]*\))/),
+  ];
+  return options.some(
+    (option) =>
+      normalizeMeaning(option) === typed ||
+      normalizeMeaning(option.replace(/\([^)]*\)/g, " ")) === typed,
+  );
 }

@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { checkMeaning } from "#lib/core/meaning.ts";
 import { checkAnswer, toDisplayRomaji } from "#lib/core/romaji.ts";
 import {
   indexDictionary,
@@ -29,6 +30,20 @@ describe("the bundled dictionary", () => {
     const rejected = bundled
       .map(([reading]) => reading)
       .filter((r) => checkAnswer(toDisplayRomaji(r), r) !== "correct");
+    expect(rejected).toEqual([]);
+  });
+
+  it("accepts every meaning typed in full, without its notes", () => {
+    const bundled: DictionaryRow[] = JSON.parse(
+      readFileSync("static/dictionary.json", "utf8"),
+    );
+    const rejected = bundled.flatMap(([, , meaning]) =>
+      meaning
+        .split(/;(?![^(]*\))/)
+        .map((part) => part.replace(/\([^)]*\)/g, " "))
+        .filter((part) => /[\p{L}\p{N}]/u.test(part))
+        .filter((part) => !checkMeaning(part, meaning)),
+    );
     expect(rejected).toEqual([]);
   });
 });
