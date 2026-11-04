@@ -1,5 +1,69 @@
 import { describe, expect, it } from "vitest";
-import { chunks, fetchAll } from "./repo";
+import type { Db } from "./client";
+import { chunks, createRepo, fetchAll } from "./repo";
+import type { SettingsRow } from "./rows";
+
+// typed in full so that a new column of `SettingsRow` has to be added here, and then fails the test until `load` selects it
+const SETTINGS_ROW: SettingsRow = {
+  theme: "dark",
+  words_focus: "meaning",
+  kana_selection: null,
+  words_sort: "reading",
+  words_sort_direction: "desc",
+  stats_sort: "accuracy",
+  stats_sort_direction: "asc",
+  tag_colors: { food: { hue: 10, tone: 1 } },
+  number_key_tabs: false,
+};
+
+/** A client whose `settings` table answers like the real API: only the selected columns come back. */
+function fakeDb(row: SettingsRow) {
+  const noRows = {
+    order: () => noRows,
+    range: async () => ({ data: [], error: null }),
+  };
+  const selected: string[] = [];
+  const settings = {
+    select(columns: string) {
+      selected.push(...columns.split(",").map((column) => column.trim()));
+      return {
+        maybeSingle: async () => ({
+          data: Object.fromEntries(
+            selected.map((column) => [
+              column,
+              row[column as keyof SettingsRow],
+            ]),
+          ),
+          error: null,
+        }),
+      };
+    },
+  };
+  const db = {
+    auth: {
+      getSession: async () => ({
+        data: { session: { user: { id: "u1" } } },
+      }),
+    },
+    from: (table: string) =>
+      table === "settings" ? settings : { select: () => noRows },
+  } as unknown as Db;
+  return { db, selected };
+}
+
+describe("load", () => {
+  it("selects every settings column", async () => {
+    const { db, selected } = fakeDb(SETTINGS_ROW);
+    await createRepo(() => db).load();
+    expect(selected.sort()).toEqual(Object.keys(SETTINGS_ROW).sort());
+  });
+
+  it("returns the saved tag colors", async () => {
+    const { db } = fakeDb(SETTINGS_ROW);
+    const { settings } = await createRepo(() => db).load();
+    expect(settings.tagColors).toEqual(SETTINGS_ROW.tag_colors);
+  });
+});
 
 describe("fetchAll", () => {
   const table = Array.from({ length: 2500 }, (_, i) => i);
