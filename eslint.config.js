@@ -16,6 +16,11 @@ export default ts.config(
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },
     },
+    rules: {
+      '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
+      // state holding a Set or Map is replaced as a whole, which $state already tracks; the others are local lookups
+      'svelte/prefer-svelte-reactivity': 'off',
+    },
   },
   {
     files: ['**/*.svelte', '**/*.svelte.ts'],

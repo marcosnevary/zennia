@@ -5,7 +5,6 @@
   import TagInput from './TagInput.svelte'
   import { closeOnBackdrop } from './dialog'
   import { plural } from '../../core/plural'
-  import { toDisplayRomaji } from '../../core/romaji'
   import { loadDictionary, lookUp, parseRomajiList, type Candidate, type RomajiItem } from '../../data/dictionary'
   import { importSummary, makeWord, wordReading } from '../../data/words'
   import { getApp } from '../../state.svelte'

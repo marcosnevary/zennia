@@ -11,7 +11,7 @@ describe('fetchAll', () => {
 
   it('stops after a page that is exactly full', async () => {
     const calls: number[] = []
-    await fetchAll(async (from, to) => {
+    await fetchAll(async (from) => {
       calls.push(from)
       return { data: from === 0 ? table.slice(0, 1000) : [], error: null }
     })

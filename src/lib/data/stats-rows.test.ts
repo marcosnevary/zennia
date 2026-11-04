@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
 import { buildRows, filterRows, type StatsFilter } from './stats-rows'
-import { emptyStats } from './stats'
 import type { Stats, Word } from '../core/types'
 
 const word = (id: string, extra: Partial<Word> = {}): Word => ({

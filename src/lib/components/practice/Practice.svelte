@@ -4,7 +4,7 @@
   import type { Verdict } from '../../core/types'
   import PracticeCard from './PracticeCard.svelte'
   import { checkParts, joinAnswers, mixedMode, rightAnswer, type PracticeItem } from '../../data/practice-modes'
-  import { drawOdds, nextRound, startSession, submit as submitAnswer } from '../../data/practice-session'
+  import { nextRound, startSession, submit as submitAnswer } from '../../data/practice-session'
   import { getApp } from '../../state.svelte'
 
   const app = getApp()
@@ -14,12 +14,6 @@
   const mode = $derived(mixedMode(app.words, kanaSelection, app.stats, focus, app.recorder))
 
   let session = $state(startSession<PracticeItem>())
-  const odds = $derived(
-    drawOdds(session, mode).map(({ item, chance }) => ({
-      label: item.kind === 'word' ? `${item.word.japanese} · ${item.word.hiragana}` : item.kana.symbol,
-      chance,
-    })),
-  )
   let answer = $state('')
   let meaningAnswer = $state('')
   let inputEl = $state<HTMLInputElement>()
