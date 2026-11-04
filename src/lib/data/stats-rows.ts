@@ -20,7 +20,7 @@ export interface StatsRow {
   tally: Tally;
 }
 
-/** One row per answered word or kana. Stats of deleted words stay saved but are not listed. */
+/** One row per answered word or kana. */
 export function buildRows(stats: Stats, words: Word[]): StatsRow[] {
   const byId = new Map(words.map((w) => [w.id, w]));
   const rows: StatsRow[] = [];
