@@ -127,7 +127,7 @@ export function createRepo(getDb: () => Db): Repo {
         db
           .from("settings")
           .select(
-            "theme, words_focus, kana_selection, words_sort, words_sort_direction, stats_sort, stats_sort_direction, number_key_tabs",
+            "theme, words_focus, kana_selection, words_sort, words_sort_direction, stats_sort, stats_sort_direction, tag_colors, number_key_tabs",
           )
           .maybeSingle<SettingsRow>(),
       ]);
