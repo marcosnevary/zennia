@@ -11,7 +11,9 @@
   import Tag from "@lucide/svelte/icons/tag";
   import Tags from "@lucide/svelte/icons/tags";
   import Trash from "@lucide/svelte/icons/trash";
-  import { closeOnBackdrop } from "./dialog";
+  import Dialog from "../Dialog.svelte";
+  import SelectAll from "../SelectAll.svelte";
+  import { selectRow } from "../select-row";
   import KanaSelector from "./KanaSelector.svelte";
   import RomajiWordsDialog from "./RomajiWordsDialog.svelte";
   import Switch from "../Switch.svelte";
@@ -19,7 +21,6 @@
   import TagInput from "./TagInput.svelte";
   import TagSearch from "../TagSearch.svelte";
   import TagsDialog from "./TagsDialog.svelte";
-  import { defaultKanaSelection } from "../../core/kana";
   import { plural } from "../../core/plural";
   import type { Word } from "../../core/types";
   import { getApp } from "../../state.svelte";
@@ -225,27 +226,9 @@
     return !!(event.target as Element).closest("button");
   }
 
-  function onCardClick(event: MouseEvent, id: string) {
-    if (!onButton(event)) toggleSelected(id);
-  }
-
   // the double click's two clicks have already toggled the selection there and back, so it ends as it was
   function onCardDoubleClick(event: MouseEvent, word: Word) {
     if (!onButton(event)) edit(word);
-  }
-
-  // a double click would otherwise highlight the word under the pointer
-  function onCardMouseDown(event: MouseEvent) {
-    if (event.detail > 1) event.preventDefault();
-  }
-
-  // Enter stands in for the double click, the only other way to edit a word
-  function onCardKey(event: KeyboardEvent, word: Word) {
-    if (event.target !== event.currentTarget) return;
-    if (event.key === " ") toggleSelected(word.id);
-    else if (event.key === "Enter") edit(word);
-    else return;
-    event.preventDefault();
   }
 
   function toggleSelectAll() {
@@ -268,17 +251,14 @@
     selected.clear();
   }
 
-  const ROW = "flex flex-wrap items-center gap-2";
   const DIM = "opacity-45";
 </script>
 
 <div>
-  <dialog
-    class="w-[min(420px,calc(100vw-32px))]"
-    bind:this={dialogEl}
+  <Dialog
+    bind:el={dialogEl}
+    label="Edit word"
     onclose={() => (editingId = null)}
-    use:closeOnBackdrop
-    aria-label="Edit word"
   >
     <form class="grid gap-2" onsubmit={saveEdit}>
       <h2 class="mt-0 mb-2">Edit word</h2>
@@ -326,14 +306,9 @@
         <button type="button" onclick={() => dialogEl?.close()}>Cancel</button>
       </div>
     </form>
-  </dialog>
+  </Dialog>
 
-  <dialog
-    class="w-[min(420px,calc(100vw-32px))]"
-    bind:this={tagDialogEl}
-    use:closeOnBackdrop
-    aria-label="Tag selected words"
-  >
+  <Dialog bind:el={tagDialogEl} label="Tag selected words">
     <div class="grid gap-2">
       <h2 class="mt-0 mb-2">
         Tag {selectedWords.length} selected {plural(
@@ -353,7 +328,7 @@
         >
       </div>
     </div>
-  </dialog>
+  </Dialog>
 
   <TagsDialog
     bind:this={tagsDialog}
@@ -466,24 +441,14 @@
               </button>
             </div>
           </div>
-          <!-- on top of the list, which scrolls up behind it -->
-          <div class="{ROW} relative z-10 mb-2">
-            <label class="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={allSelected}
-                onchange={toggleSelectAll}
-              />
-              {visibleWords.length === 1 ? "Select" : "Select all"}
-              {visibleWords.length}
-              {plural(
-                visibleWords.length,
-                visibleWords.length === words.length ? "word" : "result",
-              )}
-            </label>
-            <span class="text-muted"
-              >{activeWordCount} active · {selectedWords.length} selected</span
-            >
+          <SelectAll
+            class="mb-2"
+            checked={allSelected}
+            onchange={toggleSelectAll}
+            count={visibleWords.length}
+            noun={visibleWords.length === words.length ? "word" : "result"}
+            summary={`${activeWordCount} active · ${selectedWords.length} selected`}
+          >
             <!-- keeps the space reserved so the layout does not shift when a selection appears; the icons are 20px in 40px buttons -->
             <div
               class="ml-auto flex gap-2 *:size-10 *:items-center *:justify-center [&_svg]:size-5"
@@ -508,16 +473,16 @@
               <button
                 class="icon"
                 onclick={() => setSelectedDisabled(false)}
-                aria-label="Enable selected"
-                title="Enable selected"
+                aria-label="Activate selected"
+                title="Activate selected"
               >
                 <Eye />
               </button>
               <button
                 class="icon"
                 onclick={() => setSelectedDisabled(true)}
-                aria-label="Disable selected"
-                title="Disable selected"
+                aria-label="Deactivate selected"
+                title="Deactivate selected"
               >
                 <EyeOff />
               </button>
@@ -530,7 +495,7 @@
                 <Trash />
               </button>
             </div>
-          </div>
+          </SelectAll>
           {#if visibleWords.length === 0}
             <p class="my-4 text-muted">
               No words match your search or tag filter.
@@ -549,10 +514,12 @@
                     tabindex="0"
                     aria-checked={selected.has(word.id)}
                     aria-label={`Select ${word.japanese}`}
-                    onclick={(event) => onCardClick(event, word.id)}
+                    {...selectRow({
+                      toggle: () => toggleSelected(word.id),
+                      enter: () => edit(word),
+                      controls: "button",
+                    })}
                     ondblclick={(event) => onCardDoubleClick(event, word)}
-                    onmousedown={onCardMouseDown}
-                    onkeydown={(event) => onCardKey(event, word)}
                     onpointerenter={() => app.markSeen(word.id)}
                   >
                     {#if app.newWordIds.has(word.id)}
@@ -584,8 +551,8 @@
                     <Switch
                       checked={!word.disabled}
                       onchange={() => toggle(word)}
-                      label="Enabled"
-                      title={word.disabled ? "Enable" : "Disable"}
+                      label="Active"
+                      title={word.disabled ? "Activate" : "Deactivate"}
                     />
                   </div>
                 </li>
@@ -599,7 +566,7 @@
 
   {#if section === "kana"}
     <KanaSelector
-      selected={app.settings.kanaSelection ?? defaultKanaSelection()}
+      selected={app.kanaSelection}
       onchange={(keys) => app.setKanaSelection(keys)}
     />
   {/if}

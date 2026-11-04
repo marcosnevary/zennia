@@ -1,7 +1,8 @@
 <script lang="ts">
   import ImageUp from "@lucide/svelte/icons/image-up";
   import Save from "@lucide/svelte/icons/save";
-  import { closeOnBackdrop } from "../manage/dialog";
+  import { messageOf } from "../../core/errors";
+  import Dialog from "../Dialog.svelte";
   import { toAvatar } from "../../data/avatar";
   import { getApp } from "../../state.svelte";
   import Avatar from "./Avatar.svelte";
@@ -46,7 +47,7 @@
     try {
       setPhoto(await toAvatar(file));
     } catch (e) {
-      error = e instanceof Error ? e.message : String(e);
+      error = messageOf(e);
     }
   }
 
@@ -63,18 +64,17 @@
       await app.updateProfile({ name: trimmed, photo });
       dialogEl?.close();
     } catch (e) {
-      error = `Could not save the profile: ${e instanceof Error ? e.message : String(e)}`;
+      error = `Could not save the profile: ${messageOf(e)}`;
     } finally {
       saving = false;
     }
   }
 </script>
 
-<dialog
-  class="w-[min(440px,calc(100vw-32px))]"
-  bind:this={dialogEl}
-  use:closeOnBackdrop
-  aria-label="Edit profile"
+<Dialog
+  bind:el={dialogEl}
+  label="Edit profile"
+  width={440}
   onclose={() => setPhoto(undefined)}
 >
   <form class="grid gap-4" onsubmit={save}>
@@ -111,4 +111,4 @@
       <button type="button" onclick={() => dialogEl?.close()}>Cancel</button>
     </div>
   </form>
-</dialog>
+</Dialog>

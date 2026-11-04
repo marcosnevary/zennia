@@ -84,7 +84,7 @@ describe("settings", () => {
     });
   });
 
-  it("reads the tag colours it can draw and drops the rest", () => {
+  it("reads the tag colors it can draw and drops the rest", () => {
     expect(
       settingsFromRow({
         theme: "system",

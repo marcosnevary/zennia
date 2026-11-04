@@ -117,7 +117,7 @@ export function cleanTags(tags: unknown[]): string[] {
   return result;
 }
 
-/** A new enabled word from the form texts. */
+/** A new active word from the form texts. */
 export function makeWord({
   japanese,
   hiragana,
@@ -136,7 +136,7 @@ export function makeWord({
   };
 }
 
-/** The word enabled or disabled; enabling a disabled word stamps the time, which orders the status sort. */
+/** The word activated or deactivated; activating it stamps the time, which orders the status sort. */
 export function setDisabled(
   word: Word,
   disabled: boolean,
@@ -147,7 +147,7 @@ export function setDisabled(
   return { ...word, disabled };
 }
 
-/** The word with the form texts applied; the id and the enabled state stay. */
+/** The word with the form texts applied; the id and whether it is active stay. */
 export function updateWord(
   word: Word,
   { japanese, hiragana, meaning, tags }: WordFields,
@@ -184,6 +184,16 @@ export function hasSearchTags(tags: string[], terms: string[]): boolean {
   return terms.every((term) => matchTags(tags, term).length > 0);
 }
 
+/** What a search matches a word against. */
+export function wordSearchFields(word: Word): string[] {
+  return [
+    word.japanese,
+    word.hiragana,
+    toDisplayRomaji(word.hiragana),
+    word.meaning,
+  ];
+}
+
 /**
  * The words matching the search in the word, the reading, its romaji or the meaning, and having a tag for
  * every `#` term; everything for a blank search.
@@ -193,9 +203,7 @@ export function searchWords(words: Word[], query: string): Word[] {
   return words.filter(
     (w) =>
       hasSearchTags(w.tags, tags) &&
-      [w.japanese, w.hiragana, toDisplayRomaji(w.hiragana), w.meaning].some(
-        (field) => field.toLowerCase().includes(text),
-      ),
+      wordSearchFields(w).some((field) => field.toLowerCase().includes(text)),
   );
 }
 

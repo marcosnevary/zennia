@@ -43,7 +43,7 @@ describe("nextRound", () => {
     expect(nextRound(answered, mode)).toMatchObject({
       verdict: null,
       hits: 1,
-      total: 1,
+      answers: 1,
     });
   });
 
@@ -57,11 +57,11 @@ describe("submit", () => {
   it("counts a correct answer and records it", () => {
     const { mode, recorded } = fakeMode(["a"], ["correct"]);
     const session = submit(nextRound(startSession<Item>(), mode), "x", mode);
-    expect(session).toMatchObject({ verdict: "correct", hits: 1, total: 1 });
+    expect(session).toMatchObject({ verdict: "correct", hits: 1, answers: 1 });
     expect(recorded).toEqual([["a", "correct"]]);
   });
 
-  it("counts a wrong or almost answer in the total but not in the hits", () => {
+  it("counts a wrong or almost answer in the answers but not in the hits", () => {
     const { mode } = fakeMode(
       ["a"],
       ["correct", "correct", "almost", "incorrect"],
@@ -69,14 +69,14 @@ describe("submit", () => {
     let session = nextRound(startSession<Item>(), mode);
     for (let i = 0; i < 4; i++)
       session = submit(submit(session, "x", mode), "", mode);
-    expect(session).toMatchObject({ hits: 2, total: 4 });
+    expect(session).toMatchObject({ hits: 2, answers: 4 });
   });
 
   it("moves on to the next item when submitted after a verdict, without counting again", () => {
     const { mode, recorded } = fakeMode(["a"]);
     const checked = submit(nextRound(startSession<Item>(), mode), "x", mode);
     const moved = submit(checked, "", mode);
-    expect(moved).toMatchObject({ verdict: null, hits: 1, total: 1 });
+    expect(moved).toMatchObject({ verdict: null, hits: 1, answers: 1 });
     expect(recorded).toHaveLength(1);
   });
 

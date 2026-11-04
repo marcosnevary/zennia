@@ -1,8 +1,10 @@
-import type { KanaScript } from "../../core/kana";
+import { kanaKey, type KanaScript } from "../../core/kana";
 import type { Stats, Tally, Word } from "../../core/types";
+import { WORDS_FOCUSES } from "../practice-modes";
 import { DEFAULT_SETTINGS, type Settings } from "../settings";
 import { STATS_SORT_OPTIONS } from "../stats";
 import { isTagColor, type TagColor } from "../tag-colors";
+import { THEMES } from "../theme";
 import { SORT_OPTIONS } from "../words";
 
 export interface WordRow {
@@ -91,21 +93,42 @@ export function statsFromRows(
   for (const r of wordRows)
     stats.words[r.word_id] = { hits: r.hits, misses: r.misses };
   for (const r of kanaRows)
-    stats.kana[`${r.script}:${r.hiragana}`] = {
+    stats.kana[kanaKey(r.script, r.hiragana)] = {
       hits: r.hits,
       misses: r.misses,
     };
   return stats;
 }
 
+/** The column of each setting. */
+const SETTING_COLUMNS = {
+  theme: "theme",
+  wordsFocus: "words_focus",
+  kanaSelection: "kana_selection",
+  wordsSort: "words_sort",
+  wordsSortDirection: "words_sort_direction",
+  statsSort: "stats_sort",
+  statsSortDirection: "stats_sort_direction",
+  tagColors: "tag_colors",
+  numberKeyTabs: "number_key_tabs",
+} as const satisfies Record<keyof Settings, keyof SettingsRow>;
+
+/** What `load` selects from the `settings` table. */
+export const SETTINGS_SELECT = Object.values(SETTING_COLUMNS).join(", ");
+
 export function settingsFromRow(row: SettingsRow | null): Settings {
   if (!row) return { ...DEFAULT_SETTINGS };
   return {
-    theme: row.theme === "light" || row.theme === "dark" ? row.theme : "system",
-    wordsFocus:
-      row.words_focus === "meaning" || row.words_focus === "both"
-        ? row.words_focus
-        : "reading",
+    theme: oneOf(
+      row.theme,
+      THEMES.map((t) => t.id),
+      DEFAULT_SETTINGS.theme,
+    ),
+    wordsFocus: oneOf(
+      row.words_focus,
+      WORDS_FOCUSES.map((f) => f.id),
+      DEFAULT_SETTINGS.wordsFocus,
+    ),
     kanaSelection: row.kana_selection,
     wordsSort: oneOf(
       row.words_sort,
@@ -133,19 +156,13 @@ export function settingsFromRow(row: SettingsRow | null): Settings {
 }
 
 export function settingsToRow(patch: Partial<Settings>): Partial<SettingsRow> {
-  const row: Partial<SettingsRow> = {};
-  if (patch.theme !== undefined) row.theme = patch.theme;
-  if (patch.wordsFocus !== undefined) row.words_focus = patch.wordsFocus;
-  if (patch.kanaSelection !== undefined)
-    row.kana_selection = patch.kanaSelection;
-  if (patch.wordsSort !== undefined) row.words_sort = patch.wordsSort;
-  if (patch.wordsSortDirection !== undefined)
-    row.words_sort_direction = patch.wordsSortDirection;
-  if (patch.statsSort !== undefined) row.stats_sort = patch.statsSort;
-  if (patch.statsSortDirection !== undefined)
-    row.stats_sort_direction = patch.statsSortDirection;
-  if (patch.tagColors !== undefined) row.tag_colors = patch.tagColors;
-  if (patch.numberKeyTabs !== undefined)
-    row.number_key_tabs = patch.numberKeyTabs;
-  return row;
+  const entries = Object.entries(patch).filter(
+    ([, value]) => value !== undefined,
+  );
+  return Object.fromEntries(
+    entries.map(([key, value]) => [
+      SETTING_COLUMNS[key as keyof Settings],
+      value,
+    ]),
+  );
 }

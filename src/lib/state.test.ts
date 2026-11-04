@@ -143,7 +143,7 @@ describe("App", () => {
     expect([...app.newWordIds]).toEqual(["c"]);
   });
 
-  it("saves a colour for each new tag and frees the colours of tags no longer in use", async () => {
+  it("saves a color for each new tag and frees the colors of tags no longer in use", async () => {
     const { app, calls } = await ready({
       words: [word("a", 1, { tags: ["food"] })],
     });
@@ -156,7 +156,7 @@ describe("App", () => {
     );
   });
 
-  it("keeps the colour of a renamed tag", async () => {
+  it("keeps the color of a renamed tag", async () => {
     const tagColors = { food: { hue: 10, tone: 0 } };
     const { app } = await ready({
       words: [word("a", 1, { tags: ["food"] })],
@@ -167,7 +167,7 @@ describe("App", () => {
     expect(app.settings.tagColors).toEqual({ meals: { hue: 10, tone: 0 } });
   });
 
-  it("keeps the colour of the tag a rename merges into", async () => {
+  it("keeps the color of the tag a rename merges into", async () => {
     const tagColors = {
       food: { hue: 10, tone: 0 },
       meals: { hue: 200, tone: 1 },
@@ -186,9 +186,9 @@ describe("App", () => {
 
   it("starts the practice score over when the app loads again", async () => {
     const { app } = await ready();
-    app.practice = { ...app.practice, hits: 2, total: 3 };
+    app.practice = { ...app.practice, hits: 2, answers: 3 };
     await app.signOut();
-    expect(app.practice).toMatchObject({ hits: 0, total: 0 });
+    expect(app.practice).toMatchObject({ hits: 0, answers: 0 });
   });
 
   it("drops the stats of a deleted word", async () => {

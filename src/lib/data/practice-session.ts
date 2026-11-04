@@ -19,12 +19,12 @@ export interface Session<T> {
   /** Set once the current item was checked; the next submit moves on. */
   verdict: Verdict | null;
   hits: number;
-  total: number;
+  answers: number;
   lastKey: string | null;
 }
 
 export function startSession<T>(): Session<T> {
-  return { current: null, verdict: null, hits: 0, total: 0, lastKey: null };
+  return { current: null, verdict: null, hits: 0, answers: 0, lastKey: null };
 }
 
 /** Draws the next item, avoiding the previous one when there are others. */
@@ -64,6 +64,6 @@ export function submit<T>(
     ...session,
     verdict,
     hits: session.hits + (hit ? 1 : 0),
-    total: session.total + 1,
+    answers: session.answers + 1,
   };
 }

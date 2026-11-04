@@ -16,6 +16,7 @@ import {
   settingsFromRow,
   settingsToRow,
   statsFromRows,
+  SETTINGS_SELECT,
   wordFromRow,
   wordToRow,
   type KanaStatRow,
@@ -123,12 +124,7 @@ export function createRepo(getDb: () => Db): Repo {
             .order("hiragana")
             .range(from, to),
         ),
-        db
-          .from("settings")
-          .select(
-            "theme, words_focus, kana_selection, words_sort, words_sort_direction, stats_sort, stats_sort_direction, tag_colors, number_key_tabs",
-          )
-          .maybeSingle<SettingsRow>(),
+        db.from("settings").select(SETTINGS_SELECT).maybeSingle<SettingsRow>(),
       ]);
       return {
         words: words.map(wordFromRow),

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
-  import { defaultKanaSelection } from "../../core/kana";
   import type { Verdict } from "../../core/types";
   import PracticeCard from "./PracticeCard.svelte";
   import {
@@ -17,12 +16,9 @@
 
   const app = getApp();
 
-  const kanaSelection = $derived(
-    app.settings.kanaSelection ?? defaultKanaSelection(),
-  );
   const focus = $derived(app.settings.wordsFocus);
   const mode = $derived(
-    mixedMode(app.words, kanaSelection, app.stats, focus, app.recorder),
+    mixedMode(app.words, app.kanaSelection, app.stats, focus, app.recorder),
   );
 
   let answer = $state("");
@@ -144,7 +140,7 @@
     readingVerdict={parts.reading}
     meaningVerdict={parts.meaning}
     hits={app.practice.hits}
-    total={app.practice.total}
+    answers={app.practice.answers}
     {askReading}
     {askMeaning}
     bind:answer

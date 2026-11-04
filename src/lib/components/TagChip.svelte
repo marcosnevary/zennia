@@ -2,11 +2,11 @@
   import { getApp } from "../state.svelte";
   import { tagChipStyle, tagColorOf } from "../data/tag-colors";
 
-  // the fill is the tag's colour, dimmer in dark mode; the text stays dark so it reads in both themes
+  // the fill is the tag's color, dimmer in dark mode; the text stays dark so it reads in both themes
   export const CHIP =
     "inline-flex shrink-0 items-center rounded-pill bg-(--tag-fill) px-2 py-0 text-sm dark:bg-(--tag-fill-dark) leading-5 text-(--tag-text)";
 
-  /** The `style` that paints a chip with the tag's saved colour; reads the app, so call it while a component initializes. */
+  /** The `style` that paints a chip with the tag's saved color; reads the app, so call it while a component initializes. */
   export function useTagStyle(): (tag: string) => string {
     const app = getApp();
     return (tag) => tagChipStyle(tagColorOf(app.settings.tagColors, tag));
@@ -27,7 +27,7 @@
 </script>
 
 {#if onclick}
-  <!-- the brightness filter, like the buttons' press, darkens whatever the colour; the utilities replace the base
+  <!-- the brightness filter, like the buttons' press, darkens whatever the color; the utilities replace the base
        hover fill and press filter, so both states are set here -->
   <button
     type="button"

@@ -2,7 +2,9 @@
   import Check from "@lucide/svelte/icons/check";
   import Trash from "@lucide/svelte/icons/trash";
   import TagChip, { CHIP, useTagStyle } from "../TagChip.svelte";
-  import { closeOnBackdrop } from "./dialog";
+  import Dialog from "../Dialog.svelte";
+  import SelectAll from "../SelectAll.svelte";
+  import { selectRow } from "../select-row";
   import { plural } from "../../core/plural";
   import type { Word } from "../../core/types";
   import {
@@ -123,29 +125,9 @@
     ondelete(selectedTags);
     selected = [];
   }
-
-  // the tag chip and the rename field inside a row do their own thing, so a click on them must not also select it
-  function onRowClick(event: MouseEvent, tag: string) {
-    if (!(event.target as Element).closest("button, input"))
-      toggleSelected(tag);
-  }
-
-  // Enter stands in for the click on the chip
-  function onRowKey(event: KeyboardEvent, tag: string) {
-    if (event.target !== event.currentTarget) return;
-    if (event.key === " ") toggleSelected(tag);
-    else if (event.key === "Enter") startRename(tag);
-    else return;
-    event.preventDefault();
-  }
 </script>
 
-<dialog
-  class="w-[min(420px,calc(100vw-32px))]"
-  bind:this={dialogEl}
-  use:closeOnBackdrop
-  aria-label="Tags"
->
+<Dialog bind:el={dialogEl} label="Tags">
   <div class="grid gap-2">
     <h2 class="mt-0 mb-2">
       Tags ({visibleTags.length === tags.length
@@ -166,22 +148,13 @@
         bind:value={query}
         oninput={onSearch}
       />
-      <!-- on top of the list, which scrolls up behind it -->
-      <div class="relative z-10 flex flex-wrap items-center gap-2">
-        <label class="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={allSelected}
-            onchange={toggleSelectAll}
-          />
-          {visibleTags.length === 1 ? "Select" : "Select all"}
-          {visibleTags.length}
-          {plural(
-            visibleTags.length,
-            visibleTags.length === tags.length ? "tag" : "result",
-          )}
-        </label>
-        <span class="text-muted">{selectedTags.length} selected</span>
+      <SelectAll
+        checked={allSelected}
+        onchange={toggleSelectAll}
+        count={visibleTags.length}
+        noun={visibleTags.length === tags.length ? "tag" : "result"}
+        summary={`${selectedTags.length} selected`}
+      >
         <!-- keeps the space reserved so the layout does not shift when a selection appears; the icon is 20px in a 40px button -->
         <button
           class="danger icon ml-auto size-10 items-center justify-center [&_svg]:size-5"
@@ -192,7 +165,7 @@
         >
           <Trash />
         </button>
-      </div>
+      </SelectAll>
       {#if visibleTags.length === 0}
         <p class="my-4 text-muted">No tags match your search.</p>
       {:else}
@@ -210,8 +183,11 @@
                 tabindex="0"
                 aria-checked={isSelected(tag)}
                 aria-label={`Select ${tag}`}
-                onclick={(event) => onRowClick(event, tag)}
-                onkeydown={(event) => onRowKey(event, tag)}
+                {...selectRow({
+                  toggle: () => toggleSelected(tag),
+                  enter: () => startRename(tag),
+                  controls: "button, input",
+                })}
               >
                 {#if renaming !== null && sameTag(renaming, tag)}
                   <!-- the hidden copy of the text sizes the chip as the name is typed, as a field cannot fit its content -->
@@ -262,4 +238,4 @@
       >
     </div>
   </div>
-</dialog>
+</Dialog>

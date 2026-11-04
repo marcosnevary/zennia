@@ -23,7 +23,7 @@ Tallies are lifetime counts. The score of a practice session lives only in memor
 
 `src/lib/data/db/repo.ts` is the only code that talks to the tables. The API returns at most 1000 rows per request, so `load` reads page by page. Writes go in chunks.
 
-`load` names the `settings` columns it selects, so a new column has to be added to that list as well as to `rows.ts`.
+A new setting goes in `SETTING_COLUMNS` in `rows.ts`, which `load` and `settingsToRow` both read, and in `settingsFromRow`, which validates it.
 
 ## Outside the tables
 

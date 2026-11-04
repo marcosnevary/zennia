@@ -6,9 +6,9 @@ export interface Word {
   hiragana: string;
   /** Meaning(s), free text */
   meaning: string;
-  /** When true the word is excluded from practice. Always stored, `false` for an enabled word. */
+  /** When true the word is excluded from practice. Always stored, `false` for an active word. */
   disabled: boolean;
-  /** When the word was last enabled (ms since epoch), or added if it was never disabled. */
+  /** When the word was last activated (ms since epoch), or added if it was never deactivated. */
   activatedAt: number;
   /** When the word was added (ms since epoch); the list shows the newest first. Missing for words not stored yet. */
   createdAt?: number;

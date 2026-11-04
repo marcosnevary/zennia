@@ -1,3 +1,4 @@
+import type { SortDirection } from "./words";
 import { kanaKey, type KanaScript } from "../core/kana";
 import type { Stats, Tally, Verdict, Word } from "../core/types";
 
@@ -45,13 +46,13 @@ export function totalTally(stats: Stats): Tally {
   return { hits: words.hits + kana.hits, misses: words.misses + kana.misses };
 }
 
-export function attempts(tally: Tally): number {
+export function answerCount(tally: Tally): number {
   return tally.hits + tally.misses;
 }
 
-/** Accuracy from 0 to 1, or null when there are no attempts. */
+/** Accuracy from 0 to 1, or null when there are no answers. */
 export function accuracy(tally: Tally): number | null {
-  const total = attempts(tally);
+  const total = answerCount(tally);
   return total ? tally.hits / total : null;
 }
 
@@ -66,7 +67,6 @@ export function percent(value: number | null): string {
 }
 
 export type StatsSort = "misses" | "accuracy" | "hits";
-export type StatsSortDirection = "asc" | "desc";
 
 export const STATS_SORT_OPTIONS: { key: StatsSort; label: string }[] = [
   { key: "misses", label: "Misses" },
@@ -76,12 +76,12 @@ export const STATS_SORT_OPTIONS: { key: StatsSort; label: string }[] = [
 
 /**
  * Sorts [key, tally] entries by the chosen value (`desc` = highest first). Ties fall back to more
- * attempts, then key order, whatever the direction.
+ * answers, then key order, whatever the direction.
  */
 export function sortTallies(
   entries: [string, Tally][],
   sort: StatsSort,
-  direction: StatsSortDirection = "desc",
+  direction: SortDirection = "desc",
 ): [string, Tally][] {
   const score = ([, t]: [string, Tally]) =>
     sort === "misses"
@@ -93,7 +93,7 @@ export function sortTallies(
   return [...entries].sort(
     (a, b) =>
       sign * (score(a) - score(b)) ||
-      attempts(b[1]) - attempts(a[1]) ||
+      answerCount(b[1]) - answerCount(a[1]) ||
       a[0].localeCompare(b[0], "ja"),
   );
 }
@@ -112,7 +112,7 @@ const SAMPLE_SHARE = 0.06;
  * between the extremes) and no item ever drops to zero.
  */
 export function drawWeight(tally: Tally | undefined): number {
-  const n = tally ? attempts(tally) : 0;
+  const n = tally ? answerCount(tally) : 0;
   if (!tally || n === 0) return MAX_WEIGHT;
   const priority = (1 - SAMPLE_SHARE) * (tally.misses / n) + SAMPLE_SHARE / n;
   return MIN_WEIGHT * (MAX_WEIGHT / MIN_WEIGHT) ** priority;
