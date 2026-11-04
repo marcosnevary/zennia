@@ -2,25 +2,51 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="%sveltekit.assets%/favicon.png" media="(prefers-color-scheme: light)" />
-    <link rel="icon" type="image/png" href="%sveltekit.assets%/favicon-dark.png" media="(prefers-color-scheme: dark)" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="%sveltekit.assets%/favicon.png"
+      media="(prefers-color-scheme: light)"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="%sveltekit.assets%/favicon-dark.png"
+      media="(prefers-color-scheme: dark)"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>zennia</title>
-    <meta name="description" content="Practice Japanese vocabulary: see a word, type its reading in romaji and get instant feedback." />
+    <meta
+      name="description"
+      content="Practice Japanese vocabulary: see a word, type its reading in romaji and get instant feedback."
+    />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://zennia-japanese.vercel.app/" />
     <meta property="og:title" content="zennia" />
-    <meta property="og:description" content="Practice Japanese vocabulary: see a word, type its reading in romaji and get instant feedback." />
-    <meta property="og:image" content="https://zennia-japanese.vercel.app/favicon.png" />
+    <meta
+      property="og:description"
+      content="Practice Japanese vocabulary: see a word, type its reading in romaji and get instant feedback."
+    />
+    <meta
+      property="og:image"
+      content="https://zennia-japanese.vercel.app/favicon.png"
+    />
     <meta name="twitter:card" content="summary" />
     <!-- sets the theme before first paint so a saved choice does not flash the other one; mirrors resolveTheme in src/lib/data/theme.ts -->
     <script>
       try {
-        var saved = JSON.parse(localStorage.getItem('zennia:theme'))
-        var dark = saved === 'dark' || (saved !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)
-        document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+        var saved = JSON.parse(localStorage.getItem("zennia:theme"));
+        var dark =
+          saved === "dark" ||
+          (saved !== "light" &&
+            matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
       } catch (e) {
-        document.documentElement.dataset.theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        document.documentElement.dataset.theme = matchMedia(
+          "(prefers-color-scheme: dark)",
+        ).matches
+          ? "dark"
+          : "light";
       }
     </script>
     %sveltekit.head%

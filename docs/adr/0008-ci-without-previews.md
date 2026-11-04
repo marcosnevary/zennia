@@ -15,7 +15,7 @@ The preview build was still the only automated check that a pull request built.
 ## Decision
 
 - `vercel.json` sets `git.deploymentEnabled` so that Vercel deploys only `main`.
-- `.github/workflows/ci.yml` runs `npm run check`, `npm test` and `npm run build` on every pull request.
+- `.github/workflows/ci.yml` runs `npm run lint` ([ADR 10](0010-eslint-prettier.md)), `npm run check`, `npm test` and `npm run build` on every pull request and every push to `main`.
 
 ## Consequences
 

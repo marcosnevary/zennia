@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 /* dark mode follows the data-theme attribute (set from the saved choice or the system), not the media query */
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
@@ -32,9 +32,11 @@
 
 @theme {
   /* Geist has no Japanese glyphs, so kana and kanji fall back to the system's Japanese sans-serif */
-  --font-ui: 'Geist Variable', system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', sans-serif;
+  --font-ui:
+    "Geist Variable", system-ui, -apple-system, "Segoe UI", "Hiragino Sans",
+    "Noto Sans JP", "Yu Gothic", sans-serif;
   /* Libron only for the zennia logo; everything else is in the UI font */
-  --font-logo: 'Libron', Georgia, serif;
+  --font-logo: "Libron", Georgia, serif;
 
   /* the only font sizes: Tailwind's defaults are dropped so nothing falls outside the scale */
   --text-*: initial;
@@ -74,8 +76,8 @@
 
 /* Libron (SIL OFL), https://github.com/nicoverbruggen/libron */
 @font-face {
-  font-family: 'Libron';
-  src: url('/fonts/Libron-Bold.woff2') format('woff2');
+  font-family: "Libron";
+  src: url("/fonts/Libron-Bold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -107,7 +109,7 @@
   color-scheme: light;
 }
 
-:root[data-theme='dark'] {
+:root[data-theme="dark"] {
   color-scheme: dark;
   --bg: #111111;
   --surface: #111111;
@@ -162,7 +164,7 @@
     box-shadow: 0 0 0 1px var(--field-border);
   }
 
-  &[aria-invalid='true'] {
+  &[aria-invalid="true"] {
     --field-border: var(--bad);
   }
 
@@ -178,15 +180,15 @@
     --field-border: var(--verdict);
   }
 
-  &[data-verdict='correct'] {
+  &[data-verdict="correct"] {
     --verdict: var(--ok);
   }
 
-  &[data-verdict='almost'] {
+  &[data-verdict="almost"] {
     --verdict: var(--warn);
   }
 
-  &[data-verdict='incorrect'] {
+  &[data-verdict="incorrect"] {
     --verdict: var(--bad);
   }
 }
@@ -197,7 +199,8 @@
   padding-right: 36px;
   padding-left: 12px;
   background-image:
-    linear-gradient(45deg, transparent 50%, var(--text) 50%), linear-gradient(135deg, var(--text) 50%, transparent 50%);
+    linear-gradient(45deg, transparent 50%, var(--text) 50%),
+    linear-gradient(135deg, var(--text) 50%, transparent 50%);
   background-position:
     calc(100% - 20px) 50%,
     calc(100% - 14px) 50%;
@@ -229,16 +232,28 @@
     background-color: var(--color-tint-pressed);
   }
 
-  &[aria-checked='true'] {
-    background-color: color-mix(in oklab, var(--select-row-color, var(--action)) 10%, transparent);
+  &[aria-checked="true"] {
+    background-color: color-mix(
+      in oklab,
+      var(--select-row-color, var(--action)) 10%,
+      transparent
+    );
   }
 
-  &[aria-checked='true']:hover {
-    background-color: color-mix(in oklab, var(--select-row-color, var(--action)) 15%, transparent);
+  &[aria-checked="true"]:hover {
+    background-color: color-mix(
+      in oklab,
+      var(--select-row-color, var(--action)) 15%,
+      transparent
+    );
   }
 
-  &[aria-checked='true']:active:not(:has(:is(button, input, select):active)) {
-    background-color: color-mix(in oklab, var(--select-row-color, var(--action)) 20%, transparent);
+  &[aria-checked="true"]:active:not(:has(:is(button, input, select):active)) {
+    background-color: color-mix(
+      in oklab,
+      var(--select-row-color, var(--action)) 20%,
+      transparent
+    );
   }
 
   &:focus-visible {
@@ -265,7 +280,9 @@
   --scroll-list-fade: 36px;
   /* how much scrolling turns an edge fade fully on or off: less than a mouse wheel step, so the first one shows it */
   --scroll-list-fade-scroll: 16px;
-  --scroll-list-top-fade: calc(var(--scroll-list-under, 0px) + var(--scroll-list-fade));
+  --scroll-list-top-fade: calc(
+    var(--scroll-list-under, 0px) + var(--scroll-list-fade)
+  );
   /* the rows stay fully hidden behind the content above the list, down to its last 16px, so they never cross its text */
   --scroll-list-clear: max(0px, var(--scroll-list-under, 0px) - 16px);
   /* flex rather than grid, so the negative margins below can take the edge covers out of the flow, gap included */
@@ -278,7 +295,8 @@
      gutter sits past the right edge instead (--scrollbar-width, measured in +layout.svelte); stable, so the rows keep
      that width whether the list scrolls or not */
   scrollbar-gutter: stable;
-  margin: calc(-4px - var(--scroll-list-under, 0px)) calc(-4px - var(--scrollbar-width, 0px)) -4px -4px;
+  margin: calc(-4px - var(--scroll-list-under, 0px))
+    calc(-4px - var(--scrollbar-width, 0px)) -4px -4px;
   /* the bar shows only while the list is pointed at or focused; the gutter stays, so nothing shifts. It fades from the
      muted colour at zero alpha, not from transparent (black), which the scrollbar's transition runs through a darker grey */
   scrollbar-color: rgb(from var(--muted) r g b / 0) transparent;
@@ -292,7 +310,10 @@
   }
   scroll-padding-top: var(--scroll-list-under, 0px);
   max-height: min(
-    calc(var(--scroll-list-rows, 10) * (var(--spacing) * --value(integer) + 8px) + var(--scroll-list-under, 0px)),
+    calc(
+      var(--scroll-list-rows, 10) * (var(--spacing) * --value(integer) + 8px) +
+        var(--scroll-list-under, 0px)
+    ),
     var(--scroll-list-cap, 100dvh)
   );
 
@@ -301,7 +322,7 @@
      ramp, whose sudden end shows as a line where the rows turn solid, and twelve of them keep the kinks too small to see */
   &::before,
   &::after {
-    content: '';
+    content: "";
     position: sticky;
     z-index: 1;
     flex: none;
@@ -312,27 +333,46 @@
   /* pulled up to the top of the scroll area, and back out of the flow so the first row stays where it was */
   &::before {
     /* the ramp ends at the animated --scroll-list-fade-top and starts where it leaves the clear part, once scrolled */
-    --scroll-list-ramp-start: max(0px, var(--scroll-list-fade-top) - var(--scroll-list-top-fade) + var(--scroll-list-clear));
-    --scroll-list-ramp: calc(var(--scroll-list-fade-top) - var(--scroll-list-ramp-start));
+    --scroll-list-ramp-start: max(
+      0px,
+      var(--scroll-list-fade-top) - var(--scroll-list-top-fade) +
+        var(--scroll-list-clear)
+    );
+    --scroll-list-ramp: calc(
+      var(--scroll-list-fade-top) - var(--scroll-list-ramp-start)
+    );
     /* sticky offsets count from inside the list's padding, so this takes it back to reach the very edge (and -4px below) */
     top: calc(-4px - var(--scroll-list-under, 0px));
     height: var(--scroll-list-top-fade);
     margin-top: calc(-4px - var(--scroll-list-under, 0px));
-    margin-bottom: calc(4px + var(--scroll-list-under, 0px) - var(--scroll-list-top-fade) - 8px);
+    margin-bottom: calc(
+      4px + var(--scroll-list-under, 0px) - var(--scroll-list-top-fade) - 8px
+    );
     mask-image: linear-gradient(
       to bottom,
       black var(--scroll-list-ramp-start),
-      rgb(0 0 0 / 0.995) calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.0833),
-      rgb(0 0 0 / 0.965) calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.1667),
-      rgb(0 0 0 / 0.896) calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.25),
-      rgb(0 0 0 / 0.79) calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.3333),
-      rgb(0 0 0 / 0.653) calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.4167),
-      rgb(0 0 0 / 0.5) calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.5),
-      rgb(0 0 0 / 0.347) calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.5833),
-      rgb(0 0 0 / 0.21) calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.6667),
-      rgb(0 0 0 / 0.104) calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.75),
-      rgb(0 0 0 / 0.035) calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.8333),
-      rgb(0 0 0 / 0.005) calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.9167),
+      rgb(0 0 0 / 0.995)
+        calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.0833),
+      rgb(0 0 0 / 0.965)
+        calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.1667),
+      rgb(0 0 0 / 0.896)
+        calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.25),
+      rgb(0 0 0 / 0.79)
+        calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.3333),
+      rgb(0 0 0 / 0.653)
+        calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.4167),
+      rgb(0 0 0 / 0.5)
+        calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.5),
+      rgb(0 0 0 / 0.347)
+        calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.5833),
+      rgb(0 0 0 / 0.21)
+        calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.6667),
+      rgb(0 0 0 / 0.104)
+        calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.75),
+      rgb(0 0 0 / 0.035)
+        calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.8333),
+      rgb(0 0 0 / 0.005)
+        calc(var(--scroll-list-ramp-start) + var(--scroll-list-ramp) * 0.9167),
       transparent var(--scroll-list-fade-top)
     );
   }
@@ -385,13 +425,13 @@
 
 /* registered so the animations can interpolate them as lengths */
 @property --scroll-list-fade-top {
-  syntax: '<length>';
+  syntax: "<length>";
   inherits: false;
   initial-value: 0px;
 }
 
 @property --scroll-list-fade-bottom {
-  syntax: '<length>';
+  syntax: "<length>";
   inherits: false;
   initial-value: 0px;
 }
@@ -413,7 +453,8 @@
     box-sizing: border-box;
     /* a thin, faded bar in the muted colour, so every scrollbar follows the theme; scrollbar-width does not inherit, hence every element */
     scrollbar-width: thin;
-    scrollbar-color: color-mix(in srgb, var(--muted) 50%, transparent) transparent;
+    scrollbar-color: color-mix(in srgb, var(--muted) 50%, transparent)
+      transparent;
   }
 
   html {
@@ -439,7 +480,7 @@
   }
 
   /* drawn by hand so it takes the control fill and the action color; 20px, a little under the line height so it does not crowd its label */
-  input[type='checkbox'] {
+  input[type="checkbox"] {
     appearance: none;
     display: inline-grid;
     place-content: center;
@@ -471,7 +512,7 @@
 
     /* a mask, so the check takes the theme's color like the stroked icons */
     &::before {
-      content: '';
+      content: "";
       width: 16px;
       height: 16px;
       background-color: var(--action-text);
@@ -486,8 +527,8 @@
     }
   }
 
-  input[type='text'],
-  input[type='search'],
+  input[type="text"],
+  input[type="search"],
   textarea {
     width: 100%;
     padding: 8px 12px;
@@ -495,7 +536,7 @@
   }
 
   /* the native one is an image that ignores color, so it is redrawn as a mask, like the checkbox's check */
-  input[type='search']::-webkit-search-cancel-button {
+  input[type="search"]::-webkit-search-cancel-button {
     appearance: none;
     width: 16px;
     height: 16px;
@@ -516,12 +557,12 @@
     }
   }
 
-  input[type='search']:is(:hover, :focus)::-webkit-search-cancel-button {
+  input[type="search"]:is(:hover, :focus)::-webkit-search-cancel-button {
     opacity: 1;
     pointer-events: auto;
   }
 
-  input[type='text']:focus-visible,
+  input[type="text"]:focus-visible,
   textarea:focus-visible,
   button:focus-visible,
   .tab:focus-visible {
@@ -546,7 +587,7 @@
     box-shadow: 0 12px 40px rgb(0 0 0 / 0.2);
   }
 
-  :root[data-theme='dark'] dialog {
+  :root[data-theme="dark"] dialog {
     box-shadow: 0 12px 40px rgb(0 0 0 / 0.7);
   }
 
@@ -568,7 +609,7 @@
     }
   }
 
-  :root[data-theme='dark'] .menu {
+  :root[data-theme="dark"] .menu {
     box-shadow: 0 8px 24px rgb(0 0 0 / 0.6);
   }
 
@@ -638,7 +679,7 @@
     background: var(--color-tint-soft);
   }
 
-  .tab[aria-current='page'] {
+  .tab[aria-current="page"] {
     background: var(--color-tint);
   }
 
@@ -649,7 +690,7 @@
   }
 
   button.menu-item:not(:disabled):hover,
-  button.menu-item[aria-expanded='true'] {
+  button.menu-item[aria-expanded="true"] {
     background: var(--color-tint-soft);
     color: inherit;
   }
@@ -1066,8 +1107,8 @@
   select,
   .file,
   .tab,
-  input[type='checkbox'],
-  input[type='checkbox']::before {
+  input[type="checkbox"],
+  input[type="checkbox"]::before {
     transition: none;
   }
 }

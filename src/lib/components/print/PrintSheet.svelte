@@ -1,26 +1,34 @@
 <script lang="ts">
-  import { onMount, tick } from 'svelte'
-  import { sheetRow, SHEET, type CellKind } from '../../core/sheet'
-  import { loadStrokes, type CharStrokes, type StrokeData } from '../../data/strokes'
-  import type { Word } from '../../core/types'
+  import { onMount, tick } from "svelte";
+  import { sheetRow, SHEET, type CellKind } from "../../core/sheet";
+  import {
+    loadStrokes,
+    type CharStrokes,
+    type StrokeData,
+  } from "../../data/strokes";
+  import type { Word } from "../../core/types";
 
-  let { words, onclose }: { words: Word[]; onclose: () => void } = $props()
+  let { words, onclose }: { words: Word[]; onclose: () => void } = $props();
 
-  const rows = $derived(words.map((word) => ({ word, ...sheetRow(word.japanese) })))
-  let data = $state<StrokeData>()
+  const rows = $derived(
+    words.map((word) => ({ word, ...sheetRow(word.japanese) })),
+  );
+  let data = $state<StrokeData>();
 
   // the sheet only exists for printing: once it is rendered, the browser's print dialog (with its preview) opens
   onMount(async () => {
     try {
-      data = await loadStrokes()
+      data = await loadStrokes();
     } catch {
-      alert('Could not load the stroke order data. Check your connection and try again.')
-      onclose()
-      return
+      alert(
+        "Could not load the stroke order data. Check your connection and try again.",
+      );
+      onclose();
+      return;
     }
-    await tick()
-    window.print()
-  })
+    await tick();
+    window.print();
+  });
 </script>
 
 <svelte:window onafterprint={onclose} />
@@ -33,11 +41,18 @@
         {@render squares(row.chars, row.smallGroups, SHEET.smallCell, data)}
       </div>
     {/each}
-    <p class="credit">Stroke order data: KanjiVG (kanjivg.tagaini.net), CC BY-SA 3.0.</p>
+    <p class="credit">
+      Stroke order data: KanjiVG (kanjivg.tagaini.net), CC BY-SA 3.0.
+    </p>
   </div>
 {/if}
 
-{#snippet squares(chars: string[], groups: CellKind[], size: number, data: StrokeData)}
+{#snippet squares(
+  chars: string[],
+  groups: CellKind[],
+  size: number,
+  data: StrokeData,
+)}
   <section class="row" style:--cell="{size}mm" style:--gap="{SHEET.gap}mm">
     {#each groups as kind, g (g)}
       <div class="group">
@@ -50,9 +65,13 @@
 {/snippet}
 
 {#snippet cell(char: string, kind: CellKind, strokes: CharStrokes | undefined)}
-  <svg class="cell" viewBox="0 0 109 109" aria-label={kind === 'blank' ? 'Empty square' : char}>
+  <svg
+    class="cell"
+    viewBox="0 0 109 109"
+    aria-label={kind === "blank" ? "Empty square" : char}
+  >
     <path class="guide" d="M54.5 0V109M0 54.5H109" />
-    {#if kind === 'ref'}
+    {#if kind === "ref"}
       {#if strokes}
         <g class="strokes">
           {#each strokes.s as d, i (i)}<path {d} />{/each}
@@ -63,7 +82,7 @@
       {:else}
         <text class="fallback" x="54.5" y="84">{char}</text>
       {/if}
-    {:else if kind === 'trace'}
+    {:else if kind === "trace"}
       {#if strokes}
         <g class="strokes faint">
           {#each strokes.s as d, i (i)}<path {d} />{/each}

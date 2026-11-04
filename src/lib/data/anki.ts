@@ -1,6 +1,6 @@
-import { isKana } from 'wanakana'
-import type { SanitizeResult } from './words'
-import { mergeWords, sanitizeWords } from './words'
+import { isKana } from "wanakana";
+import type { SanitizeResult } from "./words";
+import { mergeWords, sanitizeWords } from "./words";
 
 /**
  * Parses tab-separated text where fields may be wrapped in double quotes
@@ -8,78 +8,88 @@ import { mergeWords, sanitizeWords } from './words'
  * Lines starting with `#` (Anki file headers) are ignored.
  */
 export function parseTSV(text: string): string[][] {
-  const rows: string[][] = []
-  let row: string[] = []
-  let field = ''
-  let inQuotes = false
-  let atLineStart = true
-  let skipLine = false
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let field = "";
+  let inQuotes = false;
+  let atLineStart = true;
+  let skipLine = false;
 
   const endRow = () => {
-    row.push(field)
-    if (row.length > 1 || row[0] !== '') rows.push(row)
-    row = []
-    field = ''
-    atLineStart = true
-  }
+    row.push(field);
+    if (row.length > 1 || row[0] !== "") rows.push(row);
+    row = [];
+    field = "";
+    atLineStart = true;
+  };
 
   for (let i = 0; i < text.length; i++) {
-    const c = text[i]
+    const c = text[i];
     if (skipLine) {
-      if (c === '\n') {
-        skipLine = false
-        atLineStart = true
+      if (c === "\n") {
+        skipLine = false;
+        atLineStart = true;
       }
-      continue
+      continue;
     }
     if (inQuotes) {
       if (c === '"') {
         if (text[i + 1] === '"') {
-          field += '"'
-          i++
+          field += '"';
+          i++;
         } else {
-          inQuotes = false
+          inQuotes = false;
         }
       } else {
-        field += c
+        field += c;
       }
-      continue
+      continue;
     }
-    if (atLineStart && c === '#') {
-      skipLine = true
-      continue
+    if (atLineStart && c === "#") {
+      skipLine = true;
+      continue;
     }
-    atLineStart = false
-    if (c === '"' && field === '') inQuotes = true
-    else if (c === '\t') {
-      row.push(field)
-      field = ''
-    } else if (c === '\n') endRow()
-    else if (c !== '\r') field += c
+    atLineStart = false;
+    if (c === '"' && field === "") inQuotes = true;
+    else if (c === "\t") {
+      row.push(field);
+      field = "";
+    } else if (c === "\n") endRow();
+    else if (c !== "\r") field += c;
   }
-  if (field !== '' || row.length) endRow()
-  return rows
+  if (field !== "" || row.length) endRow();
+  return rows;
 }
 
-const ENTITIES: Record<string, string> = { nbsp: ' ', amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" }
+const ENTITIES: Record<string, string> = {
+  nbsp: " ",
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+};
 
 function decodeEntities(s: string): string {
-  return s.replace(/&(?:#(\d+)|#x([0-9a-f]+)|([a-z]+));/gi, (m, dec, hex, name) => {
-    if (dec) return String.fromCodePoint(Number(dec))
-    if (hex) return String.fromCodePoint(parseInt(hex, 16))
-    return ENTITIES[name.toLowerCase()] ?? m
-  })
+  return s.replace(
+    /&(?:#(\d+)|#x([0-9a-f]+)|([a-z]+));/gi,
+    (m, dec, hex, name) => {
+      if (dec) return String.fromCodePoint(Number(dec));
+      if (hex) return String.fromCodePoint(parseInt(hex, 16));
+      return ENTITIES[name.toLowerCase()] ?? m;
+    },
+  );
 }
 
 function stripHtml(html: string): string {
   return decodeEntities(
     html
-      .replace(/<!--[\s\S]*?-->/g, '')
-      .replace(/<br\s*\/?>/gi, ' ')
-      .replace(/<[^>]*>/g, ''),
+      .replace(/<!--[\s\S]*?-->/g, "")
+      .replace(/<br\s*\/?>/gi, " ")
+      .replace(/<[^>]*>/g, ""),
   )
-    .replace(/\s+/g, ' ')
-    .trim()
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 /**
@@ -89,24 +99,29 @@ function stripHtml(html: string): string {
  * Rows with the same word + reading but different meanings become one word with the meanings joined by "; ".
  */
 export function importAnkiDeck(text: string): SanitizeResult {
-  const rows = parseTSV(text)
+  const rows = parseTSV(text);
   if (rows.length === 0 || rows.every((r) => r.length < 2)) {
-    throw new Error('Not an Anki deck export: expected tab-separated columns (word, reading, meaning).')
+    throw new Error(
+      "Not an Anki deck export: expected tab-separated columns (word, reading, meaning).",
+    );
   }
 
-  const candidates: unknown[] = []
-  let skipped = 0
-  for (const [word = '', reading = '', meaning = ''] of rows) {
-    const japanese = stripHtml(word)
-    const hiragana = stripHtml(reading).replace(/\s+/g, '')
+  const candidates: unknown[] = [];
+  let skipped = 0;
+  for (const [word = "", reading = "", meaning = ""] of rows) {
+    const japanese = stripHtml(word);
+    const hiragana = stripHtml(reading).replace(/\s+/g, "");
     if (!japanese || !hiragana || !isKana(hiragana)) {
-      skipped++
-      continue
+      skipped++;
+      continue;
     }
-    candidates.push({ japanese, hiragana, meaning: stripHtml(meaning) })
+    candidates.push({ japanese, hiragana, meaning: stripHtml(meaning) });
   }
 
-  const result = sanitizeWords(candidates, { requireMeaning: true })
-  const unique = mergeWords([], result.words)
-  return { words: unique.words, skipped: skipped + result.skipped + unique.duplicates }
+  const result = sanitizeWords(candidates, { requireMeaning: true });
+  const unique = mergeWords([], result.words);
+  return {
+    words: unique.words,
+    skipped: skipped + result.skipped + unique.duplicates,
+  };
 }

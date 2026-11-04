@@ -1,31 +1,37 @@
-import { toHiragana, toRomaji } from 'wanakana'
-import type { Verdict } from './types'
+import { toHiragana, toRomaji } from "wanakana";
+import type { Verdict } from "./types";
 
-const VOWEL_KANA: Record<string, string> = { a: 'あ', i: 'い', u: 'う', e: 'え', o: 'お' }
+const VOWEL_KANA: Record<string, string> = {
+  a: "あ",
+  i: "い",
+  u: "う",
+  e: "え",
+  o: "お",
+};
 
 /** Each macron vowel can be written in more than one way in kana. */
 const MACRONS: Record<string, string[]> = {
-  ā: ['aa'],
-  ī: ['ii'],
-  ū: ['uu'],
-  ē: ['ei', 'ee'],
-  ō: ['ou', 'oo'],
-}
+  ā: ["aa"],
+  ī: ["ii"],
+  ū: ["uu"],
+  ē: ["ei", "ee"],
+  ō: ["ou", "oo"],
+};
 
-const MAX_CANDIDATES = 256
+const MAX_CANDIDATES = 256;
 
 /** Expands macrons into every possible spelling (ō → ou / oo). */
 function expandMacrons(text: string): string[] {
-  let results = ['']
+  let results = [""];
   for (const ch of text) {
-    const options = MACRONS[ch] ?? [ch]
-    const next: string[] = []
+    const options = MACRONS[ch] ?? [ch];
+    const next: string[] = [];
     for (const prefix of results) {
-      for (const option of options) next.push(prefix + option)
+      for (const option of options) next.push(prefix + option);
     }
-    results = next.slice(0, MAX_CANDIDATES)
+    results = next.slice(0, MAX_CANDIDATES);
   }
-  return results
+  return results;
 }
 
 /**
@@ -34,46 +40,50 @@ function expandMacrons(text: string): string[] {
  */
 export function normalizeKana(text: string): string {
   // wanakana converts ー to う in the o row; here we always use the same vowel
-  const hira = toHiragana(text.replace(/\s+/g, ''), { convertLongVowelMark: false })
-  let out = ''
+  const hira = toHiragana(text.replace(/\s+/g, ""), {
+    convertLongVowelMark: false,
+  });
+  let out = "";
   for (const ch of hira) {
-    if (ch === 'ー' && out) {
-      const prev = [...out].at(-1)!
-      const vowel = toRomaji(prev).match(/[aiueo]$/)?.[0]
-      out += vowel ? VOWEL_KANA[vowel] : ch
+    if (ch === "ー" && out) {
+      const prev = [...out].at(-1)!;
+      const vowel = toRomaji(prev).match(/[aiueo]$/)?.[0];
+      out += vowel ? VOWEL_KANA[vowel] : ch;
     } else {
-      out += ch
+      out += ch;
     }
   }
-  return out
+  return out;
 }
 
 /** Romaji ignoring vowel length (used only to detect "almost"). */
 function skeleton(kana: string): string {
   return toRomaji(kana)
-    .replace(/aa/g, 'a')
-    .replace(/ii/g, 'i')
-    .replace(/uu/g, 'u')
-    .replace(/ee|ei/g, 'e')
-    .replace(/oo|ou/g, 'o')
+    .replace(/aa/g, "a")
+    .replace(/ii/g, "i")
+    .replace(/uu/g, "u")
+    .replace(/ee|ei/g, "e")
+    .replace(/oo|ou/g, "o");
 }
 
 /** Every kana spelling the typed romaji may stand for. */
 function readings(input: string): string[] {
-  const typed = expandMacrons(input.trim().toLowerCase())
+  const typed = expandMacrons(input.trim().toLowerCase());
   // "nn" at the end of a word is a common way to type ん
-  const variants = typed.flatMap((t) => (t.endsWith('nn') ? [t, t.slice(0, -1)] : [t]))
-  return variants.map(normalizeKana)
+  const variants = typed.flatMap((t) =>
+    t.endsWith("nn") ? [t, t.slice(0, -1)] : [t],
+  );
+  return variants.map(normalizeKana);
 }
 
 /** A key shared by the kana that sound the same ignoring vowel length, the ones `checkAnswer` accepts as correct or almost. */
 export function soundKey(kana: string): string {
-  return skeleton(normalizeKana(kana))
+  return skeleton(normalizeKana(kana));
 }
 
 /** The `soundKey`s of what was typed, to find the words it may stand for. */
 export function typedSoundKeys(input: string): string[] {
-  return [...new Set(readings(input).map(skeleton))]
+  return [...new Set(readings(input).map(skeleton))];
 }
 
 /**
@@ -83,22 +93,22 @@ export function typedSoundKeys(input: string): string[] {
  * - incorrect: any other difference
  */
 export function checkAnswer(input: string, hiragana: string): Verdict {
-  if (!input.trim()) return 'incorrect'
+  if (!input.trim()) return "incorrect";
 
-  const target = normalizeKana(hiragana)
-  const candidates = readings(input)
+  const target = normalizeKana(hiragana);
+  const candidates = readings(input);
 
-  if (candidates.includes(target)) return 'correct'
+  if (candidates.includes(target)) return "correct";
 
-  const targetSkeleton = skeleton(target)
-  if (candidates.some((c) => skeleton(c) === targetSkeleton)) return 'almost'
+  const targetSkeleton = skeleton(target);
+  if (candidates.some((c) => skeleton(c) === targetSkeleton)) return "almost";
 
-  return 'incorrect'
+  return "incorrect";
 }
 
 /** Romaji shown in the answer: derived from the hiragana, never saved. */
 export function toDisplayRomaji(hiragana: string): string {
-  return toRomaji(normalizeKana(hiragana))
+  return toRomaji(normalizeKana(hiragana));
 }
 
 /**
@@ -107,11 +117,13 @@ export function toDisplayRomaji(hiragana: string): string {
  * next run. The apostrophe after ん is dropped: the runs are shown apart, so ne and n·e can't be confused.
  */
 export function toDisplayRomajiRuns(runs: string[]): string[] {
-  let before = ''
+  let before = "";
   return runs.map((_, i) => {
-    const upTo = toDisplayRomaji(runs.slice(0, i + 1).join(''))
-    const own = upTo.startsWith(before) ? upTo.slice(before.length) : toDisplayRomaji(runs[i])
-    before = upTo
-    return own.replace(/^'/, '')
-  })
+    const upTo = toDisplayRomaji(runs.slice(0, i + 1).join(""));
+    const own = upTo.startsWith(before)
+      ? upTo.slice(before.length)
+      : toDisplayRomaji(runs[i]);
+    before = upTo;
+    return own.replace(/^'/, "");
+  });
 }

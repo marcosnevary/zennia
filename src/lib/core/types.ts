@@ -1,38 +1,38 @@
 export interface Word {
-  id: string
+  id: string;
   /** Japanese word (kanji/kana), as shown in practice */
-  japanese: string
+  japanese: string;
   /** Reading in hiragana: the source of truth for checking answers */
-  hiragana: string
+  hiragana: string;
   /** Meaning(s), free text */
-  meaning: string
+  meaning: string;
   /** When true the word is excluded from practice. Always stored, `false` for an enabled word. */
-  disabled: boolean
+  disabled: boolean;
   /** When the word was last enabled (ms since epoch); missing for words enabled before this was tracked. */
-  activatedAt?: number
+  activatedAt?: number;
   /** When the word was added (ms since epoch); the list shows the newest first. Missing for words not stored yet. */
-  createdAt?: number
+  createdAt?: number;
   /** Free-text labels to organize the word list. Always stored, empty when the word has none. */
-  tags: string[]
+  tags: string[];
 }
 
-export type Verdict = 'correct' | 'almost' | 'incorrect'
+export type Verdict = "correct" | "almost" | "incorrect";
 
 /** Format of the export file */
 export interface WordsFile {
   /** 2 added `tags` to each word; version 1 files are still read, their words get no tags. */
-  version: 2
-  exportedAt?: string
-  words: Word[]
+  version: 2;
+  exportedAt?: string;
+  words: Word[];
 }
 
 export interface Tally {
-  hits: number
-  misses: number
+  hits: number;
+  misses: number;
 }
 
 /** Lifetime results: per word (by id) and per kana of the hiragana/katakana practice (see `kanaKey`) */
 export interface Stats {
-  words: Record<string, Tally>
-  kana: Record<string, Tally>
+  words: Record<string, Tally>;
+  kana: Record<string, Tally>;
 }
