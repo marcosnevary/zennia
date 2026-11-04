@@ -18,4 +18,4 @@ labels: ["enhancement"]
 
 ## Notes
 
-<!-- Links, data sources, related ADRs -->
+<!-- Links, data sources, related docs -->
