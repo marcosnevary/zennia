@@ -23,7 +23,7 @@ Tallies are lifetime counts. The score of a practice session lives only in memor
 
 `src/lib/data/db/repo.ts` is the only code that talks to the tables. The API returns at most 1000 rows per request, so `load` reads page by page. Writes go in chunks.
 
-`load` names the `settings` columns it selects, so a new column has to be added to that list as well as to `rows.ts`. `tag_colors` is missing from it today, so saved tag colors are written but never read ([vocabulary](vocabulary.md#colors)).
+`load` names the `settings` columns it selects, so a new column has to be added to that list as well as to `rows.ts`.
 
 ## Outside the tables
 

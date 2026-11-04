@@ -56,7 +56,7 @@ A tag name has at most 30 characters: letters, numbers, `-` and `_`. Two names a
 
 Each tag has a pastel color: a hue and one of three tones, in OKLCH (`src/lib/data/tag-colors.ts`). A new tag gets the color farthest from those in use, in the softest tone that stays clearly apart from all of them (an OKLab distance of 0.07). Only colors both themes can show are candidates, so the measured distances are the ones seen.
 
-The rule meant to keep a tag's color for good, also through a rename, doesn't hold today. `Repo.load` doesn't select `tag_colors`, so every load starts with no saved colors and assigns them all again, in alphabetical order. The result is stable until the set of tags changes.
+A tag keeps its color from then on, also when renamed, unless the rename merges it into a tag that has its own. A color is freed when no word has the tag anymore.
 
 ## Search
 
