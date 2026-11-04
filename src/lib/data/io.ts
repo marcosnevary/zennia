@@ -26,7 +26,7 @@ function parseJSON(text: string): unknown {
 
 /** Reads an exported JSON (or a plain list of words) and validates each item. */
 export function importJSON(text: string): SanitizeResult {
-  return sanitizeWords(parseJSON(text), { requireMeaning: true });
+  return sanitizeWords(parseJSON(text));
 }
 
 /** Downloads a text as a file through the browser. */

@@ -16,7 +16,6 @@ import {
   settingsFromRow,
   settingsToRow,
   statsFromRows,
-  statsToRows,
   wordFromRow,
   wordToRow,
   type KanaStatRow,
@@ -38,7 +37,7 @@ export interface Repo {
   deleteWords(ids: string[]): Promise<void>;
   /** Adds one answer to the tally of a word (`key` is its id) or of a kana (`key` is its `kanaKey`). */
   recordAnswer(kind: "word" | "kana", key: string, hit: boolean): Promise<void>;
-  replaceStats(stats: Stats): Promise<void>;
+  resetStats(): Promise<void>;
   saveSettings(patch: Partial<Settings>): Promise<void>;
   account(): Promise<Account>;
   updateProfile(change: ProfileChange): Promise<void>;
@@ -166,15 +165,10 @@ export function createRepo(getDb: () => Db): Repo {
       );
     },
 
-    async replaceStats(stats) {
+    async resetStats() {
       const { db, userId } = await open();
       unwrap(await db.from("word_stats").delete().eq("user_id", userId));
       unwrap(await db.from("kana_stats").delete().eq("user_id", userId));
-      const rows = statsToRows(stats, userId);
-      for (const chunk of chunks(rows.words, WRITE_CHUNK))
-        unwrap(await db.from("word_stats").insert(chunk));
-      for (const chunk of chunks(rows.kana, WRITE_CHUNK))
-        unwrap(await db.from("kana_stats").insert(chunk));
     },
 
     async saveSettings(patch) {

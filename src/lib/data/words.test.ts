@@ -14,7 +14,6 @@ import {
   matchTags,
   mergeNote,
   mergeWords,
-  needsMeaning,
   parseSearch,
   removeTag,
   renameTag,
@@ -49,16 +48,16 @@ describe("sanitizeWords and mergeWords", () => {
   it("rejects invalid format", () => {
     expect(() => sanitizeWords({ foo: 1 })).toThrow();
     const c = sanitizeWords([
-      { japanese: "犬", hiragana: "いぬ", disabled: true },
-      { japanese: "猫", hiragana: "ねこ", disabled: "yes" },
+      { japanese: "犬", hiragana: "いぬ", meaning: "dog", disabled: true },
+      { japanese: "猫", hiragana: "ねこ", meaning: "cat", disabled: "yes" },
     ]);
     expect(c.words[0].disabled).toBe(true);
     expect(c.words[1].disabled).toBe(false);
   });
   it("always stores disabled as a boolean, false when it was missing", () => {
     const { words } = sanitizeWords([
-      { japanese: "犬", hiragana: "いぬ" },
-      { japanese: "猫", hiragana: "ねこ", disabled: false },
+      { japanese: "犬", hiragana: "いぬ", meaning: "dog" },
+      { japanese: "猫", hiragana: "ねこ", meaning: "cat", disabled: false },
     ]);
     expect(words.map((w) => w.disabled)).toEqual([false, false]);
   });
@@ -111,6 +110,7 @@ describe("sortWords", () => {
     hiragana,
     meaning,
     disabled,
+    activatedAt: 0,
     tags: [],
   });
   const list = [
@@ -131,18 +131,13 @@ describe("sortWords", () => {
     expect(ids(sortWords(list, "reading", "desc"))).toBe("2413");
   });
 
-  it("puts words without a meaning last in both directions", () => {
-    expect(ids(sortWords(list, "meaning", "asc"))).toBe("1342");
-    expect(ids(sortWords(list, "meaning", "desc"))).toBe("4312");
-  });
-
   it("sorts by status keeping ties in stored order, and does not mutate the input", () => {
     expect(ids(sortWords(list, "status", "asc"))).toBe("1243");
     expect(ids(sortWords(list, "status", "desc"))).toBe("3124");
     expect(ids(list)).toBe("1234");
   });
 
-  it("orders active words by when they were activated, oldest first, with undated ones oldest", () => {
+  it("orders active words by when they were activated, oldest first", () => {
     const dated = [
       { ...w("1", "犬", "いぬ"), activatedAt: 300 },
       { ...w("2", "猫", "ねこ"), activatedAt: 100 },
@@ -156,13 +151,28 @@ describe("sortWords", () => {
 });
 
 describe("sanitizeWords activatedAt", () => {
-  it("keeps a numeric activatedAt and drops anything else", () => {
+  it("keeps a numeric activatedAt and stamps anything else with the current time", () => {
+    const before = Date.now();
     const { words } = sanitizeWords([
-      { id: "1", japanese: "犬", hiragana: "いぬ", activatedAt: 42 },
-      { id: "2", japanese: "猫", hiragana: "ねこ", activatedAt: "x" },
+      {
+        id: "1",
+        japanese: "犬",
+        hiragana: "いぬ",
+        meaning: "dog",
+        activatedAt: 42,
+      },
+      {
+        id: "2",
+        japanese: "猫",
+        hiragana: "ねこ",
+        meaning: "cat",
+        activatedAt: "x",
+      },
+      { id: "3", japanese: "鳥", hiragana: "とり", meaning: "bird" },
     ]);
     expect(words[0].activatedAt).toBe(42);
-    expect(words[1]).not.toHaveProperty("activatedAt");
+    expect(words[1].activatedAt).toBeGreaterThanOrEqual(before);
+    expect(words[2].activatedAt).toBeGreaterThanOrEqual(before);
   });
 });
 
@@ -173,6 +183,7 @@ describe("setDisabled", () => {
     hiragana: "いぬ",
     meaning: "",
     disabled: true,
+    activatedAt: 0,
     tags: [],
   };
 
@@ -301,6 +312,7 @@ describe("searchWords", () => {
     hiragana,
     meaning,
     disabled: false,
+    activatedAt: 0,
     tags: [],
   });
   const list = [
@@ -455,10 +467,11 @@ describe("tags on words", () => {
       {
         japanese: "犬",
         hiragana: "いぬ",
+        meaning: "dog",
         tags: [" Animals ", "animals", 5, ""],
       },
-      { japanese: "猫", hiragana: "ねこ" },
-      { japanese: "鳥", hiragana: "とり", tags: "birds" },
+      { japanese: "猫", hiragana: "ねこ", meaning: "cat" },
+      { japanese: "鳥", hiragana: "とり", meaning: "bird", tags: "birds" },
     ]);
     expect(words.map((w) => w.tags)).toEqual([["Animals"], [], []]);
   });
@@ -596,6 +609,7 @@ describe("tag operations", () => {
     hiragana: "あ",
     meaning: "",
     disabled: false,
+    activatedAt: 0,
     tags,
   });
   const list = [
@@ -694,27 +708,14 @@ describe("required meaning", () => {
     meaning: "cat",
   };
 
-  it("sanitizeWords keeps words without a meaning by default, so saved words are not lost", () => {
-    expect(
-      sanitizeWords([noMeaning, withMeaning]).words.map((w) => w.id),
-    ).toEqual(["a", "b"]);
-  });
-
-  it("sanitizeWords can reject new entries without a meaning, counting them as skipped", () => {
-    const r = sanitizeWords(
-      [noMeaning, { ...withMeaning, id: "c", meaning: "  " }, withMeaning],
-      {
-        requireMeaning: true,
-      },
-    );
+  it("sanitizeWords rejects entries without a meaning, counting them as skipped", () => {
+    const r = sanitizeWords([
+      noMeaning,
+      { ...withMeaning, id: "c", meaning: "  " },
+      withMeaning,
+    ]);
     expect(r.words.map((w) => w.id)).toEqual(["b"]);
     expect(r.skipped).toBe(2);
-  });
-
-  it("needsMeaning flags words saved without one", () => {
-    const [a, b] = sanitizeWords([noMeaning, withMeaning]).words;
-    expect(needsMeaning(a)).toBe(true);
-    expect(needsMeaning(b)).toBe(false);
   });
 
   it("wordReading shows the hiragana only when the word is not written in it", () => {

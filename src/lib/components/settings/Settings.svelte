@@ -14,7 +14,7 @@
     exportJSON,
     importJSON,
   } from "../../data/io";
-  import { emptyStats, attempts, totalTally } from "../../data/stats";
+  import { attempts, totalTally } from "../../data/stats";
   import {
     importBrief,
     importSummary,
@@ -128,7 +128,7 @@
 
   function resetStats() {
     if (!confirm("Reset all statistics? This cannot be undone.")) return;
-    app.replaceStats(emptyStats());
+    app.resetStats();
     error = "";
     flash("reset", true, "Stats reset");
   }

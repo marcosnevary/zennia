@@ -118,7 +118,7 @@ export function importAnkiDeck(text: string): SanitizeResult {
     candidates.push({ japanese, hiragana, meaning: stripHtml(meaning) });
   }
 
-  const result = sanitizeWords(candidates, { requireMeaning: true });
+  const result = sanitizeWords(candidates);
   const unique = mergeWords([], result.words);
   return {
     words: unique.words,

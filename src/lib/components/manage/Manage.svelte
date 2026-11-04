@@ -32,7 +32,6 @@
     findTag,
     makeWord,
     mergeNote,
-    needsMeaning,
     removeTag,
     sameTag,
     searchWords,
@@ -576,20 +575,9 @@
                       class={["text-sm text-muted", word.disabled && DIM]}
                       lang="ja">{wordReading(word)}</span
                     >
-                    {#if needsMeaning(word)}
-                      <span
-                        class={[
-                          "min-w-0 truncate text-warn italic",
-                          word.disabled && DIM,
-                        ]}
-                        title="Add a meaning to practice this word by meaning"
-                        >Needs meaning</span
-                      >
-                    {:else}
-                      <span class={["min-w-0 truncate", word.disabled && DIM]}
-                        >{word.meaning}</span
-                      >
-                    {/if}
+                    <span class={["min-w-0 truncate", word.disabled && DIM]}
+                      >{word.meaning}</span
+                    >
                     {#if word.tags.length > 0}
                       <span class="flex gap-1"
                         >{#each word.tags as tag (tag)}<TagChip

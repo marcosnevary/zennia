@@ -16,6 +16,7 @@ describe("words file", () => {
     hiragana: "いぬ",
     meaning: "dog",
     disabled: false,
+    activatedAt: 0,
     tags: ["Pets"],
   };
 
@@ -25,12 +26,11 @@ describe("words file", () => {
     expect(importJSON(text).words).toEqual([word]);
   });
 
-  it("imports a version 1 file, whose words have no tags", () => {
-    const text = JSON.stringify({
-      version: 1,
-      words: [{ id: "a", japanese: "犬", hiragana: "いぬ", meaning: "dog" }],
-    });
-    expect(importJSON(text).words).toEqual([{ ...word, tags: [] }]);
+  it("imports a plain list of words, which need no tags", () => {
+    const text = JSON.stringify([
+      { id: "a", japanese: "犬", hiragana: "いぬ", meaning: "dog" },
+    ]);
+    expect(importJSON(text).words).toMatchObject([{ id: "a", tags: [] }]);
   });
 
   it("skips words without a meaning", () => {

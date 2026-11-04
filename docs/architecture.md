@@ -10,7 +10,7 @@ Dependencies point one way, with each layer using only the ones before it: `core
 
 - `src/lib/core/`: pure logic with no app data (kana tables, answer checking, meaning matching, furigana, writing sheet layout).
 - `src/lib/data/`: the rules over the app's data (words, tags, stats, practice, settings), import and export, and the dictionary lookup.
-- `src/lib/data/db/`: database access: the Supabase client (`client.ts`), the `Repo` that reads and writes the rows (`repo.ts`, `rows.ts`) and the one-time import of old `localStorage` data (`legacy.ts`).
+- `src/lib/data/db/`: database access: the Supabase client (`client.ts`), and the `Repo` that reads and writes the rows (`repo.ts`, `rows.ts`).
 - `src/lib/state.svelte.ts`: `App`, the shared data and the actions that change it.
 - `src/lib/components/`: Svelte components, grouped by feature.
 - `src/routes/`: one folder per tab (`practice`, `vocabulary`, `kana`, `stats`, `settings`), and the shell in `+layout.svelte`. `/` redirects to `/practice`.
@@ -21,7 +21,7 @@ Dependencies point one way, with each layer using only the ones before it: `core
 
 ## Data flow
 
-The layout creates `App` and shares it through the Svelte context, and components get it with `getApp()`. `init()` opens a session, loads everything and uploads any old `localStorage` data.
+The layout creates `App` and shares it through the Svelte context, and components get it with `getApp()`. `init()` opens a session and loads everything.
 
 The database is the source of truth, but a change doesn't wait for it:
 

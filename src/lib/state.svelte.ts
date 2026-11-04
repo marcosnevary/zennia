@@ -2,7 +2,6 @@ import { getContext, setContext } from "svelte";
 import { SvelteSet } from "svelte/reactivity";
 import { kanaKey, type KanaScript } from "./core/kana";
 import type { Stats, Verdict, Word } from "./core/types";
-import { clearLegacy, readLegacy } from "./data/db/legacy";
 import type { Account, ProfileChange } from "./data/db/client";
 import type { Repo, Stored } from "./data/db/repo";
 import type { Recorder, WordsFocus } from "./data/practice-modes";
@@ -83,7 +82,7 @@ export class App {
     this.error = "";
     this.newWordIds.clear();
     try {
-      let stored = await this.#repo.load();
+      const stored = await this.#repo.load();
       const isNew =
         stored.words.length === 0 && !attempts(totalTally(stored.stats));
       this.account = await this.#repo.account();
@@ -93,14 +92,6 @@ export class App {
           return;
         }
         this.conflict = true;
-      }
-      const legacy = isNew ? readLegacy() : null;
-      if (legacy) {
-        await this.#repo.upsertWords(legacy.words);
-        await this.#repo.replaceStats(legacy.stats);
-        await this.#repo.saveSettings(legacy.settings);
-        clearLegacy();
-        stored = await this.#repo.load();
       }
       this.#apply(stored);
       this.#syncTagColors();
@@ -221,19 +212,9 @@ export class App {
     );
   }
 
-  /** Replaces all the stats, e.g. when importing or resetting; tallies of words that do not exist are dropped. */
-  replaceStats(stats: Stats): void {
-    // eslint-disable-next-line svelte/prefer-svelte-reactivity -- a lookup local to this function
-    const ids = new Set(this.words.map((w) => w.id));
-    const next: Stats = {
-      words: Object.fromEntries(
-        Object.entries(stats.words).filter(([id]) => ids.has(id)),
-      ),
-      kana: stats.kana,
-    };
-    this.stats = next;
-    const saved: Stats = $state.snapshot(next);
-    this.#persist(() => this.#repo.replaceStats(saved));
+  resetStats(): void {
+    this.stats = emptyStats();
+    this.#persist(() => this.#repo.resetStats());
   }
 
   setTheme(theme: ThemePreference): void {

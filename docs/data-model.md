@@ -10,7 +10,7 @@ Every row belongs to a Supabase user, anonymous or signed in ([integrations](int
 
 | Table        | Key                             | Notes                                                                                                                                                                                                                                                         |
 | ------------ | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `words`      | `user_id`, `id`                 | `id` is a text id generated in the browser, which an imported file can bring along. `meaning` can be empty on words saved before it became required. `activated_at` is null on words last enabled before it was tracked; it orders the status sort.           |
+| `words`      | `user_id`, `id`                 | `id` is a text id generated in the browser, which an imported file can bring along. `activated_at` orders the status sort.                                                                                                                                    |
 | `word_stats` | `user_id`, `word_id`            | One tally per answered word. The foreign key cascades, so deleting a word deletes its tally.                                                                                                                                                                  |
 | `kana_stats` | `user_id`, `script`, `hiragana` | One tally per kana and script. `hiragana` holds the sound even for katakana, and the app joins the two as the key `script:hiragana` (`kanaKey`).                                                                                                              |
 | `settings`   | `user_id`                       | At most one row, created by the first change. With no row, or with a value the app doesn't know, it falls back to `DEFAULT_SETTINGS`. `kana_selection` is null until the user chooses, which means the basic hiragana. `tag_colors` maps `tagKey` to a color. |
@@ -30,7 +30,6 @@ Tallies are lifetime counts. The score of a practice session lives only in memor
 - `auth.users.user_metadata` holds the profile name and photo URL ([integrations](integrations.md#profile)).
 - The `avatars` Storage bucket holds the profile photos.
 - `localStorage` holds the Supabase session and a cache of the theme. `src/app.html` reads that cache before the first paint, so the page doesn't flash the other theme.
-- `localStorage` may also hold the data of versions from before the database. `src/lib/data/db/legacy.ts` uploads it once, when a user with no data opens the app, and then removes it.
 
 ## Migrations
 
