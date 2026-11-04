@@ -27,20 +27,16 @@ export function startSession<T>(): Session<T> {
   return { current: null, verdict: null, hits: 0, total: 0, lastKey: null };
 }
 
-/** The items the next draw may pick: the pool without the previous item, unless that is the only one. */
-function choicesOf<T>(session: Session<T>, mode: PracticeMode<T>): T[] {
-  return mode.pool.length > 1
-    ? mode.pool.filter((item) => mode.keyOf(item) !== session.lastKey)
-    : mode.pool;
-}
-
 /** Draws the next item, avoiding the previous one when there are others. */
 export function nextRound<T>(
   session: Session<T>,
   mode: PracticeMode<T>,
   random?: () => number,
 ): Session<T> {
-  const choices = choicesOf(session, mode);
+  const choices =
+    mode.pool.length > 1
+      ? mode.pool.filter((item) => mode.keyOf(item) !== session.lastKey)
+      : mode.pool;
   const current = pickWeighted(choices, mode.weightOf, random);
   return {
     ...session,
@@ -48,20 +44,6 @@ export function nextRound<T>(
     verdict: null,
     lastKey: current ? mode.keyOf(current) : null,
   };
-}
-
-/** The chance (0 to 1) of each pool item being the next one drawn, most likely first; the previous item has none. */
-export function drawOdds<T>(
-  session: Session<T>,
-  mode: PracticeMode<T>,
-): { item: T; chance: number }[] {
-  const choices = choicesOf(session, mode);
-  const weight = (item: T) =>
-    choices.includes(item) ? Math.max(0, mode.weightOf(item)) : 0;
-  const total = mode.pool.reduce((sum, item) => sum + weight(item), 0);
-  return mode.pool
-    .map((item) => ({ item, chance: total ? weight(item) / total : 0 }))
-    .sort((a, b) => b.chance - a.chance);
 }
 
 /** Checks the answer for the current item and updates the score. */

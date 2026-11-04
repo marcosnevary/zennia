@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  drawOdds,
   nextRound,
   startSession,
   submit,
@@ -76,47 +75,5 @@ describe("submit", () => {
     const before = nextRound(startSession<Item>(), mode);
     expect(submit(before, "   ", mode)).toEqual(before);
     expect(recorded).toEqual([]);
-  });
-});
-
-describe("drawOdds", () => {
-  const weights: Record<string, number> = { a: 1, b: 3, c: 6 };
-  function weightedMode(ids: string[]): PracticeMode<Item> {
-    return { ...fakeMode(ids).mode, weightOf: (item) => weights[item.id] };
-  }
-  const chances = (odds: { item: Item; chance: number }[]) =>
-    Object.fromEntries(odds.map((o) => [o.item.id, o.chance]));
-
-  it("gives each item its share of the total weight, most likely first", () => {
-    const odds = drawOdds(startSession<Item>(), weightedMode(["a", "b", "c"]));
-    expect(odds.map((o) => o.item.id)).toEqual(["c", "b", "a"]);
-    expect(chances(odds)).toEqual({ a: 0.1, b: 0.3, c: 0.6 });
-  });
-
-  it("leaves the item on screen out, like the next draw does", () => {
-    const mode = weightedMode(["a", "b", "c"]);
-    const session = {
-      ...startSession<Item>(),
-      current: { id: "c" },
-      lastKey: "c",
-    };
-    expect(chances(drawOdds(session, mode))).toEqual({
-      a: 0.25,
-      b: 0.75,
-      c: 0,
-    });
-  });
-
-  it("gives the only item of a pool the whole chance", () => {
-    const session = {
-      ...startSession<Item>(),
-      current: { id: "a" },
-      lastKey: "a",
-    };
-    expect(chances(drawOdds(session, weightedMode(["a"])))).toEqual({ a: 1 });
-  });
-
-  it("is empty for an empty pool", () => {
-    expect(drawOdds(startSession<Item>(), weightedMode([]))).toEqual([]);
   });
 });
