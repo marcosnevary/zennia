@@ -17,6 +17,16 @@ describe("checkMeaning", () => {
     expect(checkMeaning("big", "large, big")).toBe(true);
   });
 
+  it("accepts a whole phrase with commas, and also its parts", () => {
+    const needs = "food, clothing and shelter; necessities of life";
+    expect(checkMeaning("food, clothing and shelter", needs)).toBe(true);
+    expect(checkMeaning("food clothing and shelter", needs)).toBe(true);
+    expect(checkMeaning("food", needs)).toBe(true);
+    expect(checkMeaning("Washington, D.C.", "Washington, D.C. (USA)")).toBe(
+      true,
+    );
+  });
+
   it("makes the leading to optional", () => {
     expect(checkMeaning("eat", "to eat")).toBe(true);
     expect(checkMeaning("to eat", "eat")).toBe(true);
