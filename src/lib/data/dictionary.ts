@@ -1,5 +1,5 @@
 import { asset } from "$app/paths";
-import { checkAnswer, soundKey, typedSoundKeys } from "../core/romaji";
+import { checkAnswer, soundKeys, typedSoundKeys } from "../core/romaji";
 import type { Verdict } from "../core/types";
 
 /** One reading of a JMdict word, as stored in `static/dictionary.json`. */
@@ -9,7 +9,7 @@ export type DictionaryRow = [
   meaning: string,
 ];
 
-/** The rows grouped by the `soundKey` of their reading. */
+/** The rows grouped by the `soundKeys` of their reading. */
 export type Dictionary = Map<string, DictionaryRow[]>;
 
 /** A word the typed romaji may stand for; `almost` when only the vowel length differs. */
@@ -29,10 +29,11 @@ export interface RomajiItem {
 export function indexDictionary(rows: DictionaryRow[]): Dictionary {
   const index: Dictionary = new Map();
   for (const row of rows) {
-    const key = soundKey(row[0]);
-    const bucket = index.get(key);
-    if (bucket) bucket.push(row);
-    else index.set(key, [row]);
+    for (const key of soundKeys(row[0])) {
+      const bucket = index.get(key);
+      if (bucket) bucket.push(row);
+      else index.set(key, [row]);
+    }
   }
   return index;
 }

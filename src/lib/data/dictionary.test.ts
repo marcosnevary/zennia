@@ -1,4 +1,6 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { checkAnswer, toDisplayRomaji } from "../core/romaji";
 import {
   indexDictionary,
   lookUp,
@@ -18,6 +20,18 @@ const rows: DictionaryRow[] = [
 const dictionary = indexDictionary(rows);
 const words = (romaji: string, hint = "") =>
   lookUp(dictionary, { romaji, hint }).map((c) => c.japanese);
+
+describe("the bundled dictionary", () => {
+  it("accepts the romaji the app shows for every reading", () => {
+    const bundled: DictionaryRow[] = JSON.parse(
+      readFileSync("static/dictionary.json", "utf8"),
+    );
+    const rejected = bundled
+      .map(([reading]) => reading)
+      .filter((r) => checkAnswer(toDisplayRomaji(r), r) !== "correct");
+    expect(rejected).toEqual([]);
+  });
+});
 
 describe("parseRomajiList", () => {
   it("splits on new lines, commas and semicolons and reads hints, also with commas inside", () => {
@@ -43,6 +57,18 @@ describe("lookUp", () => {
     expect(words("ko-hi-")).toEqual(["コーヒー"]);
     expect(words("honn")).toEqual(["本"]);
     expect(words("xyzzy")).toEqual([]);
+  });
+  it("finds a final は by either sound", () => {
+    const greeting = indexDictionary([["こんにちは", "今日は", "hello"]]);
+    for (const romaji of ["konnichiha", "konnichiwa"])
+      expect(lookUp(greeting, { romaji, hint: "" })).toEqual([
+        {
+          japanese: "今日は",
+          hiragana: "こんにちは",
+          meaning: "hello",
+          verdict: "correct",
+        },
+      ]);
   });
   it("lists the same sound first and marks a vowel-length difference as almost", () => {
     expect(

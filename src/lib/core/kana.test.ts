@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   ALL_HIRAGANA,
   KANA_SECTIONS,
-  acceptedReadings,
   buildKana,
   columnKeys,
   defaultKanaSelection,
@@ -70,11 +69,10 @@ describe("buildKana", () => {
       kanaKey("katakana", h),
     ]);
     for (const k of buildKana(all)) {
-      const typed = toDisplayRomaji(k.hiragana);
-      const ok = acceptedReadings(k.hiragana).some(
-        (h) => checkAnswer(typed, h) === "correct",
-      );
-      expect(ok, k.symbol).toBe(true);
+      expect(
+        checkAnswer(toDisplayRomaji(k.hiragana), k.hiragana),
+        k.symbol,
+      ).toBe("correct");
     }
   });
 
@@ -87,17 +85,12 @@ describe("buildKana", () => {
 
   it("includes ぢ / づ and accepts both of their spellings", () => {
     expect(ALL_HIRAGANA).toEqual(expect.arrayContaining(["ぢ", "づ", "ぢゃ"]));
-    expect(acceptedReadings("ぢ")).toEqual(["ぢ", "じ"]);
-    expect(acceptedReadings("づ")).toEqual(["づ", "ず"]);
-    expect(acceptedReadings("ぢょ")).toEqual(["ぢょ", "じょ"]);
-    expect(acceptedReadings("か")).toEqual(["か"]);
-    const ok = (answer: string, h: string) =>
-      acceptedReadings(h).some((r) => checkAnswer(answer, r) === "correct");
-    expect(ok("di", "ぢ")).toBe(true);
-    expect(ok("ji", "ぢ")).toBe(true);
-    expect(ok("du", "づ")).toBe(true);
-    expect(ok("zu", "づ")).toBe(true);
-    expect(ok("ka", "ぢ")).toBe(false);
+    expect(checkAnswer("di", "ぢ")).toBe("correct");
+    expect(checkAnswer("ji", "ぢ")).toBe("correct");
+    expect(checkAnswer("jo", "ぢょ")).toBe("correct");
+    expect(checkAnswer("du", "づ")).toBe("correct");
+    expect(checkAnswer("zu", "づ")).toBe("correct");
+    expect(checkAnswer("ka", "ぢ")).toBe("incorrect");
   });
 });
 

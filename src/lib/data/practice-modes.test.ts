@@ -124,6 +124,19 @@ describe("kanaMode", () => {
     expect(mode.check("di", di)).toBe("correct");
   });
 
+  it("accepts o and wo for を, and only ha for a lone は", () => {
+    const mode = kanaMode(
+      [kanaKey("hiragana", "を"), kanaKey("hiragana", "は")],
+      emptyStats(),
+    );
+    const wo = mode.pool.find((k) => k.symbol === "を")!;
+    const ha = mode.pool.find((k) => k.symbol === "は")!;
+    expect(mode.check("o", wo)).toBe("correct");
+    expect(mode.check("wo", wo)).toBe("correct");
+    expect(mode.check("ha", ha)).toBe("correct");
+    expect(mode.check("wa", ha)).toBe("incorrect");
+  });
+
   it("records per script, so hiragana and katakana stay apart", () => {
     const stats = emptyStats();
     const mode = kanaMode(selected, stats);
