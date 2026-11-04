@@ -10,12 +10,19 @@ A word added by any route is marked as new until the pointer passes over it. The
 
 ## Merging
 
-Add from romaji and every import go through `mergeWords`, which only ever adds. Two words are the same when both the written form and the reading match.
+Two words are the same when both the written form and the reading match, and the list never holds the same word twice.
 
-- When the word already exists, a different meaning is appended after `; `, and the tags are united.
+The add form, Add from romaji and every import go through `mergeWords`, which only ever adds.
+
+- When the word already exists, a different meaning is appended after `; `, and the tags are united. The add form says so under its button, because the list gains no row.
 - An incoming word with the id of an existing but different word counts as already existing.
 
-The add form doesn't merge, so it can save a second word with the same written form and reading.
+The edit dialog refuses a change that would match another word.
+
+### Decisions
+
+- **The edit dialog refuses instead of merging.** Merging there would also have to combine the tallies of the two words.
+- **No database constraint.** The rule lives in the app; the `words` primary key is `user_id, id`.
 
 ## Add from romaji
 
