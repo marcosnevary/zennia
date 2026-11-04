@@ -48,6 +48,11 @@ describe("importAnkiDeck", () => {
       words: [{ japanese: "銀行", meaning: "bank; financial institution" }],
     });
   });
+  it("keeps an entity that is not a valid character as text instead of failing", () => {
+    const { words } = importAnkiDeck("犬\tいぬ\tdog &#xFFFFFFF; &#65;");
+    expect(words[0].meaning).toBe("dog &#xFFFFFFF; A");
+  });
+
   it("rejects text that is not an Anki export", () => {
     expect(() => importAnkiDeck("just one column")).toThrow();
   });

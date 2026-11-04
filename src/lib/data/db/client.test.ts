@@ -1,6 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import { describe, expect, it } from "vitest";
-import { accountOf } from "./client";
+import { accountOf, getAccount, type Db } from "./client";
 
 const user = (extra: Partial<User>): User => ({
   id: "u1",
@@ -19,6 +19,20 @@ const google = (identity_data: Record<string, string>) => ({
   identity_id: "i1",
   provider: "google",
   identity_data,
+});
+
+describe("getAccount", () => {
+  it("throws when the user can't be fetched, instead of reporting an anonymous one", async () => {
+    const db = {
+      auth: {
+        getUser: async () => ({
+          data: { user: null },
+          error: new Error("down"),
+        }),
+      },
+    } as unknown as Db;
+    await expect(getAccount(db)).rejects.toThrow("down");
+  });
 });
 
 describe("accountOf", () => {

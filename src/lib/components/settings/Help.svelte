@@ -40,9 +40,9 @@
     also works, where each item has
     <code>japanese</code> (the word), <code>hiragana</code> (the reading in
     kana) and <code>meaning</code>. Imported words are
-    <strong>added</strong> to your current list, nothing is replaced or deleted. Words
-    you already have (same word and reading) are skipped, and invalid items, including
-    words without a meaning, are ignored.
+    <strong>added</strong> to your current list, nothing is replaced or deleted. A
+    word you already have (same word and reading) gains any new meaning and tags,
+    and invalid items, including words without a meaning, are ignored.
   </p>
 
   <h3 class="mt-4 mb-1 text-base font-bold">Import Anki deck (.txt)</h3>
@@ -50,15 +50,17 @@
     In Anki, choose <strong>File → Export…</strong>, and set the format to
     <strong>Notes in Plain Text (.txt)</strong> (not "Cards in Plain Text").
     Then pick the exported file with
-    <strong>Import Anki deck</strong>.
+    <strong>Import .txt</strong>.
   </p>
   <p class="mt-1 mb-2">
     The first three columns of the file must be, in this order, the <strong
       >word</strong
     >, its
     <strong>reading</strong> in kana and the <strong>meaning</strong>. Any other
-    column is ignored. Rows without a valid reading or without a meaning, and
-    repeated word + reading pairs, are skipped; the summary tells you how many.
+    column is ignored. Rows with the same word and reading become one word with
+    their meanings joined, and a word you already have gains any new meaning.
+    Rows without a valid reading or without a meaning, and exact repeats, are
+    skipped; the summary tells you how many.
   </p>
 
   <div class="dialog-actions">

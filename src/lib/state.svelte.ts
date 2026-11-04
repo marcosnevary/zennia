@@ -154,11 +154,13 @@ export class App {
   /** Replaces the word list; only the words that were added, changed or removed are written. */
   setWords(next: Word[]): void {
     const now = Date.now();
+    let undated = 0;
     const previous: Word[] = $state.snapshot(this.words);
+    // a batch keeps its order after a reload only if no two of its words share a time: the database breaks ties by id
     const words = newestFirst(
       $state
         .snapshot(next)
-        .map((w) => ({ ...w, createdAt: w.createdAt ?? now })),
+        .map((w) => ({ ...w, createdAt: w.createdAt ?? now - undated++ })),
     );
 
     // eslint-disable-next-line svelte/prefer-svelte-reactivity -- a lookup local to this function
