@@ -29,6 +29,7 @@ A new setting goes in `SETTING_COLUMNS` in `rows.ts`, which `load` and `settings
 
 - `auth.users.user_metadata` holds the profile name and photo URL ([integrations](integrations.md#profile)).
 - The `avatars` Storage bucket holds the profile photos.
+- The `pronunciations` Storage bucket holds the [pronunciation audio](integrations.md#pronunciation), shared by every user. Only the Edge Function writes to it, with the service role, so it has no policies.
 - `localStorage` holds the Supabase session and a cache of the theme. `src/app.html` reads that cache before the first paint, so the page doesn't flash the other theme.
 
 ## Migrations

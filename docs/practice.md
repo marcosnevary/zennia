@@ -73,6 +73,15 @@ The result shows the written form with furigana above what isn't hiragana and ro
 
 Furigana (`src/lib/core/furigana.ts`) splits the written form into runs of hiragana and of anything else, then uses the hiragana runs as anchors to find each other run's part of the reading. When they don't fit the reading, the whole word gets it.
 
+## Pronunciation
+
+The answer can be heard in Japanese: the written form, said with the saved reading ([how it is made](integrations.md#pronunciation)). A kana is said on its own.
+
+- With **Play the pronunciation** on in Settings, Check plays it, and Practice fetches each item's audio as soon as it is drawn, so it starts at once. Off by default, so the app makes no sound unasked.
+- The speaker button on the result plays it again, on or off. A mouse click leaves the focus on the page, so Enter and Space still move on.
+- Moving on stops the audio still playing.
+- If the audio can't be loaded or made, a toast says so, once.
+
 ## Fonts
 
 Settings lists the fonts in `PRACTICE_FONTS` (`src/lib/data/practice-fonts.ts`), each with a preview in hiragana, kanji and katakana, and the user picks which ones Practice uses. Each word is then shown in one of them, never the same one twice in a row unless only one is chosen. With none chosen, words keep the UI font. Kana and the result always keep the UI font.

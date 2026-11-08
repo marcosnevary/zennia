@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Volume2 from "@lucide/svelte/icons/volume-2";
   import { prefersReducedMotion } from "svelte/motion";
   import { fade } from "svelte/transition";
   import type { Verdict } from "#lib/core/types.ts";
@@ -14,11 +15,14 @@
     verdict,
     answer,
     note,
+    onplay,
   }: {
     verdict: Verdict | null;
     answer: RightAnswer;
     /** Optional outcome of each part of the answer, for screen readers: the fields show it by color */
     note?: string;
+    /** Plays the pronunciation of the answer again */
+    onplay: () => void;
   } = $props();
 
   const duration = $derived(prefersReducedMotion.current ? 0 : 200);
@@ -76,4 +80,17 @@
     {@render answerLines(answer)}
     {#if note}<p class="sr-only">{note}</p>{/if}
   </div>
+  <!-- outside the status, so its label isn't announced with the verdict; a mouse click leaves the focus on the page,
+       where Enter and Space move on to the next item -->
+  <button
+    type="button"
+    class="icon col-start-1 row-start-1 m-2 self-start justify-self-end"
+    aria-label="Listen"
+    title="Listen"
+    onmousedown={(e) => e.preventDefault()}
+    onclick={onplay}
+    transition:fade={{ duration }}
+  >
+    <Volume2 />
+  </button>
 {/if}

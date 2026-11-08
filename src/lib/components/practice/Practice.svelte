@@ -1,13 +1,19 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
+  import { untrack } from "svelte";
   import PracticeCard from "./PracticeCard.svelte";
   import { loadFonts } from "./fonts.ts";
+  import { Pronunciation } from "./pronunciation.ts";
   import {
     fontFamily,
     nextFont,
     type PracticeFontId,
   } from "#lib/data/practice-fonts.ts";
-  import { mixedMode, rightAnswer } from "#lib/data/practice-modes.ts";
+  import {
+    mixedMode,
+    pronouncedOf,
+    rightAnswer,
+  } from "#lib/data/practice-modes.ts";
   import {
     nextRound,
     submit as submitAnswer,
@@ -38,6 +44,26 @@
   function drawFont() {
     font = practiceFonts.length ? nextFont(practiceFonts, font) : undefined;
   }
+
+  const pronunciation = new Pronunciation({
+    url: (pronounced) => app.pronunciationUrl(pronounced),
+    make: (pronounced) => app.makePronunciation(pronounced),
+    onerror: () =>
+      app.toasts.show(
+        "Couldn't play the pronunciation. Check your connection and try again.",
+        { id: "pronunciation" },
+      ),
+  });
+  const playPronunciation = $derived(app.settings.playPronunciation);
+
+  $effect(() => {
+    if (!current) return;
+    pronunciation.set(
+      pronouncedOf(current),
+      untrack(() => playPronunciation),
+    );
+    return () => pronunciation.stop();
+  });
 
   const outcome = $derived(app.practice.outcome);
   const verdict = $derived(outcome?.verdict ?? null);
@@ -71,6 +97,7 @@
     } else {
       inputEl?.blur();
       meaningEl?.blur();
+      if (app.practice.outcome && playPronunciation) pronunciation.play();
     }
   }
 
@@ -136,5 +163,6 @@
     bind:meaningEl
     onsubmit={submit}
     {onkeydown}
+    onplay={() => pronunciation.play()}
   />
 {/if}

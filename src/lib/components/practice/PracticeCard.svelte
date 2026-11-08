@@ -30,6 +30,7 @@
     meaningEl = $bindable(),
     onsubmit,
     onkeydown,
+    onplay,
   }: {
     /** The word or symbol being asked */
     prompt: string;
@@ -57,6 +58,8 @@
     meaningEl?: HTMLInputElement;
     onsubmit: (event: Event) => void;
     onkeydown: (event: KeyboardEvent) => void;
+    /** Plays the pronunciation of the answer again */
+    onplay: () => void;
   } = $props();
 
   function moveFocus(event: KeyboardEvent) {
@@ -102,7 +105,7 @@
     >
       {prompt}
     </p>
-    <ResultPanel {verdict} answer={rightAnswer} {note} />
+    <ResultPanel {verdict} answer={rightAnswer} {note} {onplay} />
   </div>
 
   <form class="flex gap-2" {onsubmit}>

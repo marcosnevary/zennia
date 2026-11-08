@@ -32,6 +32,27 @@ A picked photo goes to the public `avatars` bucket at `<user id>/avatar.jpg`, cr
 
 Policies let a user write only their own folder, and the bucket takes JPEGs of up to 1 MB. Uploading with `upsert` and removing both read the object first, so reading through the API needs a policy of its own, even though the bucket is public.
 
+## Pronunciation
+
+The voice is Azure's neural text-to-speech, `ja-JP-NanamiNeural`, on the free F0 tier. Over its monthly allowance Azure throttles the requests instead of billing, so the worst case is a toast and no audio.
+
+Each word's audio is made once and kept in the public `pronunciations` bucket, so every later play, by anyone, is a plain download:
+
+1. The app knows where the file would be: `<voice>/<sha256 of written form and reading>.mp3` (`supabase/functions/_shared/pronunciation.ts`).
+2. If loading it fails, the app calls the `pronounce` Edge Function, which makes the file and stores it, and then loads it again.
+3. The function checks the user's session itself, and only accepts what a word can be: up to 32 characters, with a kana reading. Anonymous sessions count, so anyone could still fill the bucket with odd words, which only costs storage.
+
+The SSML gives the voice the saved reading as a `sapi` phoneme in katakana, with no accent marks. The phoneme makes it say the reading the word was saved with, not its own guess for the kanji, while it keeps the pitch accent it knows for that word. Its accent marks aren't documented, and in tests the pattern with the fall after the first mora never came out, so they are left out.
+
+To deploy, with the Supabase CLI linked to the project:
+
+```
+supabase secrets set AZURE_SPEECH_KEY=<key> AZURE_SPEECH_REGION=<region>
+supabase functions deploy pronounce --no-verify-jwt
+```
+
+The function verifies the session itself, so it doesn't depend on the gateway's JWT check, which `--no-verify-jwt` turns off. Keep the same voice name in `PRONUNCIATION_VOICE`: it is part of each file's path, so changing it makes every word again.
+
 ## Vercel
 
 Vercel builds and serves the static site. `vercel.json` rewrites every path to `index.html` so deep links work, and deploys only `main`, so pull requests get no preview. To show a branch to someone, deploy it by hand with the Vercel CLI.
@@ -57,6 +78,7 @@ The Add from romaji dialog credits JMdict and the printed sheet credits KanjiVG,
 2. Run the files in `supabase/migrations/` in order, in the SQL editor or with the Supabase CLI.
 3. Create a Google OAuth Web client with the redirect URIs `http://localhost:5173/auth/google.html` and `<Vercel URL>/auth/google.html`. In Supabase, enable the **Google** provider with that client ID, and turn on **Allow manual linking**.
 4. Copy `.env.example` to `.env` and fill in the project URL, anon key and Google client ID. Set the same variables in Vercel.
+5. Create an Azure **Speech** resource on the Free F0 tier in the region nearest the Supabase project, and [deploy the Edge Function](#pronunciation) with its key and region.
 
 ## Decisions
 
@@ -67,4 +89,7 @@ The Add from romaji dialog credits JMdict and the printed sheet credits KanjiVG,
 - **A browser with no data signs in instead of linking.** There is nothing to keep, and no conflict to ask about. Leaving an empty anonymous user behind costs nothing.
 - **The profile photo is in Storage, not a table column.** A data URL would come with the data on every load, and the browser could not cache it.
 - **The photo is a JPEG.** Safari can't encode WebP from a canvas.
+- **The pronunciation comes from Azure, not the browser's Web Speech API.** The browser's voice depends on the device and sounds robotic on many. Azure's neural voices sound natural, and its free tier can't bill.
+- **Azure over Google Cloud.** Azure documents phonemes for Japanese, which is what makes the voice say the saved reading.
+- **The audio is made once and shared by every user.** The free allowance then goes as far as the number of distinct words, not the number of plays.
 - **No Vercel previews.** Nobody opened the previews: changes are tested locally, Google login doesn't work on preview URLs, and previews used the production Supabase project.

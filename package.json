@@ -53,6 +53,7 @@
     "wanakana": "^5.3.1"
   },
   "imports": {
-    "#lib/*": "./src/lib/*"
+    "#lib/*": "./src/lib/*",
+    "#functions/*": "./supabase/functions/*"
   }
 }

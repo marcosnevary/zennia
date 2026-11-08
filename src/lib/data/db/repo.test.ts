@@ -15,6 +15,7 @@ const SETTINGS_ROW: SettingsRow = {
   tag_colors: { food: { hue: 10, tone: 1 } },
   number_key_tabs: false,
   practice_fonts: ["klee-one"],
+  play_pronunciation: true,
 };
 
 /** A client whose `settings` table answers like the real API: only the selected columns come back. */

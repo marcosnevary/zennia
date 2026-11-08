@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Switch from "#lib/components/Switch.svelte";
   import { plural } from "#lib/core/plural.ts";
   import { WORDS_FOCUSES, type WordsFocus } from "#lib/data/practice-modes.ts";
   import { getApp } from "#lib/state.svelte.ts";
@@ -37,6 +38,20 @@
         ? `${fontCount} ${plural(fontCount, "font")} selected`
         : "Choose fonts"}</button
     >
+  </SettingRow>
+
+  <SettingRow
+    title="Play the pronunciation"
+    description="Hear the answer read aloud once it's checked."
+  >
+    <div class="flex sm:justify-end">
+      <Switch
+        checked={app.settings.playPronunciation}
+        onchange={() =>
+          app.setPlayPronunciation(!app.settings.playPronunciation)}
+        label="Play the pronunciation"
+      />
+    </div>
   </SettingRow>
 </div>
 <FontsDialog bind:this={fontsDialog} />
