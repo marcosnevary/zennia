@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Check from "@lucide/svelte/icons/check";
   import Trash from "@lucide/svelte/icons/trash";
   import TagChip, { CHIP, useTagStyle } from "#lib/components/TagChip.svelte";
   import Dialog from "#lib/components/Dialog.svelte";
@@ -234,7 +233,7 @@
     {/if}
     <div class="dialog-actions">
       <button class="action" type="button" onclick={() => dialogEl?.close()}
-        ><Check />Done</button
+        >Done</button
       >
     </div>
   </div>

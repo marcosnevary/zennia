@@ -1,6 +1,4 @@
 <script lang="ts">
-  import ImageUp from "@lucide/svelte/icons/image-up";
-  import Save from "@lucide/svelte/icons/save";
   import { messageOf } from "#lib/core/errors.ts";
   import Dialog from "#lib/components/Dialog.svelte";
   import { toAvatar } from "#lib/data/avatar.ts";
@@ -83,7 +81,7 @@
       <Avatar url={shownUrl} label={name || (app.account.email ?? "")} large />
       <div class="flex flex-wrap gap-2">
         <label class="file">
-          <ImageUp />Change photo
+          Change photo
           <input type="file" accept="image/*" onchange={pick} hidden />
         </label>
         {#if custom}
@@ -106,7 +104,7 @@
     {#if error}<p class="m-0 text-bad" role="alert">{error}</p>{/if}
     <div class="dialog-actions">
       <button class="action" type="submit" disabled={saving}
-        ><Save />{saving ? "Saving…" : "Save"}</button
+        >{saving ? "Saving…" : "Save"}</button
       >
       <button type="button" onclick={() => dialogEl?.close()}>Cancel</button>
     </div>

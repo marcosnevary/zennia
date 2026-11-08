@@ -2,14 +2,10 @@
   import { SvelteSet } from "svelte/reactivity";
   import ArrowDown from "@lucide/svelte/icons/arrow-down";
   import ArrowUp from "@lucide/svelte/icons/arrow-up";
-  import Check from "@lucide/svelte/icons/check";
   import Eye from "@lucide/svelte/icons/eye";
   import EyeOff from "@lucide/svelte/icons/eye-off";
-  import ListPlus from "@lucide/svelte/icons/list-plus";
-  import Plus from "@lucide/svelte/icons/plus";
   import Printer from "@lucide/svelte/icons/printer";
   import Tag from "@lucide/svelte/icons/tag";
-  import Tags from "@lucide/svelte/icons/tags";
   import Trash from "@lucide/svelte/icons/trash";
   import Dialog from "#lib/components/Dialog.svelte";
   import SelectAll from "#lib/components/SelectAll.svelte";
@@ -301,7 +297,7 @@
         <TagInput bind:tags={editTags} suggestions={tags} />
       {/key}
       <div class="dialog-actions">
-        <button class="action" type="submit"><Check />Save</button>
+        <button class="action" type="submit">Save</button>
         <button type="button" onclick={() => dialogEl?.close()}>Cancel</button>
       </div>
     </form>
@@ -323,7 +319,7 @@
         <button
           class="action"
           type="button"
-          onclick={() => tagDialogEl?.close()}><Check />Done</button
+          onclick={() => tagDialogEl?.close()}>Done</button
         >
       </div>
     </div>
@@ -382,13 +378,13 @@
         />
         {@render fieldError(errors.meaning)}
         <TagInput bind:tags={newTags} suggestions={tags} />
-        <button class="action w-full" type="submit"><Plus />Add</button>
+        <button class="action w-full" type="submit">Add</button>
         {#if merged}<p role="status">{merged}</p>{/if}
       </form>
       <button
         type="button"
         class="field mt-2 w-full"
-        onclick={() => romajiDialog?.open()}><ListPlus />Add from romaji</button
+        onclick={() => romajiDialog?.open()}>Add from romaji</button
       >
     </div>
     <div>
@@ -409,7 +405,7 @@
             <button
               class="field"
               onclick={() => tagsDialog?.open()}
-              disabled={tags.length === 0}><Tags />Tags</button
+              disabled={tags.length === 0}>Tags</button
             >
             <select
               class="field chevron"

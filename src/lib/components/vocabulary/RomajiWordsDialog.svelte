@@ -1,7 +1,5 @@
 <script lang="ts">
   import ChevronDown from "@lucide/svelte/icons/chevron-down";
-  import Plus from "@lucide/svelte/icons/plus";
-  import Search from "@lucide/svelte/icons/search";
   import TagInput from "./TagInput.svelte";
   import Dialog from "#lib/components/Dialog.svelte";
   import SelectAll from "#lib/components/SelectAll.svelte";
@@ -112,7 +110,7 @@
             class="action"
             type="submit"
             disabled={loading || parseRomajiList(text).length === 0}
-            ><Search />{loading ? "Looking up…" : "Look up"}</button
+            >{loading ? "Looking up…" : "Look up"}</button
           >
           <button type="button" onclick={() => dialogEl?.close()}>Close</button>
         </div>
@@ -211,7 +209,7 @@
           type="button"
           onclick={add}
           disabled={chosen.length === 0}
-          ><Plus />Add {chosen.length} {plural(chosen.length, "word")}</button
+          >Add {chosen.length} {plural(chosen.length, "word")}</button
         >
         <button type="button" onclick={() => (rows = [])}>Back</button>
       </div>
