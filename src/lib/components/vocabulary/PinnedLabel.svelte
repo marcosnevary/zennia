@@ -11,7 +11,7 @@
   <label for={id} class="text-sm text-muted">{label}</label>
   <button
     type="button"
-    class="pin size-5"
+    class="bare pin size-5"
     aria-pressed={pinned}
     aria-label={`Keep ${label.toLowerCase()} after adding`}
     title={pinned ? "Pinned: kept after adding" : "Keep after adding"}

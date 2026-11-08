@@ -707,30 +707,19 @@
     background: color-mix(in srgb, var(--action) 80%, var(--text));
   }
 
-  /* a bare X: no fill or box, it only darkens on hover */
-  button.toast-close {
+  /* a bare icon: no fill or box, it only darkens on hover */
+  button.bare {
     padding: 0;
     background: transparent;
     color: var(--muted);
   }
 
-  button.toast-close:not(:disabled):hover {
+  button.bare:not(:disabled):hover {
     background: transparent;
     color: var(--text);
   }
 
-  /* a bare pin like the toast X, filled while pressed */
-  button.pin {
-    padding: 0;
-    background: transparent;
-    color: var(--muted);
-  }
-
-  button.pin:not(:disabled):hover {
-    background: transparent;
-    color: var(--text);
-  }
-
+  /* a bare pin, filled while pressed */
   button.pin[aria-pressed="true"] {
     color: var(--text);
   }

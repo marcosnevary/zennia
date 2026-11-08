@@ -63,6 +63,7 @@ The Vocabulary and Stats searches share a bar (`TagSearch`), with tag chips befo
 - Plain text matches the word, the reading, its romaji or the meaning.
 - A `#term` in the text keeps only the rows with a tag containing it.
 - Space right after a `#term` that names a tag turns it into that tag's chip, and ← at the start of the text turns the last chip back into its `#term`.
+- The X clears the text and every chip. It is drawn by the bar instead of the browser, whose X only shows while there is text.
 
 ## List
 
