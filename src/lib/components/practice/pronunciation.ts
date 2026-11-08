@@ -18,6 +18,7 @@ export class Pronunciation {
   #loaded = false;
   #made = false;
   #wanted = false;
+  #delay?: ReturnType<typeof setTimeout>;
 
   constructor(source: Source) {
     this.#source = source;
@@ -38,7 +39,13 @@ export class Pronunciation {
     if (this.#wanted) this.#play();
   }
 
-  play(): void {
+  /** Waiting `delay` ms first, for the answer sound to be heard; until then the item isn't wanted, so it can't start early. */
+  play(delay = 0): void {
+    clearTimeout(this.#delay);
+    if (delay) {
+      this.#delay = setTimeout(() => this.play(), delay);
+      return;
+    }
     this.#wanted = true;
     if (!this.#url) return;
     if (!this.#loaded) this.#load();
@@ -46,6 +53,7 @@ export class Pronunciation {
   }
 
   stop(): void {
+    clearTimeout(this.#delay);
     this.#wanted = false;
     this.#audio.pause();
   }

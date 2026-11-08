@@ -2,6 +2,7 @@
   import { resolve } from "$app/paths";
   import { untrack } from "svelte";
   import PracticeCard from "./PracticeCard.svelte";
+  import { ANSWER_SOUND_MS, AnswerSound } from "./answer-sound.ts";
   import { loadFonts } from "./fonts.ts";
   import { Pronunciation } from "./pronunciation.ts";
   import {
@@ -55,6 +56,8 @@
       ),
   });
   const playPronunciation = $derived(app.settings.playPronunciation);
+  const answerSound = new AnswerSound();
+  const playAnswerSound = $derived(app.settings.playAnswerSound);
 
   $effect(() => {
     if (!current) return;
@@ -62,7 +65,10 @@
       pronouncedOf(current),
       untrack(() => playPronunciation),
     );
-    return () => pronunciation.stop();
+    return () => {
+      pronunciation.stop();
+      answerSound.stop();
+    };
   });
 
   const outcome = $derived(app.practice.outcome);
@@ -97,13 +103,18 @@
     } else {
       inputEl?.blur();
       meaningEl?.blur();
-      if (app.practice.outcome && playPronunciation) pronunciation.play();
+      const checked = app.practice.outcome;
+      if (!checked) return;
+      if (playAnswerSound) answerSound.play(checked.verdict === "correct");
+      if (playPronunciation)
+        pronunciation.play(playAnswerSound ? ANSWER_SOUND_MS : 0);
     }
   }
 
   // Check takes the focus off the fields, so Enter and Space reach the page and still move on to the next round;
   // before Check, Enter on the page brings the focus back to the answer
   function onWindowKeydown(event: KeyboardEvent) {
+    if (playAnswerSound) answerSound.prepare();
     if (event.target !== document.body) return;
     if (verdict !== null && (event.key === " " || event.key === "Enter")) {
       submit(event);
