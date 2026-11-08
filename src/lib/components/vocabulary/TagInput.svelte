@@ -1,14 +1,17 @@
 <script lang="ts">
   import TagChip from "#lib/components/TagChip.svelte";
   import { cleanTags, findTag, sameTag, validateTag } from "#lib/data/tags.ts";
+  import { getApp } from "#lib/state.svelte.ts";
 
   let {
     tags = $bindable(),
     suggestions,
   }: { tags: string[]; suggestions: string[] } = $props();
 
+  const app = getApp();
+
   let draft = $state("");
-  let error = $state("");
+  let invalid = $state(false);
 
   const collator = new Intl.Collator(undefined, { sensitivity: "base" });
   // every tag in use plus the ones just typed for this word, once each and in alphabetical order
@@ -28,12 +31,14 @@
 
   // adds the typed tag, with the spelling already in use when there is one
   function commit() {
-    if (!draft.trim()) {
-      error = "";
+    const error = draft.trim() ? validateTag(draft) : "";
+    invalid = !!error;
+    if (error) {
+      app.toasts.show(error, { id: "tag" });
       return;
     }
-    error = validateTag(draft);
-    if (error) return;
+    app.toasts.dismiss("tag");
+    if (!draft.trim()) return;
     const spelling = findTag(choices, draft) ?? draft;
     tags = cleanTags([...tags, spelling]);
     draft = "";
@@ -53,11 +58,11 @@
     class="field"
     placeholder="New tag (type it and press Enter)"
     bind:value={draft}
-    oninput={() => (error = "")}
+    aria-invalid={invalid}
+    oninput={() => (invalid = false)}
     onkeydown={onKeydown}
     onblur={commit}
   />
-  {#if error}<p class="text-bad" role="alert">{error}</p>{/if}
   {#if choices.length > 0}
     <ul
       class="flex max-h-32 flex-wrap gap-1 overflow-y-auto"

@@ -1,6 +1,5 @@
 import { getContext, setContext } from "svelte";
 import { SvelteSet } from "svelte/reactivity";
-import { messageOf } from "./core/errors";
 import { defaultKanaSelection, kanaKey, type KanaScript } from "./core/kana";
 import type { Stats, Verdict, Word } from "./core/types";
 import type { Account, ProfileChange } from "./data/db/client";
@@ -18,6 +17,7 @@ import {
 } from "./data/stats";
 import { assignTagColors } from "./data/tag-colors";
 import { tagKey } from "./data/tags";
+import { Toasts } from "./toasts.svelte";
 import {
   readThemeCache,
   writeThemeCache,
@@ -47,7 +47,7 @@ export class App {
   practice = $state<Session<PracticeItem>>(startSession());
   settings = $state<Settings>({ ...DEFAULT_SETTINGS, theme: readThemeCache() });
   status = $state<"loading" | "ready" | "failed">("loading");
-  error = $state("");
+  readonly toasts = new Toasts();
   account = $state<Account>({
     anonymous: true,
     email: null,
@@ -56,8 +56,6 @@ export class App {
     googleAvatarUrl: null,
     customAvatar: false,
   });
-  // Google sent the user back because that account already has data; waits for them to choose
-  conflict = $state(false);
   // words of the writing sheet being printed; it renders hidden and only shows up in the print dialog
   sheetWords = $state<Word[] | null>(null);
   // words added since the app loaded; the Vocabulary list marks them as new until they are pointed at
@@ -82,7 +80,7 @@ export class App {
 
   async init(): Promise<void> {
     this.status = "loading";
-    this.error = "";
+    this.toasts.dismiss("load");
     this.newWordIds.clear();
     this.practice = startSession();
     try {
@@ -95,33 +93,40 @@ export class App {
           await this.#repo.signInToAccount();
           return;
         }
-        this.conflict = true;
+        this.#askConflict();
       }
       this.#apply(stored);
       this.#syncTagColors();
       this.status = "ready";
-    } catch (e) {
-      this.error = messageOf(e);
+    } catch {
       this.status = "failed";
+      this.toasts.show(
+        "Couldn't load your words. Check your connection and reload the page.",
+        { id: "load", sticky: true },
+      );
     }
   }
 
   async signIn(): Promise<void> {
     try {
       await this.#repo.linkAccount();
-    } catch (e) {
-      this.error = `Could not sign in: ${messageOf(e)}`;
+    } catch {
+      this.toasts.show(
+        "Couldn't sign in. Check your connection and try again.",
+        { id: "auth" },
+      );
     }
   }
 
-  /** Answers the conflict: discarding signs in to the existing account, keeping stays anonymous. */
-  async resolveConflict(discard: boolean): Promise<void> {
-    this.conflict = false;
-    if (!discard) return;
+  // discards the data of this browser for the Google account that already has some
+  async #signInToAccount(): Promise<void> {
     try {
       await this.#repo.signInToAccount();
-    } catch (e) {
-      this.error = `Could not sign in: ${messageOf(e)}`;
+    } catch {
+      this.toasts.show(
+        "Couldn't sign in. Check your connection and try again.",
+        { id: "auth" },
+      );
     }
   }
 
@@ -135,8 +140,11 @@ export class App {
     await this.flush();
     try {
       await this.#repo.signOut();
-    } catch (e) {
-      this.error = `Could not sign out: ${messageOf(e)}`;
+    } catch {
+      this.toasts.show(
+        "Couldn't sign out. Check your connection and try again.",
+        { id: "auth" },
+      );
       return;
     }
     await this.init();
@@ -145,10 +153,6 @@ export class App {
   /** Resolves when every change made so far has been written. */
   flush(): Promise<void> {
     return this.#queue;
-  }
-
-  clearError(): void {
-    this.error = "";
   }
 
   /** Replaces the word list; only the words that were added, changed or removed are written. */
@@ -267,9 +271,32 @@ export class App {
     if (tagColors !== saved) this.#setSettings({ tagColors });
   }
 
+  // Google sent the user back because that account already has data; the toast waits for them to choose
+  #askConflict(): void {
+    this.toasts.show(
+      "This Google account already has saved words. If you sign in, the words in this browser will be lost.",
+      {
+        id: "conflict",
+        tone: "warning",
+        actions: [
+          {
+            label: "Sign in and discard",
+            primary: true,
+            run: () => this.#signInToAccount(),
+          },
+          // keeping the data leaves the user anonymous, so there is nothing to do
+          { label: "Keep my data", run: () => {} },
+        ],
+      },
+    );
+  }
+
   #persist(write: () => Promise<void>): void {
-    this.#queue = this.#queue.then(write).catch(async (e) => {
-      this.error = `Could not save your changes: ${messageOf(e)}`;
+    this.#queue = this.#queue.then(write).catch(async () => {
+      this.toasts.show(
+        "Couldn't save your last change. Check your connection and try again.",
+        { id: "save" },
+      );
       try {
         this.#apply(await this.#repo.load());
       } catch {
