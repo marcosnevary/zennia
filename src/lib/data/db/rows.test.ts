@@ -60,6 +60,7 @@ describe("settings", () => {
         tag_colors: "x",
         number_key_tabs: true,
         practice_fonts: [],
+        play_pronunciation: false,
       }),
     ).toEqual({ ...DEFAULT_SETTINGS, kanaSelection: ["hiragana:あ"] });
   });
@@ -77,6 +78,7 @@ describe("settings", () => {
         tag_colors: {},
         number_key_tabs: true,
         practice_fonts: [],
+        play_pronunciation: false,
       }),
     ).toMatchObject({
       wordsSort: "reading",
@@ -103,6 +105,7 @@ describe("settings", () => {
         },
         number_key_tabs: true,
         practice_fonts: [],
+        play_pronunciation: false,
       }).tagColors,
     ).toEqual({ food: { hue: 10, tone: 1 } });
   });
@@ -120,6 +123,7 @@ describe("settings", () => {
         tag_colors: {},
         number_key_tabs: false,
         practice_fonts: [],
+        play_pronunciation: false,
       }).numberKeyTabs,
     ).toBe(false);
   });
@@ -137,6 +141,7 @@ describe("settings", () => {
         tag_colors: {},
         number_key_tabs: true,
         practice_fonts: ["yomogi", "unknown", "klee-one"],
+        play_pronunciation: false,
       }).practiceFonts,
     ).toEqual(["klee-one", "yomogi"]);
   });
@@ -170,6 +175,9 @@ describe("settings", () => {
     });
     expect(settingsToRow({ practiceFonts: ["klee-one"] })).toEqual({
       practice_fonts: ["klee-one"],
+    });
+    expect(settingsToRow({ playPronunciation: true })).toEqual({
+      play_pronunciation: true,
     });
   });
 });

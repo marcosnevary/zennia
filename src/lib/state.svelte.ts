@@ -1,3 +1,4 @@
+import type { Pronounced } from "#functions/_shared/pronunciation.ts";
 import { getContext, setContext } from "svelte";
 import { SvelteSet } from "svelte/reactivity";
 import { defaultKanaSelection, kanaKey, type KanaScript } from "./core/kana";
@@ -164,6 +165,14 @@ export class App {
     await this.init();
   }
 
+  pronunciationUrl(pronounced: Pronounced): Promise<string> {
+    return this.#repo.pronunciationUrl(pronounced);
+  }
+
+  makePronunciation(pronounced: Pronounced): Promise<void> {
+    return this.#repo.makePronunciation(pronounced);
+  }
+
   /** Resolves when every change made so far has been written. */
   flush(): Promise<void> {
     return this.#queue;
@@ -264,6 +273,10 @@ export class App {
 
   setPracticeFonts(practiceFonts: PracticeFontId[]): void {
     this.#setSettings({ practiceFonts: [...practiceFonts] });
+  }
+
+  setPlayPronunciation(playPronunciation: boolean): void {
+    this.#setSettings({ playPronunciation });
   }
 
   setKanaSelection(kanaSelection: string[]): void {

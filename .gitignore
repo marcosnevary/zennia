@@ -9,3 +9,6 @@ dist
 .svelte-kit
 build
 !.env.example
+
+# Supabase CLI state of the linked project
+supabase/.temp/

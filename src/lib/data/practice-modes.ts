@@ -1,3 +1,4 @@
+import type { Pronounced } from "#functions/_shared/pronunciation.ts";
 import { furigana, type FuriganaPart } from "#lib/core/furigana.ts";
 import {
   buildKana,
@@ -87,11 +88,15 @@ export interface RightAnswer {
   meaning?: string;
 }
 
+/** The word or kana as written, with its reading: what the result shows and the voice says. */
+export function pronouncedOf(item: PracticeItem): Pronounced {
+  return item.kind === "word"
+    ? { written: item.word.japanese, reading: item.word.hiragana }
+    : { written: item.kana.symbol, reading: item.kana.hiragana };
+}
+
 export function rightAnswer(item: PracticeItem): RightAnswer {
-  const [written, hiragana] =
-    item.kind === "word"
-      ? [item.word.japanese, item.word.hiragana]
-      : [item.kana.symbol, item.kana.hiragana];
+  const { written, reading: hiragana } = pronouncedOf(item);
   const parts = furigana(written, hiragana);
   const romaji = toDisplayRomajiRuns(
     parts.map((part) => part.reading ?? part.text),

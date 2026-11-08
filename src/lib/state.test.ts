@@ -68,6 +68,10 @@ function fakeRepo(stored: Partial<Stored> = {}, conflict = false) {
     signOut: vi.fn(async () => {
       calls.push("signout");
     }),
+    pronunciationUrl: vi.fn(async (p) => `audio/${p.reading}.mp3`),
+    makePronunciation: vi.fn(async (p) => {
+      calls.push(`pronounce ${p.reading}`);
+    }),
   };
   return { repo, calls, setStored: (next: Stored) => (current = next) };
 }

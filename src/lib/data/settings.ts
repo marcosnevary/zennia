@@ -20,6 +20,8 @@ export interface Settings {
   numberKeyTabs: boolean;
   /** The fonts a practice word is drawn from; none keeps the UI font. */
   practiceFonts: PracticeFontId[];
+  /** Whether checking an answer reads the word aloud. */
+  playPronunciation: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -33,4 +35,5 @@ export const DEFAULT_SETTINGS: Settings = {
   tagColors: {},
   numberKeyTabs: true,
   practiceFonts: [],
+  playPronunciation: false,
 };

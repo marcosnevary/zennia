@@ -1,6 +1,6 @@
 # Architecture
 
-A static SvelteKit SPA. There is no server of our own: the browser talks directly to Supabase, which stores the data and the accounts.
+A static SvelteKit SPA. There is no server of our own: the browser talks directly to Supabase, which stores the data and the accounts. The one piece of code that runs elsewhere is a Supabase Edge Function that [makes the pronunciation audio](integrations.md#pronunciation).
 
 The other docs cover the [data model](data-model.md), [practice and stats](practice.md), [vocabulary](vocabulary.md) and the [integrations and setup](integrations.md).
 
@@ -18,6 +18,7 @@ Dependencies point one way, with each layer using only the ones before it: `core
 - `src/app.html`: the page shell.
 - `static/`: fonts, favicons, the [bundled data](integrations.md#bundled-data), which `scripts/` builds, and the page Google sign-in returns to (`auth/google.html`).
 - `supabase/migrations/`: the [database schema](data-model.md#migrations).
+- `supabase/functions/`: the Edge Function (`pronounce`), and in `_shared/` the code it shares with the app, imported as `#functions/*`.
 
 ## Data flow
 
@@ -78,6 +79,7 @@ The description and Open Graph tags must stay static in `src/app.html`. The app 
 - **`#lib/*` instead of `$lib`, and no `svelte.config.js`.** SvelteKit 3 deprecates the alias and no longer reads that file, so its options are in the `sveltekit()` plugin in `vite.config.ts`. Imports between folders use `#lib/*` with the file extension, as Node resolves it literally, and files in the same folder import each other by relative path.
 - **Theme colors are CSS variables that `data-theme` redefines.** Tailwind utilities such as `bg-surface` switch themes by themselves. `dark:` variants are only for what isn't a theme color, such as the fill of a tag chip, which comes from the tag.
 - **`PrintSheet.svelte` keeps a scoped `<style>`.** It is print-only, sized in millimeters, and relies on `@page`.
+- **The code shared with the Edge Function lives under `supabase/functions/_shared/`.** The function runs on Deno and is bundled from its own folder, so the app imports from there rather than the other way around. That code uses only web APIs and has no imports.
 - **Lucide icons are imported one module at a time.** Importing from the package root would make the dev server and the build load the whole set.
 - **Prettier with its default options, and ESLint with the recommended rules, none type-aware.** The accepted convention wins over the style the code had before. `prettier-plugin-tailwindcss` isn't installed, so Tailwind classes keep their written order.
 - **Settings is reachable only when signed in.** It lives in the account menu, which anonymous users don't have, so they keep the defaults until they sign in.

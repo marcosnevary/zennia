@@ -1,3 +1,8 @@
+import {
+  PRONUNCIATION_BUCKET,
+  pronunciationPath,
+  type Pronounced,
+} from "#functions/_shared/pronunciation.ts";
 import type { Stats, Word } from "#lib/core/types.ts";
 import type { Settings } from "#lib/data/settings.ts";
 import {
@@ -50,6 +55,10 @@ export interface Repo {
   signInToAccount(google: GoogleToken): Promise<void>;
   /** Signs out; the next load starts a new anonymous user. */
   signOut(): Promise<void>;
+  /** Where the audio of a word is played from, though it may not have been made yet. */
+  pronunciationUrl(pronounced: Pronounced): Promise<string>;
+  /** Makes the audio of a word, unless it is already stored. */
+  makePronunciation(pronounced: Pronounced): Promise<void>;
 }
 
 const PAGE = 1000;
@@ -191,6 +200,20 @@ export function createRepo(getDb: () => Db): Repo {
     async updateProfile(change) {
       const { db, userId } = await open();
       await updateProfile(db, userId, change);
+    },
+
+    async pronunciationUrl(pronounced) {
+      const path = await pronunciationPath(pronounced);
+      return getDb().storage.from(PRONUNCIATION_BUCKET).getPublicUrl(path).data
+        .publicUrl;
+    },
+
+    async makePronunciation(pronounced) {
+      const { db } = await open();
+      const { error } = await db.functions.invoke("pronounce", {
+        body: pronounced,
+      });
+      if (error) throw new Error(error.message);
     },
 
     async signInToAccount(google) {
