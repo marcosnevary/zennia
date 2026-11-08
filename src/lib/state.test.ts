@@ -310,6 +310,18 @@ describe("login", () => {
     expect(calls).toEqual(["signin"]);
   });
 
+  it("signs in without linking when the browser has no data", async () => {
+    const { app, calls } = await ready();
+    await app.signIn();
+    expect(calls).toEqual(["signin"]);
+  });
+
+  it("links Google to the anonymous user when the browser has data", async () => {
+    const { app, calls } = await ready({ words: [word("a", 1)] });
+    await app.signIn();
+    expect(calls).toEqual(["link"]);
+  });
+
   it("reloads the data after signing out", async () => {
     const { app, calls, repo } = await ready({ words: [word("a", 1)] });
     await app.signOut();

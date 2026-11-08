@@ -12,7 +12,9 @@ The app needs a connection to start and to save. There is no offline mode.
 
 Every browser without a session gets an anonymous Supabase user, so the app works with no login.
 
-**Signing in** calls `linkIdentity`, which attaches Google to the anonymous user. The user keeps its id, so no data moves.
+**Signing in** with no data in the browser calls `signInWithOAuth`, which goes to the user of that Google account or creates one. The empty anonymous user is left behind.
+
+**Signing in with data** calls `linkIdentity`, which attaches Google to the anonymous user. The user keeps its id, so no data moves.
 
 **If the Google account already belongs to another user**, Supabase redirects back with `identity_already_exists`. The client may drop that error from the URL when it starts, so it is read before the client is created, and `/` keeps the query and hash through its redirect to `/practice`. Then:
 
@@ -62,6 +64,7 @@ The Add from romaji dialog credits JMdict and the printed sheet credits KanjiVG,
 - **Supabase over Neon.** Neon is only the database, so it would need a server layer and our own Auth. Supabase lets the app stay a static SPA.
 - **Google is the only login provider.** There are no passwords to reset and no email delivery to set up.
 - **Login is optional, and starts from an anonymous user.** Nothing has to happen before the first practice, and signing in later keeps the data.
+- **A browser with no data signs in instead of linking.** Linking fails for a Google account that already has a user, and recovering from that sends the user through Google's account chooser twice. Leaving an empty anonymous user behind costs nothing.
 - **The profile photo is in Storage, not a table column.** A data URL would come with the data on every load, and the browser could not cache it.
 - **The photo is a JPEG.** Safari can't encode WebP from a canvas.
 - **No Vercel previews.** Nobody opened the previews: changes are tested locally, Google login doesn't work on preview URLs, and previews used the production Supabase project.
