@@ -902,6 +902,13 @@
       animation: icon-leave var(--icon-motion);
     }
 
+    /* the pencil scribbles on its tip; it sits in the icon's corner, so it only tilts toward the free space above */
+    &.lucide-user-pen > path:nth-child(2) {
+      transform-box: view-box;
+      transform-origin: 13px 21px;
+      animation: icon-scribble var(--icon-motion);
+    }
+
     &.lucide-download > path:is(:nth-child(1), :nth-child(3)) {
       animation: icon-drop var(--icon-motion);
     }
@@ -968,6 +975,15 @@
   50% {
     translate: 3px 0;
     rotate: -6deg;
+  }
+}
+
+@keyframes icon-scribble {
+  40% {
+    rotate: -8deg;
+  }
+  75% {
+    rotate: -2deg;
   }
 }
 
