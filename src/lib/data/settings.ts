@@ -16,7 +16,7 @@ export interface Settings {
   statsSortDirection: SortDirection;
   /** The color of each tag in use, by `tagKey`. */
   tagColors: Record<string, TagColor>;
-  /** Whether the keys 1 to 5 switch tabs. */
+  /** Whether the keys 1 to 4 switch tabs. */
   numberKeyTabs: boolean;
   /** The fonts a practice word is drawn from; none keeps the UI font. */
   practiceFonts: PracticeFontId[];

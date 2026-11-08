@@ -54,7 +54,7 @@
       bind:this={buttons[i]}
       type="button"
       class={[
-        "z-10 bg-transparent p-0",
+        "z-10 w-10 bg-transparent p-0",
         checked ? "text-on-action" : "text-muted hover:text-ink",
       ]}
       role="radio"

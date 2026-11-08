@@ -1,14 +1,10 @@
 <script lang="ts">
   import Check from "@lucide/svelte/icons/check";
-  import Monitor from "@lucide/svelte/icons/monitor";
-  import Moon from "@lucide/svelte/icons/moon";
-  import Sun from "@lucide/svelte/icons/sun";
   import X from "@lucide/svelte/icons/x";
-  import { tick, type Component } from "svelte";
+  import { tick } from "svelte";
   import type { Attachment } from "svelte/attachments";
   import { prefersReducedMotion } from "svelte/motion";
   import { messageOf } from "#lib/core/errors.ts";
-  import { plural } from "#lib/core/plural.ts";
   import { importAnkiDeck } from "#lib/data/anki.ts";
   import {
     downloadJSON,
@@ -22,25 +18,11 @@
     importSummary,
     type SanitizeResult,
   } from "#lib/data/words.ts";
-  import FontsDialog from "./FontsDialog.svelte";
-  import Help from "./Help.svelte";
+  import AnkiHelp from "./AnkiHelp.svelte";
   import SettingRow from "./SettingRow.svelte";
-  import SegmentedControl from "#lib/components/SegmentedControl.svelte";
-  import Switch from "#lib/components/Switch.svelte";
-  import { WORDS_FOCUSES, type WordsFocus } from "#lib/data/practice-modes.ts";
-  import { THEMES, type ThemePreference } from "#lib/data/theme.ts";
   import { getApp } from "#lib/state.svelte.ts";
 
   const app = getApp();
-
-  const THEME_ICONS: Record<ThemePreference, Component> = {
-    system: Monitor,
-    light: Sun,
-    dark: Moon,
-  };
-
-  let fontsDialog = $state<FontsDialog>();
-  const fontCount = $derived(app.settings.practiceFonts.length);
 
   const FEEDBACK_MS = 4000;
 
@@ -152,69 +134,10 @@
   {/if}
 {/snippet}
 
-<!-- with the rows' 12px padding, the first title starts 24px below the top of the content, like on the other screens -->
-<div class="mt-3 divide-y divide-tint">
-  <SettingRow
-    title="Theme"
-    description="Light, dark, or the same as your system."
-  >
-    <SegmentedControl
-      options={THEMES.map((t) => ({ ...t, icon: THEME_ICONS[t.id] }))}
-      value={app.settings.theme}
-      onchange={(theme) => app.setTheme(theme)}
-      label="Theme"
-    />
-  </SettingRow>
-
-  <SettingRow
-    title="Answer words by"
-    description="How words are answered in Practice: by romaji, by meaning, or both. Kana are always answered by romaji."
-  >
-    <select
-      class="field chevron"
-      value={app.settings.wordsFocus}
-      onchange={(e) => app.setWordsFocus(e.currentTarget.value as WordsFocus)}
-      aria-label="Answer words by"
-    >
-      {#each WORDS_FOCUSES as f (f.id)}
-        <option value={f.id}>{f.label}</option>
-      {/each}
-    </select>
-  </SettingRow>
-
-  <SettingRow
-    title="Practice fonts"
-    description="Show each word in Practice in one of the fonts you choose, to learn to read it in any style."
-  >
-    <button type="button" onclick={() => fontsDialog?.open()}
-      >{fontCount
-        ? `${fontCount} ${plural(fontCount, "font")} selected`
-        : "Choose fonts"}</button
-    >
-  </SettingRow>
-
-  <SettingRow
-    title="Switch tabs with number keys"
-    description="Press 1 to 5 to open Practice, Vocabulary, Kana, Stats or Settings, except while typing in a field."
-  >
-    <div class="flex sm:justify-end">
-      <Switch
-        checked={app.settings.numberKeyTabs}
-        onchange={() => app.setNumberKeyTabs(!app.settings.numberKeyTabs)}
-        label="Switch tabs with number keys"
-      />
-    </div>
-  </SettingRow>
-</div>
-
-<div class="mt-6 flex items-center gap-2">
-  <h2 class="m-0">Data</h2>
-  <Help />
-</div>
 <div class="divide-y divide-tint">
   <SettingRow
     title="Export words"
-    description="Download all your words as a JSON file, as a backup or to move them elsewhere."
+    description="Download all your words as a JSON file."
   >
     <button
       onclick={exportWords}
@@ -225,10 +148,7 @@
   </SettingRow>
   <SettingRow
     title="Import words"
-    description={describe(
-      "json",
-      "Add the words of a file made by Export JSON.",
-    )}
+    description={describe("json", "Add words from an exported JSON file.")}
   >
     <label class="file" {@attach control("json")}>
       {@render action("json", "Import JSON")}
@@ -242,11 +162,9 @@
   </SettingRow>
   <SettingRow
     title="Import an Anki deck"
-    description={describe(
-      "anki",
-      "Add the words of Anki notes exported as plain text.",
-    )}
+    description={describe("anki", "Add words from Anki notes in plain text.")}
   >
+    {#snippet help()}<AnkiHelp />{/snippet}
     <label
       class="file"
       title="Anki: Export → Notes in Plain Text. Columns: word, reading, meaning"
@@ -265,7 +183,7 @@
   {#if answerCount(totalTally(app.stats)) || feedback?.key === "reset"}
     <SettingRow
       title="Reset statistics"
-      description="Erase every practice result. This cannot be undone."
+      description="Erase all practice results for good."
     >
       <button class="danger" onclick={resetStats} {@attach control("reset")}
         >{@render action("reset", "Reset stats")}</button
@@ -273,6 +191,5 @@
     </SettingRow>
   {/if}
 </div>
-<FontsDialog bind:this={fontsDialog} />
 <!-- a label change is not announced, so the outcome is also read from here -->
 <p class="sr-only" role="status">{feedback?.detail ?? feedback?.text ?? ""}</p>

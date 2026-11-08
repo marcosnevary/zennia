@@ -49,8 +49,6 @@ describe("accountOf", () => {
       email: "ana@example.com",
       name: "Ana Sato",
       avatarUrl: "https://photo",
-      googleAvatarUrl: "https://photo",
-      customAvatar: false,
     });
   });
 
@@ -61,7 +59,7 @@ describe("accountOf", () => {
     expect(account).toMatchObject({ name: "Ana", avatarUrl: "https://pic" });
   });
 
-  it("prefers the name and photo saved in Edit profile", () => {
+  it("prefers the name and photo saved in the Profile settings", () => {
     const account = accountOf(
       user({
         user_metadata: {
@@ -75,8 +73,6 @@ describe("accountOf", () => {
     expect(account).toMatchObject({
       name: "Ana",
       avatarUrl: "https://mine",
-      googleAvatarUrl: "https://photo",
-      customAvatar: true,
     });
   });
 
@@ -86,8 +82,6 @@ describe("accountOf", () => {
       email: null,
       name: null,
       avatarUrl: null,
-      googleAvatarUrl: null,
-      customAvatar: false,
     });
   });
 

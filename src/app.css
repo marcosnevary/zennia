@@ -577,7 +577,9 @@
     box-shadow: 0 12px 40px rgb(0 0 0 / 0.2);
   }
 
+  /* on the dark page the shadow barely shows, so a border draws the dialog's edge */
   :root[data-theme="dark"] dialog {
+    border: 1px solid var(--color-tint);
     box-shadow: 0 12px 40px rgb(0 0 0 / 0.7);
   }
 
@@ -603,6 +605,26 @@
     box-shadow: 0 8px 24px rgb(0 0 0 / 0.6);
   }
 
+  /* a help note opened from a small button, placed by its opener like the menu */
+  .tooltip {
+    inset: auto;
+    margin: 0;
+    border: 0;
+    width: min(288px, calc(100vw - 32px));
+    padding: 12px 16px;
+    border-radius: var(--radius-panel);
+    background: var(--bg);
+    color: inherit;
+    font-size: var(--text-sm);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.16);
+  }
+
+  /* like a dialog, it needs a border to stand out on the dark page, and here also on the dialog it opens from */
+  :root[data-theme="dark"] .tooltip {
+    border: 1px solid var(--color-tint);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.6);
+  }
+
   /* flat, with a fill that tells what kind of message it is; mixed into the page color, so it stays soft in both themes */
   .toast {
     border-radius: var(--radius-panel);
@@ -618,7 +640,11 @@
 
   dialog::backdrop {
     background: rgb(0 0 0 / 0.5);
-    backdrop-filter: blur(6px);
+  }
+
+  /* half black barely darkens the dark page, so the dialog wouldn't stand out from it */
+  :root[data-theme="dark"] dialog::backdrop {
+    background: rgb(0 0 0 / 0.75);
   }
 
   /* the backdrop stops at the scrollbar, so a modal hides it; scrollbar-gutter would instead reserve a strip the backdrop cannot cover */
@@ -683,11 +709,12 @@
     background: var(--color-tint-hover);
   }
 
-  .tab:hover {
+  /* as specific as the button hover above, so a button tab keeps the light tint of a nav tab */
+  :is(a, button).tab:hover {
     background: var(--color-tint-soft);
   }
 
-  .tab[aria-current="page"] {
+  :is(a, button).tab:is([aria-current="page"], [aria-selected="true"]) {
     background: var(--color-tint);
   }
 

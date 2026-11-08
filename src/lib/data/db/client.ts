@@ -27,16 +27,12 @@ export interface Account {
   email: string | null;
   name: string | null;
   avatarUrl: string | null;
-  /** The Google photo, which Edit profile can go back to. */
-  googleAvatarUrl: string | null;
-  /** True when the photo was picked in Edit profile rather than taken from Google. */
-  customAvatar: boolean;
 }
 
-/** A change made in Edit profile: a new photo, `null` to go back to the Google one, or none to keep it. */
+/** A change made in the Profile settings: a new photo, or none to keep it. */
 export interface ProfileChange {
   name: string;
-  photo?: Blob | null;
+  photo?: Blob;
 }
 
 export async function getAccount(db: Db): Promise<Account> {
@@ -51,16 +47,13 @@ export function accountOf(user: User | null): Account {
     ...user?.user_metadata,
     ...user?.identities?.find((i) => i.provider === "google")?.identity_data,
   };
-  // Google sign-in rewrites its own keys of user_metadata every time, so what Edit profile saves lives under keys of ours
+  // Google sign-in rewrites its own keys of user_metadata every time, so what the Profile settings save lives under keys of ours
   const own = user?.user_metadata ?? {};
-  const googleAvatarUrl = google.avatar_url ?? google.picture ?? null;
   return {
     anonymous: user?.is_anonymous ?? true,
     email: user?.email ?? null,
     name: own.display_name ?? google.full_name ?? google.name ?? null,
-    avatarUrl: own.photo_url ?? googleAvatarUrl,
-    googleAvatarUrl,
-    customAvatar: own.photo_url != null,
+    avatarUrl: own.photo_url ?? google.avatar_url ?? google.picture ?? null,
   };
 }
 
@@ -69,7 +62,7 @@ export async function updateProfile(
   userId: string,
   change: ProfileChange,
 ): Promise<void> {
-  const data: Record<string, string | null> = { display_name: change.name };
+  const data: Record<string, string> = { display_name: change.name };
   const path = `${userId}/avatar.jpg`;
   const avatars = db.storage.from("avatars");
   if (change.photo) {
@@ -80,10 +73,6 @@ export async function updateProfile(
     if (error) throw new Error(error.message);
     // the path never changes, so the browser would keep showing the old photo from its cache
     data.photo_url = `${avatars.getPublicUrl(path).data.publicUrl}?v=${Date.now()}`;
-  } else if (change.photo === null) {
-    const { error } = await avatars.remove([path]);
-    if (error) throw new Error(error.message);
-    data.photo_url = null;
   }
   const { error } = await db.auth.updateUser({ data });
   if (error) throw new Error(error.message);

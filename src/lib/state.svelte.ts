@@ -61,8 +61,6 @@ export class App {
     email: null,
     name: null,
     avatarUrl: null,
-    googleAvatarUrl: null,
-    customAvatar: false,
   });
   // words of the writing sheet being printed; it renders hidden and only shows up in the print dialog
   sheetWords = $state<Word[] | null>(null);
@@ -146,7 +144,7 @@ export class App {
     await this.init();
   }
 
-  /** Saves a change made in Edit profile; a failure is thrown for the dialog to show. */
+  /** Saves a change made in the Profile settings; a failure is thrown for the form to show. */
   async updateProfile(change: ProfileChange): Promise<void> {
     await this.#repo.updateProfile(change);
     this.account = await this.#repo.account();
