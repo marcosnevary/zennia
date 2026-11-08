@@ -6,12 +6,12 @@ import {
   openSession,
   signInGoogle,
   signOut,
-  takeLinkConflict,
   updateProfile,
   type Account,
   type Db,
   type ProfileChange,
 } from "./client";
+import { requestGoogleToken, type GoogleToken } from "./google";
 import {
   settingsFromRow,
   settingsToRow,
@@ -42,14 +42,14 @@ export interface Repo {
   saveSettings(patch: Partial<Settings>): Promise<void>;
   account(): Promise<Account>;
   updateProfile(change: ProfileChange): Promise<void>;
-  /** Goes to Google to attach it to the current user; the page is left. */
-  linkAccount(): Promise<void>;
-  /** Goes to Google to sign in to the user that owns the account, leaving the current user's data behind. */
-  signInToAccount(): Promise<void>;
+  /** Asks Google which account to use; null when the user declines. */
+  googleToken(): Promise<GoogleToken | null>;
+  /** Attaches the Google account to the current user; false when it already belongs to another user. */
+  linkAccount(google: GoogleToken): Promise<boolean>;
+  /** Signs in to the user that owns the Google account, leaving the current user's data behind. */
+  signInToAccount(google: GoogleToken): Promise<void>;
   /** Signs out; the next load starts a new anonymous user. */
   signOut(): Promise<void>;
-  /** True once when Google sent the user back because that account already belongs to another user. */
-  takeLinkConflict(): boolean;
 }
 
 const PAGE = 1000;
@@ -181,9 +181,11 @@ export function createRepo(getDb: () => Db): Repo {
       return getAccount(db);
     },
 
-    async linkAccount() {
+    googleToken: requestGoogleToken,
+
+    async linkAccount(google) {
       const { db } = await open();
-      await linkGoogle(db);
+      return linkGoogle(db, google);
     },
 
     async updateProfile(change) {
@@ -191,9 +193,10 @@ export function createRepo(getDb: () => Db): Repo {
       await updateProfile(db, userId, change);
     },
 
-    async signInToAccount() {
+    async signInToAccount(google) {
       const { db } = await open();
-      await signInGoogle(db);
+      await signInGoogle(db, google);
+      opened = undefined;
     },
 
     async signOut() {
@@ -201,7 +204,5 @@ export function createRepo(getDb: () => Db): Repo {
       await signOut(db);
       opened = undefined;
     },
-
-    takeLinkConflict,
   };
 }

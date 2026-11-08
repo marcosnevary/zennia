@@ -57,8 +57,10 @@ function fakeRepo(stored: Partial<Stored> = {}, conflict = false) {
     updateProfile: vi.fn(async (change) => {
       calls.push(`profile ${change.name}`);
     }),
+    googleToken: vi.fn(async () => ({ token: "id-token", nonce: "nonce" })),
     linkAccount: vi.fn(async () => {
       calls.push("link");
+      return !conflict;
     }),
     signInToAccount: vi.fn(async () => {
       calls.push("signin");
@@ -66,7 +68,6 @@ function fakeRepo(stored: Partial<Stored> = {}, conflict = false) {
     signOut: vi.fn(async () => {
       calls.push("signout");
     }),
-    takeLinkConflict: vi.fn(() => conflict),
   };
   return { repo, calls, setStored: (next: Stored) => (current = next) };
 }
@@ -292,34 +293,52 @@ describe("App", () => {
 describe("login", () => {
   it("asks before discarding the data of a browser that already has some", async () => {
     const { app, calls } = await ready({ words: [word("a", 1)] }, true);
-    expect(calls).toEqual([]);
+    await app.signIn();
+    expect(calls).toEqual(["link"]);
     await choose(app, "Sign in and discard");
-    expect(calls).toEqual(["signin"]);
+    expect(calls).toEqual(["link", "signin"]);
+  });
+
+  it("asks Google only once to sign in and discard", async () => {
+    const { app, repo } = await ready({ words: [word("a", 1)] }, true);
+    await app.signIn();
+    await choose(app, "Sign in and discard");
+    expect(repo.googleToken).toHaveBeenCalledTimes(1);
+    expect(repo.signInToAccount).toHaveBeenCalledWith({
+      token: "id-token",
+      nonce: "nonce",
+    });
   });
 
   it("keeps the data when the user declines", async () => {
     const { app, calls } = await ready({ words: [word("a", 1)] }, true);
+    await app.signIn();
     await choose(app, "Keep my data");
     expect(app.toasts.items).toEqual([]);
-    expect(calls).toEqual([]);
-  });
-
-  it("signs in to the existing account at once when the browser has no data", async () => {
-    const { app, calls } = await ready({}, true);
-    expect(app.toasts.items).toEqual([]);
-    expect(calls).toEqual(["signin"]);
+    expect(calls).toEqual(["link"]);
   });
 
   it("signs in without linking when the browser has no data", async () => {
-    const { app, calls } = await ready();
+    const { app, calls, repo } = await ready({}, true);
     await app.signIn();
+    expect(app.toasts.items).toEqual([]);
     expect(calls).toEqual(["signin"]);
+    expect(repo.load).toHaveBeenCalledTimes(2);
   });
 
   it("links Google to the anonymous user when the browser has data", async () => {
-    const { app, calls } = await ready({ words: [word("a", 1)] });
+    const { app, calls, repo } = await ready({ words: [word("a", 1)] });
     await app.signIn();
     expect(calls).toEqual(["link"]);
+    expect(repo.account).toHaveBeenCalledTimes(2);
+  });
+
+  it("does nothing when the user declines on Google", async () => {
+    const { app, calls, repo } = await ready({ words: [word("a", 1)] });
+    vi.mocked(repo.googleToken).mockResolvedValueOnce(null);
+    await app.signIn();
+    expect(calls).toEqual([]);
+    expect(app.toasts.items).toEqual([]);
   });
 
   it("reloads the data after signing out", async () => {

@@ -3,6 +3,7 @@ import { SvelteSet } from "svelte/reactivity";
 import { defaultKanaSelection, kanaKey, type KanaScript } from "./core/kana";
 import type { Stats, Verdict, Word } from "./core/types";
 import type { Account, ProfileChange } from "./data/db/client";
+import { PopupBlockedError, type GoogleToken } from "./data/db/google";
 import type { Repo, Stored } from "./data/db/repo";
 import type { PracticeItem, Recorder, WordsFocus } from "./data/practice-modes";
 import { startSession, type Session } from "./data/practice-session";
@@ -30,6 +31,8 @@ import {
   type SortKey,
 } from "./data/words";
 import { allTags, findTag, renameTag } from "./data/tags";
+
+const SIGN_IN_FAILED = "Couldn't sign in. Check your connection and try again.";
 
 function hasData(words: Word[], stats: Stats): boolean {
   return words.length > 0 || answerCount(totalTally(stats)) > 0;
@@ -90,13 +93,6 @@ export class App {
     try {
       const stored = await this.#repo.load();
       this.account = await this.#repo.account();
-      if (this.#repo.takeLinkConflict()) {
-        if (!hasData(stored.words, stored.stats)) {
-          await this.#repo.signInToAccount();
-          return;
-        }
-        this.#askConflict();
-      }
       this.#apply(stored);
       this.#syncTagColors();
       this.status = "ready";
@@ -110,28 +106,43 @@ export class App {
   }
 
   async signIn(): Promise<void> {
-    // linking would fail for a Google account that already has a user and send the user through Google a second time
-    if (!hasData(this.words, this.stats)) return this.#signInToAccount();
+    let google: GoogleToken | null;
     try {
-      await this.#repo.linkAccount();
-    } catch {
+      google = await this.#repo.googleToken();
+    } catch (error) {
       this.toasts.show(
-        "Couldn't sign in. Check your connection and try again.",
+        error instanceof PopupBlockedError
+          ? "Couldn't open Google sign-in. Allow pop-ups for this site and try again."
+          : SIGN_IN_FAILED,
         { id: "auth" },
       );
+      return;
+    }
+    if (!google) return;
+    // with no data to keep there is nothing to link, and nothing to ask about if the account already has a user
+    if (!hasData(this.words, this.stats)) return this.#signInToAccount(google);
+    try {
+      if (await this.#repo.linkAccount(google)) {
+        this.account = await this.#repo.account();
+      } else {
+        this.#askConflict(google);
+      }
+    } catch {
+      this.toasts.show(SIGN_IN_FAILED, { id: "auth" });
     }
   }
 
   // discards the data of this browser for the Google account that already has some
-  async #signInToAccount(): Promise<void> {
+  async #signInToAccount(google: GoogleToken): Promise<void> {
+    // pending writes belong to the user being left
+    await this.flush();
     try {
-      await this.#repo.signInToAccount();
+      await this.#repo.signInToAccount(google);
     } catch {
-      this.toasts.show(
-        "Couldn't sign in. Check your connection and try again.",
-        { id: "auth" },
-      );
+      this.toasts.show(SIGN_IN_FAILED, { id: "auth" });
+      return;
     }
+    await this.init();
   }
 
   /** Saves a change made in Edit profile; a failure is thrown for the dialog to show. */
@@ -275,8 +286,8 @@ export class App {
     if (tagColors !== saved) this.#setSettings({ tagColors });
   }
 
-  // Google sent the user back because that account already has data; the toast waits for them to choose
-  #askConflict(): void {
+  // the toast waits for the user to choose, and signing in reuses the token so Google isn't asked again
+  #askConflict(google: GoogleToken): void {
     this.toasts.show(
       "This Google account already has saved words. If you sign in, the words in this browser will be lost.",
       {
@@ -286,7 +297,7 @@ export class App {
           {
             label: "Sign in and discard",
             primary: true,
-            run: () => this.#signInToAccount(),
+            run: () => this.#signInToAccount(google),
           },
           // keeping the data leaves the user anonymous, so there is nothing to do
           { label: "Keep my data", run: () => {} },

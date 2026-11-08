@@ -3,11 +3,11 @@ import {
   type SupabaseClient,
   type User,
 } from "@supabase/supabase-js";
+import type { GoogleToken } from "./google";
 
 export type Db = SupabaseClient;
 
 let client: Db | undefined;
-let linkConflict = false;
 
 export function getDb(): Db {
   if (client) return client;
@@ -18,8 +18,6 @@ export function getDb(): Db {
       "Supabase is not configured: set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env.",
     );
   }
-  // read before the client starts: it processes the redirect and may drop the error from the URL
-  linkConflict = readLinkConflict();
   client = createClient(url, key);
   return client;
 }
@@ -39,24 +37,6 @@ export interface Account {
 export interface ProfileChange {
   name: string;
   photo?: Blob | null;
-}
-
-function readLinkConflict(): boolean {
-  const { search, hash } = window.location;
-  const found =
-    new URLSearchParams(search).get("error_code") ===
-      "identity_already_exists" ||
-    new URLSearchParams(hash.slice(1)).get("error_code") ===
-      "identity_already_exists";
-  if (found) history.replaceState(null, "", window.location.pathname);
-  return found;
-}
-
-/** True once when the user came back from Google and that Google account already belongs to another user. */
-export function takeLinkConflict(): boolean {
-  const found = linkConflict;
-  linkConflict = false;
-  return found;
 }
 
 export async function getAccount(db: Db): Promise<Account> {
@@ -109,20 +89,28 @@ export async function updateProfile(
   if (error) throw new Error(error.message);
 }
 
-/** Attaches Google to the anonymous user, which keeps its id and data. Leaves the page to go to Google. */
-export async function linkGoogle(db: Db): Promise<void> {
+/**
+ * Attaches Google to the anonymous user, which keeps its id and data.
+ * False when that Google account already belongs to another user.
+ */
+export async function linkGoogle(
+  db: Db,
+  google: GoogleToken,
+): Promise<boolean> {
   const { error } = await db.auth.linkIdentity({
     provider: "google",
-    options: { redirectTo: window.location.origin },
+    ...google,
   });
+  if (error?.code === "identity_already_exists") return false;
   if (error) throw new Error(error.message);
+  return true;
 }
 
 /** Signs in to the user that owns the Google account; the data of the current anonymous user is left behind. */
-export async function signInGoogle(db: Db): Promise<void> {
-  const { error } = await db.auth.signInWithOAuth({
+export async function signInGoogle(db: Db, google: GoogleToken): Promise<void> {
+  const { error } = await db.auth.signInWithIdToken({
     provider: "google",
-    options: { redirectTo: window.location.origin },
+    ...google,
   });
   if (error) throw new Error(error.message);
 }

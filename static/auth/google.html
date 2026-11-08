@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>zennia</title>
+  </head>
+  <body>
+    <p>You can close this window.</p>
+    <script>
+      const channel = new BroadcastChannel("google-sign-in");
+      channel.postMessage(window.location.hash.slice(1));
+      channel.close();
+      window.close();
+    </script>
+  </body>
+</html>
