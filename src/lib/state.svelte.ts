@@ -31,6 +31,10 @@ import {
 } from "./data/words";
 import { allTags, findTag, renameTag } from "./data/tags";
 
+function hasData(words: Word[], stats: Stats): boolean {
+  return words.length > 0 || answerCount(totalTally(stats)) > 0;
+}
+
 function newestFirst(words: Word[]): Word[] {
   return [...words].sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
 }
@@ -85,11 +89,9 @@ export class App {
     this.practice = startSession();
     try {
       const stored = await this.#repo.load();
-      const isNew =
-        stored.words.length === 0 && !answerCount(totalTally(stored.stats));
       this.account = await this.#repo.account();
       if (this.#repo.takeLinkConflict()) {
-        if (isNew) {
+        if (!hasData(stored.words, stored.stats)) {
           await this.#repo.signInToAccount();
           return;
         }
@@ -108,6 +110,8 @@ export class App {
   }
 
   async signIn(): Promise<void> {
+    // linking would fail for a Google account that already has a user and send the user through Google a second time
+    if (!hasData(this.words, this.stats)) return this.#signInToAccount();
     try {
       await this.#repo.linkAccount();
     } catch {
