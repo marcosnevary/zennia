@@ -71,6 +71,17 @@ function fakeRepo(stored: Partial<Stored> = {}, conflict = false) {
   return { repo, calls, setStored: (next: Stored) => (current = next) };
 }
 
+const messages = (app: App) => app.toasts.items.map((t) => t.message);
+
+async function choose(app: App, label: string) {
+  const action = app.toasts.items
+    .flatMap((t) => t.actions)
+    .find((a) => a.label === label);
+  if (!action) throw new Error(`No toast offers "${label}"`);
+  action.run();
+  await app.flush();
+}
+
 async function ready(stored?: Partial<Stored>, conflict = false) {
   const fake = fakeRepo(stored, conflict);
   const app = new App(fake.repo);
@@ -91,7 +102,9 @@ describe("App", () => {
     const app = new App(repo);
     await app.init();
     expect(app.status).toBe("failed");
-    expect(app.error).toBe("offline");
+    expect(messages(app)).toEqual([
+      "Couldn't load your words. Check your connection and reload the page.",
+    ]);
   });
 
   it("writes only the words that changed, were added or were removed", async () => {
@@ -269,7 +282,9 @@ describe("App", () => {
     });
     app.setWords([word("b", 2), ...app.words]);
     await app.flush();
-    expect(app.error).toContain("denied");
+    expect(messages(app)).toEqual([
+      "Couldn't save your last change. Check your connection and try again.",
+    ]);
     expect(app.words.map((w) => w.id)).toEqual(["a"]);
   });
 });
@@ -277,22 +292,21 @@ describe("App", () => {
 describe("login", () => {
   it("asks before discarding the data of a browser that already has some", async () => {
     const { app, calls } = await ready({ words: [word("a", 1)] }, true);
-    expect(app.conflict).toBe(true);
     expect(calls).toEqual([]);
-    await app.resolveConflict(true);
+    await choose(app, "Sign in and discard");
     expect(calls).toEqual(["signin"]);
   });
 
   it("keeps the data when the user declines", async () => {
     const { app, calls } = await ready({ words: [word("a", 1)] }, true);
-    await app.resolveConflict(false);
-    expect(app.conflict).toBe(false);
+    await choose(app, "Keep my data");
+    expect(app.toasts.items).toEqual([]);
     expect(calls).toEqual([]);
   });
 
   it("signs in to the existing account at once when the browser has no data", async () => {
     const { app, calls } = await ready({}, true);
-    expect(app.conflict).toBe(false);
+    expect(app.toasts.items).toEqual([]);
     expect(calls).toEqual(["signin"]);
   });
 

@@ -27,18 +27,29 @@ The database is the source of truth, but a change doesn't wait for it:
 
 1. The action updates the screen first.
 2. It adds a write of only the rows it touched to a queue, so writes run in order.
-3. If a write fails, the app shows the error and reads the data back. If the database is still unreachable, the screen keeps showing the unsaved data.
+3. If a write fails, the app shows the error in a toast and reads the data back. If the database is still unreachable, the screen keeps showing the unsaved data.
 
 `setWords` finds those rows by comparing the new list with the previous one. Tests use a fake `Repo`.
 
 ## Shell
 
-`+layout.svelte` holds the sidebar, the error and login conflict messages, and the writing sheet.
+`+layout.svelte` holds the sidebar, the toasts and the writing sheet.
 
 - It preloads every tab's code as soon as the nav renders. A click switches the tab at once, showing `Loading` while that tab's code is still on its way.
 - The keys 1 to 5 switch to the tabs in nav order, unless turned off in Settings. They do nothing in a text field or select, which take typed digits themselves, or while a dialog is open.
 - Escape takes the focus off the current control. In a dialog it closes the dialog as usual.
 - The content wrapper has a 76px top padding and relies on every screen opening with a 24px top margin, so that the first block starts at the top of the first tab. A new screen must open the same way.
+
+## Toasts
+
+Every error, from a failed write to an invalid field, and the login conflict question show up as toasts in the bottom-right corner (`toasts.svelte.ts`, owned by `App` as `app.toasts`). An invalid field is also marked with `aria-invalid`.
+
+- The fill and icon show the kind: red for an error, yellow for a warning such as the login conflict.
+- An error closes by itself after 6 seconds, or with its X. The one shown when the data fails to load stays until closed, since the screen is empty without it.
+- A toast with actions, such as the two choices of the login conflict, stays until one of them is chosen.
+- A failed request shows a plain message that says what to do, never the raw error from Supabase or the browser.
+- Showing a toast with the `id` of one already open replaces it, so a failure that repeats, like every answer while offline, shows up once. A form clears its toast once it is valid again, and a dialog clears its own when it closes.
+- A modal dialog makes the rest of the page inert, so the toasts couldn't be clicked there. `Dialog.svelte` renders a toaster of its own, and the page's is hidden while a modal is open.
 
 ## Link previews
 

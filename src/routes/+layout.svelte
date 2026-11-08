@@ -6,7 +6,6 @@
   import Languages from "@lucide/svelte/icons/languages";
   import LogIn from "@lucide/svelte/icons/log-in";
   import PencilLine from "@lucide/svelte/icons/pencil-line";
-  import RotateCw from "@lucide/svelte/icons/rotate-cw";
   import Settings from "@lucide/svelte/icons/settings";
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
@@ -15,6 +14,7 @@
   import AccountMenu from "#lib/components/account/AccountMenu.svelte";
   import Loading from "#lib/components/Loading.svelte";
   import PrintSheet from "#lib/components/print/PrintSheet.svelte";
+  import Toaster from "#lib/components/Toaster.svelte";
   import { getDb } from "#lib/data/db/client.ts";
   import { createRepo } from "#lib/data/db/repo.ts";
   import { resolveTheme } from "#lib/data/theme.ts";
@@ -177,45 +177,20 @@
     >
       <main>
         {#if app.status === "ready"}
-          {#if app.error}
-            <p class="my-4 text-bad" role="alert">
-              {app.error}
-              <button onclick={() => app.clearError()}>Dismiss</button>
-            </p>
-          {/if}
-          {#if app.conflict}
-            <div class="my-4" role="alert">
-              <p class="mb-2">
-                This Google account already has data. Signing in discards the
-                data in this browser.
-              </p>
-              <div class="flex gap-2">
-                <button class="action" onclick={() => app.resolveConflict(true)}
-                  >Sign in and discard</button
-                >
-                <button onclick={() => app.resolveConflict(false)}
-                  >Keep my data</button
-                >
-              </div>
-            </div>
-          {/if}
           {#if loadingRoute}
             <Loading />
           {:else}
             {@render children()}
           {/if}
-        {:else if app.status === "failed"}
-          <p class="mt-6 mb-4 text-bad" role="alert">
-            Could not load your data: {app.error}
-          </p>
-          <button onclick={() => app.init()}><RotateCw />Try again</button>
-        {:else}
+        {:else if app.status === "loading"}
           <Loading />
         {/if}
       </main>
     </div>
   </div>
 </div>
+
+<Toaster />
 
 {#if app.sheetWords}
   <PrintSheet words={app.sheetWords} onclose={() => (app.sheetWords = null)} />

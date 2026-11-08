@@ -33,7 +33,6 @@
   let batchTags = $state<string[]>([]);
   let rows = $state<Row[]>([]);
   let loading = $state(false);
-  let error = $state("");
   let message = $state("");
 
   const chosen = $derived(rows.filter((r) => r.selected));
@@ -52,7 +51,6 @@
     text = "";
     batchTags = [];
     rows = [];
-    error = "";
     message = "";
     dialogEl?.showModal();
   }
@@ -60,7 +58,6 @@
   async function look(event: Event) {
     event.preventDefault();
     loading = true;
-    error = "";
     message = "";
     try {
       const dictionary = await loadDictionary();
@@ -68,9 +65,12 @@
         const candidates = lookUp(dictionary, item);
         return { item, candidates, choice: 0, selected: candidates.length > 0 };
       });
+      app.toasts.dismiss("dictionary");
     } catch {
-      error =
-        "Could not load the dictionary. Check your connection and try again.";
+      app.toasts.show(
+        "Couldn't load the dictionary. Check your connection and try again.",
+        { id: "dictionary" },
+      );
     } finally {
       loading = false;
     }
@@ -105,7 +105,6 @@
           e.g. hashi (chopsticks), picks the word whose meaning contains it.
         </p>
         <TagInput bind:tags={batchTags} suggestions={tags} />
-        {#if error}<p class="text-bad" role="alert">{error}</p>{/if}
         {#if message}<p role="status">{message}</p>{/if}
         <div class="dialog-actions">
           <button
