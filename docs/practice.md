@@ -73,6 +73,12 @@ The result shows the written form with furigana above what isn't hiragana and ro
 
 Furigana (`src/lib/core/furigana.ts`) splits the written form into runs of hiragana and of anything else, then uses the hiragana runs as anchors to find each other run's part of the reading. When they don't fit the reading, the whole word gets it.
 
+## Fonts
+
+Settings lists the fonts in `PRACTICE_FONTS` (`src/lib/data/practice-fonts.ts`), each with a preview in hiragana, kanji and katakana, and the user picks which ones Practice uses. Each word is then shown in one of them, never the same one twice in a row unless only one is chosen. With none chosen, words keep the UI font. Kana and the result always keep the UI font.
+
+The fonts are self-hosted from Fontsource. Practice loads only the chosen ones, and the picker loads them all for its previews. Fontsource splits each font by `unicode-range`, so the browser fetches only the chunks of the text it shows. A font that lacks a glyph falls back to the system's Japanese font for it.
+
 ## Keyboard
 
 - In the reading field, Space works like Enter. With Both, either one moves on to the meaning field, where a typed answer ends and Space stays a space.
@@ -93,4 +99,5 @@ The Stats tab lists one row per answered word or kana, and sums every tally at t
 - **Kana have no `almost`.** Single sounds have no vowel-length ambiguity.
 - **Practice has no controls for what it includes.** A separate practice scope was a second place to decide this, on top of the active words and the kana grid. To narrow a session, activate only the words wanted.
 - **The focus lives in Settings.** It is a preference, not part of a session.
+- **Practice fonts are opt-in and self-hosted.** Japanese fonts are megabytes each, so nobody downloads them without asking. Fontsource keeps them free and off third-party servers, like Geist.
 - **A correct answer is marked with a circle.** This is the maru (○) Japan uses for "correct", where a check mark can read as "wrong". The check mark stays for actions such as Check and Save.

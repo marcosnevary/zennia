@@ -8,6 +8,7 @@
   import type { Attachment } from "svelte/attachments";
   import { prefersReducedMotion } from "svelte/motion";
   import { messageOf } from "#lib/core/errors.ts";
+  import { plural } from "#lib/core/plural.ts";
   import { importAnkiDeck } from "#lib/data/anki.ts";
   import {
     downloadJSON,
@@ -21,6 +22,7 @@
     importSummary,
     type SanitizeResult,
   } from "#lib/data/words.ts";
+  import FontsDialog from "./FontsDialog.svelte";
   import Help from "./Help.svelte";
   import SettingRow from "./SettingRow.svelte";
   import SegmentedControl from "#lib/components/SegmentedControl.svelte";
@@ -36,6 +38,9 @@
     light: Sun,
     dark: Moon,
   };
+
+  let fontsDialog = $state<FontsDialog>();
+  const fontCount = $derived(app.settings.practiceFonts.length);
 
   const FEEDBACK_MS = 4000;
 
@@ -178,6 +183,17 @@
   </SettingRow>
 
   <SettingRow
+    title="Practice fonts"
+    description="Show each word in Practice in one of the fonts you choose, to learn to read it in any style."
+  >
+    <button type="button" onclick={() => fontsDialog?.open()}
+      >{fontCount
+        ? `${fontCount} ${plural(fontCount, "font")} selected`
+        : "Choose fonts"}</button
+    >
+  </SettingRow>
+
+  <SettingRow
     title="Switch tabs with number keys"
     description="Press 1 to 5 to open Practice, Vocabulary, Kana, Stats or Settings, except while typing in a field."
   >
@@ -257,5 +273,6 @@
     </SettingRow>
   {/if}
 </div>
+<FontsDialog bind:this={fontsDialog} />
 <!-- a label change is not announced, so the outcome is also read from here -->
 <p class="sr-only" role="status">{feedback?.detail ?? feedback?.text ?? ""}</p>

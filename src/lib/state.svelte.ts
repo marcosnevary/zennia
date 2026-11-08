@@ -5,6 +5,7 @@ import type { Stats, Verdict, Word } from "./core/types";
 import type { Account, ProfileChange } from "./data/db/client";
 import { PopupBlockedError, type GoogleToken } from "./data/db/google";
 import type { Repo, Stored } from "./data/db/repo";
+import type { PracticeFontId } from "./data/practice-fonts";
 import type { PracticeItem, Recorder, WordsFocus } from "./data/practice-modes";
 import { startSession, type Session } from "./data/practice-session";
 import { DEFAULT_SETTINGS, type Settings } from "./data/settings";
@@ -261,6 +262,10 @@ export class App {
 
   setNumberKeyTabs(numberKeyTabs: boolean): void {
     this.#setSettings({ numberKeyTabs });
+  }
+
+  setPracticeFonts(practiceFonts: PracticeFontId[]): void {
+    this.#setSettings({ practiceFonts: [...practiceFonts] });
   }
 
   setKanaSelection(kanaSelection: string[]): void {

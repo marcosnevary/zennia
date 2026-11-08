@@ -1,6 +1,12 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
   import PracticeCard from "./PracticeCard.svelte";
+  import { loadFonts } from "./fonts.ts";
+  import {
+    fontFamily,
+    nextFont,
+    type PracticeFontId,
+  } from "#lib/data/practice-fonts.ts";
   import { mixedMode, rightAnswer } from "#lib/data/practice-modes.ts";
   import {
     nextRound,
@@ -24,6 +30,14 @@
   const current = $derived(app.practice.current);
   const askReading = $derived(current?.kind === "kana" || focus !== "meaning");
   const askMeaning = $derived(current?.kind === "word" && focus !== "reading");
+
+  let font = $state<PracticeFontId>();
+  const practiceFonts = $derived(app.settings.practiceFonts);
+  $effect(() => loadFonts(practiceFonts));
+
+  function drawFont() {
+    font = practiceFonts.length ? nextFont(practiceFonts, font) : undefined;
+  }
 
   const outcome = $derived(app.practice.outcome);
   const verdict = $derived(outcome?.verdict ?? null);
@@ -50,6 +64,7 @@
       mode,
     );
     if (advancing) {
+      drawFont();
       answer = "";
       meaningAnswer = "";
       focusField();
@@ -85,6 +100,7 @@
 
   function draw() {
     app.practice = nextRound(app.practice, mode);
+    drawFont();
   }
 
   // an item left behind in another tab is not picked up again: coming back draws a new one, keeping the score
@@ -104,6 +120,7 @@
     prompt={current.kind === "word"
       ? current.word.japanese
       : current.kana.symbol}
+    promptFont={current.kind === "word" && font ? fontFamily(font) : undefined}
     {verdict}
     rightAnswer={rightAnswer(current)}
     {note}
