@@ -8,7 +8,7 @@
   --color-surface: var(--surface);
   --color-ink: var(--text);
   --color-muted: var(--muted);
-  --color-line: var(--border);
+  --color-track: var(--track);
   --color-action: var(--action);
   --color-on-action: var(--action-text);
   --color-ok: var(--ok);
@@ -17,7 +17,7 @@
   --color-on: var(--on);
   --color-on-bg: var(--on-bg);
   --color-off: var(--off);
-  /* the fill of secondary buttons, fields and checkboxes, a little darker on hover; pressed only for the word cards;
+  /* the fill of secondary buttons, fields and checkboxes and the color of borders and dividers, a little darker on hover; pressed only for the word cards;
      soft, lighter, only for a hovered tab */
   --color-tint-soft: color-mix(in srgb, var(--surface) 96%, var(--text));
   --color-tint: color-mix(in srgb, var(--surface) 92%, var(--text));
@@ -83,8 +83,8 @@
   --surface: #ffffff;
   --text: #1c1917;
   --muted: #78716c;
-  /* the lightest gray that keeps the 3:1 against the page that borders need */
-  --border: #9a938e;
+  /* the off switch's track: the lightest gray that keeps the 3:1 against the page a control needs */
+  --track: #9a938e;
   --action: #292524;
   --action-text: #ffffff;
   --ok: #15803d;
@@ -106,8 +106,8 @@
   --surface: #111111;
   --text: #f2f2f2;
   --muted: #a3a3a3;
-  /* the dimmest gray that keeps the 3:1 against the page that borders need */
-  --border: #6b6b6b;
+  /* the off switch's track: the dimmest gray that keeps the 3:1 against the page a control needs */
+  --track: #6b6b6b;
   --action: #d4d4d4;
   --action-text: #111111;
   --ok: #86efac;
@@ -677,8 +677,7 @@
 
   button:not(:disabled):hover,
   .file:hover {
-    background: var(--action);
-    color: var(--action-text);
+    background: var(--color-tint-hover);
   }
 
   .tab:hover {
@@ -689,7 +688,7 @@
     background: var(--color-tint);
   }
 
-  /* the account pill and menu items are ghost like the tabs: a light tint on hover, not the dark fill of a button */
+  /* the account button and menu items are ghost like the tabs: a light tint on hover, not the fill of a button */
   button.menu-item {
     justify-content: flex-start;
     background: transparent;

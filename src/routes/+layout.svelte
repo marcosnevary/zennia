@@ -122,7 +122,7 @@
 
 <div class="flex print:hidden">
   <aside
-    class="sticky top-0 flex h-dvh w-16 shrink-0 flex-col gap-8 self-start px-3 py-6 md:w-56 md:px-4"
+    class="sticky top-0 flex h-dvh w-16 shrink-0 flex-col border-r border-tint gap-8 self-start px-3 py-6 md:w-56 md:px-4"
   >
     <h1 class="h-11 font-logo text-2xl font-bold max-md:text-center md:px-4">
       <span class="md:hidden" aria-hidden="true">z</span><span

@@ -138,7 +138,7 @@
 {/snippet}
 
 <!-- with the rows' 12px padding, the first title starts 24px below the top of the content, like on the other screens -->
-<div class="mt-3 divide-y divide-line/40">
+<div class="mt-3 divide-y divide-tint">
   <SettingRow
     title="Theme"
     description="Light, dark, or the same as your system."
@@ -189,7 +189,7 @@
   <h2 class="m-0">Data</h2>
   <Help />
 </div>
-<div class="divide-y divide-line/40">
+<div class="divide-y divide-tint">
   <SettingRow
     title="Export words"
     description="Download all your words as a JSON file, as a backup or to move them elsewhere."
