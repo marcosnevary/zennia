@@ -29,8 +29,6 @@
 
   const FEEDBACK_MS = 4000;
 
-  let error = $state("");
-
   // the outcome of an action replaces the label of the button that ran it for a moment, like "Copied!";
   // the button only fits a few words, so the full detail takes the place of the row's description
   let feedback = $state<{
@@ -94,7 +92,6 @@
 
   function exportWords() {
     downloadJSON(exportFilename(), exportJSON(app.words));
-    error = "";
     flash("export", true, `${app.words.length} exported`);
   }
 
@@ -107,13 +104,15 @@
     const file = input.files?.[0];
     input.value = "";
     if (!file) return;
-    error = "";
     try {
       const { words: incoming, skipped } = parse(await file.text());
       const result = app.importWords(incoming);
+      app.toasts.dismiss("import");
       flash(key, true, importBrief(result), importSummary(result, skipped));
     } catch (e) {
-      error = messageOf(e, "Could not import the file.");
+      app.toasts.show(messageOf(e, "Couldn't import the file."), {
+        id: "import",
+      });
       flash(key, false, "Import failed");
     }
   }
@@ -121,7 +120,6 @@
   function resetStats() {
     if (!confirm("Reset all statistics? This cannot be undone.")) return;
     app.resetStats();
-    error = "";
     flash("reset", true, "Stats reset");
   }
 </script>
@@ -253,6 +251,5 @@
     </SettingRow>
   {/if}
 </div>
-{#if error}<p class="my-4 text-bad" role="alert">{error}</p>{/if}
 <!-- a label change is not announced, so the outcome is also read from here -->
 <p class="sr-only" role="status">{feedback?.detail ?? feedback?.text ?? ""}</p>

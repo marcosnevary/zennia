@@ -13,6 +13,7 @@
     validateTag,
     withAnyTag,
   } from "#lib/data/tags.ts";
+  import { getApp } from "#lib/state.svelte.ts";
 
   let {
     tags,
@@ -26,6 +27,7 @@
     ondelete: (tags: string[]) => void;
   } = $props();
 
+  const app = getApp();
   const tagStyle = useTagStyle();
 
   let dialogEl = $state<HTMLDialogElement>();
@@ -46,7 +48,7 @@
 
   let renaming = $state<string | null>(null);
   let renameDraft = $state("");
-  let renameError = $state("");
+  let renameInvalid = $state(false);
 
   export function open() {
     query = "";
@@ -79,15 +81,24 @@
   function startRename(tag: string) {
     renaming = tag;
     renameDraft = tag;
-    renameError = "";
+    renameInvalid = false;
+  }
+
+  function stopRename() {
+    renaming = null;
+    app.toasts.dismiss("tag");
   }
 
   function saveRename() {
     if (renaming === null) return;
     const from = renaming;
     const to = renameDraft.trim();
-    renameError = validateTag(to);
-    if (renameError) return;
+    const error = validateTag(to);
+    renameInvalid = !!error;
+    if (error) {
+      app.toasts.show(error, { id: "tag" });
+      return;
+    }
     const merges = !sameTag(from, to) && tags.some((t) => sameTag(t, to));
     const moved = filterByTags(words, [from]).length;
     if (
@@ -96,19 +107,19 @@
         `"${to}" already exists. Merge "${from}" into it? Its ${moved} ${plural(moved, "word")} will be tagged "${to}".`,
       )
     ) {
-      renaming = null;
+      stopRename();
       return;
     }
     if (to !== from) onrename(from, to);
     selected = selected.filter((t) => !sameTag(t, from));
-    renaming = null;
+    stopRename();
   }
 
   // Enter saves through the blur, so the field has already let go of the focus when the merge confirm() takes it
   // and the blur cannot save a second time
   function onRenameKey(event: KeyboardEvent) {
     if (event.key === "Enter") (event.currentTarget as HTMLInputElement).blur();
-    else if (event.key === "Escape") renaming = null;
+    else if (event.key === "Escape") stopRename();
     else return;
     // Escape would otherwise also close the dialog
     event.preventDefault();
@@ -126,7 +137,7 @@
   }
 </script>
 
-<Dialog bind:el={dialogEl} label="Tags">
+<Dialog bind:el={dialogEl} label="Tags" onclose={stopRename}>
   <div class="grid gap-2">
     <h2 class="mt-0 mb-2">
       Tags ({visibleTags.length === tags.length
@@ -202,9 +213,9 @@
                         type="text"
                         class="absolute inset-0 w-full cursor-text bg-transparent p-0 outline-none"
                         aria-label={`New name for ${tag}`}
-                        aria-invalid={!!renameError}
+                        aria-invalid={renameInvalid}
                         bind:value={renameDraft}
-                        oninput={() => (renameError = "")}
+                        oninput={() => (renameInvalid = false)}
                         onkeydown={onRenameKey}
                         onblur={saveRename}
                         {@attach focusAndSelect}
@@ -227,9 +238,6 @@
           {/each}
         </ul>
       {/if}
-      {#if renaming !== null && renameError}<p class="text-bad" role="alert">
-          {renameError}
-        </p>{/if}
     {/if}
     <div class="dialog-actions">
       <button class="action" type="button" onclick={() => dialogEl?.close()}

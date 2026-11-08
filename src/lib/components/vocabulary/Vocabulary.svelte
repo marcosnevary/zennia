@@ -71,12 +71,20 @@
     errors = {};
   }
 
+  // one toast for the whole form, while each invalid field is marked
+  function reportErrors(found: WordErrors, id: string): boolean {
+    const messages = Object.values(found);
+    if (messages.length) app.toasts.show(messages.join(" "), { id });
+    else app.toasts.dismiss(id);
+    return messages.length > 0;
+  }
+
   function save(event: Event) {
     event.preventDefault();
     const fields = { japanese, hiragana, meaning, tags: newTags };
     merged = "";
     errors = validateWord(fields);
-    if (Object.keys(errors).length) return;
+    if (reportErrors(errors, "word")) return;
     const word = makeWord(fields);
     merged = mergeNote(word, app.importWords([word]));
     resetForm();
@@ -102,7 +110,7 @@
       tags: editTags,
     };
     editErrors = validateEdit(fields, words, editingId);
-    if (Object.keys(editErrors).length) return;
+    if (reportErrors(editErrors, "word-edit")) return;
     app.setWords(
       words.map((w) => (w.id === editingId ? updateWord(w, fields) : w)),
     );
@@ -253,7 +261,10 @@
   <Dialog
     bind:el={dialogEl}
     label="Edit word"
-    onclose={() => (editingId = null)}
+    onclose={() => {
+      editingId = null;
+      app.toasts.dismiss("word-edit");
+    }}
   >
     <form class="grid gap-2" onsubmit={saveEdit}>
       <h2 class="mt-0 mb-2">Edit word</h2>
@@ -269,7 +280,6 @@
           editErrors.duplicate = "";
         }}
       />
-      {@render fieldError(editErrors.japanese)}
       <input
         type="text"
         class="field"
@@ -282,8 +292,6 @@
           editErrors.duplicate = "";
         }}
       />
-      {@render fieldError(editErrors.hiragana)}
-      {@render fieldError(editErrors.duplicate)}
       <input
         type="text"
         class="field"
@@ -292,7 +300,6 @@
         aria-invalid={!!editErrors.meaning}
         oninput={() => (editErrors.meaning = "")}
       />
-      {@render fieldError(editErrors.meaning)}
       {#key editingId}
         <TagInput bind:tags={editTags} suggestions={tags} />
       {/key}
@@ -335,10 +342,6 @@
 
   <RomajiWordsDialog bind:this={romajiDialog} {tags} />
 
-  {#snippet fieldError(message: string | undefined)}
-    {#if message}<p class="text-bad" role="alert">{message}</p>{/if}
-  {/snippet}
-
   <div
     class="mt-6 grid items-start gap-x-8 gap-y-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]"
   >
@@ -357,7 +360,6 @@
             merged = "";
           }}
         />
-        {@render fieldError(errors.japanese)}
         <input
           type="text"
           class="field"
@@ -367,7 +369,6 @@
           aria-invalid={!!errors.hiragana}
           oninput={() => (errors.hiragana = "")}
         />
-        {@render fieldError(errors.hiragana)}
         <input
           type="text"
           class="field"
@@ -376,7 +377,6 @@
           aria-invalid={!!errors.meaning}
           oninput={() => (errors.meaning = "")}
         />
-        {@render fieldError(errors.meaning)}
         <TagInput bind:tags={newTags} suggestions={tags} />
         <button class="action w-full" type="submit">Add</button>
         {#if merged}<p role="status">{merged}</p>{/if}

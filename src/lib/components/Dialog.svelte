@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
   import { closeOnBackdrop } from "./dialog";
+  import Toaster from "./Toaster.svelte";
 
   let {
     el = $bindable(),
@@ -27,4 +28,5 @@
   {onclose}
 >
   {@render children()}
+  <Toaster />
 </dialog>

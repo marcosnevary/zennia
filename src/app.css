@@ -600,6 +600,19 @@
     box-shadow: 0 8px 24px rgb(0 0 0 / 0.6);
   }
 
+  /* flat, with a fill that tells what kind of message it is; mixed into the page color, so it stays soft in both themes */
+  .toast {
+    border-radius: var(--radius-panel);
+
+    &[data-tone="error"] {
+      background: color-mix(in srgb, var(--bad) 12%, var(--bg));
+    }
+
+    &[data-tone="warning"] {
+      background: color-mix(in srgb, var(--warn) 12%, var(--bg));
+    }
+  }
+
   dialog::backdrop {
     background: rgb(0 0 0 / 0.5);
     backdrop-filter: blur(6px);
@@ -608,6 +621,11 @@
   /* the backdrop stops at the scrollbar, so a modal hides it; scrollbar-gutter would instead reserve a strip the backdrop cannot cover */
   html:has(dialog:modal) {
     overflow: hidden;
+  }
+
+  /* a modal makes the rest of the page inert, so the open dialog shows the toasts with a toaster of its own */
+  html:has(dialog:modal) .toaster:not(dialog .toaster) {
+    visibility: hidden;
   }
 }
 
@@ -685,6 +703,18 @@
 
   button.action:not(:disabled):hover {
     background: color-mix(in srgb, var(--action) 80%, var(--text));
+  }
+
+  /* a bare X: no fill or box, it only darkens on hover */
+  button.toast-close {
+    padding: 0;
+    background: transparent;
+    color: var(--muted);
+  }
+
+  button.toast-close:not(:disabled):hover {
+    background: transparent;
+    color: var(--text);
   }
 
   button.danger:not(:disabled):hover {

@@ -12,7 +12,6 @@
   // undefined keeps the saved photo, null goes back to the Google one
   let photo = $state<Blob | null | undefined>(undefined);
   let preview = $state<string | null>(null);
-  let error = $state("");
   let saving = $state(false);
 
   const shownUrl = $derived(
@@ -27,7 +26,6 @@
   export function open() {
     name = app.account.name ?? "";
     setPhoto(undefined);
-    error = "";
     dialogEl?.showModal();
   }
 
@@ -37,15 +35,19 @@
     preview = next ? URL.createObjectURL(next) : null;
   }
 
+  function fail(message: string) {
+    app.toasts.show(message, { id: "profile" });
+  }
+
   async function pick(event: Event & { currentTarget: HTMLInputElement }) {
     const file = event.currentTarget.files?.[0];
     event.currentTarget.value = "";
     if (!file) return;
-    error = "";
     try {
       setPhoto(await toAvatar(file));
+      app.toasts.dismiss("profile");
     } catch (e) {
-      error = messageOf(e);
+      fail(messageOf(e));
     }
   }
 
@@ -53,16 +55,15 @@
     event.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) {
-      error = "Enter a name.";
+      fail("Enter a name.");
       return;
     }
     saving = true;
-    error = "";
     try {
       await app.updateProfile({ name: trimmed, photo });
       dialogEl?.close();
-    } catch (e) {
-      error = `Could not save the profile: ${messageOf(e)}`;
+    } catch {
+      fail("Couldn't save your profile. Check your connection and try again.");
     } finally {
       saving = false;
     }
@@ -73,7 +74,10 @@
   bind:el={dialogEl}
   label="Edit profile"
   width={440}
-  onclose={() => setPhoto(undefined)}
+  onclose={() => {
+    setPhoto(undefined);
+    app.toasts.dismiss("profile");
+  }}
 >
   <form class="grid gap-4" onsubmit={save}>
     <h2 class="m-0">Edit profile</h2>
@@ -101,7 +105,6 @@
         bind:value={name}
       />
     </label>
-    {#if error}<p class="m-0 text-bad" role="alert">{error}</p>{/if}
     <div class="dialog-actions">
       <button class="action" type="submit" disabled={saving}
         >{saving ? "Saving…" : "Save"}</button
