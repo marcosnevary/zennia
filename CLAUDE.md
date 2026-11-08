@@ -2,7 +2,7 @@
 
 Web app for practicing Japanese vocabulary: it shows a word, the user types the reading in romaji, and the app checks it.
 
-The structure and commands are in [docs/architecture.md](docs/architecture.md).
+The structure and commands are in [docs/architecture.md](docs/architecture.md). Who the app is for and how it should feel are in [PRODUCT.md](PRODUCT.md).
 
 ## Conventions
 
