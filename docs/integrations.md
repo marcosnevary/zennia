@@ -4,7 +4,7 @@
 
 Supabase provides the Postgres database, Auth and Storage. The browser talks to it directly (`src/lib/data/db/`).
 
-The client reads `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` at runtime, on first use. So the build works without them, which is how CI runs it, but the app can't load data without them. The anon key is public by design, and Row Level Security protects the data ([data model](data-model.md#ownership)).
+The client reads `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` at runtime, on first use. So the build works without them, but the app can't load data without them. The anon key is public by design, and Row Level Security protects the data ([data model](data-model.md#ownership)).
 
 The app needs a connection to start and to save. There is no offline mode.
 
@@ -37,10 +37,6 @@ Vercel builds and serves the static site. `vercel.json` rewrites every path to `
 
 `src/app.html` has the production URL in its Open Graph tags.
 
-## GitHub Actions
-
-`.github/workflows/ci.yml` runs `lint`, `check`, `test` and `build` on every pull request and every push to `main`.
-
 ## Bundled data
 
 Two generated files are committed in `static/`. Both are big, so each is fetched on first use and kept for the session, and a failed fetch can be retried.
@@ -68,4 +64,4 @@ The Add from romaji dialog credits JMdict and the printed sheet credits KanjiVG,
 - **Login is optional, and starts from an anonymous user.** Nothing has to happen before the first practice, and signing in later keeps the data.
 - **The profile photo is in Storage, not a table column.** A data URL would come with the data on every load, and the browser could not cache it.
 - **The photo is a JPEG.** Safari can't encode WebP from a canvas.
-- **CI instead of Vercel previews.** Nobody opened the previews: changes are tested locally, Google login doesn't work on preview URLs, and previews used the production Supabase project.
+- **No Vercel previews.** Nobody opened the previews: changes are tested locally, Google login doesn't work on preview URLs, and previews used the production Supabase project.
