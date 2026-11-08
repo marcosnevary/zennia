@@ -6,6 +6,8 @@ The rules for words are in `src/lib/data/words.ts` and those for tags in `src/li
 
 A word needs a written form, a reading made only of kana, and a meaning. In the code and the export file, the written form is `japanese` and the reading is `hiragana`, although a reading may hold katakana.
 
+After a word is added, the add form clears every field except the pinned ones, so a run of words can share a value such as their tags. The pins aren't stored, so a reload unpins them.
+
 A word added by any route is marked as new until the pointer passes over it. The mark isn't stored, so a reload clears it.
 
 ## Merging

@@ -719,6 +719,26 @@
     color: var(--text);
   }
 
+  /* a bare pin like the toast X, filled while pressed */
+  button.pin {
+    padding: 0;
+    background: transparent;
+    color: var(--muted);
+  }
+
+  button.pin:not(:disabled):hover {
+    background: transparent;
+    color: var(--text);
+  }
+
+  button.pin[aria-pressed="true"] {
+    color: var(--text);
+  }
+
+  button.pin[aria-pressed="true"] > svg {
+    fill: currentColor;
+  }
+
   button.danger:not(:disabled):hover {
     background: var(--bad);
     color: var(--surface);
@@ -748,6 +768,12 @@
     flex: none;
     width: 20px;
     height: 20px;
+  }
+
+  /* sized to the small label it sits beside */
+  button.pin > svg {
+    width: 16px;
+    height: 16px;
   }
 
   /* one rule for every variant: darkening works whatever the background */
