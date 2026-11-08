@@ -21,7 +21,7 @@
   <span
     class={[
       "flex h-6 w-10 items-center rounded-pill px-1 transition-colors motion-reduce:transition-none",
-      checked ? "bg-action" : "bg-line",
+      checked ? "bg-action" : "bg-track",
     ]}
   >
     <span

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import ChevronsUpDown from "@lucide/svelte/icons/chevrons-up-down";
+  import ChevronUp from "@lucide/svelte/icons/chevron-up";
   import LogOut from "@lucide/svelte/icons/log-out";
   import UserPen from "@lucide/svelte/icons/user-pen";
   import { getApp } from "#lib/state.svelte.ts";
@@ -9,18 +9,18 @@
   const app = getApp();
   const label = $derived(app.account.name ?? app.account.email ?? "");
 
-  let pillEl = $state<HTMLButtonElement>();
+  let triggerEl = $state<HTMLButtonElement>();
   let menuEl = $state<HTMLDivElement>();
   let profileDialog = $state<ProfileDialog>();
   let open = $state(false);
 
-  // the menu lives in the top layer, out of the sidebar, so it is placed by hand just above the pill
+  // the menu lives in the top layer, out of the sidebar, so it is placed by hand just above the trigger
   function ontoggle(event: ToggleEvent) {
     open = event.newState === "open";
-    if (!open || !pillEl || !menuEl) return;
-    const pill = pillEl.getBoundingClientRect();
-    menuEl.style.left = `${pill.left}px`;
-    menuEl.style.bottom = `${window.innerHeight - pill.top + 8}px`;
+    if (!open || !triggerEl || !menuEl) return;
+    const trigger = triggerEl.getBoundingClientRect();
+    menuEl.style.left = `${trigger.left + 8}px`;
+    menuEl.style.bottom = `${window.innerHeight - trigger.top + 8}px`;
     menuEl.querySelector<HTMLElement>("[role=menuitem]")?.focus();
   }
 
@@ -52,8 +52,8 @@
 </script>
 
 <button
-  class="menu-item rounded-pill gap-2 p-1 max-md:size-10 md:pr-3"
-  bind:this={pillEl}
+  class="menu-item -mx-3 -mb-6 gap-2 rounded-none border-t border-tint px-3 py-4 max-md:justify-center md:-mx-4 md:px-4"
+  bind:this={triggerEl}
   popovertarget="account-menu"
   aria-haspopup="menu"
   aria-expanded={open}
@@ -63,7 +63,12 @@
   <span class="min-w-0 flex-1 truncate text-left text-sm max-md:hidden"
     >{label}</span
   >
-  <ChevronsUpDown class="size-4 text-muted max-md:hidden" />
+  <ChevronUp
+    class={[
+      "size-4 text-muted transition-transform motion-reduce:transition-none max-md:hidden",
+      open && "rotate-180",
+    ]}
+  />
 </button>
 
 <div
