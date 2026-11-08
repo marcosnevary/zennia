@@ -19,10 +19,10 @@
   --color-off: var(--off);
   /* the fill of secondary buttons, fields and checkboxes and the color of borders and dividers, a little darker on hover; pressed only for the word cards;
      soft, lighter, only for a hovered tab */
-  --color-tint-soft: color-mix(in srgb, var(--surface) 96%, var(--text));
-  --color-tint: color-mix(in srgb, var(--surface) 92%, var(--text));
-  --color-tint-hover: color-mix(in srgb, var(--surface) 90%, var(--text));
-  --color-tint-pressed: color-mix(in srgb, var(--surface) 84%, var(--text));
+  --color-tint-soft: color-mix(in srgb, var(--tint-base) 4%, transparent);
+  --color-tint: color-mix(in srgb, var(--tint-base) 8%, transparent);
+  --color-tint-hover: color-mix(in srgb, var(--tint-base) 10%, transparent);
+  --color-tint-pressed: color-mix(in srgb, var(--tint-base) 16%, transparent);
 }
 
 @theme {
@@ -83,6 +83,8 @@
   --surface: #ffffff;
   --text: #1c1917;
   --muted: #78716c;
+  /* the tints are this color at a low opacity, so on a colored fill like a toast's they take on that color instead of showing gray */
+  --tint-base: #000000;
   /* the off switch's track: the lightest gray that keeps the 3:1 against the page a control needs */
   --track: #9a938e;
   --action: #292524;
@@ -106,6 +108,7 @@
   --surface: #111111;
   --text: #f2f2f2;
   --muted: #a3a3a3;
+  --tint-base: #ffffff;
   /* the off switch's track: the dimmest gray that keeps the 3:1 against the page a control needs */
   --track: #6b6b6b;
   --action: #d4d4d4;
