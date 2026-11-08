@@ -1,7 +1,10 @@
 <script lang="ts">
   import Check from "@lucide/svelte/icons/check";
+  import Monitor from "@lucide/svelte/icons/monitor";
+  import Moon from "@lucide/svelte/icons/moon";
+  import Sun from "@lucide/svelte/icons/sun";
   import X from "@lucide/svelte/icons/x";
-  import { tick } from "svelte";
+  import { tick, type Component } from "svelte";
   import type { Attachment } from "svelte/attachments";
   import { prefersReducedMotion } from "svelte/motion";
   import { messageOf } from "#lib/core/errors.ts";
@@ -20,12 +23,19 @@
   } from "#lib/data/words.ts";
   import Help from "./Help.svelte";
   import SettingRow from "./SettingRow.svelte";
+  import SegmentedControl from "#lib/components/SegmentedControl.svelte";
   import Switch from "#lib/components/Switch.svelte";
   import { WORDS_FOCUSES, type WordsFocus } from "#lib/data/practice-modes.ts";
   import { THEMES, type ThemePreference } from "#lib/data/theme.ts";
   import { getApp } from "#lib/state.svelte.ts";
 
   const app = getApp();
+
+  const THEME_ICONS: Record<ThemePreference, Component> = {
+    system: Monitor,
+    light: Sun,
+    dark: Moon,
+  };
 
   const FEEDBACK_MS = 4000;
 
@@ -143,16 +153,12 @@
     title="Theme"
     description="Light, dark, or the same as your system."
   >
-    <select
-      class="field chevron"
+    <SegmentedControl
+      options={THEMES.map((t) => ({ ...t, icon: THEME_ICONS[t.id] }))}
       value={app.settings.theme}
-      onchange={(e) => app.setTheme(e.currentTarget.value as ThemePreference)}
-      aria-label="Theme"
-    >
-      {#each THEMES as t (t.id)}
-        <option value={t.id}>{t.label}</option>
-      {/each}
-    </select>
+      onchange={(theme) => app.setTheme(theme)}
+      label="Theme"
+    />
   </SettingRow>
 
   <SettingRow
