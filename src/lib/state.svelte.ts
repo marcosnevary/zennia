@@ -279,6 +279,10 @@ export class App {
     this.#setSettings({ playPronunciation });
   }
 
+  setPlayAnswerSound(playAnswerSound: boolean): void {
+    this.#setSettings({ playAnswerSound });
+  }
+
   setKanaSelection(kanaSelection: string[]): void {
     this.#setSettings({ kanaSelection: [...kanaSelection] });
   }

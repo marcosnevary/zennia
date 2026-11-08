@@ -41,6 +41,19 @@
   </SettingRow>
 
   <SettingRow
+    title="Play sound effects"
+    description="Hear a sound for a correct or incorrect answer."
+  >
+    <div class="flex sm:justify-end">
+      <Switch
+        checked={app.settings.playAnswerSound}
+        onchange={() => app.setPlayAnswerSound(!app.settings.playAnswerSound)}
+        label="Play sound effects"
+      />
+    </div>
+  </SettingRow>
+
+  <SettingRow
     title="Play the pronunciation"
     description="Hear the answer read aloud once it's checked."
   >

@@ -40,6 +40,7 @@ export interface SettingsRow {
   number_key_tabs: boolean;
   practice_fonts: unknown;
   play_pronunciation: boolean;
+  play_answer_sound: boolean;
 }
 
 function oneOf<T extends string>(
@@ -116,6 +117,7 @@ const SETTING_COLUMNS = {
   numberKeyTabs: "number_key_tabs",
   practiceFonts: "practice_fonts",
   playPronunciation: "play_pronunciation",
+  playAnswerSound: "play_answer_sound",
 } as const satisfies Record<keyof Settings, keyof SettingsRow>;
 
 /** What `load` selects from the `settings` table. */
@@ -159,6 +161,7 @@ export function settingsFromRow(row: SettingsRow | null): Settings {
     numberKeyTabs: row.number_key_tabs,
     practiceFonts: practiceFontsFrom(row.practice_fonts),
     playPronunciation: row.play_pronunciation,
+    playAnswerSound: row.play_answer_sound,
   };
 }
 

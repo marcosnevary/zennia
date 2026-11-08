@@ -16,6 +16,7 @@ const SETTINGS_ROW: SettingsRow = {
   number_key_tabs: false,
   practice_fonts: ["klee-one"],
   play_pronunciation: true,
+  play_answer_sound: false,
 };
 
 /** A client whose `settings` table answers like the real API: only the selected columns come back. */

@@ -22,6 +22,8 @@ export interface Settings {
   practiceFonts: PracticeFontId[];
   /** Whether checking an answer reads the word aloud. */
   playPronunciation: boolean;
+  /** Whether checking an answer plays a sound for correct and another for incorrect. */
+  playAnswerSound: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -36,4 +38,5 @@ export const DEFAULT_SETTINGS: Settings = {
   numberKeyTabs: true,
   practiceFonts: [],
   playPronunciation: false,
+  playAnswerSound: true,
 };
