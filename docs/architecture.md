@@ -10,13 +10,13 @@ Dependencies point one way, with each layer using only the ones before it: `core
 
 - `src/lib/core/`: pure logic with no app data (kana tables, answer checking, meaning matching, furigana, writing sheet layout).
 - `src/lib/data/`: the rules over the app's data (words, tags, stats, practice, settings), import and export, and the dictionary lookup.
-- `src/lib/data/db/`: database access: the Supabase client (`client.ts`), and the `Repo` that reads and writes the rows (`repo.ts`, `rows.ts`).
+- `src/lib/data/db/`: database access: the Supabase client (`client.ts`), the [Google sign-in popup](integrations.md#accounts) (`google.ts`), and the `Repo` that reads and writes the rows (`repo.ts`, `rows.ts`).
 - `src/lib/state.svelte.ts`: `App`, the shared data and the actions that change it.
 - `src/lib/components/`: Svelte components, grouped by feature.
 - `src/routes/`: one folder per tab (`practice`, `vocabulary`, `kana`, `stats`, `settings`), and the shell in `+layout.svelte`. `/` redirects to `/practice`.
 - `src/app.css`: Tailwind setup, theme variables and shared styles.
 - `src/app.html`: the page shell.
-- `static/`: fonts, favicons and the [bundled data](integrations.md#bundled-data), which `scripts/` builds.
+- `static/`: fonts, favicons, the [bundled data](integrations.md#bundled-data), which `scripts/` builds, and the page Google sign-in returns to (`auth/google.html`).
 - `supabase/migrations/`: the [database schema](data-model.md#migrations).
 
 ## Data flow
