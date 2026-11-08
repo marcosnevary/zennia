@@ -1,5 +1,6 @@
 import { kanaKey, type KanaScript } from "#lib/core/kana.ts";
 import type { Stats, Tally, Word } from "#lib/core/types.ts";
+import { practiceFontsFrom } from "#lib/data/practice-fonts.ts";
 import { WORDS_FOCUSES } from "#lib/data/practice-modes.ts";
 import { DEFAULT_SETTINGS, type Settings } from "#lib/data/settings.ts";
 import { STATS_SORT_OPTIONS } from "#lib/data/stats.ts";
@@ -37,6 +38,7 @@ export interface SettingsRow {
   stats_sort_direction: string;
   tag_colors: unknown;
   number_key_tabs: boolean;
+  practice_fonts: unknown;
 }
 
 function oneOf<T extends string>(
@@ -111,6 +113,7 @@ const SETTING_COLUMNS = {
   statsSortDirection: "stats_sort_direction",
   tagColors: "tag_colors",
   numberKeyTabs: "number_key_tabs",
+  practiceFonts: "practice_fonts",
 } as const satisfies Record<keyof Settings, keyof SettingsRow>;
 
 /** What `load` selects from the `settings` table. */
@@ -152,6 +155,7 @@ export function settingsFromRow(row: SettingsRow | null): Settings {
     ),
     tagColors: tagColorsFrom(row.tag_colors),
     numberKeyTabs: row.number_key_tabs,
+    practiceFonts: practiceFontsFrom(row.practice_fonts),
   };
 }
 

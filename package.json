@@ -36,6 +36,18 @@
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",
+    "@fontsource/biz-udpgothic": "^5.3.0",
+    "@fontsource/hachi-maru-pop": "^5.3.0",
+    "@fontsource/kiwi-maru": "^5.3.1",
+    "@fontsource/klee-one": "^5.3.1",
+    "@fontsource/kosugi-maru": "^5.3.0",
+    "@fontsource/noto-serif-jp": "^5.3.1",
+    "@fontsource/shippori-mincho": "^5.3.0",
+    "@fontsource/yomogi": "^5.3.0",
+    "@fontsource/yuji-syuku": "^5.3.1",
+    "@fontsource/zen-kurenaido": "^5.3.1",
+    "@fontsource/zen-maru-gothic": "^5.3.1",
+    "@fontsource/zen-old-mincho": "^5.3.1",
     "@lucide/svelte": "^1.66.0",
     "@supabase/supabase-js": "^2.118.0",
     "wanakana": "^5.3.1"

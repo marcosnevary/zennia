@@ -254,6 +254,7 @@ describe("App", () => {
     app.setWordsSort("reading", "desc");
     app.setStatsSort("misses", "asc");
     app.setNumberKeyTabs(false);
+    app.setPracticeFonts(["klee-one"]);
     await app.flush();
     expect(app.settings).toMatchObject({
       wordsFocus: "both",
@@ -263,6 +264,7 @@ describe("App", () => {
       statsSort: "misses",
       statsSortDirection: "asc",
       numberKeyTabs: false,
+      practiceFonts: ["klee-one"],
     });
     expect(calls).toEqual([
       'settings {"wordsFocus":"both"}',
@@ -270,6 +272,7 @@ describe("App", () => {
       'settings {"wordsSort":"reading","wordsSortDirection":"desc"}',
       'settings {"statsSort":"misses","statsSortDirection":"asc"}',
       'settings {"numberKeyTabs":false}',
+      'settings {"practiceFonts":["klee-one"]}',
     ]);
   });
 

@@ -59,6 +59,7 @@ describe("settings", () => {
         stats_sort_direction: "down",
         tag_colors: "x",
         number_key_tabs: true,
+        practice_fonts: [],
       }),
     ).toEqual({ ...DEFAULT_SETTINGS, kanaSelection: ["hiragana:あ"] });
   });
@@ -75,6 +76,7 @@ describe("settings", () => {
         stats_sort_direction: "asc",
         tag_colors: {},
         number_key_tabs: true,
+        practice_fonts: [],
       }),
     ).toMatchObject({
       wordsSort: "reading",
@@ -100,6 +102,7 @@ describe("settings", () => {
           worse: "red",
         },
         number_key_tabs: true,
+        practice_fonts: [],
       }).tagColors,
     ).toEqual({ food: { hue: 10, tone: 1 } });
   });
@@ -116,8 +119,26 @@ describe("settings", () => {
         stats_sort_direction: "desc",
         tag_colors: {},
         number_key_tabs: false,
+        practice_fonts: [],
       }).numberKeyTabs,
     ).toBe(false);
+  });
+
+  it("reads the chosen practice fonts", () => {
+    expect(
+      settingsFromRow({
+        theme: "system",
+        words_focus: "reading",
+        kana_selection: null,
+        words_sort: "japanese",
+        words_sort_direction: "asc",
+        stats_sort: "accuracy",
+        stats_sort_direction: "desc",
+        tag_colors: {},
+        number_key_tabs: true,
+        practice_fonts: ["yomogi", "unknown", "klee-one"],
+      }).practiceFonts,
+    ).toEqual(["klee-one", "yomogi"]);
   });
 
   it("writes only the fields that changed", () => {
@@ -146,6 +167,9 @@ describe("settings", () => {
     });
     expect(settingsToRow({ numberKeyTabs: false })).toEqual({
       number_key_tabs: false,
+    });
+    expect(settingsToRow({ practiceFonts: ["klee-one"] })).toEqual({
+      practice_fonts: ["klee-one"],
     });
   });
 });

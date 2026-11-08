@@ -14,6 +14,7 @@
 
   let {
     prompt,
+    promptFont,
     verdict,
     rightAnswer,
     note,
@@ -32,6 +33,8 @@
   }: {
     /** The word or symbol being asked */
     prompt: string;
+    /** A font-family for the prompt instead of the UI font */
+    promptFont?: string;
     verdict: Verdict | null;
     /** Shown with the verdict */
     rightAnswer: RightAnswer;
@@ -93,6 +96,7 @@
       class="col-start-1 row-start-1 self-center text-display motion-safe:transition-opacity motion-safe:duration-200 {verdict
         ? 'opacity-0'
         : ''}"
+      style:font-family={promptFont}
       lang="ja"
       aria-hidden={verdict !== null}
     >
