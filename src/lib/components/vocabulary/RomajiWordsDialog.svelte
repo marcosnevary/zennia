@@ -39,6 +39,7 @@
   const differs = (row: Row) =>
     row.candidates[row.choice]?.verdict === "almost";
   const allSelected = $derived(found.every((r) => r.selected));
+  const canLook = $derived(!loading && parseRomajiList(text).length > 0);
 
   function toggleSelectAll() {
     const next = !allSelected;
@@ -74,6 +75,14 @@
     }
   }
 
+  function lookOnEnter(
+    event: KeyboardEvent & { currentTarget: HTMLTextAreaElement },
+  ) {
+    if (event.key !== "Enter" || event.shiftKey || event.isComposing) return;
+    event.preventDefault();
+    if (canLook) event.currentTarget.form?.requestSubmit();
+  }
+
   function add() {
     const result = app.importWords(
       chosen.map((row) => {
@@ -97,18 +106,17 @@
           rows="1"
           placeholder="Words in romaji (e.g. neko, taberu, hashi)"
           aria-label="Words in romaji"
-          bind:value={text}></textarea>
+          bind:value={text}
+          onkeydown={lookOnEnter}></textarea>
         <p class="text-muted">
-          Separate the words with commas or new lines. A hint in parentheses,
-          e.g. hashi (chopsticks), picks the word whose meaning contains it.
+          Separate the words with commas or new lines (Shift+Enter). A hint in
+          parentheses, e.g. hashi (chopsticks), picks the word whose meaning
+          contains it.
         </p>
         <TagInput bind:tags={batchTags} suggestions={tags} />
         {#if message}<p role="status">{message}</p>{/if}
         <div class="dialog-actions">
-          <button
-            class="action"
-            type="submit"
-            disabled={loading || parseRomajiList(text).length === 0}
+          <button class="action" type="submit" disabled={!canLook}
             >{loading ? "Looking up…" : "Look up"}</button
           >
           <button type="button" onclick={() => dialogEl?.close()}>Close</button>

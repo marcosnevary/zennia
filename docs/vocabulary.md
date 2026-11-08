@@ -21,7 +21,7 @@ The edit dialog refuses a change that would match another word.
 
 ## Add from romaji
 
-The user pastes a list, and each item is looked up in the bundled dictionary (`src/lib/data/dictionary.ts`).
+The user pastes a list, and each item is looked up in the bundled dictionary (`src/lib/data/dictionary.ts`). Enter in the list runs the lookup, and Shift+Enter adds a line.
 
 - Items are separated by lines, commas or semicolons, and repeats are dropped. An item can carry a hint in parentheses, as in `hashi (chopsticks)`, whose own commas don't split it.
 - The dictionary is indexed by `soundKeys`, the sounds ignoring vowel length, which is what makes a lookup find the words `checkAnswer` would call `correct` or `almost`.
