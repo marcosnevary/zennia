@@ -1,17 +1,17 @@
 <script lang="ts">
   import ChevronUp from "@lucide/svelte/icons/chevron-up";
   import LogOut from "@lucide/svelte/icons/log-out";
-  import UserPen from "@lucide/svelte/icons/user-pen";
+  import Settings from "@lucide/svelte/icons/settings";
   import { getApp } from "#lib/state.svelte.ts";
   import Avatar from "./Avatar.svelte";
-  import ProfileDialog from "./ProfileDialog.svelte";
+  import SettingsDialog from "#lib/components/settings/SettingsDialog.svelte";
 
   const app = getApp();
   const label = $derived(app.account.name ?? app.account.email ?? "");
 
   let triggerEl = $state<HTMLButtonElement>();
   let menuEl = $state<HTMLDivElement>();
-  let profileDialog = $state<ProfileDialog>();
+  let settingsDialog = $state<SettingsDialog>();
   let open = $state(false);
 
   // the menu lives in the top layer, out of the sidebar, so it is placed by hand just above the trigger
@@ -35,9 +35,9 @@
     items[(at + step + items.length) % items.length]?.focus();
   }
 
-  function editProfile() {
+  function openSettings() {
     menuEl?.hidePopover();
-    profileDialog?.open();
+    settingsDialog?.open();
   }
 
   function signOut() {
@@ -82,12 +82,12 @@
   {ontoggle}
   {onkeydown}
 >
-  <button class="menu-item" role="menuitem" onclick={editProfile}
-    ><UserPen />Edit profile</button
+  <button class="menu-item" role="menuitem" onclick={openSettings}
+    ><Settings />Settings</button
   >
   <button class="menu-item" role="menuitem" onclick={signOut}
     ><LogOut />Sign out</button
   >
 </div>
 
-<ProfileDialog bind:this={profileDialog} />
+<SettingsDialog bind:this={settingsDialog} />

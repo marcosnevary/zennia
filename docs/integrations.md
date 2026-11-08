@@ -24,11 +24,11 @@ Supabase checks the token's `nonce` claim against the SHA-256 of the raw nonce, 
 
 ## Profile
 
-The name and photo come from Google unless the user changed them in Edit profile.
+The name and photo come from Google unless the user changed them in the Profile tab of Settings.
 
-`linkIdentity` doesn't copy the Google profile into the `user_metadata` of an anonymous user, only into its identity, so `accountOf` reads both. Google sign-in rewrites its own `user_metadata` keys every time, so Edit profile saves under `display_name` and `photo_url`, which take priority.
+`linkIdentity` doesn't copy the Google profile into the `user_metadata` of an anonymous user, only into its identity, so `accountOf` reads both. Google sign-in rewrites its own `user_metadata` keys every time, so the Profile tab saves under `display_name` and `photo_url`, which take priority.
 
-A picked photo goes to the public `avatars` bucket at `<user id>/avatar.jpg`, cropped to a centered 256px square. The path never changes, so the saved URL carries a `?v=` timestamp to get past the browser cache. Going back to the Google photo deletes the file.
+A picked photo goes to the public `avatars` bucket at `<user id>/avatar.jpg`, cropped to a centered 256px square. The path never changes, so the saved URL carries a `?v=` timestamp to get past the browser cache. Once a photo is picked there is no going back to the Google one: a new pick replaces it.
 
 Policies let a user write only their own folder, and the bucket takes JPEGs of up to 1 MB. Uploading with `upsert` and removing both read the object first, so reading through the API needs a policy of its own, even though the bucket is public.
 

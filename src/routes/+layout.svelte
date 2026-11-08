@@ -6,7 +6,6 @@
   import Languages from "@lucide/svelte/icons/languages";
   import LogIn from "@lucide/svelte/icons/log-in";
   import PencilLine from "@lucide/svelte/icons/pencil-line";
-  import Settings from "@lucide/svelte/icons/settings";
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
@@ -43,7 +42,6 @@
     { path: "/vocabulary", label: "Vocabulary", icon: BookOpen },
     { path: "/kana", label: "Kana", icon: Languages },
     { path: "/stats", label: "Stats", icon: ChartColumn },
-    { path: "/settings", label: "Settings", icon: Settings },
   ] as const;
 
   // the controls that take typed digits (a select jumps to the option they start), so the number keys are left to them

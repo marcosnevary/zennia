@@ -7,6 +7,7 @@
     el = $bindable(),
     label,
     width = 420,
+    class: className,
     onclose,
     children,
   }: {
@@ -14,13 +15,14 @@
     label: string;
     /** In px; a narrow screen keeps a 16px gutter on each side. */
     width?: number;
+    class?: string;
     onclose?: () => void;
     children: Snippet;
   } = $props();
 </script>
 
 <dialog
-  class="w-[min(var(--dialog-width),calc(100vw-32px))]"
+  class={["w-[min(var(--dialog-width),calc(100vw-32px))] text-base", className]}
   style:--dialog-width="{width}px"
   bind:this={el}
   use:closeOnBackdrop
