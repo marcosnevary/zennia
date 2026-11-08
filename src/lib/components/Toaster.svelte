@@ -44,7 +44,7 @@
         <!-- as tall as the message's first line, so the X lines up with it -->
         <button
           type="button"
-          class="toast-close size-6"
+          class="bare size-6"
           aria-label="Dismiss"
           title="Dismiss"
           onclick={() => toasts.dismiss(toast.id)}><X /></button

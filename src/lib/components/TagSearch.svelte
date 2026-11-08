@@ -1,5 +1,6 @@
 <script lang="ts">
   import { tick } from "svelte";
+  import X from "@lucide/svelte/icons/x";
   import TagChip from "./TagChip.svelte";
   import { findTag, sameTag } from "#lib/data/tags.ts";
 
@@ -27,6 +28,13 @@
   function removeTag(tag: string) {
     tags = tags.filter((t) => !sameTag(t, tag));
     onchange();
+  }
+
+  function clear() {
+    query = "";
+    tags = [];
+    onchange();
+    inputEl?.focus();
   }
 
   async function placeCaret(at: number) {
@@ -78,7 +86,7 @@
      button instead, which then turns hovered and clicked along with the whole bar -->
 <label
   for={id}
-  class="field flex min-h-10 min-w-50 flex-1 cursor-text flex-wrap items-center gap-1 px-3 py-1"
+  class="field group flex min-h-10 min-w-50 flex-1 cursor-text flex-wrap items-center gap-1 px-3 py-1"
 >
   {#each tags as tag (tag)}
     <TagChip {tag} selected onclick={() => removeTag(tag)} />
@@ -86,7 +94,7 @@
   <input
     {id}
     type="search"
-    class="min-w-30 flex-1 appearance-none bg-transparent p-0 outline-none"
+    class="min-w-30 flex-1 appearance-none bg-transparent p-0 outline-none [&::-webkit-search-cancel-button]:hidden"
     {placeholder}
     aria-label={label}
     bind:value={query}
@@ -94,4 +102,14 @@
     oninput={onchange}
     onkeydown={onKeydown}
   />
+  {#if query || tags.length > 0}
+    <!-- replaces the native X, which only shows with text typed; like it, visible only while the bar is hovered or focused -->
+    <button
+      type="button"
+      class="bare ml-1 size-4 shrink-0 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"
+      aria-label="Clear search"
+      title="Clear search"
+      onclick={clear}><X class="size-4" /></button
+    >
+  {/if}
 </label>
