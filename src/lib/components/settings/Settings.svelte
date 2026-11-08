@@ -1,10 +1,7 @@
 <script lang="ts">
   import Check from "@lucide/svelte/icons/check";
-  import Download from "@lucide/svelte/icons/download";
-  import RotateCcw from "@lucide/svelte/icons/rotate-ccw";
-  import Upload from "@lucide/svelte/icons/upload";
   import X from "@lucide/svelte/icons/x";
-  import { tick, type Component } from "svelte";
+  import { tick } from "svelte";
   import type { Attachment } from "svelte/attachments";
   import { prefersReducedMotion } from "svelte/motion";
   import { messageOf } from "#lib/core/errors.ts";
@@ -32,7 +29,7 @@
 
   const FEEDBACK_MS = 4000;
 
-  // the outcome of an action replaces the icon and label of the button that ran it for a moment, like "Copied!";
+  // the outcome of an action replaces the label of the button that ran it for a moment, like "Copied!";
   // the button only fits a few words, so the full detail takes the place of the row's description
   let feedback = $state<{
     key: string;
@@ -127,7 +124,7 @@
   }
 </script>
 
-{#snippet action(key: string, Icon: Component, label: string)}
+{#snippet action(key: string, label: string)}
   {#if feedback?.key === key}
     {#key feedback}
       {#if feedback.ok}<Check class="outcome" />{:else}<X
@@ -136,7 +133,7 @@
     {/key}
     <span>{feedback.text}</span>
   {:else}
-    <Icon /><span>{label}</span>
+    <span>{label}</span>
   {/if}
 {/snippet}
 
@@ -201,7 +198,7 @@
       onclick={exportWords}
       disabled={app.words.length === 0}
       {@attach control("export")}
-      >{@render action("export", Upload, "Export JSON")}</button
+      >{@render action("export", "Export JSON")}</button
     >
   </SettingRow>
   <SettingRow
@@ -212,7 +209,7 @@
     )}
   >
     <label class="file" {@attach control("json")}>
-      {@render action("json", Download, "Import JSON")}
+      {@render action("json", "Import JSON")}
       <input
         type="file"
         accept="application/json,.json"
@@ -229,11 +226,11 @@
     )}
   >
     <label
-      class="file text-center"
+      class="file"
       title="Anki: Export → Notes in Plain Text. Columns: word, reading, meaning"
       {@attach control("anki")}
     >
-      {@render action("anki", Download, "Import .txt")}
+      {@render action("anki", "Import .txt")}
       <input
         type="file"
         accept="text/plain,.txt,.tsv"
@@ -249,7 +246,7 @@
       description="Erase every practice result. This cannot be undone."
     >
       <button class="danger" onclick={resetStats} {@attach control("reset")}
-        >{@render action("reset", RotateCcw, "Reset stats")}</button
+        >{@render action("reset", "Reset stats")}</button
       >
     </SettingRow>
   {/if}

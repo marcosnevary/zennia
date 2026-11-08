@@ -1,6 +1,4 @@
 <script lang="ts">
-  import ArrowRight from "@lucide/svelte/icons/arrow-right";
-  import Check from "@lucide/svelte/icons/check";
   import CircleSmall from "@lucide/svelte/icons/circle-small";
   import X from "@lucide/svelte/icons/x";
   import type { Verdict } from "#lib/core/types.ts";
@@ -152,7 +150,7 @@
     </div>
     <!-- fixed width, so the button does not resize when its label switches between Check and Next -->
     <button class="action w-28 flex-none" type="submit"
-      >{#if verdict}<ArrowRight />Next{:else}<Check />Check{/if}</button
+      >{verdict ? "Next" : "Check"}</button
     >
   </form>
 

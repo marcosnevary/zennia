@@ -656,6 +656,7 @@
   button,
   .file {
     background: var(--color-tint);
+    text-align: center;
   }
 
   /* icon-only buttons are ghost: no fill until hover */
