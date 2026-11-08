@@ -10,6 +10,7 @@
   import Dialog from "#lib/components/Dialog.svelte";
   import SelectAll from "#lib/components/SelectAll.svelte";
   import { selectRow } from "#lib/components/select-row.ts";
+  import PinnedLabel from "./PinnedLabel.svelte";
   import RomajiWordsDialog from "./RomajiWordsDialog.svelte";
   import Switch from "#lib/components/Switch.svelte";
   import TagChip from "#lib/components/TagChip.svelte";
@@ -62,12 +63,18 @@
   let errors = $state<WordErrors>({});
   let merged = $state("");
   let japaneseEl = $state<HTMLInputElement>();
+  let pinned = $state({
+    japanese: false,
+    hiragana: false,
+    meaning: false,
+    tags: false,
+  });
 
   function resetForm() {
-    japanese = "";
-    hiragana = "";
-    meaning = "";
-    newTags = [];
+    if (!pinned.japanese) japanese = "";
+    if (!pinned.hiragana) hiragana = "";
+    if (!pinned.meaning) meaning = "";
+    if (!pinned.tags) newTags = [];
     errors = {};
   }
 
@@ -347,37 +354,64 @@
   >
     <div>
       <form class="grid gap-2" onsubmit={save}>
-        <input
-          type="text"
-          class="field"
-          lang="ja"
-          placeholder="Word (e.g. 食べる)"
-          bind:value={japanese}
-          bind:this={japaneseEl}
-          aria-invalid={!!errors.japanese}
-          oninput={() => {
-            errors.japanese = "";
-            merged = "";
-          }}
-        />
-        <input
-          type="text"
-          class="field"
-          lang="ja"
-          placeholder="Reading in kana (e.g. たべる)"
-          bind:value={hiragana}
-          aria-invalid={!!errors.hiragana}
-          oninput={() => (errors.hiragana = "")}
-        />
-        <input
-          type="text"
-          class="field"
-          placeholder="Meaning (e.g. to eat)"
-          bind:value={meaning}
-          aria-invalid={!!errors.meaning}
-          oninput={() => (errors.meaning = "")}
-        />
-        <TagInput bind:tags={newTags} suggestions={tags} />
+        <div class="grid gap-1">
+          <PinnedLabel
+            label="Word"
+            id="new-japanese"
+            bind:pinned={pinned.japanese}
+          />
+          <input
+            id="new-japanese"
+            type="text"
+            class="field"
+            lang="ja"
+            placeholder="e.g. 食べる"
+            bind:value={japanese}
+            bind:this={japaneseEl}
+            aria-invalid={!!errors.japanese}
+            oninput={() => {
+              errors.japanese = "";
+              merged = "";
+            }}
+          />
+        </div>
+        <div class="grid gap-1">
+          <PinnedLabel
+            label="Reading"
+            id="new-hiragana"
+            bind:pinned={pinned.hiragana}
+          />
+          <input
+            id="new-hiragana"
+            type="text"
+            class="field"
+            lang="ja"
+            placeholder="In kana, e.g. たべる"
+            bind:value={hiragana}
+            aria-invalid={!!errors.hiragana}
+            oninput={() => (errors.hiragana = "")}
+          />
+        </div>
+        <div class="grid gap-1">
+          <PinnedLabel
+            label="Meaning"
+            id="new-meaning"
+            bind:pinned={pinned.meaning}
+          />
+          <input
+            id="new-meaning"
+            type="text"
+            class="field"
+            placeholder="e.g. to eat"
+            bind:value={meaning}
+            aria-invalid={!!errors.meaning}
+            oninput={() => (errors.meaning = "")}
+          />
+        </div>
+        <div class="grid gap-1">
+          <PinnedLabel label="Tags" id="new-tags" bind:pinned={pinned.tags} />
+          <TagInput id="new-tags" bind:tags={newTags} suggestions={tags} />
+        </div>
         <button class="action w-full" type="submit">Add</button>
         {#if merged}<p role="status">{merged}</p>{/if}
       </form>

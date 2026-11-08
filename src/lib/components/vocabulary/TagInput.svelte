@@ -6,7 +6,8 @@
   let {
     tags = $bindable(),
     suggestions,
-  }: { tags: string[]; suggestions: string[] } = $props();
+    id,
+  }: { tags: string[]; suggestions: string[]; id?: string } = $props();
 
   const app = getApp();
 
@@ -54,6 +55,7 @@
 
 <div class="grid gap-2">
   <input
+    {id}
     type="text"
     class="field"
     placeholder="New tag (type it and press Enter)"
