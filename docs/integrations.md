@@ -38,7 +38,7 @@ The voice is Azure's neural text-to-speech, `ja-JP-NanamiNeural`, on the free F0
 
 Each word's audio is made once and kept in the public `pronunciations` bucket, so every later play, by anyone, is a plain download:
 
-1. The app knows where the file would be: `<voice>/<sha256 of written form and reading>.mp3` (`supabase/functions/_shared/pronunciation.ts`).
+1. The app knows where the file would be: `<voice>/<sha256 of written form and spoken reading>.mp3` (`supabase/functions/_shared/pronunciation.ts`).
 2. If loading it fails, the app calls the `pronounce` Edge Function, which makes the file and stores it, and then loads it again.
 3. The function checks the user's session itself, and only accepts what a word can be: up to 32 characters, with a kana reading. Anonymous sessions count, so anyone could still fill the bucket with odd words, which only costs storage.
 
