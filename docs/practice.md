@@ -75,7 +75,7 @@ Furigana (`src/lib/core/furigana.ts`) splits the written form into runs of hirag
 
 ## Answer sound
 
-With **Play sound effects** on in Settings, on by default, Check plays two notes: a kalimba rising a fourth for a correct answer, a marimba falling a third for an incorrect one, `almost` included. They are synthesized with the Web Audio API (`src/lib/components/practice/answer-sound.ts`), so there are no files to load, and moving on stops them.
+With **Play sound effects** on in Settings, on by default, Check plays two notes: a kalimba rising a fourth for a correct answer, a marimba falling a third for an incorrect one, `almost` included. They are synthesized with the Web Audio API (`src/lib/components/practice/answer-sound.ts`), so there are no files to load. Moving on lets them finish; leaving Practice stops them.
 
 The notes are made to sound open rather than muffled: a pluck at the attack, a long ring, a light room reverb, and the two notes panned apart.
 
@@ -85,7 +85,7 @@ The answer can be heard in Japanese: the written form, said with the saved readi
 
 - With **Play the pronunciation** on in Settings, Check plays it, and Practice fetches each item's audio as soon as it is drawn, so it starts at once. With the answer sound on, it waits for the two notes (`ANSWER_SOUND_MS`) and plays while their ring fades. Off by default.
 - The speaker button on the result plays it again, on or off. A mouse click leaves the focus on the page, so Enter and Space still move on.
-- Moving on stops the audio still playing.
+- Moving on stops it, even when it is still waiting for the answer sound.
 - If the audio can't be loaded or made, a toast says so, once.
 
 ## Fonts

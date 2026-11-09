@@ -79,11 +79,10 @@
       pronouncedOf(current),
       untrack(() => playPronunciation),
     );
-    return () => {
-      pronunciation.stop();
-      answerSound.stop();
-    };
+    return () => pronunciation.stop();
   });
+  // the answer sound is short, so moving on lets it finish; only leaving Practice stops it
+  $effect(() => () => answerSound.stop());
 
   const outcome = $derived(app.practice.outcome);
   const verdict = $derived(outcome?.verdict ?? null);
