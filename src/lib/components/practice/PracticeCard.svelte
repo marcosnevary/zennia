@@ -15,6 +15,7 @@
   let {
     prompt,
     promptFont,
+    promptReady = true,
     verdict,
     rightAnswer,
     note,
@@ -36,6 +37,8 @@
     prompt: string;
     /** A font-family for the prompt instead of the UI font */
     promptFont?: string;
+    /** False keeps the prompt hidden while its font loads */
+    promptReady?: boolean;
     verdict: Verdict | null;
     /** Shown with the verdict */
     rightAnswer: RightAnswer;
@@ -98,7 +101,7 @@
     <p
       class="col-start-1 row-start-1 self-center text-display motion-safe:transition-opacity motion-safe:duration-200 {verdict
         ? 'opacity-0'
-        : ''}"
+        : ''} {promptReady ? '' : 'invisible'}"
       style:font-family={promptFont}
       lang="ja"
       aria-hidden={verdict !== null}

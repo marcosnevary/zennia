@@ -1,4 +1,4 @@
-import type { PracticeFontId } from "#lib/data/practice-fonts.ts";
+import { fontFamily, type PracticeFontId } from "#lib/data/practice-fonts.ts";
 
 const LOADERS: Record<
   Exclude<PracticeFontId, "default">,
@@ -18,14 +18,38 @@ const LOADERS: Record<
   "yuji-syuku": () => import("@fontsource/yuji-syuku/400.css"),
 };
 
-const loaded = new Set<PracticeFontId>();
+// as long as the browser's own wait under `font-display: block`: on a slow connection the text shows in the
+// fallback font rather than not at all
+const FONT_WAIT_MS = 3000;
+
+const loaded = new Map<PracticeFontId, Promise<unknown>>();
+
+function load(id: Exclude<PracticeFontId, "default">): Promise<unknown> {
+  let loading = loaded.get(id);
+  if (!loading) {
+    loading = LOADERS[id]();
+    loaded.set(id, loading);
+  }
+  return loading;
+}
 
 // Japanese fonts are megabytes each, so only the chosen ones load, or all of them while the picker shows its previews;
 // Fontsource splits them by unicode-range, and the browser then fetches only the chunks the shown text uses
 export function loadFonts(ids: readonly PracticeFontId[]): void {
   for (const id of ids) {
-    if (id === "default" || loaded.has(id)) continue;
-    loaded.add(id);
-    void LOADERS[id]();
+    if (id !== "default") void load(id);
   }
+}
+
+/** Resolves once `text` can be drawn in the font, or after `FONT_WAIT_MS` if it can't be fetched in time. */
+export async function fontReady(
+  id: PracticeFontId,
+  text: string,
+): Promise<void> {
+  if (id === "default") return;
+  const fetched = load(id).then(() =>
+    document.fonts.load(`1em ${fontFamily(id)}`, text),
+  );
+  const timeout = new Promise((done) => setTimeout(done, FONT_WAIT_MS));
+  await Promise.race([fetched, timeout]).catch(() => {});
 }
