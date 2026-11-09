@@ -51,7 +51,9 @@ Settings is a dialog, not a tab: the Settings item of the account menu opens it 
 
 ## Toasts
 
-Every error, from a failed write to an invalid field, and the login conflict question show up as toasts in the bottom-right corner (`toasts.svelte.ts`, owned by `App` as `app.toasts`). An invalid field is also marked with `aria-invalid`.
+Errors that aren't about what a field holds, such as a failed write, and the login conflict question show up as toasts in the bottom-right corner (`toasts.svelte.ts`, owned by `App` as `app.toasts`).
+
+An invalid field in the vocabulary forms and tag fields instead shows its message under it (`FieldError.svelte`), marked with `aria-invalid` and linked by `aria-describedby`. A failed save moves the focus to the first invalid field, since nothing else announces it.
 
 - The fill and icon show the kind: red for an error, yellow for a warning such as the login conflict.
 - An error closes by itself after 6 seconds, or with its X. The one shown when the data fails to load stays until closed, since the screen is empty without it.
