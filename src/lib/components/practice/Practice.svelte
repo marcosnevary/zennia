@@ -3,7 +3,7 @@
   import { untrack } from "svelte";
   import PracticeCard from "./PracticeCard.svelte";
   import { ANSWER_SOUND_MS, AnswerSound } from "./answer-sound.ts";
-  import { loadFonts } from "./fonts.ts";
+  import { fontReady, loadFonts } from "./fonts.ts";
   import { Pronunciation } from "./pronunciation.ts";
   import {
     fontFamily,
@@ -45,6 +45,20 @@
   function drawFont() {
     font = practiceFonts.length ? nextFont(practiceFonts, font) : undefined;
   }
+
+  // a font's glyphs are fetched only for the text it shows, so the word waits hidden for them instead of
+  // appearing in the fallback font and swapping in view
+  const promptFontKey = $derived(
+    current?.kind === "word" && font ? `${font}\n${current.word.japanese}` : "",
+  );
+  let readyFontKey = $state("");
+  $effect(() => {
+    const key = promptFontKey;
+    if (!key || !font || current?.kind !== "word") return;
+    void fontReady(font, current.word.japanese).then(() => {
+      readyFontKey = key;
+    });
+  });
 
   const pronunciation = new Pronunciation({
     url: (pronounced) => app.pronunciationUrl(pronounced),
@@ -159,6 +173,7 @@
       ? current.word.japanese
       : current.kana.symbol}
     promptFont={current.kind === "word" && font ? fontFamily(font) : undefined}
+    promptReady={!promptFontKey || readyFontKey === promptFontKey}
     {verdict}
     rightAnswer={rightAnswer(current)}
     {note}
