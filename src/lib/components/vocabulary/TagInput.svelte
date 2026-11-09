@@ -1,7 +1,7 @@
 <script lang="ts">
+  import FieldError from "#lib/components/FieldError.svelte";
   import TagChip from "#lib/components/TagChip.svelte";
   import { cleanTags, findTag, sameTag, validateTag } from "#lib/data/tags.ts";
-  import { getApp } from "#lib/state.svelte.ts";
 
   let {
     tags = $bindable(),
@@ -9,10 +9,12 @@
     id,
   }: { tags: string[]; suggestions: string[]; id?: string } = $props();
 
-  const app = getApp();
+  // the input appears in the add form and in dialogs at the same time, so the error needs an id of its own
+  const uid = $props.id();
+  const errorId = `${uid}-error`;
 
   let draft = $state("");
-  let invalid = $state(false);
+  let error = $state("");
 
   const collator = new Intl.Collator(undefined, { sensitivity: "base" });
   // every tag in use plus the ones just typed for this word, once each and in alphabetical order
@@ -32,14 +34,8 @@
 
   // adds the typed tag, with the spelling already in use when there is one
   function commit() {
-    const error = draft.trim() ? validateTag(draft) : "";
-    invalid = !!error;
-    if (error) {
-      app.toasts.show(error, { id: "tag" });
-      return;
-    }
-    app.toasts.dismiss("tag");
-    if (!draft.trim()) return;
+    error = draft.trim() ? validateTag(draft) : "";
+    if (error || !draft.trim()) return;
     const spelling = findTag(choices, draft) ?? draft;
     tags = cleanTags([...tags, spelling]);
     draft = "";
@@ -54,17 +50,21 @@
 </script>
 
 <div class="grid gap-2">
-  <input
-    {id}
-    type="text"
-    class="field"
-    placeholder="New tag (type it and press Enter)"
-    bind:value={draft}
-    aria-invalid={invalid}
-    oninput={() => (invalid = false)}
-    onkeydown={onKeydown}
-    onblur={commit}
-  />
+  <div class="grid gap-1">
+    <input
+      {id}
+      type="text"
+      class="field"
+      placeholder="New tag (type it and press Enter)"
+      bind:value={draft}
+      aria-invalid={!!error}
+      aria-describedby={error ? errorId : undefined}
+      oninput={() => (error = "")}
+      onkeydown={onKeydown}
+      onblur={commit}
+    />
+    <FieldError id={errorId} message={error} />
+  </div>
   {#if choices.length > 0}
     <ul
       class="flex max-h-32 flex-wrap gap-1 overflow-y-auto"

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tick } from "svelte";
   import { SvelteSet } from "svelte/reactivity";
   import ArrowDown from "@lucide/svelte/icons/arrow-down";
   import ArrowUp from "@lucide/svelte/icons/arrow-up";
@@ -8,6 +9,7 @@
   import Tag from "@lucide/svelte/icons/tag";
   import Trash from "@lucide/svelte/icons/trash";
   import Dialog from "#lib/components/Dialog.svelte";
+  import FieldError from "#lib/components/FieldError.svelte";
   import SelectAll from "#lib/components/SelectAll.svelte";
   import { selectRow } from "#lib/components/select-row.ts";
   import PinnedLabel from "./PinnedLabel.svelte";
@@ -78,20 +80,21 @@
     errors = {};
   }
 
-  // one toast for the whole form, while each invalid field is marked
-  function reportErrors(found: WordErrors, id: string): boolean {
-    const messages = Object.values(found);
-    if (messages.length) app.toasts.show(messages.join(" "), { id });
-    else app.toasts.dismiss(id);
-    return messages.length > 0;
+  // the messages sit under their fields, so moving to the first invalid one is what tells a keyboard or screen
+  // reader user that the save failed
+  async function hasErrors(found: WordErrors, form: HTMLFormElement) {
+    if (!Object.values(found).some(Boolean)) return false;
+    await tick();
+    form.querySelector<HTMLElement>("[aria-invalid='true']")?.focus();
+    return true;
   }
 
-  function save(event: Event) {
+  async function save(event: SubmitEvent) {
     event.preventDefault();
     const fields = { japanese, hiragana, meaning, tags: newTags };
     merged = "";
     errors = validateWord(fields);
-    if (reportErrors(errors, "word")) return;
+    if (await hasErrors(errors, event.currentTarget as HTMLFormElement)) return;
     const word = makeWord(fields);
     merged = mergeNote(word, app.importWords([word]));
     resetForm();
@@ -108,7 +111,7 @@
     dialogEl?.showModal();
   }
 
-  function saveEdit(event: Event) {
+  async function saveEdit(event: SubmitEvent) {
     event.preventDefault();
     const fields = {
       japanese: editJapanese,
@@ -117,7 +120,8 @@
       tags: editTags,
     };
     editErrors = validateEdit(fields, words, editingId);
-    if (reportErrors(editErrors, "word-edit")) return;
+    if (await hasErrors(editErrors, event.currentTarget as HTMLFormElement))
+      return;
     app.setWords(
       words.map((w) => (w.id === editingId ? updateWord(w, fields) : w)),
     );
@@ -268,45 +272,66 @@
   <Dialog
     bind:el={dialogEl}
     label="Edit word"
-    onclose={() => {
-      editingId = null;
-      app.toasts.dismiss("word-edit");
-    }}
+    onclose={() => (editingId = null)}
   >
     <form class="grid gap-2" onsubmit={saveEdit}>
       <h2 class="mt-0 mb-2">Edit word</h2>
-      <input
-        type="text"
-        class="field"
-        lang="ja"
-        placeholder="Word (e.g. 食べる)"
-        bind:value={editJapanese}
-        aria-invalid={!!editErrors.japanese || !!editErrors.duplicate}
-        oninput={() => {
-          editErrors.japanese = "";
-          editErrors.duplicate = "";
-        }}
-      />
-      <input
-        type="text"
-        class="field"
-        lang="ja"
-        placeholder="Reading in kana (e.g. たべる)"
-        bind:value={editHiragana}
-        aria-invalid={!!editErrors.hiragana || !!editErrors.duplicate}
-        oninput={() => {
-          editErrors.hiragana = "";
-          editErrors.duplicate = "";
-        }}
-      />
-      <input
-        type="text"
-        class="field"
-        placeholder="Meaning (e.g. to eat)"
-        bind:value={editMeaning}
-        aria-invalid={!!editErrors.meaning}
-        oninput={() => (editErrors.meaning = "")}
-      />
+      <div class="grid gap-1">
+        <input
+          type="text"
+          class="field"
+          lang="ja"
+          placeholder="Word (e.g. 食べる)"
+          bind:value={editJapanese}
+          aria-invalid={!!editErrors.japanese || !!editErrors.duplicate}
+          aria-describedby={editErrors.japanese
+            ? "edit-japanese-error"
+            : editErrors.duplicate
+              ? "edit-duplicate-error"
+              : undefined}
+          oninput={() => {
+            editErrors.japanese = "";
+            editErrors.duplicate = "";
+          }}
+        />
+        <FieldError id="edit-japanese-error" message={editErrors.japanese} />
+      </div>
+      <div class="grid gap-1">
+        <input
+          type="text"
+          class="field"
+          lang="ja"
+          placeholder="Reading in kana (e.g. たべる)"
+          bind:value={editHiragana}
+          aria-invalid={!!editErrors.hiragana || !!editErrors.duplicate}
+          aria-describedby={editErrors.hiragana
+            ? "edit-hiragana-error"
+            : editErrors.duplicate
+              ? "edit-duplicate-error"
+              : undefined}
+          oninput={() => {
+            editErrors.hiragana = "";
+            editErrors.duplicate = "";
+          }}
+        />
+        <FieldError id="edit-hiragana-error" message={editErrors.hiragana} />
+        <!-- the word and the reading together make it a duplicate, so the message closes the pair -->
+        <FieldError id="edit-duplicate-error" message={editErrors.duplicate} />
+      </div>
+      <div class="grid gap-1">
+        <input
+          type="text"
+          class="field"
+          placeholder="Meaning (e.g. to eat)"
+          bind:value={editMeaning}
+          aria-invalid={!!editErrors.meaning}
+          aria-describedby={editErrors.meaning
+            ? "edit-meaning-error"
+            : undefined}
+          oninput={() => (editErrors.meaning = "")}
+        />
+        <FieldError id="edit-meaning-error" message={editErrors.meaning} />
+      </div>
       {#key editingId}
         <TagInput bind:tags={editTags} suggestions={tags} />
       {/key}
@@ -369,11 +394,15 @@
             bind:value={japanese}
             bind:this={japaneseEl}
             aria-invalid={!!errors.japanese}
+            aria-describedby={errors.japanese
+              ? "new-japanese-error"
+              : undefined}
             oninput={() => {
               errors.japanese = "";
               merged = "";
             }}
           />
+          <FieldError id="new-japanese-error" message={errors.japanese} />
         </div>
         <div class="grid gap-1">
           <PinnedLabel
@@ -389,8 +418,12 @@
             placeholder="In kana, e.g. たべる"
             bind:value={hiragana}
             aria-invalid={!!errors.hiragana}
+            aria-describedby={errors.hiragana
+              ? "new-hiragana-error"
+              : undefined}
             oninput={() => (errors.hiragana = "")}
           />
+          <FieldError id="new-hiragana-error" message={errors.hiragana} />
         </div>
         <div class="grid gap-1">
           <PinnedLabel
@@ -405,8 +438,10 @@
             placeholder="e.g. to eat"
             bind:value={meaning}
             aria-invalid={!!errors.meaning}
+            aria-describedby={errors.meaning ? "new-meaning-error" : undefined}
             oninput={() => (errors.meaning = "")}
           />
+          <FieldError id="new-meaning-error" message={errors.meaning} />
         </div>
         <div class="grid gap-1">
           <PinnedLabel label="Tags" id="new-tags" bind:pinned={pinned.tags} />

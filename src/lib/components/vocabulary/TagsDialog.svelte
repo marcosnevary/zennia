@@ -2,6 +2,7 @@
   import Trash from "@lucide/svelte/icons/trash";
   import TagChip, { CHIP, useTagStyle } from "#lib/components/TagChip.svelte";
   import Dialog from "#lib/components/Dialog.svelte";
+  import FieldError from "#lib/components/FieldError.svelte";
   import SelectAll from "#lib/components/SelectAll.svelte";
   import { selectRow } from "#lib/components/select-row.ts";
   import { plural } from "#lib/core/plural.ts";
@@ -13,7 +14,6 @@
     validateTag,
     withAnyTag,
   } from "#lib/data/tags.ts";
-  import { getApp } from "#lib/state.svelte.ts";
 
   let {
     tags,
@@ -27,7 +27,6 @@
     ondelete: (tags: string[]) => void;
   } = $props();
 
-  const app = getApp();
   const tagStyle = useTagStyle();
 
   let dialogEl = $state<HTMLDialogElement>();
@@ -48,7 +47,7 @@
 
   let renaming = $state<string | null>(null);
   let renameDraft = $state("");
-  let renameInvalid = $state(false);
+  let renameError = $state("");
 
   export function open() {
     query = "";
@@ -81,24 +80,20 @@
   function startRename(tag: string) {
     renaming = tag;
     renameDraft = tag;
-    renameInvalid = false;
+    renameError = "";
   }
 
   function stopRename() {
     renaming = null;
-    app.toasts.dismiss("tag");
+    renameError = "";
   }
 
   function saveRename() {
     if (renaming === null) return;
     const from = renaming;
     const to = renameDraft.trim();
-    const error = validateTag(to);
-    renameInvalid = !!error;
-    if (error) {
-      app.toasts.show(error, { id: "tag" });
-      return;
-    }
+    renameError = validateTag(to);
+    if (renameError) return;
     const merges = !sameTag(from, to) && tags.some((t) => sameTag(t, to));
     const moved = filterByTags(words, [from]).length;
     if (
@@ -213,9 +208,12 @@
                         type="text"
                         class="absolute inset-0 w-full cursor-text bg-transparent p-0 outline-none"
                         aria-label={`New name for ${tag}`}
-                        aria-invalid={renameInvalid}
+                        aria-invalid={!!renameError}
+                        aria-describedby={renameError
+                          ? "rename-tag-error"
+                          : undefined}
                         bind:value={renameDraft}
-                        oninput={() => (renameInvalid = false)}
+                        oninput={() => (renameError = "")}
                         onkeydown={onRenameKey}
                         onblur={saveRename}
                         {@attach focusAndSelect}
@@ -238,6 +236,8 @@
           {/each}
         </ul>
       {/if}
+      <!-- a row has no room for the message, so it sits under the list -->
+      <FieldError id="rename-tag-error" message={renameError} />
     {/if}
     <div class="dialog-actions">
       <button class="action" type="button" onclick={() => dialogEl?.close()}
