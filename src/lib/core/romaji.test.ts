@@ -96,6 +96,12 @@ describe("toDisplayRomaji", () => {
     expect(toDisplayRomaji("を")).toBe("wo");
     expect(toDisplayRomaji("つづく")).toBe("tsuzuku");
   });
+  it("reads the particle は at the end of a greeting as wa, and any other は as ha", () => {
+    expect(toDisplayRomaji("こんにちは")).toBe("konnichiwa");
+    expect(toDisplayRomaji("こんばんは")).toBe("konbanwa");
+    expect(toDisplayRomaji("はは")).toBe("haha");
+    expect(toDisplayRomaji("は")).toBe("ha");
+  });
 });
 
 describe("toDisplayRomajiRuns", () => {

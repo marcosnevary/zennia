@@ -45,7 +45,7 @@ Answers are compared by sound, written in romaji (`src/lib/core/romaji.ts`). Bef
 
 The saved reading goes through steps 4 to 6, and a final は in a longer word also counts as わ, as in こんにちは. Words that end in a real は, such as はは, accept the same.
 
-The romaji the app shows is always accepted. wanakana spells foreign sounds kana by kana (ティ as `tei`), so `FOREIGN_SOUNDS` gives them one spelling, for the display and the comparison.
+The romaji the app shows, and the pronunciation, use the reading as it is said: the particle は at the end of こんにちは, こんばんは, では and それでは is わ (`PARTICLE_WA_WORDS`). A final は can't always be read as わ, so these words are listed one by one. The romaji the app shows is always accepted. wanakana spells foreign sounds kana by kana (ティ as `tei`), so `FOREIGN_SOUNDS` gives them one spelling, for the display and the comparison.
 
 | Verdict     | When                                                                                                         |
 | ----------- | ------------------------------------------------------------------------------------------------------------ |
@@ -81,7 +81,7 @@ The notes are made to sound open rather than muffled: a pluck at the attack, a l
 
 ## Pronunciation
 
-The answer can be heard in Japanese: the written form, said with the saved reading ([how it is made](integrations.md#pronunciation)). A kana is said on its own.
+The answer can be heard in Japanese: the written form, said with the saved reading as it is said ([how it is made](integrations.md#pronunciation)). A kana is said on its own.
 
 - With **Play the pronunciation** on in Settings, Check plays it, and Practice fetches each item's audio as soon as it is drawn, so it starts at once. With the answer sound on, it waits for the two notes (`ANSWER_SOUND_MS`) and plays while their ring fades. Off by default.
 - The speaker button on the result plays it again, on or off. A mouse click leaves the focus on the page, so Enter and Space still move on.

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   kanaMode as buildKanaMode,
   mixedMode as buildMixedMode,
+  pronouncedOf,
   rightAnswer,
   wordsMode as buildWordsMode,
   type Recorder,
@@ -237,6 +238,31 @@ describe("rightAnswer", () => {
       written: [{ text: "ア", reading: "あ", romaji: "a" }],
       romaji: "a",
       meaning: undefined,
+    });
+  });
+
+  it("shows the particle は of a greeting as wa", () => {
+    const item = {
+      kind: "word",
+      word: word("こんにちは", { hiragana: "こんにちは", meaning: "hello" }),
+    } as const;
+    expect(rightAnswer(item)).toEqual({
+      written: [{ text: "こんにちは", romaji: "konnichiwa" }],
+      romaji: "konnichiwa",
+      meaning: "hello",
+    });
+  });
+});
+
+describe("pronouncedOf", () => {
+  it("says the particle は of a greeting as わ", () => {
+    const item = {
+      kind: "word",
+      word: word("今日は", { hiragana: "こんにちは" }),
+    } as const;
+    expect(pronouncedOf(item)).toEqual({
+      written: "今日は",
+      reading: "こんにちわ",
     });
   });
 });

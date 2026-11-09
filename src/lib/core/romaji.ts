@@ -162,9 +162,24 @@ export function checkAnswer(input: string, hiragana: string): Verdict {
   return "incorrect";
 }
 
-/** Romaji shown in the answer: derived from the hiragana, never saved. */
+/** Words whose final は is the particle. A final は can't always be read as わ: はは (mother) ends in a real は. */
+const PARTICLE_WA_WORDS = new Set([
+  "こんにちは",
+  "こんばんは",
+  "では",
+  "それでは",
+]);
+
+/** The reading as it is said: the particle は at the end of a greeting such as こんにちは is わ. */
+export function spokenReading(hiragana: string): string {
+  return PARTICLE_WA_WORDS.has(hiragana)
+    ? `${hiragana.slice(0, -1)}わ`
+    : hiragana;
+}
+
+/** Romaji shown in the answer: derived from the hiragana as it is said, never saved. */
 export function toDisplayRomaji(hiragana: string): string {
-  return romajiOf(normalizeKana(hiragana));
+  return romajiOf(normalizeKana(spokenReading(hiragana)));
 }
 
 /**

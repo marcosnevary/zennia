@@ -9,6 +9,7 @@ import {
 import { checkMeaning } from "#lib/core/meaning.ts";
 import {
   checkAnswer,
+  spokenReading,
   toDisplayRomaji,
   toDisplayRomajiRuns,
 } from "#lib/core/romaji.ts";
@@ -89,14 +90,20 @@ export interface RightAnswer {
 }
 
 /** The word or kana as written, with its reading: what the result shows and the voice says. */
-export function pronouncedOf(item: PracticeItem): Pronounced {
+function savedOf(item: PracticeItem): Pronounced {
   return item.kind === "word"
     ? { written: item.word.japanese, reading: item.word.hiragana }
     : { written: item.kana.symbol, reading: item.kana.hiragana };
 }
 
+/** Said with the spoken reading, which also gives it its own audio file apart from the saved one. */
+export function pronouncedOf(item: PracticeItem): Pronounced {
+  const { written, reading } = savedOf(item);
+  return { written, reading: spokenReading(reading) };
+}
+
 export function rightAnswer(item: PracticeItem): RightAnswer {
-  const { written, reading: hiragana } = pronouncedOf(item);
+  const { written, reading: hiragana } = savedOf(item);
   const parts = furigana(written, hiragana);
   const romaji = toDisplayRomajiRuns(
     parts.map((part) => part.reading ?? part.text),
