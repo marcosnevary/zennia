@@ -1,6 +1,7 @@
 <script lang="ts">
   import CircleSmall from "@lucide/svelte/icons/circle-small";
   import X from "@lucide/svelte/icons/x";
+  import { editedRomaji, typedKana } from "#lib/core/kana-input.ts";
   import type { Verdict } from "#lib/core/types.ts";
   import type { RightAnswer } from "#lib/data/practice-modes.ts";
   import ResultPanel from "./ResultPanel.svelte";
@@ -25,6 +26,7 @@
     answers,
     askReading = true,
     askMeaning = false,
+    kanaInput = false,
     answer = $bindable(),
     inputEl = $bindable(),
     meaningAnswer = $bindable(""),
@@ -55,6 +57,8 @@
     askReading?: boolean;
     /** Whether the meaning field is shown */
     askMeaning?: boolean;
+    /** Whether the romaji field shows what is typed as kana, while `answer` keeps the romaji */
+    kanaInput?: boolean;
     answer: string;
     inputEl?: HTMLInputElement;
     meaningAnswer?: string;
@@ -75,6 +79,24 @@
     if (!target || target === event.target) return;
     event.preventDefault();
     target.focus();
+  }
+
+  function onReadingInput(event: Event) {
+    const field = inputEl;
+    if (!field) return;
+    if (!kanaInput) {
+      answer = field.value;
+      return;
+    }
+    // rewriting the field mid-composition would break a Japanese keyboard's own input; its compositionend comes next
+    if (event instanceof InputEvent && event.isComposing) return;
+    const fromEnd = field.value.length - (field.selectionEnd ?? 0);
+    answer = editedRomaji(answer, field.value);
+    const shown = typedKana(answer);
+    if (field.value === shown) return;
+    field.value = shown;
+    const caret = Math.max(0, shown.length - fromEnd);
+    field.setSelectionRange(caret, caret);
   }
 
   function onReadingKeydown(event: KeyboardEvent) {
@@ -123,7 +145,9 @@
               ? readingVerdict !== "correct"
               : undefined}
             bind:this={inputEl}
-            bind:value={answer}
+            value={kanaInput ? typedKana(answer) : answer}
+            oninput={onReadingInput}
+            oncompositionend={onReadingInput}
             onkeydown={onReadingKeydown}
             readonly={verdict !== null}
             placeholder="Type in romaji"

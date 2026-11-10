@@ -1,5 +1,6 @@
 import type { Pronounced } from "#functions/_shared/pronunciation.ts";
 import { furigana, type FuriganaPart } from "#lib/core/furigana.ts";
+import { isKanji } from "wanakana";
 import {
   buildKana,
   kanaKey,
@@ -100,6 +101,17 @@ function savedOf(item: PracticeItem): Pronounced {
 export function pronouncedOf(item: PracticeItem): Pronounced {
   const { written, reading } = savedOf(item);
   return { written, reading: spokenReading(reading) };
+}
+
+/**
+ * Whether the reading field shows what is typed as kana. Only for words with kanji: when the prompt is already
+ * kana, the field could be matched against it before Check.
+ */
+export function typesInKana(item: PracticeItem): boolean {
+  return (
+    item.kind === "word" &&
+    [...item.word.japanese].some((char) => isKanji(char))
+  );
 }
 
 export function rightAnswer(item: PracticeItem): RightAnswer {

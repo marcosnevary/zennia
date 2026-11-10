@@ -4,6 +4,7 @@ import {
   mixedMode as buildMixedMode,
   pronouncedOf,
   rightAnswer,
+  typesInKana,
   wordsMode as buildWordsMode,
   type Recorder,
   type WordsFocus,
@@ -251,6 +252,22 @@ describe("rightAnswer", () => {
       romaji: "konnichiwa",
       meaning: "hello",
     });
+  });
+});
+
+describe("typesInKana", () => {
+  it("is only for words with kanji, whose prompt doesn't show the reading", () => {
+    const wordOf = (japanese: string) =>
+      ({ kind: "word", word: word(japanese) }) as const;
+    expect(typesInKana(wordOf("食べる"))).toBe(true);
+    expect(typesInKana(wordOf("ありがとう"))).toBe(false);
+    expect(typesInKana(wordOf("コーヒー"))).toBe(false);
+    const [kana] = mixedMode(
+      [],
+      [kanaKey("hiragana", "あ")],
+      emptyStats(),
+    ).pool;
+    expect(typesInKana(kana)).toBe(false);
   });
 });
 
