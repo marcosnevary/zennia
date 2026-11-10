@@ -9,7 +9,7 @@ The other docs cover the [data model](data-model.md), [practice and stats](pract
 Dependencies point one way, with each layer using only the ones before it: `core`, `data`, `state.svelte.ts`, then components and routes.
 
 - `src/lib/core/`: pure logic with no app data (kana tables, answer checking, meaning matching, furigana, writing sheet layout).
-- `src/lib/data/`: the rules over the app's data (words, tags, stats, practice, settings), import and export, and the dictionary lookup.
+- `src/lib/data/`: the rules over the app's data (words, tags, stats, practice, the Learn schedule, settings), import and export, and the dictionary lookup.
 - `src/lib/data/db/`: database access: the Supabase client (`client.ts`), the [Google sign-in popup](integrations.md#accounts) (`google.ts`), and the `Repo` that reads and writes the rows (`repo.ts`, `rows.ts`).
 - `src/lib/state.svelte.ts`: `App`, the shared data and the actions that change it.
 - `src/lib/components/`: Svelte components, grouped by feature.

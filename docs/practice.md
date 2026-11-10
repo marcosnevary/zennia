@@ -30,6 +30,18 @@ A never-answered item gets the top weight of 5, and no item drops to zero. Low a
 | 1 answer, right        | 0.57   |
 | 10 answers, all right  | 0.51   |
 
+## Learn schedule
+
+Learn leads through the lists of the path, Hiragana, then Katakana, then N5, and decides when each item enters (`src/lib/data/learn.ts`). Practice doesn't offer Learn yet.
+
+An item with no progress is new; once introduced it is `learning`, and it becomes `known` after 3 hits in a row (`HITS_TO_KNOW`). A miss, `almost` included, resets the streak, and a `known` item goes back to `learning`.
+
+- Lists come in groups: a row of kana or a handful of words. While fewer than 5 items are `learning` (`LEARNING_TARGET`), the next group enters, so a list of small groups can bring in more than one at a time.
+- When a list has no new items left, the next list starts, and `introduce` names it so the screen can say so. Items still `learning` from the finished list keep counting, so they mix with the first groups of the next one.
+- At the end of the path nothing more enters.
+
+The user never picks what enters nor says what they already know: whoever knows an item gets it right in a row and it becomes `known`. The numbers are a starting point to tune with real use.
+
 ## Typing in kana
 
 For a word with kanji, the romaji field shows what is typed as kana (`src/lib/core/kana-input.ts`), while the check still gets the romaji. Every spelling the check accepts keeps working, such as `ti` for ティ, shown as ち.
