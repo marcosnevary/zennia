@@ -45,6 +45,8 @@ Learn leads through the lists of the path, Hiragana, then Katakana, then N5, and
 
 Above the card, Learn shows the latest list with introduced items and how many of its items are `known`, such as "Hiragana · 12 of 107 known". When an answer starts the next list, a line says so until the next answer.
 
+**Restart list**, in the menu next to that line, makes every item of the list new again after a confirmation: it deletes their `list_progress` rows, and the list starts over from its first group by the usual entry rule. The words and the lifetime tallies stay. It is the only control over Learn's progress; to pause Learn, the user practices in Free practice.
+
 ### Schedule
 
 An item with no progress is new; once introduced it is `learning`, and it becomes `known` after 3 hits in a row (`HITS_TO_KNOW`). A miss, `almost` included, resets the streak, and a `known` item goes back to `learning`.

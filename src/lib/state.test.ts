@@ -45,6 +45,9 @@ function fakeRepo(stored: Partial<Stored> = {}, conflict = false) {
     resetStats: vi.fn(async () => {
       calls.push("reset stats");
     }),
+    deleteProgress: vi.fn(async (items) => {
+      calls.push(`delete progress ${items.join(",")}`);
+    }),
     saveProgress: vi.fn(async (progress) => {
       calls.push(`progress ${Object.keys(progress).join(",")}`);
     }),
@@ -410,5 +413,36 @@ describe("Learn", () => {
     expect(app.startedList).toBe("katakana");
     app.recordLearn("kana:hiragana:2", true);
     expect(app.startedList).toBeNull();
+  });
+
+  it("restarts a list from its first group, keeping the other lists and the tallies", async () => {
+    const { app, calls } = await ready();
+    app.startLearn(path);
+    for (let i = 0; i < 3; i++) app.recordLearn("kana:hiragana:0", true);
+    for (let i = 0; i < 3; i++) app.recordLearn("kana:hiragana:1", true);
+    app.recordKana("hiragana", "あ", true);
+    await app.flush();
+    calls.length = 0;
+
+    app.restartList(path[0]);
+    await app.flush();
+    expect(Object.keys(app.progress).sort()).toEqual([
+      "kana:hiragana:0",
+      "kana:hiragana:1",
+      "kana:hiragana:2",
+      "kana:hiragana:3",
+      "kana:hiragana:4",
+      "kana:katakana:0",
+    ]);
+    expect(app.progress["kana:hiragana:0"]).toMatchObject({
+      state: "learning",
+      streak: 0,
+    });
+    expect(app.progress["kana:katakana:0"]).toBeDefined();
+    expect(app.stats.kana["hiragana:あ"]).toEqual({ hits: 1, misses: 0 });
+    expect(calls).toEqual([
+      "delete progress kana:hiragana:0,kana:hiragana:1,kana:hiragana:2,kana:hiragana:3,kana:hiragana:4,kana:hiragana:5",
+      "progress kana:hiragana:0,kana:hiragana:1,kana:hiragana:2,kana:hiragana:3,kana:hiragana:4",
+    ]);
   });
 });
