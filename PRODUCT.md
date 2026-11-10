@@ -1,6 +1,6 @@
 # Zennia
 
-A web app for practicing Japanese vocabulary and kana. The name joins _zen_ and _omnia_.
+A web app for learning Japanese from zero: kana, then basic vocabulary. The name joins _zen_ and _omnia_.
 
 ## Register
 
@@ -8,13 +8,24 @@ product
 
 ## Users
 
-People learning Japanese on their own, from absolute beginners still learning hiragana, katakana and their first words to learners who want to lock in the vocabulary they are already studying.
+Absolute beginners who study Japanese on their own and don't know where to start. Zennia decides what they practice next, so they only have to open the app and follow along.
+
+Learners who already study from a textbook or a course can bring their own vocabulary and practice it freely. They are served, but they are not the focus.
 
 ## Product Purpose
 
-Zennia shows a word or a kana, the user types its reading in romaji, and the app checks the answer by sound. Items the user misses come up more often.
+Zennia takes a beginner from zero to reading hiragana, katakana and the basic (JLPT N5) vocabulary. It shows a kana or a word, the user types its reading in romaji, and the app checks the answer by sound. Items the user misses come up more often.
 
-A Lessons feature is planned: grammar taught together with a vocabulary pack the user learns inside the app.
+It grows in phases, and each one starts only once the previous one is shown to work with real learners:
+
+1. **Free practice** (done): the user adds their own words and practices them, along with the kana they choose.
+2. **Guided path**: the app leads through hiragana, then katakana, then the N5 vocabulary, introducing new items as the current ones are known.
+3. **Basic grammar**: lessons that teach grammar with the vocabulary the user already knows.
+4. **Kanji**: the kanji of the words the user already knows, built from their components, with their readings from the start.
+
+The order of phases 3 and 4 is decided once phase 2 shows where learners get stuck.
+
+Zennia doesn't teach kanji as a subject of its own before phase 4, nor conversation or listening beyond the pronunciation of each item.
 
 ## Brand Personality / Tone
 
