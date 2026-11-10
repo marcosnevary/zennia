@@ -15,9 +15,9 @@ Practice opens in the mode it was left in (`practiceMode`), and in Learn for som
 
 ## What is drawn
 
-In Free practice, the pool is the active words of the Vocabulary tab and the kana chosen in the Kana tab. Until the user chooses, the kana are the basic hiragana, everything before the dakuten block.
+In Free practice, the pool is the words the Vocabulary tab puts in Free practice and the kana chosen in the Kana tab. Until the user chooses, the kana are the basic hiragana, everything before the dakuten block.
 
-With an empty pool, Practice links to both tabs.
+With an empty pool, Practice links to both tabs and offers to start Learn, which switches the mode in place, so someone without words of their own still has something to practice.
 
 ## Draw weight
 

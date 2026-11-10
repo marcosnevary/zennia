@@ -240,11 +240,17 @@
 
 {#if !current}
   {#if !learning}
-    <p class="mt-6 mb-4 text-muted">
-      Nothing to practice. Select kana in <a href={resolve("/kana")}>Kana</a> or
-      activate words in
-      <a href={resolve("/vocabulary")}>Vocabulary</a>.
-    </p>
+    <div class="mt-6 mb-4 flex flex-col items-start gap-4">
+      <p class="text-muted">
+        Nothing to practice. Select kana in <a href={resolve("/kana")}>Kana</a>
+        or add words to Free practice in
+        <a href={resolve("/vocabulary")}>Vocabulary</a>.
+      </p>
+      <p class="text-muted">Or let Learn pick what to practice for you.</p>
+      <button class="action" onclick={() => switchMode("learn")}
+        >Start Learn</button
+      >
+    </div>
   {/if}
 {:else}
   <PracticeCard
