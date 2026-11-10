@@ -2,9 +2,14 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   HITS_TO_KNOW,
+  currentList,
   introduce,
   kanaList,
+  knownCount,
+  LEARNING_WEIGHT,
   learningCount,
+  learnWeight,
+  MIN_KNOWN_WEIGHT,
   recordProgress,
   type List,
   type ListId,
@@ -192,4 +197,43 @@ describe("kanaList", () => {
       expect(JSON.parse(readFileSync(file, "utf8"))).toEqual(kanaList(script));
     },
   );
+});
+
+describe("learnWeight", () => {
+  const known = (streak: number) => ({
+    state: "known" as const,
+    streak,
+    introducedAt: 0,
+  });
+
+  it("draws learning items the most", () => {
+    expect(learnWeight({ state: "learning", streak: 2, introducedAt: 0 })).toBe(
+      LEARNING_WEIGHT,
+    );
+    expect(learnWeight(known(3))).toBeLessThan(LEARNING_WEIGHT);
+  });
+
+  it("halves a known item with each hit, but never drops it", () => {
+    expect(learnWeight(known(4))).toBe(learnWeight(known(3)) / 2);
+    expect(learnWeight(known(40))).toBe(MIN_KNOWN_WEIGHT);
+  });
+});
+
+describe("currentList", () => {
+  const path = [list("hiragana", [2]), list("katakana", [2])];
+
+  it("is the first list before anything was introduced", () => {
+    expect(currentList(path, {})?.id).toBe("hiragana");
+  });
+
+  it("is the latest list with introduced items, and counts its known ones", () => {
+    const progress: Progress = {};
+    introduce(path, progress, 0);
+    know(progress, ["hiragana:0.0", "hiragana:0.1"]);
+    introduce(path, progress, 0);
+    know(progress, ["katakana:0.0"]);
+    const current = currentList(path, progress);
+    expect(current?.id).toBe("katakana");
+    expect(current && knownCount(current, progress)).toBe(1);
+  });
 });

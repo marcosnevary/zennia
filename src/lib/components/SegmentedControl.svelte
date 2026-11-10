@@ -7,7 +7,8 @@
     onchange,
     label,
   }: {
-    options: { id: T; label: string; icon: Component }[];
+    /** Options without an icon show their label instead. */
+    options: { id: T; label: string; icon?: Component }[];
     value: T;
     onchange: (value: T) => void;
     label: string;
@@ -54,18 +55,23 @@
       bind:this={buttons[i]}
       type="button"
       class={[
-        "z-10 w-10 bg-transparent p-0",
+        "z-10 bg-transparent",
+        Icon ? "w-10 p-0" : "px-4 text-sm",
         checked ? "text-on-action" : "text-muted hover:text-ink",
       ]}
       role="radio"
       aria-checked={checked}
-      aria-label={option.label}
-      title={option.label}
+      aria-label={Icon ? option.label : undefined}
+      title={Icon ? option.label : undefined}
       tabindex={checked ? 0 : -1}
       onclick={() => onchange(option.id)}
       {onkeydown}
     >
-      <Icon />
+      {#if Icon}
+        <Icon />
+      {:else}
+        {option.label}
+      {/if}
     </button>
   {/each}
 </div>

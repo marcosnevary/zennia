@@ -4,9 +4,18 @@ Practice draws an item, checks what the user typed and records the result. Stats
 
 The session is in `src/lib/data/practice-session.ts` and the rules of each kind of item in `src/lib/data/practice-modes.ts`. Words and kana are drawn together, and each item is weighted, checked and recorded by the rules of its kind.
 
+## Modes
+
+A segmented control at the top of Practice switches between two modes, on the same practice card:
+
+- **Learn**: the app leads through the lists of the path and decides what is practiced ([Learn](#learn)).
+- **Free practice**: the user's own pool, described below.
+
+Practice opens in the mode it was left in (`practiceMode`), and in Learn for someone who never chose. Each mode keeps its own session score, while an answer counts in the item's lifetime tally in both.
+
 ## What is drawn
 
-The pool is the active words of the Vocabulary tab and the kana chosen in the Kana tab. Until the user chooses, the kana are the basic hiragana, everything before the dakuten block.
+In Free practice, the pool is the active words of the Vocabulary tab and the kana chosen in the Kana tab. Until the user chooses, the kana are the basic hiragana, everything before the dakuten block.
 
 With an empty pool, Practice links to both tabs.
 
@@ -30,9 +39,13 @@ A never-answered item gets the top weight of 5, and no item drops to zero. Low a
 | 1 answer, right        | 0.57   |
 | 10 answers, all right  | 0.51   |
 
-## Learn schedule
+## Learn
 
-Learn leads through the lists of the path, Hiragana, then Katakana, then N5, and decides when each item enters (`src/lib/data/learn.ts`). Practice doesn't offer Learn yet.
+Learn leads through the lists of the path, Hiragana, then Katakana, then N5, and decides when each item enters (`src/lib/data/learn.ts`). Only the kana lists exist so far. The lists load the first time Learn opens (`src/lib/data/lists.ts`), and the first groups enter then.
+
+Above the card, Learn shows the latest list with introduced items and how many of its items are `known`, such as "Hiragana · 12 of 107 known". When an answer starts the next list, a line says so until the next answer.
+
+### Schedule
 
 An item with no progress is new; once introduced it is `learning`, and it becomes `known` after 3 hits in a row (`HITS_TO_KNOW`). A miss, `almost` included, resets the streak, and a `known` item goes back to `learning`.
 
@@ -43,6 +56,10 @@ An item with no progress is new; once introduced it is `learning`, and it become
 The kana lists, `static/lists/hiragana.json` and `katakana.json`, hold every kana of the Kana tab in its order: the basic rows, then dakuten, then combinations, one row per group. They are generated from the tables in `src/lib/core/kana.ts` ([rebuild](integrations.md#bundled-data)), and a test fails when they drift apart. An item's key is `kana:<script>:<hiragana>`, such as `kana:katakana:か`.
 
 The user never picks what enters nor says what they already know: whoever knows an item gets it right in a row and it becomes `known`. The numbers are a starting point to tune with real use.
+
+### Draw
+
+Learn draws from the introduced items, weighted by their progress rather than their lifetime tally (`learnWeight`). A `learning` item has the top weight of 5, the same as a never-answered item in Free practice. A `known` item starts at half of that and halves again with each further hit in a row, down to 0.1, so it keeps coming back for review. An answer saves the progress of only the items it changed, the answered one and any that entered.
 
 ## Typing in kana
 

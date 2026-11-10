@@ -1,7 +1,7 @@
 import { kanaKey, type KanaScript } from "#lib/core/kana.ts";
 import type { Stats, Tally, Word } from "#lib/core/types.ts";
 import {
-  PRACTICE_MODE_IDS,
+  PRACTICE_MODES,
   type ItemProgress,
   type Progress,
 } from "#lib/data/learn.ts";
@@ -206,7 +206,7 @@ export function settingsFromRow(row: SettingsRow | null): Settings {
     showResultRomaji: row.show_result_romaji,
     practiceMode: oneOf(
       row.practice_mode,
-      PRACTICE_MODE_IDS,
+      PRACTICE_MODES.map((m) => m.id),
       DEFAULT_SETTINGS.practiceMode,
     ),
   };
