@@ -1,3 +1,5 @@
+import { KANA_SECTIONS, kanaKey, type KanaScript } from "#lib/core/kana.ts";
+
 /** The lists of the Learn path, in order: finishing one opens the next. */
 export const PATH = ["hiragana", "katakana", "n5"] as const;
 
@@ -12,6 +14,24 @@ export interface ListItem {
 export interface List {
   id: ListId;
   items: ListItem[];
+}
+
+/** Identifies a kana item of a list, e.g. "kana:katakana:か". */
+export function kanaItemKey(script: KanaScript, hiragana: string): string {
+  return `kana:${kanaKey(script, hiragana)}`;
+}
+
+/** Every kana of the Kana tab, in its order, one row per group. */
+export function kanaList(script: KanaScript): List {
+  const rows = KANA_SECTIONS.flatMap((s) => s.rows);
+  return {
+    id: script,
+    items: rows.flatMap((row, group) =>
+      row.cells
+        .filter((c): c is string => c !== null)
+        .map((hiragana) => ({ key: kanaItemKey(script, hiragana), group })),
+    ),
+  };
 }
 
 /** An item with no progress is new. */

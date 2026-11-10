@@ -40,6 +40,8 @@ An item with no progress is new; once introduced it is `learning`, and it become
 - When a list has no new items left, the next list starts, and `introduce` names it so the screen can say so. Items still `learning` from the finished list keep counting, so they mix with the first groups of the next one.
 - At the end of the path nothing more enters.
 
+The kana lists, `static/lists/hiragana.json` and `katakana.json`, hold every kana of the Kana tab in its order: the basic rows, then dakuten, then combinations, one row per group. They are generated from the tables in `src/lib/core/kana.ts` ([rebuild](integrations.md#bundled-data)), and a test fails when they drift apart. An item's key is `kana:<script>:<hiragana>`, such as `kana:katakana:か`.
+
 The user never picks what enters nor says what they already know: whoever knows an item gets it right in a row and it becomes `known`. The numbers are a starting point to tune with real use.
 
 ## Typing in kana
@@ -131,6 +133,8 @@ The Stats tab lists one row per answered word or kana, and sums every tally at t
 - Search and tag filters work as in the [Vocabulary list](vocabulary.md#search). A word shows its tags, and a kana its script as a system tag, which isn't stored and can't be edited.
 
 ## Decisions
+
+- **Dakuten and combinations are in the same list as the basic kana.** Nearly every N5 word needs them, so the path stays Hiragana, Katakana, N5, and each script is done in one go.
 
 - **`almost` counts as an error.** Relaxing this needs a decision from the user.
 - **Kana have no `almost`.** Single sounds have no vowel-length ambiguity.

@@ -70,6 +70,8 @@ Two generated files are committed in `static/`. Both are big, so each is fetched
 
 The dictionary has one row per common reading. Each row takes the first sense that applies to the reading and up to three of its glosses. The written form is its kanji spelling, preferring a common one, or the kana when the word has no kanji or JMdict marks the sense as usually written in kana.
 
+The Learn lists in `static/lists/` are generated too. The kana lists come from the tables of the Kana tab, so they have no outside source, and `node scripts/build-kana-lists.ts` rebuilds them.
+
 The Add from romaji dialog credits JMdict and the printed sheet credits KanjiVG, as their licenses require.
 
 ## Setup

@@ -1,7 +1,9 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   HITS_TO_KNOW,
   introduce,
+  kanaList,
   learningCount,
   recordProgress,
   type List,
@@ -148,4 +150,46 @@ describe("recordProgress", () => {
     recordProgress(progress, "a", true);
     expect(progress).toEqual({});
   });
+});
+
+describe("kanaList", () => {
+  it("has every kana of the Kana tab, one row per group", () => {
+    const { items } = kanaList("hiragana");
+    expect(items).toHaveLength(107);
+    expect(items.slice(0, 6)).toEqual([
+      { key: "kana:hiragana:あ", group: 0 },
+      { key: "kana:hiragana:い", group: 0 },
+      { key: "kana:hiragana:う", group: 0 },
+      { key: "kana:hiragana:え", group: 0 },
+      { key: "kana:hiragana:お", group: 0 },
+      { key: "kana:hiragana:か", group: 1 },
+    ]);
+    expect(items.filter((i) => i.group === 7).map((i) => i.key)).toEqual([
+      "kana:hiragana:や",
+      "kana:hiragana:ゆ",
+      "kana:hiragana:よ",
+    ]);
+  });
+
+  it("puts dakuten after the basic kana and combinations last", () => {
+    const keys = kanaList("katakana").items.map((i) => i.key);
+    expect(keys.indexOf("kana:katakana:ん")).toBeLessThan(
+      keys.indexOf("kana:katakana:が"),
+    );
+    expect(keys.indexOf("kana:katakana:ぽ")).toBeLessThan(
+      keys.indexOf("kana:katakana:きゃ"),
+    );
+    expect(keys.at(-1)).toBe("kana:katakana:ぴょ");
+  });
+
+  it.each(["hiragana", "katakana"] as const)(
+    "matches static/lists/%s.json (rebuild with node scripts/build-kana-lists.ts)",
+    (script) => {
+      const file = new URL(
+        `../../../static/lists/${script}.json`,
+        import.meta.url,
+      );
+      expect(JSON.parse(readFileSync(file, "utf8"))).toEqual(kanaList(script));
+    },
+  );
 });
