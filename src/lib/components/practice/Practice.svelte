@@ -14,6 +14,7 @@
     mixedMode,
     pronouncedOf,
     rightAnswer,
+    typesInKana,
   } from "#lib/data/practice-modes.ts";
   import {
     nextRound,
@@ -182,6 +183,7 @@
     answers={app.practice.answers}
     {askReading}
     {askMeaning}
+    kanaInput={typesInKana(current)}
     bind:answer
     bind:inputEl
     bind:meaningAnswer

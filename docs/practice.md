@@ -30,6 +30,14 @@ A never-answered item gets the top weight of 5, and no item drops to zero. Low a
 | 1 answer, right        | 0.57   |
 | 10 answers, all right  | 0.51   |
 
+## Typing in kana
+
+For a word with kanji, the romaji field shows what is typed as kana (`src/lib/core/kana-input.ts`), while the check still gets the romaji. Every spelling the check accepts keeps working, such as `ti` for ティ, shown as ち.
+
+- A final `n` stays romaji until the next letter tells ん from な, and a final `nn` shows as ん.
+- A kana and a word written only in kana keep the romaji as typed: their prompt is already kana, so the field could be matched against it before Check.
+- Typing and deleting at the end keep the romaji. After any other edit, and for kana typed with a Japanese keyboard, the field's text is kept from the first changed kana on, and the check reads it as kana.
+
 ## Answer checking
 
 ### Reading
@@ -115,4 +123,5 @@ The Stats tab lists one row per answered word or kana, and sums every tally at t
 - **Practice has no controls for what it includes.** A separate practice scope was a second place to decide this, on top of the active words and the kana grid. To narrow a session, activate only the words wanted.
 - **The focus lives in Settings.** It is a preference, not part of a session.
 - **Practice fonts are opt-in and self-hosted.** Japanese fonts are megabytes each, so nobody downloads them without asking. Fontsource keeps them free and off third-party servers, like Geist.
+- **The romaji field keeps the romaji behind the kana it shows.** wanakana's own input binding replaces the text with kana, so the check would lose spellings it accepts (`ti` for ティ), and its IME mode reads the Hepburn `minna` as みんあ, though that is the romaji the app shows.
 - **A correct answer is marked with a circle.** This is the maru (○) Japan uses for "correct", where a check mark can read as "wrong". The check mark stays for actions such as Check and Save.
