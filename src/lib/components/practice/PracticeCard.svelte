@@ -26,6 +26,7 @@
     answers,
     askReading = true,
     askMeaning = false,
+    showRomaji = true,
     kanaInput = false,
     answer = $bindable(),
     inputEl = $bindable(),
@@ -57,6 +58,8 @@
     askReading?: boolean;
     /** Whether the meaning field is shown */
     askMeaning?: boolean;
+    /** Whether the result shows the romaji below the answer */
+    showRomaji?: boolean;
     /** Whether the romaji field shows what is typed as kana, while `answer` keeps the romaji */
     kanaInput?: boolean;
     answer: string;
@@ -130,7 +133,7 @@
     >
       {prompt}
     </p>
-    <ResultPanel {verdict} answer={rightAnswer} {note} {onplay} />
+    <ResultPanel {verdict} answer={rightAnswer} {note} {showRomaji} {onplay} />
   </div>
 
   <form class="flex gap-2" {onsubmit}>

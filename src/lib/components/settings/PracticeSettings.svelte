@@ -41,6 +41,19 @@
   </SettingRow>
 
   <SettingRow
+    title="Show romaji in the result"
+    description="Turn it off once you read kana without it."
+  >
+    <div class="flex sm:justify-end">
+      <Switch
+        checked={app.settings.showResultRomaji}
+        onchange={() => app.setShowResultRomaji(!app.settings.showResultRomaji)}
+        label="Show romaji in the result"
+      />
+    </div>
+  </SettingRow>
+
+  <SettingRow
     title="Play sound effects"
     description="Hear a sound for a correct or incorrect answer."
   >

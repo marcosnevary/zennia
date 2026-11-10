@@ -77,7 +77,7 @@ A blank answer is not checked. Only `correct` counts as a hit: `almost` is a mis
 
 ## Feedback
 
-The result shows the written form with furigana above what isn't hiragana and romaji below each run. Romaji is always derived from the reading, never saved.
+The result shows the written form with furigana above what isn't hiragana and romaji below each run. Romaji is always derived from the reading, never saved. **Show romaji in the result**, on by default in Settings, can hide it for learners who read kana without it; screen readers still get it, and the result area is a line shorter.
 
 The verdict is told by the panel's color. An `almost` also says that only the length of a vowel differs, on a line the panel always keeps room for, so the prompt area doesn't resize.
 
