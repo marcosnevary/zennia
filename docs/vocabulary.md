@@ -18,6 +18,13 @@ The add form, Add from romaji and every import go through `mergeWords`, which on
 
 - When the word already exists, a different meaning is appended after `; `, and the tags are united. The add form says so under its button, because the list gains no row.
 - An incoming word with the id of an existing but different word counts as already existing.
+- Adding a word that only a list brought makes it the user's (`mine`), and that counts as a change too.
+
+## List words
+
+A word is one record with one tally, whether the user added it, a [Learn](practice.md#learn) list brought it, or both. When Learn introduces a word of the N5 list that the user doesn't have, it enters through `mergeWords` with `mine` false and turned off, so it stays out of Free practice. A word the user already has is left exactly as it is, and Learn practices it too, whether or not it is on. If a list word Learn has introduced is deleted, Learn adds it back the next time it introduces anything.
+
+Which list a word comes from isn't stored: it is found by its written form and reading in the list files.
 
 The edit dialog refuses a change that would match another word.
 

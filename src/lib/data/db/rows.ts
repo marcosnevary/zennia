@@ -19,6 +19,7 @@ export interface WordRow {
   hiragana: string;
   meaning: string;
   disabled: boolean;
+  mine: boolean;
   activated_at: string;
   tags: string[];
   created_at: string;
@@ -83,6 +84,7 @@ export function wordFromRow(row: WordRow): Word {
     hiragana: row.hiragana,
     meaning: row.meaning,
     disabled: row.disabled,
+    mine: row.mine,
     tags: row.tags,
     activatedAt: Date.parse(row.activated_at),
     createdAt: Date.parse(row.created_at),
@@ -97,6 +99,7 @@ export function wordToRow(word: Word, userId: string) {
     hiragana: word.hiragana,
     meaning: word.meaning,
     disabled: word.disabled,
+    mine: word.mine,
     activated_at: new Date(word.activatedAt).toISOString(),
     tags: word.tags,
     created_at: new Date(word.createdAt ?? Date.now()).toISOString(),

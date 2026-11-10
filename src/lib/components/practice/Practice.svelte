@@ -41,7 +41,7 @@
   const learning = $derived(app.settings.practiceMode === "learn");
   const mode = $derived(
     learning
-      ? learnMode(app.progress, app.stats, focus, app.recorder)
+      ? learnMode(app.progress, app.words, app.stats, focus, app.recorder)
       : mixedMode(app.words, app.kanaSelection, app.stats, focus, app.recorder),
   );
   const session = $derived(learning ? app.learn : app.practice);
@@ -223,6 +223,13 @@
       </p>
       <ListMenu {list} />
     </div>
+    {#if list.id === "n5"}
+      <!-- the licenses of the list (CC BY) and of the meanings (CC BY-SA) both ask for credit -->
+      <p class="text-xs text-muted">
+        Unofficial JLPT N5 list by Jonathan Waller (tanos.co.uk), CC BY.
+        Meanings: JMdict (EDRDG), CC BY-SA 4.0.
+      </p>
+    {/if}
   {/if}
   {#if learning && app.startedList}
     <p class="text-sm" role="status">

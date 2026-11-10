@@ -84,6 +84,7 @@ export function makeWord({
     hiragana: hiragana.trim(),
     meaning: meaning.trim(),
     disabled: false,
+    mine: true,
     activatedAt: Date.now(),
     createdAt: Date.now(),
     tags: cleanTags(tags),
@@ -209,6 +210,7 @@ export function sanitizeWords(raw: unknown): SanitizeResult {
       hiragana,
       meaning,
       disabled: o.disabled === true,
+      mine: true,
       activatedAt:
         typeof o.activatedAt === "number" && Number.isFinite(o.activatedAt)
           ? o.activatedAt
@@ -287,13 +289,20 @@ export function mergeWords(current: Word[], incoming: Word[]): MergeResult {
     if (at !== undefined) {
       const meaning = joinMeanings(words[at].meaning, w.meaning);
       const tags = cleanTags([...words[at].tags, ...w.tags]);
-      if (meaning === null && tags.length === words[at].tags.length)
+      // adding a word that only a list brought makes it the user's
+      const mine = words[at].mine || w.mine;
+      if (
+        meaning === null &&
+        tags.length === words[at].tags.length &&
+        mine === words[at].mine
+      )
         duplicates++;
       else {
         words[at] = {
           ...words[at],
           meaning: meaning ?? words[at].meaning,
           tags,
+          mine,
         };
         updated++;
       }

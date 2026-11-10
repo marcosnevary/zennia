@@ -16,6 +16,7 @@ const word = (
   hiragana: "ひ",
   meaning: id,
   disabled: false,
+  mine: true,
   activatedAt: createdAt,
   tags: [],
   createdAt,
@@ -444,5 +445,47 @@ describe("Learn", () => {
       "delete progress kana:hiragana:0,kana:hiragana:1,kana:hiragana:2,kana:hiragana:3,kana:hiragana:4,kana:hiragana:5",
       "progress kana:hiragana:0,kana:hiragana:1,kana:hiragana:2,kana:hiragana:3,kana:hiragana:4",
     ]);
+  });
+});
+
+describe("List words", () => {
+  const n5: List = {
+    id: "n5",
+    items: ["a", "b", "c", "d", "e", "f"].map((id, i) => ({
+      key: `word:日${id}:ひ`,
+      group: Math.floor(i / 5),
+      japanese: `日${id}`,
+      hiragana: "ひ",
+      meaning: `list ${id}`,
+    })),
+  };
+
+  it("adds the words Learn introduces, out of Free practice, and leaves the user's own as they are", async () => {
+    const { app } = await ready({ words: [word("a", 1)] });
+    app.startLearn([n5]);
+    const byJapanese = Object.fromEntries(
+      app.words.map((w) => [w.japanese, w]),
+    );
+    expect(app.words).toHaveLength(5);
+    expect(byJapanese["日a"]).toMatchObject({
+      id: "a",
+      meaning: "a",
+      mine: true,
+      disabled: false,
+    });
+    expect(byJapanese["日b"]).toMatchObject({
+      meaning: "list b",
+      mine: false,
+      disabled: true,
+    });
+    expect(byJapanese["日f"]).toBeUndefined();
+  });
+
+  it("adds a list word back when it was deleted", async () => {
+    const { app } = await ready();
+    app.startLearn([n5]);
+    app.setWords(app.words.filter((w) => w.japanese !== "日b"));
+    app.recordLearn("word:日c:ひ", true);
+    expect(app.words.some((w) => w.japanese === "日b")).toBe(true);
   });
 });

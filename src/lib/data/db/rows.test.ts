@@ -18,6 +18,7 @@ const word: Word = {
   hiragana: "たべる",
   meaning: "to eat",
   disabled: false,
+  mine: true,
   activatedAt: Date.UTC(2026, 0, 2),
   createdAt: Date.UTC(2026, 0, 1),
   tags: ["N5"],
