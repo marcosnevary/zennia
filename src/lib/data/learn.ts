@@ -1,5 +1,10 @@
 import { KANA_SECTIONS, kanaKey, type KanaScript } from "#lib/core/kana.ts";
 
+/** What Practice opens in: Learn, where the app decides, or Free practice, with the user's own pool. */
+export type PracticeModeId = "learn" | "free";
+
+export const PRACTICE_MODE_IDS: PracticeModeId[] = ["learn", "free"];
+
 /** The lists of the Learn path, in order: finishing one opens the next. */
 export const PATH = ["hiragana", "katakana", "n5"] as const;
 
