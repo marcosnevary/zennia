@@ -79,6 +79,8 @@ A blank answer is not checked. Only `correct` counts as a hit: `almost` is a mis
 
 The result shows the written form with furigana above what isn't hiragana and romaji below each run. Romaji is always derived from the reading, never saved.
 
+The verdict is told by the panel's color. An `almost` also says that only the length of a vowel differs, on a line the panel always keeps room for, so the prompt area doesn't resize.
+
 Furigana (`src/lib/core/furigana.ts`) splits the written form into runs of hiragana and of anything else, then uses the hiragana runs as anchors to find each other run's part of the reading. When they don't fit the reading, the whole word gets it.
 
 ## Answer sound

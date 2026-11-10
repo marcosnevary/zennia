@@ -58,13 +58,18 @@
   {#if a.meaning !== undefined}<p class="mt-2 text-lg">{a.meaning}</p>{/if}
 {/snippet}
 
+{#snippet explanation(text: string)}
+  <p class="mt-2 text-sm">{text}</p>
+{/snippet}
+
 <!-- both are items of the grid cell that holds the prompt, which they cover -->
 <!-- an invisible verdict with every part keeps the cell as tall as a verdict, so the prompt area never resizes -->
 <div class="invisible col-start-1 row-start-1 p-4" aria-hidden="true">
   {@render answerLines(TALLEST)}
+  {@render explanation("\u00a0")}
 </div>
 {#if verdict}
-  <!-- the verdict is told by the panel's color alone; the words are left for screen readers -->
+  <!-- the verdict is told by the panel's color, and its word is left for screen readers -->
   <div
     class="col-start-1 row-start-1 flex flex-col justify-center rounded-panel p-4 text-ink {VERDICT_STYLES[
       verdict
@@ -74,10 +79,13 @@
   >
     <p class="sr-only">
       {#if verdict === "correct"}Correct.
-      {:else if verdict === "almost"}Almost: only the length of a vowel differs.
+      {:else if verdict === "almost"}Almost.
       {:else}Incorrect.{/if}
     </p>
     {@render answerLines(answer)}
+    {#if verdict === "almost"}
+      {@render explanation("Only the length of a vowel differs.")}
+    {/if}
     {#if note}<p class="sr-only">{note}</p>{/if}
   </div>
   <!-- outside the status, so its label isn't announced with the verdict; a mouse click leaves the focus on the page,
