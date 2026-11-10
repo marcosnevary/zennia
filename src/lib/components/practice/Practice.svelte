@@ -1,6 +1,7 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
   import { untrack } from "svelte";
+  import ListMenu from "./ListMenu.svelte";
   import PracticeCard from "./PracticeCard.svelte";
   import { ANSWER_SOUND_MS, AnswerSound } from "./answer-sound.ts";
   import { fontReady, loadFonts } from "./fonts.ts";
@@ -215,10 +216,13 @@
     label="Practice mode"
   />
   {#if learning && list}
-    <p class="text-sm text-muted">
-      {LIST_LABELS[list.id]} · {knownCount(list, app.progress)} of {list.items
-        .length} known
-    </p>
+    <div class="flex items-center gap-1">
+      <p class="text-sm text-muted">
+        {LIST_LABELS[list.id]} · {knownCount(list, app.progress)} of {list.items
+          .length} known
+      </p>
+      <ListMenu {list} />
+    </div>
   {/if}
   {#if learning && app.startedList}
     <p class="text-sm" role="status">

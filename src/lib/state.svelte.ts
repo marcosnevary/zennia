@@ -275,6 +275,18 @@ export class App {
     this.#introduce([key]);
   }
 
+  /** Makes every item of the list new again; the words and the lifetime tallies stay. */
+  restartList(list: List): void {
+    const items = list.items
+      .map((item) => item.key)
+      .filter((key) => this.progress[key]);
+    if (!items.length) return;
+    for (const key of items) delete this.progress[key];
+    this.startedList = null;
+    this.#persist(() => this.#repo.deleteProgress(items));
+    this.#introduce([]);
+  }
+
   // saves the answered item along with the ones that entered, and keeps the notice for a list that began
   #introduce(changed: string[]): void {
     const path = this.path;

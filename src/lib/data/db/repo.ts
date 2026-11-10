@@ -51,6 +51,8 @@ export interface Repo {
   resetStats(): Promise<void>;
   /** Saves the progress of the given items, which should be only the ones that changed. */
   saveProgress(progress: Progress): Promise<void>;
+  /** Deletes the progress of the given items, which become new again. */
+  deleteProgress(items: string[]): Promise<void>;
   saveSettings(patch: Partial<Settings>): Promise<void>;
   account(): Promise<Account>;
   updateProfile(change: ProfileChange): Promise<void>;
@@ -193,6 +195,19 @@ export function createRepo(getDb: () => Db): Repo {
       const { db, userId } = await open();
       unwrap(await db.from("word_stats").delete().eq("user_id", userId));
       unwrap(await db.from("kana_stats").delete().eq("user_id", userId));
+    },
+
+    async deleteProgress(items) {
+      const { db, userId } = await open();
+      for (const chunk of chunks(items, DELETE_CHUNK)) {
+        unwrap(
+          await db
+            .from("list_progress")
+            .delete()
+            .eq("user_id", userId)
+            .in("item", chunk),
+        );
+      }
     },
 
     async saveProgress(progress) {
