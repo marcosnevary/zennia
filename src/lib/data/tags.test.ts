@@ -70,6 +70,7 @@ describe("tag operations", () => {
     hiragana: "あ",
     meaning: "",
     disabled: false,
+    mine: true,
     activatedAt: 0,
     tags,
   });

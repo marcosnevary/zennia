@@ -83,6 +83,18 @@ describe("sanitizeWords and mergeWords", () => {
     expect(r.duplicates).toBe(1);
     expect(r.words).toHaveLength(2);
   });
+  it("makes a word that only a list brought the user's when they add it", () => {
+    const [listWord] = sanitizeWords([
+      { id: "1", japanese: "犬", hiragana: "いぬ", meaning: "dog" },
+    ]).words;
+    const r = mergeWords(
+      [{ ...listWord, mine: false }],
+      sanitizeWords([{ japanese: "犬", hiragana: "いぬ", meaning: "dog" }])
+        .words,
+    );
+    expect(r.updated).toBe(1);
+    expect(r.words[0]).toMatchObject({ id: "1", mine: true, meaning: "dog" });
+  });
 });
 
 describe("sortWords", () => {
@@ -98,6 +110,7 @@ describe("sortWords", () => {
     hiragana,
     meaning,
     disabled,
+    mine: true,
     activatedAt: 0,
     tags: [],
   });
@@ -171,6 +184,7 @@ describe("setDisabled", () => {
     hiragana: "いぬ",
     meaning: "",
     disabled: true,
+    mine: true,
     activatedAt: 0,
     tags: [],
   };
@@ -178,6 +192,7 @@ describe("setDisabled", () => {
   it("stamps the activation time when a word is activated", () => {
     expect(setDisabled(base, false, 500)).toMatchObject({
       disabled: false,
+      mine: true,
       activatedAt: 500,
     });
   });
@@ -187,6 +202,7 @@ describe("setDisabled", () => {
     expect(setDisabled(on, false, 500).activatedAt).toBe(100);
     expect(setDisabled(on, true, 500)).toMatchObject({
       disabled: true,
+      mine: true,
       activatedAt: 100,
     });
   });
@@ -258,6 +274,7 @@ describe("makeWord and updateWord", () => {
       hiragana: "たべる",
       meaning: "to eat",
       disabled: false,
+      mine: true,
     });
     expect(a.id).toBeTruthy();
     expect(makeWord(typed).id).not.toBe(a.id);
@@ -273,6 +290,7 @@ describe("makeWord and updateWord", () => {
         tags: [],
       }),
       disabled: true,
+      mine: true,
     };
     expect(updateWord(word, typed)).toEqual({
       id: word.id,
@@ -280,6 +298,7 @@ describe("makeWord and updateWord", () => {
       hiragana: "たべる",
       meaning: "to eat",
       disabled: true,
+      mine: true,
       activatedAt: word.activatedAt,
       createdAt: word.createdAt,
       tags: [],
@@ -300,6 +319,7 @@ describe("searchWords", () => {
     hiragana,
     meaning,
     disabled: false,
+    mine: true,
     activatedAt: 0,
     tags: [],
   });

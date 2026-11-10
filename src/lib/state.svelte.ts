@@ -8,6 +8,7 @@ import { PopupBlockedError, type GoogleToken } from "./data/db/google";
 import type { Repo, Stored } from "./data/db/repo";
 import {
   introduce,
+  missingWords,
   recordProgress,
   type List,
   type ListId,
@@ -35,6 +36,7 @@ import {
   type ThemePreference,
 } from "./data/theme";
 import {
+  makeWord,
   mergeWords,
   type MergeResult,
   type SortDirection,
@@ -294,12 +296,25 @@ export class App {
     const { keys, started } = introduce(path, this.progress, Date.now());
     const next = started.filter((id) => id !== path[0].id).at(-1);
     if (next) this.startedList = next;
+    this.#addListWords(path);
     const saved = [...changed, ...keys];
     if (!saved.length) return;
     const patch: Progress = Object.fromEntries(
       saved.map((key) => [key, $state.snapshot(this.progress[key])]),
     );
     this.#persist(() => this.#repo.saveProgress(patch));
+  }
+
+  // a word the user already has stays as it is and counts for the list too; only missing ones are added, kept out of Free practice
+  #addListWords(path: List[]): void {
+    const missing = missingWords(path, this.progress, this.words);
+    if (!missing.length) return;
+    const incoming = missing.map(({ japanese, hiragana, meaning }) => ({
+      ...makeWord({ japanese, hiragana, meaning, tags: [] }),
+      disabled: true,
+      mine: false,
+    }));
+    this.setWords(mergeWords(this.words, incoming).words);
   }
 
   resetStats(): void {

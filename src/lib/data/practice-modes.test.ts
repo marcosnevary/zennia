@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  itemKeyOf,
   kanaMode as buildKanaMode,
   learnMode,
   mixedMode as buildMixedMode,
@@ -10,7 +11,7 @@ import {
   type Recorder,
   type WordsFocus,
 } from "./practice-modes";
-import type { Progress } from "./learn";
+import { wordItemKey, type Progress } from "./learn";
 import { emptyStats, recordAnswer, recordKana } from "./stats";
 import { kanaKey } from "#lib/core/kana.ts";
 import type { Stats, Word } from "#lib/core/types.ts";
@@ -45,6 +46,7 @@ const word = (id: string, extra: Partial<Word> = {}): Word => ({
   hiragana: "おう",
   meaning: "",
   disabled: false,
+  mine: true,
   activatedAt: 0,
   tags: [],
   ...extra,
@@ -296,6 +298,7 @@ describe("learnMode", () => {
   it("practices the introduced kana, learning ones first", () => {
     const mode = learnMode(
       progress,
+      [],
       emptyStats(),
       "reading",
       recorderOf(emptyStats()),
@@ -310,7 +313,7 @@ describe("learnMode", () => {
   it("records the lifetime tally and the Learn progress", () => {
     const stats = emptyStats();
     const learned: string[] = [];
-    const mode = learnMode(progress, stats, "reading", {
+    const mode = learnMode(progress, [], stats, "reading", {
       ...recorderOf(stats),
       learn: (key, hit) => learned.push(`${key} ${hit}`),
     });
@@ -321,5 +324,39 @@ describe("learnMode", () => {
       misses: 1,
     });
     expect(learned).toEqual(["kana:hiragana:あ false"]);
+  });
+});
+
+describe("learn words", () => {
+  it("practices the words Learn introduced, even out of Free practice", () => {
+    const word: Word = {
+      id: "w1",
+      japanese: "犬",
+      hiragana: "いぬ",
+      meaning: "dog",
+      disabled: true,
+      mine: false,
+      activatedAt: 0,
+      tags: [],
+    };
+    const other: Word = { ...word, id: "w2", japanese: "猫", hiragana: "ねこ" };
+    const progress: Progress = {
+      [wordItemKey("犬", "いぬ")]: {
+        state: "learning",
+        streak: 0,
+        introducedAt: 0,
+      },
+    };
+    const mode = learnMode(
+      progress,
+      [word, other],
+      emptyStats(),
+      "reading",
+      recorderOf(emptyStats()),
+    );
+    expect(mode.pool).toEqual([
+      { kind: "word", word: { ...word, disabled: false } },
+    ]);
+    expect(itemKeyOf(mode.pool[0])).toBe("word:犬:いぬ");
   });
 });

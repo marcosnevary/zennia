@@ -9,6 +9,7 @@ import {
 } from "#lib/core/kana.ts";
 import { checkMeaning } from "#lib/core/meaning.ts";
 import {
+  introducedWords,
   kanaItemKey,
   kanaKeyOfItem,
   learnWeight,
@@ -180,6 +181,7 @@ export function itemKeyOf(item: PracticeItem): string {
 /** Learn: the introduced items, weighted by their progress instead of their lifetime tally, which still counts. */
 export function learnMode(
   progress: Progress,
+  words: Word[],
   stats: Stats,
   focus: WordsFocus,
   recorder: Recorder,
@@ -187,7 +189,12 @@ export function learnMode(
   const kana = Object.keys(progress)
     .map(kanaKeyOfItem)
     .filter((key): key is string => key !== null);
-  const mixed = mixedMode([], kana, stats, focus, recorder);
+  // whether a word is in Free practice doesn't matter here: Learn practices every word it introduced
+  const learned = introducedWords(words, progress).map((w) => ({
+    ...w,
+    disabled: false,
+  }));
+  const mixed = mixedMode(learned, kana, stats, focus, recorder);
   return {
     ...mixed,
     weightOf: (item) => learnWeight(progress[itemKeyOf(item)]),

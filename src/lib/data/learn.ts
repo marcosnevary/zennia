@@ -1,4 +1,5 @@
 import { KANA_SECTIONS, kanaKey, type KanaScript } from "#lib/core/kana.ts";
+import type { Word } from "#lib/core/types.ts";
 
 /** What Practice opens in: Learn, where the app decides, or Free practice, with the user's own pool. */
 export type PracticeModeId = "learn" | "free";
@@ -50,6 +51,28 @@ export function wordItemKey(japanese: string, hiragana: string): string {
 /** The `kanaKey` of a kana item; null for a word. */
 export function kanaKeyOfItem(key: string): string | null {
   return key.startsWith("kana:") ? key.slice("kana:".length) : null;
+}
+
+export function isWordItem(item: ListItem): item is WordListItem {
+  return "japanese" in item;
+}
+
+/** The user's words that Learn has introduced, found by their written form and reading. */
+export function introducedWords(words: Word[], progress: Progress): Word[] {
+  return words.filter((w) => progress[wordItemKey(w.japanese, w.hiragana)]);
+}
+
+/** The list words Learn has introduced that the user's words lack, either new or deleted since. */
+export function missingWords(
+  path: List[],
+  progress: Progress,
+  words: Word[],
+): WordListItem[] {
+  const have = new Set(words.map((w) => wordItemKey(w.japanese, w.hiragana)));
+  return path
+    .flatMap((list) => list.items)
+    .filter(isWordItem)
+    .filter((item) => progress[item.key] && !have.has(item.key));
 }
 
 /** Every kana of the Kana tab, in its order, one row per group. */
