@@ -57,6 +57,15 @@ export function isWordItem(item: ListItem): item is WordListItem {
   return "japanese" in item;
 }
 
+/** The list of each word of the path's lists, by item key. */
+export function wordLists(path: List[]): Map<string, ListId> {
+  return new Map(
+    path.flatMap((list) =>
+      list.items.filter(isWordItem).map((item) => [item.key, list.id] as const),
+    ),
+  );
+}
+
 /** The user's words that Learn has introduced, found by their written form and reading. */
 export function introducedWords(words: Word[], progress: Progress): Word[] {
   return words.filter((w) => progress[wordItemKey(w.japanese, w.hiragana)]);

@@ -13,6 +13,7 @@ import {
   MIN_KNOWN_WEIGHT,
   recordProgress,
   wordItemKey,
+  wordLists,
   type List,
   type ListId,
   type Progress,
@@ -268,5 +269,22 @@ describe("currentList", () => {
     const current = currentList(path, progress);
     expect(current?.id).toBe("katakana");
     expect(current && knownCount(current, progress)).toBe(1);
+  });
+});
+
+describe("wordLists", () => {
+  it("maps each word of the path to its list, leaving kana out", () => {
+    const key = wordItemKey("会う", "あう");
+    const word: WordListItem = {
+      key,
+      group: 0,
+      japanese: "会う",
+      hiragana: "あう",
+      meaning: "to meet",
+    };
+    const n5: List = { id: "n5", items: [word] };
+    expect(wordLists([kanaList("hiragana"), n5])).toEqual(
+      new Map([[key, "n5"]]),
+    );
   });
 });
