@@ -1,7 +1,7 @@
 import { asset } from "$app/paths";
 import type { List } from "./learn";
 
-/** The files of the path's lists, in path order; N5 joins once `static/lists/n5.json` exists. */
+/** The files of the path's lists, in path order; N5 joins once Learn can bring its words into the user's words. */
 const FILES = ["lists/hiragana.json", "lists/katakana.json"] as const;
 
 async function loadList(file: (typeof FILES)[number]): Promise<List> {
