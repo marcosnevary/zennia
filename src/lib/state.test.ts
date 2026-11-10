@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Stats, Word } from "./core/types";
 import type { Repo, Stored } from "./data/db/repo";
+import type { List } from "./data/learn";
 import { DEFAULT_SETTINGS } from "./data/settings";
 import { emptyStats } from "./data/stats";
 import { App } from "./state.svelte";
@@ -365,5 +366,49 @@ describe("login", () => {
     await app.updateProfile({ name: "Ana" });
     expect(calls).toEqual(["profile Ana"]);
     expect(repo.account).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("Learn", () => {
+  const path: List[] = [
+    {
+      id: "hiragana",
+      items: [0, 1, 2, 3, 4, 5].map((i) => ({
+        key: `kana:hiragana:${i}`,
+        group: Math.floor(i / 5),
+      })),
+    },
+    { id: "katakana", items: [{ key: "kana:katakana:0", group: 0 }] },
+  ];
+
+  it("introduces the first group and saves it", async () => {
+    const { app, calls } = await ready();
+    app.startLearn(path);
+    await app.flush();
+    expect(Object.keys(app.progress)).toHaveLength(5);
+    expect(calls).toEqual([
+      "progress kana:hiragana:0,kana:hiragana:1,kana:hiragana:2,kana:hiragana:3,kana:hiragana:4",
+    ]);
+    expect(app.startedList).toBeNull();
+  });
+
+  it("saves only the answered item while enough items are learning", async () => {
+    const { app, calls } = await ready();
+    app.startLearn(path);
+    app.recordLearn("kana:hiragana:0", true);
+    await app.flush();
+    expect(calls.at(-1)).toBe("progress kana:hiragana:0");
+    expect(app.progress["kana:hiragana:0"].streak).toBe(1);
+  });
+
+  it("says when the next list starts", async () => {
+    const { app } = await ready();
+    app.startLearn(path);
+    for (let i = 0; i < 3; i++) app.recordLearn("kana:hiragana:0", true);
+    expect(app.progress["kana:hiragana:5"]).toBeDefined();
+    for (let i = 0; i < 3; i++) app.recordLearn("kana:hiragana:1", true);
+    expect(app.startedList).toBe("katakana");
+    app.recordLearn("kana:hiragana:2", true);
+    expect(app.startedList).toBeNull();
   });
 });

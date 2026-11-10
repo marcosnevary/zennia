@@ -3,12 +3,21 @@ import { KANA_SECTIONS, kanaKey, type KanaScript } from "#lib/core/kana.ts";
 /** What Practice opens in: Learn, where the app decides, or Free practice, with the user's own pool. */
 export type PracticeModeId = "learn" | "free";
 
-export const PRACTICE_MODE_IDS: PracticeModeId[] = ["learn", "free"];
+export const PRACTICE_MODES: { id: PracticeModeId; label: string }[] = [
+  { id: "learn", label: "Learn" },
+  { id: "free", label: "Free practice" },
+];
 
 /** The lists of the Learn path, in order: finishing one opens the next. */
 export const PATH = ["hiragana", "katakana", "n5"] as const;
 
 export type ListId = (typeof PATH)[number];
+
+export const LIST_LABELS: Record<ListId, string> = {
+  hiragana: "Hiragana",
+  katakana: "Katakana",
+  n5: "N5",
+};
 
 /** A kana or a word of a list. Items of a group are consecutive and enter Learn together. */
 export interface ListItem {
@@ -24,6 +33,16 @@ export interface List {
 /** Identifies a kana item of a list, e.g. "kana:katakana:か". */
 export function kanaItemKey(script: KanaScript, hiragana: string): string {
   return `kana:${kanaKey(script, hiragana)}`;
+}
+
+/** Identifies a word item of a list by its written form and reading, the identity `mergeWords` uses. */
+export function wordItemKey(japanese: string, hiragana: string): string {
+  return `word:${japanese}:${hiragana}`;
+}
+
+/** The `kanaKey` of a kana item; null for a word. */
+export function kanaKeyOfItem(key: string): string | null {
+  return key.startsWith("kana:") ? key.slice("kana:".length) : null;
 }
 
 /** Every kana of the Kana tab, in its order, one row per group. */
@@ -121,4 +140,31 @@ export function recordProgress(
   }
   item.streak++;
   if (item.streak >= HITS_TO_KNOW) item.state = "known";
+}
+
+/** Draw weight of a learning item, the top weight of the Free practice draw. */
+export const LEARNING_WEIGHT = 5;
+
+/** The lowest draw weight of a known item, so it keeps coming back for review. */
+export const MIN_KNOWN_WEIGHT = 0.1;
+
+/** Learning items come up most; a known item comes up half as often with each hit past `HITS_TO_KNOW`. */
+export function learnWeight(item: ItemProgress | undefined): number {
+  if (!item || item.state === "learning") return LEARNING_WEIGHT;
+  const past = item.streak - HITS_TO_KNOW + 1;
+  return Math.max(MIN_KNOWN_WEIGHT, LEARNING_WEIGHT / 2 ** past);
+}
+
+/** The latest list of the path with introduced items, which Learn shows the progress of. */
+export function currentList(path: List[], progress: Progress): List | null {
+  return (
+    path.findLast((list) => list.items.some((item) => progress[item.key])) ??
+    path[0] ??
+    null
+  );
+}
+
+export function knownCount(list: List, progress: Progress): number {
+  return list.items.filter((item) => progress[item.key]?.state === "known")
+    .length;
 }

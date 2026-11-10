@@ -10,24 +10,72 @@
     nextFont,
     type PracticeFontId,
   } from "#lib/data/practice-fonts.ts";
+  import SegmentedControl from "#lib/components/SegmentedControl.svelte";
   import {
+    currentList,
+    knownCount,
+    LIST_LABELS,
+    PRACTICE_MODES,
+    type PracticeModeId,
+  } from "#lib/data/learn.ts";
+  import { loadPath } from "#lib/data/lists.ts";
+  import {
+    learnMode,
     mixedMode,
     pronouncedOf,
     rightAnswer,
     typesInKana,
+    type PracticeItem,
   } from "#lib/data/practice-modes.ts";
   import {
     nextRound,
     submit as submitAnswer,
+    type Session,
   } from "#lib/data/practice-session.ts";
   import { getApp } from "#lib/state.svelte.ts";
 
   const app = getApp();
 
   const focus = $derived(app.settings.wordsFocus);
+  const learning = $derived(app.settings.practiceMode === "learn");
   const mode = $derived(
-    mixedMode(app.words, app.kanaSelection, app.stats, focus, app.recorder),
+    learning
+      ? learnMode(app.progress, app.stats, focus, app.recorder)
+      : mixedMode(app.words, app.kanaSelection, app.stats, focus, app.recorder),
   );
+  const session = $derived(learning ? app.learn : app.practice);
+
+  function setSession(next: Session<PracticeItem>) {
+    if (learning) app.learn = next;
+    else app.practice = next;
+  }
+
+  $effect(() => {
+    if (!learning) return;
+    loadPath().then(
+      (path) => app.startLearn(path),
+      () =>
+        app.toasts.show(
+          "Couldn't load the Learn lists. Check your connection and reload the page.",
+          { id: "lists" },
+        ),
+    );
+  });
+
+  // the first groups enter once the lists arrive, so the first item is drawn then
+  $effect(() => {
+    if (!session.current && mode.pool.length) untrack(draw);
+  });
+
+  const list = $derived(app.path && currentList(app.path, app.progress));
+
+  function switchMode(practiceMode: PracticeModeId) {
+    if (practiceMode === app.settings.practiceMode) return;
+    app.setPracticeMode(practiceMode);
+    answer = "";
+    meaningAnswer = "";
+    draw();
+  }
 
   let answer = $state("");
   let meaningAnswer = $state("");
@@ -35,7 +83,7 @@
   let meaningEl = $state<HTMLInputElement>();
 
   // the focus only applies to words: a kana is always answered by its reading
-  const current = $derived(app.practice.current);
+  const current = $derived(session.current);
   const askReading = $derived(current?.kind === "kana" || focus !== "meaning");
   const askMeaning = $derived(current?.kind === "word" && focus !== "reading");
 
@@ -85,7 +133,7 @@
   // the answer sound is short, so moving on lets it finish; only leaving Practice stops it
   $effect(() => () => answerSound.stop());
 
-  const outcome = $derived(app.practice.outcome);
+  const outcome = $derived(session.outcome);
   const verdict = $derived(outcome?.verdict ?? null);
 
   // the fields show the parts by color, so screen readers get them in words when both are practiced
@@ -104,10 +152,8 @@
   function submit(event: Event) {
     event.preventDefault();
     const advancing = verdict !== null;
-    app.practice = submitAnswer(
-      app.practice,
-      { reading: answer, meaning: meaningAnswer },
-      mode,
+    setSession(
+      submitAnswer(session, { reading: answer, meaning: meaningAnswer }, mode),
     );
     if (advancing) {
       drawFont();
@@ -117,7 +163,7 @@
     } else {
       inputEl?.blur();
       meaningEl?.blur();
-      const checked = app.practice.outcome;
+      const checked = session.outcome;
       if (!checked) return;
       if (playAnswerSound) answerSound.play(checked.verdict === "correct");
       if (playPronunciation)
@@ -151,7 +197,7 @@
   }
 
   function draw() {
-    app.practice = nextRound(app.practice, mode);
+    setSession(nextRound(session, mode));
     drawFont();
   }
 
@@ -161,12 +207,34 @@
 
 <svelte:window onkeydown={onWindowKeydown} />
 
+<div class="mt-6 flex flex-col items-center gap-2">
+  <SegmentedControl
+    options={PRACTICE_MODES}
+    value={app.settings.practiceMode}
+    onchange={switchMode}
+    label="Practice mode"
+  />
+  {#if learning && list}
+    <p class="text-sm text-muted">
+      {LIST_LABELS[list.id]} · {knownCount(list, app.progress)} of {list.items
+        .length} known
+    </p>
+  {/if}
+  {#if learning && app.startedList}
+    <p class="text-sm" role="status">
+      {LIST_LABELS[app.startedList]} starts now. Keep going!
+    </p>
+  {/if}
+</div>
+
 {#if !current}
-  <p class="mt-6 mb-4 text-muted">
-    Nothing to practice. Select kana in <a href={resolve("/kana")}>Kana</a> or
-    activate words in
-    <a href={resolve("/vocabulary")}>Vocabulary</a>.
-  </p>
+  {#if !learning}
+    <p class="mt-6 mb-4 text-muted">
+      Nothing to practice. Select kana in <a href={resolve("/kana")}>Kana</a> or
+      activate words in
+      <a href={resolve("/vocabulary")}>Vocabulary</a>.
+    </p>
+  {/if}
 {:else}
   <PracticeCard
     prompt={current.kind === "word"
@@ -179,8 +247,8 @@
     {note}
     readingVerdict={outcome?.reading ?? null}
     meaningVerdict={outcome?.meaning ?? null}
-    hits={app.practice.hits}
-    answers={app.practice.answers}
+    hits={session.hits}
+    answers={session.answers}
     {askReading}
     {askMeaning}
     showRomaji={app.settings.showResultRomaji}

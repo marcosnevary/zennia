@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   kanaMode as buildKanaMode,
+  learnMode,
   mixedMode as buildMixedMode,
   pronouncedOf,
   rightAnswer,
@@ -9,6 +10,7 @@ import {
   type Recorder,
   type WordsFocus,
 } from "./practice-modes";
+import type { Progress } from "./learn";
 import { emptyStats, recordAnswer, recordKana } from "./stats";
 import { kanaKey } from "#lib/core/kana.ts";
 import type { Stats, Word } from "#lib/core/types.ts";
@@ -18,6 +20,7 @@ const typed = (reading: string, meaning = "") => ({ reading, meaning });
 const recorderOf = (stats: Stats): Recorder => ({
   word: (word, verdict) => recordAnswer(stats, word, verdict),
   kana: (script, hiragana, hit) => recordKana(stats, script, hiragana, hit),
+  learn: () => {},
 });
 
 const wordsMode = (
@@ -281,5 +284,42 @@ describe("pronouncedOf", () => {
       written: "今日は",
       reading: "こんにちわ",
     });
+  });
+});
+
+describe("learnMode", () => {
+  const progress: Progress = {
+    "kana:hiragana:あ": { state: "learning", streak: 1, introducedAt: 0 },
+    "kana:katakana:か": { state: "known", streak: 3, introducedAt: 0 },
+  };
+
+  it("practices the introduced kana, learning ones first", () => {
+    const mode = learnMode(
+      progress,
+      emptyStats(),
+      "reading",
+      recorderOf(emptyStats()),
+    );
+    expect(
+      mode.pool.map((item) => item.kind === "kana" && item.kana.symbol),
+    ).toEqual(["あ", "カ"]);
+    const [learning, known] = mode.pool.map(mode.weightOf);
+    expect(learning).toBeGreaterThan(known);
+  });
+
+  it("records the lifetime tally and the Learn progress", () => {
+    const stats = emptyStats();
+    const learned: string[] = [];
+    const mode = learnMode(progress, stats, "reading", {
+      ...recorderOf(stats),
+      learn: (key, hit) => learned.push(`${key} ${hit}`),
+    });
+    const [item] = mode.pool;
+    mode.record(item, "almost");
+    expect(stats.kana[kanaKey("hiragana", "あ")]).toEqual({
+      hits: 0,
+      misses: 1,
+    });
+    expect(learned).toEqual(["kana:hiragana:あ false"]);
   });
 });
