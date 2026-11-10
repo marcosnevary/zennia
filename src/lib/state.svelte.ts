@@ -283,6 +283,10 @@ export class App {
     this.#setSettings({ playAnswerSound });
   }
 
+  setShowResultRomaji(showResultRomaji: boolean): void {
+    this.#setSettings({ showResultRomaji });
+  }
+
   setKanaSelection(kanaSelection: string[]): void {
     this.#setSettings({ kanaSelection: [...kanaSelection] });
   }

@@ -62,6 +62,7 @@ describe("settings", () => {
         practice_fonts: [],
         play_pronunciation: false,
         play_answer_sound: true,
+        show_result_romaji: true,
       }),
     ).toEqual({ ...DEFAULT_SETTINGS, kanaSelection: ["hiragana:あ"] });
   });
@@ -81,6 +82,7 @@ describe("settings", () => {
         practice_fonts: [],
         play_pronunciation: false,
         play_answer_sound: true,
+        show_result_romaji: true,
       }),
     ).toMatchObject({
       wordsSort: "reading",
@@ -109,6 +111,7 @@ describe("settings", () => {
         practice_fonts: [],
         play_pronunciation: false,
         play_answer_sound: true,
+        show_result_romaji: true,
       }).tagColors,
     ).toEqual({ food: { hue: 10, tone: 1 } });
   });
@@ -128,6 +131,7 @@ describe("settings", () => {
         practice_fonts: [],
         play_pronunciation: false,
         play_answer_sound: true,
+        show_result_romaji: true,
       }).numberKeyTabs,
     ).toBe(false);
   });
@@ -147,6 +151,7 @@ describe("settings", () => {
         practice_fonts: ["yomogi", "unknown", "klee-one"],
         play_pronunciation: false,
         play_answer_sound: true,
+        show_result_romaji: true,
       }).practiceFonts,
     ).toEqual(["klee-one", "yomogi"]);
   });

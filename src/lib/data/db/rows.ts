@@ -41,6 +41,7 @@ export interface SettingsRow {
   practice_fonts: unknown;
   play_pronunciation: boolean;
   play_answer_sound: boolean;
+  show_result_romaji: boolean;
 }
 
 function oneOf<T extends string>(
@@ -118,6 +119,7 @@ const SETTING_COLUMNS = {
   practiceFonts: "practice_fonts",
   playPronunciation: "play_pronunciation",
   playAnswerSound: "play_answer_sound",
+  showResultRomaji: "show_result_romaji",
 } as const satisfies Record<keyof Settings, keyof SettingsRow>;
 
 /** What `load` selects from the `settings` table. */
@@ -162,6 +164,7 @@ export function settingsFromRow(row: SettingsRow | null): Settings {
     practiceFonts: practiceFontsFrom(row.practice_fonts),
     playPronunciation: row.play_pronunciation,
     playAnswerSound: row.play_answer_sound,
+    showResultRomaji: row.show_result_romaji,
   };
 }
 

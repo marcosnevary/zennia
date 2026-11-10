@@ -15,12 +15,15 @@
     verdict,
     answer,
     note,
+    showRomaji = true,
     onplay,
   }: {
     verdict: Verdict | null;
     answer: RightAnswer;
     /** Optional outcome of each part of the answer, for screen readers: the fields show it by color */
     note?: string;
+    /** Whether the romaji shows below each run; screen readers get it either way */
+    showRomaji?: boolean;
     /** Plays the pronunciation of the answer again */
     onplay: () => void;
   } = $props();
@@ -49,7 +52,9 @@
         <!-- text-2xl's negative letter spacing would cramp Japanese -->
         <span class="text-2xl leading-none tracking-normal">{part.text}</span>
         <!-- a lone っ adds no romaji of its own, but keeps the line so the runs stay aligned -->
-        <span class="text-base" lang="en">{part.romaji || "\u00a0"}</span>
+        {#if showRomaji}
+          <span class="text-base" lang="en">{part.romaji || "\u00a0"}</span>
+        {/if}
       </span>
     {/each}
   </div>

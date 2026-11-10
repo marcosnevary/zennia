@@ -24,6 +24,8 @@ export interface Settings {
   playPronunciation: boolean;
   /** Whether checking an answer plays a sound for correct and another for incorrect. */
   playAnswerSound: boolean;
+  /** Whether the practice result shows the romaji below the answer. */
+  showResultRomaji: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -39,4 +41,5 @@ export const DEFAULT_SETTINGS: Settings = {
   practiceFonts: [],
   playPronunciation: false,
   playAnswerSound: true,
+  showResultRomaji: true,
 };

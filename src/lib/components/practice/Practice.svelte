@@ -183,6 +183,7 @@
     answers={app.practice.answers}
     {askReading}
     {askMeaning}
+    showRomaji={app.settings.showResultRomaji}
     kanaInput={typesInKana(current)}
     bind:answer
     bind:inputEl
