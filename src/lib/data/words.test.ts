@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
+import type { Word } from "#lib/core/types.ts";
 import {
+  deleteMine,
+  filterByOrigin,
   hasSearchTags,
   importBrief,
   importSummary,
@@ -205,6 +208,49 @@ describe("setDisabled", () => {
       mine: true,
       activatedAt: 100,
     });
+  });
+});
+
+describe("filterByOrigin and deleteMine", () => {
+  const word = (id: string, japanese: string, mine: boolean): Word => ({
+    id,
+    japanese,
+    hiragana: japanese,
+    meaning: "",
+    disabled: false,
+    mine,
+    activatedAt: 0,
+    tags: [],
+  });
+  const own = word("1", "いぬ", true);
+  const ownInN5 = word("2", "あう", true);
+  const listOnly = word("3", "あさ", false);
+  const words = [own, ownInN5, listOnly];
+  const listOf = (w: Word) => (w === own ? undefined : ("n5" as const));
+
+  it("shows every word, the user's own, or the words of a list", () => {
+    expect(filterByOrigin(words, "all", listOf)).toEqual(words);
+    expect(filterByOrigin(words, "mine", listOf)).toEqual([own, ownInN5]);
+    expect(filterByOrigin(words, "n5", listOf)).toEqual([ownInN5, listOnly]);
+  });
+
+  it("deletes the user's words that Learn doesn't practice", () => {
+    expect(deleteMine(words, new Set(["1"]), () => false)).toEqual([
+      ownInN5,
+      listOnly,
+    ]);
+  });
+
+  it("keeps a word Learn practices, no longer the user's and out of Free practice", () => {
+    expect(deleteMine(words, new Set(["2"]), (w) => w === ownInN5)).toEqual([
+      own,
+      { ...ownInN5, mine: false, disabled: true },
+      listOnly,
+    ]);
+  });
+
+  it("never deletes a word that only a list brought", () => {
+    expect(deleteMine(words, new Set(["3"]), () => false)).toEqual(words);
   });
 });
 

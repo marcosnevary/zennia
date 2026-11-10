@@ -21,8 +21,18 @@
   import TagsDialog from "./TagsDialog.svelte";
   import { plural } from "#lib/core/plural.ts";
   import type { Word } from "#lib/core/types.ts";
+  import SegmentedControl from "#lib/components/SegmentedControl.svelte";
+  import {
+    LIST_LABELS,
+    wordItemKey,
+    wordLists,
+    type ListId,
+  } from "#lib/data/learn.ts";
+  import { loadPath } from "#lib/data/lists.ts";
   import { getApp } from "#lib/state.svelte.ts";
   import {
+    deleteMine,
+    filterByOrigin,
     makeWord,
     mergeNote,
     searchWords,
@@ -33,9 +43,11 @@
     validateEdit,
     validateWord,
     wordReading,
+    WORD_ORIGINS,
     type SortDirection,
     type SortKey,
     type WordErrors,
+    type WordOrigin,
   } from "#lib/data/words.ts";
   import {
     addTag,
@@ -145,9 +157,28 @@
   const filterTags = $derived(
     activeTags.filter((a) => tags.some((t) => sameTag(t, a))),
   );
+  // the lists tell which words belong to one; until they arrive no word shows a badge
+  let lists = $state<Map<string, ListId> | null>(null);
+  $effect(() => {
+    loadPath().then(
+      (path) => (lists = wordLists(path)),
+      () =>
+        app.toasts.show(
+          "Couldn't load the Learn lists. Check your connection and reload the page.",
+          { id: "lists" },
+        ),
+    );
+  });
+  const listOf = (word: Word) =>
+    lists?.get(wordItemKey(word.japanese, word.hiragana));
+  let origin = $state<WordOrigin>("all");
+
   const visibleWords = $derived(
     sortWords(
-      searchWords(filterByTags(words, filterTags), query),
+      searchWords(
+        filterByTags(filterByOrigin(words, origin, listOf), filterTags),
+        query,
+      ),
       sortKey,
       sortDirection,
     ),
@@ -258,10 +289,19 @@
     selected.clear();
   }
 
+  // only the user's words can be deleted; one that Learn practices stays there
+  const deletableCount = $derived(selectedWords.filter((w) => w.mine).length);
+
   function removeSelected() {
-    const count = selectedWords.length;
+    const count = deletableCount;
     if (!confirm(`Delete ${count} selected ${plural(count, "word")}?`)) return;
-    app.setWords(words.filter((w) => !selected.has(w.id)));
+    app.setWords(
+      deleteMine(
+        words,
+        selected,
+        (w) => !!app.progress[wordItemKey(w.japanese, w.hiragana)],
+      ),
+    );
     selected.clear();
   }
 
@@ -460,6 +500,17 @@
       {#if words.length === 0}
         <p class="my-4 text-muted">No words yet.</p>
       {:else}
+        <div class="mb-2">
+          <SegmentedControl
+            options={WORD_ORIGINS}
+            value={origin}
+            onchange={(next) => {
+              origin = next;
+              onSearch();
+            }}
+            label="Show words"
+          />
+        </div>
         <div class="mb-2 flex flex-wrap items-center gap-2">
           <TagSearch
             id="word-search"
@@ -506,7 +557,7 @@
           onchange={toggleSelectAll}
           count={visibleWords.length}
           noun={visibleWords.length === words.length ? "word" : "result"}
-          summary={`${activeWordCount} active · ${selectedWords.length} selected`}
+          summary={`${activeWordCount} in free practice · ${selectedWords.length} selected`}
         >
           <!-- keeps the space reserved so the layout does not shift when a selection appears; the icons are 20px in 40px buttons -->
           <div
@@ -532,33 +583,34 @@
             <button
               class="icon"
               onclick={() => setSelectedDisabled(false)}
-              aria-label="Activate selected"
-              title="Activate selected"
+              aria-label="Add selected to Free practice"
+              title="Add selected to Free practice"
             >
               <Eye />
             </button>
             <button
               class="icon"
               onclick={() => setSelectedDisabled(true)}
-              aria-label="Deactivate selected"
-              title="Deactivate selected"
+              aria-label="Remove selected from Free practice"
+              title="Remove selected from Free practice"
             >
               <EyeOff />
             </button>
             <button
               class="danger icon"
               onclick={removeSelected}
+              disabled={deletableCount === 0}
               aria-label="Delete selected"
-              title="Delete selected"
+              title={deletableCount === 0
+                ? "Only your own words can be deleted"
+                : "Delete selected"}
             >
               <Trash />
             </button>
           </div>
         </SelectAll>
         {#if visibleWords.length === 0}
-          <p class="my-4 text-muted">
-            No words match your search or tag filter.
-          </p>
+          <p class="my-4 text-muted">No words match your filters.</p>
         {:else}
           <!-- reaches up behind the 40px select-all row and the 8px below it -->
           <ul
@@ -566,6 +618,7 @@
             bind:this={listEl}
           >
             {#each visibleWords as word (word.id)}
+              {@const list = listOf(word)}
               <li>
                 <div
                   class="select-row relative"
@@ -595,6 +648,12 @@
                     class={["text-sm text-muted", word.disabled && DIM]}
                     lang="ja">{wordReading(word)}</span
                   >
+                  {#if list}
+                    <span
+                      class="rounded-pill border border-tint px-2 text-xs text-muted"
+                      >{LIST_LABELS[list]}</span
+                    >
+                  {/if}
                   <span class={["min-w-0 truncate", word.disabled && DIM]}
                     >{word.meaning}</span
                   >
@@ -610,8 +669,10 @@
                   <Switch
                     checked={!word.disabled}
                     onchange={() => toggle(word)}
-                    label="Active"
-                    title={word.disabled ? "Activate" : "Deactivate"}
+                    label="In free practice"
+                    title={word.disabled
+                      ? "Add to Free practice"
+                      : "Remove from Free practice"}
                   />
                 </div>
               </li>
