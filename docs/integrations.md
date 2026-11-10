@@ -61,16 +61,19 @@ Vercel builds and serves the static site. `vercel.json` rewrites every path to `
 
 ## Bundled data
 
-Two generated files are committed in `static/`. Both are big, so each is fetched on first use and kept for the session, and a failed fetch can be retried.
+Generated files from outside sources are committed in `static/`. Each is fetched on first use and kept for the session, and a failed fetch can be retried.
 
-| File              | Source                                                                                                        | License      | Used by         | Rebuild                                                                 |
-| ----------------- | ------------------------------------------------------------------------------------------------------------- | ------------ | --------------- | ----------------------------------------------------------------------- |
-| `dictionary.json` | [jmdict-simplified](https://github.com/scriptin/jmdict-simplified), the `jmdict-eng-common` release of JMdict | CC BY-SA 4.0 | Add from romaji | `node scripts/build-dictionary.mjs <jmdict-eng-common-*.json>`          |
-| `strokes.json`    | [KanjiVG](https://kanjivg.tagaini.net)                                                                        | CC BY-SA 3.0 | Writing sheet   | `node scripts/build-strokes.mjs <directory with the kanji/*.svg files>` |
+| File              | Source                                                                                                                                                                                                               | License                               | Used by         | Rebuild                                                                 |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | --------------- | ----------------------------------------------------------------------- |
+| `dictionary.json` | [jmdict-simplified](https://github.com/scriptin/jmdict-simplified), the `jmdict-eng-common` release of JMdict                                                                                                        | CC BY-SA 4.0                          | Add from romaji | `node scripts/build-dictionary.mjs <jmdict-eng-common-*.json>`          |
+| `strokes.json`    | [KanjiVG](https://kanjivg.tagaini.net)                                                                                                                                                                               | CC BY-SA 3.0                          | Writing sheet   | `node scripts/build-strokes.mjs <directory with the kanji/*.svg files>` |
+| `lists/n5.json`   | The unofficial JLPT N5 list by Jonathan Waller (tanos.co.uk), as converted in [Bluskyo/JLPT_Vocabulary](https://github.com/Bluskyo/JLPT_Vocabulary) (`n5_vocab_cleaned.csv`), with the meanings of `dictionary.json` | CC BY (list), CC BY-SA 4.0 (meanings) | Learn           | `node scripts/build-n5-list.ts <n5_vocab_cleaned.csv>`                  |
 
 The dictionary has one row per common reading. Each row takes the first sense that applies to the reading and up to three of its glosses. The written form is its kanji spelling, preferring a common one, or the kana when the word has no kanji or JMdict marks the sense as usually written in kana.
 
 The Learn lists in `static/lists/` are generated too. The kana lists come from the tables of the Kana tab, so they have no outside source, and `node scripts/build-kana-lists.ts` rebuilds them.
+
+The N5 list keeps the order of its source, by reading, in groups of 5. There has been no official JLPT list since 2010, so it is always called unofficial. tanos.co.uk is gone, and its CC BY license is stated by the copies of its data. Each word takes its meaning from the dictionary row with the same written form and reading. About 90 words of the source don't match one as written: misspellings, kana where JMdict uses kanji, rows that mix two words, and forms JMdict writes oddly (`５日`). `FIXES` in the script resolves each one, and repeated words are dropped.
 
 The Add from romaji dialog credits JMdict and the printed sheet credits KanjiVG, as their licenses require.
 

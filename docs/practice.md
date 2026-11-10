@@ -41,7 +41,7 @@ A never-answered item gets the top weight of 5, and no item drops to zero. Low a
 
 ## Learn
 
-Learn leads through the lists of the path, Hiragana, then Katakana, then N5, and decides when each item enters (`src/lib/data/learn.ts`). Only the kana lists exist so far. The lists load the first time Learn opens (`src/lib/data/lists.ts`), and the first groups enter then.
+Learn leads through the lists of the path, Hiragana, then Katakana, then N5, and decides when each item enters (`src/lib/data/learn.ts`). Learn uses only the kana lists so far: the N5 list ([source](integrations.md#bundled-data)) joins once its words can enter the user's words. The lists load the first time Learn opens (`src/lib/data/lists.ts`), and the first groups enter then.
 
 Above the card, Learn shows the latest list with introduced items and how many of its items are `known`, such as "Hiragana · 12 of 107 known". When an answer starts the next list, a line says so until the next answer.
 

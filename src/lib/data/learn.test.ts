@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { isKana } from "wanakana";
 import {
   HITS_TO_KNOW,
   currentList,
@@ -11,9 +12,11 @@ import {
   learnWeight,
   MIN_KNOWN_WEIGHT,
   recordProgress,
+  wordItemKey,
   type List,
   type ListId,
   type Progress,
+  type WordListItem,
 } from "./learn";
 
 /** A list whose groups have the given sizes, with keys like "hiragana:1.0". */
@@ -197,6 +200,36 @@ describe("kanaList", () => {
       expect(JSON.parse(readFileSync(file, "utf8"))).toEqual(kanaList(script));
     },
   );
+});
+
+describe("static/lists/n5.json", () => {
+  const n5: { id: string; items: WordListItem[] } = JSON.parse(
+    readFileSync(
+      new URL("../../../static/lists/n5.json", import.meta.url),
+      "utf8",
+    ),
+  );
+
+  it("keys each word by its written form and reading, once", () => {
+    expect(n5.id).toBe("n5");
+    for (const item of n5.items) {
+      expect(item.key).toBe(wordItemKey(item.japanese, item.hiragana));
+    }
+    expect(new Set(n5.items.map((item) => item.key)).size).toBe(
+      n5.items.length,
+    );
+  });
+
+  it("groups the words in fives, in order", () => {
+    n5.items.forEach((item, i) => expect(item.group).toBe(Math.floor(i / 5)));
+  });
+
+  it("has a kana reading and a meaning for every word", () => {
+    for (const item of n5.items) {
+      expect(isKana(item.hiragana), item.key).toBe(true);
+      expect(item.meaning.trim(), item.key).not.toBe("");
+    }
+  });
 });
 
 describe("learnWeight", () => {

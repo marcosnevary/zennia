@@ -25,6 +25,13 @@ export interface ListItem {
   group: number;
 }
 
+/** A word of a list carries the word itself, since it enters the user's words only once Learn introduces it. */
+export interface WordListItem extends ListItem {
+  japanese: string;
+  hiragana: string;
+  meaning: string;
+}
+
 export interface List {
   id: ListId;
   items: ListItem[];
