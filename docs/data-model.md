@@ -8,14 +8,17 @@ Every row belongs to a Supabase user, anonymous or signed in ([integrations](int
 
 ## Tables
 
-| Table        | Key                             | Notes                                                                                                                                                                                                                                                         |
-| ------------ | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `words`      | `user_id`, `id`                 | `id` is a text id generated in the browser, which an imported file can bring along. `activated_at` orders the status sort.                                                                                                                                    |
-| `word_stats` | `user_id`, `word_id`            | One tally per answered word. The foreign key cascades, so deleting a word deletes its tally.                                                                                                                                                                  |
-| `kana_stats` | `user_id`, `script`, `hiragana` | One tally per kana and script. `hiragana` holds the sound even for katakana, and the app joins the two as the key `script:hiragana` (`kanaKey`).                                                                                                              |
-| `settings`   | `user_id`                       | At most one row, created by the first change. With no row, or with a value the app doesn't know, it falls back to `DEFAULT_SETTINGS`. `kana_selection` is null until the user chooses, which means the basic hiragana. `tag_colors` maps `tagKey` to a color. |
+| Table           | Key                             | Notes                                                                                                                                                                                                                                                                                                                                                  |
+| --------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `words`         | `user_id`, `id`                 | `id` is a text id generated in the browser, which an imported file can bring along. `activated_at` orders the status sort.                                                                                                                                                                                                                             |
+| `word_stats`    | `user_id`, `word_id`            | One tally per answered word. The foreign key cascades, so deleting a word deletes its tally.                                                                                                                                                                                                                                                           |
+| `kana_stats`    | `user_id`, `script`, `hiragana` | One tally per kana and script. `hiragana` holds the sound even for katakana, and the app joins the two as the key `script:hiragana` (`kanaKey`).                                                                                                                                                                                                       |
+| `list_progress` | `user_id`, `item`               | The [Learn](practice.md#learn-schedule) progress of each introduced item, keyed by its list key (`kana:hiragana:あ`). `state` is `learning` or `known`, and `streak` counts hits in a row. An item with no row is new.                                                                                                                                 |
+| `settings`      | `user_id`                       | At most one row, created by the first change. With no row, or with a value the app doesn't know, it falls back to `DEFAULT_SETTINGS`. `kana_selection` is null until the user chooses, which means the basic hiragana. `tag_colors` maps `tagKey` to a color. `practice_mode` says whether Practice opens in Learn or Free practice, Learn by default. |
 
 Tallies are lifetime counts. The score of a practice session lives only in memory, in `App`: it survives switching tabs and starts over when the app loads or the user signs out.
+
+Learn progress is written as whole rows, only for the items an answer or an introduction changed, so two tabs answering the same item keep the last write.
 
 `record_answer` counts an answer with `hits = hits + 1` in the database rather than writing a new total. Resetting the statistics deletes the user's rows in both stats tables.
 
@@ -34,7 +37,7 @@ A new setting goes in `SETTING_COLUMNS` in `rows.ts`, which `load` and `settings
 
 ## Migrations
 
-Files run in order, and a new project runs them all ([setup](integrations.md#setup)). The Supabase integration runs new files on `main`. A column the new code selects has to exist before the merge, so it can be added by hand in the SQL editor, and the migration then uses `add column if not exists`, as `0008_number_key_tabs.sql` does.
+Files run in order, and a new project runs them all ([setup](integrations.md#setup)). The Supabase integration runs new files on `main`. A column the new code selects has to exist before the merge, so it can be added by hand in the SQL editor, and the migration then uses `add column if not exists`, as `0008_number_key_tabs.sql` does. A new table that `load` reads works the same way, with `create table if not exists`, as in `0014_list_progress.sql`.
 
 ## Decisions
 

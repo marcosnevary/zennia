@@ -26,6 +26,7 @@ function fakeRepo(stored: Partial<Stored> = {}, conflict = false) {
     words: [],
     stats: emptyStats(),
     settings: { ...DEFAULT_SETTINGS },
+    progress: {},
     ...stored,
   };
   const calls: string[] = [];
@@ -42,6 +43,9 @@ function fakeRepo(stored: Partial<Stored> = {}, conflict = false) {
     }),
     resetStats: vi.fn(async () => {
       calls.push("reset stats");
+    }),
+    saveProgress: vi.fn(async (progress) => {
+      calls.push(`progress ${Object.keys(progress).join(",")}`);
     }),
     saveSettings: vi.fn(async (patch) => {
       calls.push(`settings ${JSON.stringify(patch)}`);
@@ -287,6 +291,7 @@ describe("App", () => {
       words: [word("a", 1)],
       stats: emptyStats(),
       settings: { ...DEFAULT_SETTINGS },
+      progress: {},
     });
     app.setWords([word("b", 2), ...app.words]);
     await app.flush();

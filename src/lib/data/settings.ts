@@ -1,3 +1,4 @@
+import type { PracticeModeId } from "./learn";
 import type { PracticeFontId } from "./practice-fonts";
 import type { WordsFocus } from "./practice-modes";
 import type { StatsSort } from "./stats";
@@ -26,6 +27,8 @@ export interface Settings {
   playAnswerSound: boolean;
   /** Whether the practice result shows the romaji below the answer. */
   showResultRomaji: boolean;
+  /** Whether Practice opens in Learn or Free practice, as it was left. */
+  practiceMode: PracticeModeId;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -42,4 +45,5 @@ export const DEFAULT_SETTINGS: Settings = {
   playPronunciation: false,
   playAnswerSound: true,
   showResultRomaji: true,
+  practiceMode: "learn",
 };
