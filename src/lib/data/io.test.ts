@@ -16,6 +16,7 @@ describe("words file", () => {
     hiragana: "いぬ",
     meaning: "dog",
     disabled: false,
+    mine: true,
     activatedAt: 0,
     tags: ["Pets"],
   };

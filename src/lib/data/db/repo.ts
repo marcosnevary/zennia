@@ -4,6 +4,7 @@ import {
   type Pronounced,
 } from "#functions/_shared/pronunciation.ts";
 import type { Stats, Word } from "#lib/core/types.ts";
+import type { Progress } from "#lib/data/learn.ts";
 import type { Settings } from "#lib/data/settings.ts";
 import {
   getAccount,
@@ -18,6 +19,8 @@ import {
 } from "./client";
 import { requestGoogleToken, type GoogleToken } from "./google";
 import {
+  progressFromRows,
+  progressToRows,
   settingsFromRow,
   settingsToRow,
   statsFromRows,
@@ -25,6 +28,7 @@ import {
   wordFromRow,
   wordToRow,
   type KanaStatRow,
+  type ProgressRow,
   type SettingsRow,
   type WordRow,
   type WordStatRow,
@@ -34,6 +38,7 @@ export interface Stored {
   words: Word[];
   stats: Stats;
   settings: Settings;
+  progress: Progress;
 }
 
 /** Everything the app stores for the signed-in user. */
@@ -44,6 +49,10 @@ export interface Repo {
   /** Adds one answer to the tally of a word (`key` is its id) or of a kana (`key` is its `kanaKey`). */
   recordAnswer(kind: "word" | "kana", key: string, hit: boolean): Promise<void>;
   resetStats(): Promise<void>;
+  /** Saves the progress of the given items, which should be only the ones that changed. */
+  saveProgress(progress: Progress): Promise<void>;
+  /** Deletes the progress of the given items, which become new again. */
+  deleteProgress(items: string[]): Promise<void>;
   saveSettings(patch: Partial<Settings>): Promise<void>;
   account(): Promise<Account>;
   updateProfile(change: ProfileChange): Promise<void>;
@@ -109,36 +118,48 @@ export function createRepo(getDb: () => Db): Repo {
   return {
     async load() {
       const { db } = await open();
-      const [words, wordStats, kanaStats, settings] = await Promise.all([
-        fetchAll<WordRow>((from, to) =>
+      const [words, wordStats, kanaStats, progress, settings] =
+        await Promise.all([
+          fetchAll<WordRow>((from, to) =>
+            db
+              .from("words")
+              .select("*")
+              .order("created_at", { ascending: false })
+              .order("id")
+              .range(from, to),
+          ),
+          fetchAll<WordStatRow>((from, to) =>
+            db
+              .from("word_stats")
+              .select("word_id, hits, misses")
+              .order("word_id")
+              .range(from, to),
+          ),
+          fetchAll<KanaStatRow>((from, to) =>
+            db
+              .from("kana_stats")
+              .select("script, hiragana, hits, misses")
+              .order("script")
+              .order("hiragana")
+              .range(from, to),
+          ),
+          fetchAll<ProgressRow>((from, to) =>
+            db
+              .from("list_progress")
+              .select("item, state, streak, introduced_at")
+              .order("item")
+              .range(from, to),
+          ),
           db
-            .from("words")
-            .select("*")
-            .order("created_at", { ascending: false })
-            .order("id")
-            .range(from, to),
-        ),
-        fetchAll<WordStatRow>((from, to) =>
-          db
-            .from("word_stats")
-            .select("word_id, hits, misses")
-            .order("word_id")
-            .range(from, to),
-        ),
-        fetchAll<KanaStatRow>((from, to) =>
-          db
-            .from("kana_stats")
-            .select("script, hiragana, hits, misses")
-            .order("script")
-            .order("hiragana")
-            .range(from, to),
-        ),
-        db.from("settings").select(SETTINGS_SELECT).maybeSingle<SettingsRow>(),
-      ]);
+            .from("settings")
+            .select(SETTINGS_SELECT)
+            .maybeSingle<SettingsRow>(),
+        ]);
       return {
         words: words.map(wordFromRow),
         stats: statsFromRows(wordStats, kanaStats),
         settings: settingsFromRow(unwrap(settings)),
+        progress: progressFromRows(progress),
       };
     },
 
@@ -174,6 +195,33 @@ export function createRepo(getDb: () => Db): Repo {
       const { db, userId } = await open();
       unwrap(await db.from("word_stats").delete().eq("user_id", userId));
       unwrap(await db.from("kana_stats").delete().eq("user_id", userId));
+    },
+
+    async deleteProgress(items) {
+      const { db, userId } = await open();
+      for (const chunk of chunks(items, DELETE_CHUNK)) {
+        unwrap(
+          await db
+            .from("list_progress")
+            .delete()
+            .eq("user_id", userId)
+            .in("item", chunk),
+        );
+      }
+    },
+
+    async saveProgress(progress) {
+      const { db, userId } = await open();
+      for (const chunk of chunks(
+        progressToRows(progress, userId),
+        WRITE_CHUNK,
+      )) {
+        unwrap(
+          await db
+            .from("list_progress")
+            .upsert(chunk, { onConflict: "user_id,item" }),
+        );
+      }
     },
 
     async saveSettings(patch) {

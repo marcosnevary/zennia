@@ -9,6 +9,14 @@ import {
 } from "#lib/core/kana.ts";
 import { checkMeaning } from "#lib/core/meaning.ts";
 import {
+  introducedWords,
+  kanaItemKey,
+  kanaKeyOfItem,
+  learnWeight,
+  wordItemKey,
+  type Progress,
+} from "./learn";
+import {
   checkAnswer,
   spokenReading,
   toDisplayRomaji,
@@ -54,6 +62,8 @@ function checkWord(
 export interface Recorder {
   word: (word: Word, verdict: Verdict) => void;
   kana: (script: KanaScript, hiragana: string, hit: boolean) => void;
+  /** The Learn progress of an item, by its list key; on top of the lifetime tally. */
+  learn: (key: string, hit: boolean) => void;
 }
 
 /** Word practice: active words, weighted by past mistakes. "almost" is a real verdict here. */
@@ -158,6 +168,40 @@ export function mixedMode(
       item.kind === "word"
         ? wordMode.record(item.word, verdict)
         : kana.record(item.kana, verdict),
+  };
+}
+
+/** The key of an item in the Learn lists. */
+export function itemKeyOf(item: PracticeItem): string {
+  return item.kind === "word"
+    ? wordItemKey(item.word.japanese, item.word.hiragana)
+    : kanaItemKey(item.kana.script, item.kana.hiragana);
+}
+
+/** Learn: the introduced items, weighted by their progress instead of their lifetime tally, which still counts. */
+export function learnMode(
+  progress: Progress,
+  words: Word[],
+  stats: Stats,
+  focus: WordsFocus,
+  recorder: Recorder,
+): PracticeMode<PracticeItem> {
+  const kana = Object.keys(progress)
+    .map(kanaKeyOfItem)
+    .filter((key): key is string => key !== null);
+  // whether a word is in Free practice doesn't matter here: Learn practices every word it introduced
+  const learned = introducedWords(words, progress).map((w) => ({
+    ...w,
+    disabled: false,
+  }));
+  const mixed = mixedMode(learned, kana, stats, focus, recorder);
+  return {
+    ...mixed,
+    weightOf: (item) => learnWeight(progress[itemKeyOf(item)]),
+    record: (item, verdict) => {
+      mixed.record(item, verdict);
+      recorder.learn(itemKeyOf(item), verdict === "correct");
+    },
   };
 }
 

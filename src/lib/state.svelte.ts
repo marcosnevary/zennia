@@ -6,6 +6,15 @@ import type { Stats, Verdict, Word } from "./core/types";
 import type { Account, ProfileChange } from "./data/db/client";
 import { PopupBlockedError, type GoogleToken } from "./data/db/google";
 import type { Repo, Stored } from "./data/db/repo";
+import {
+  introduce,
+  missingWords,
+  recordProgress,
+  type List,
+  type ListId,
+  type PracticeModeId,
+  type Progress,
+} from "./data/learn";
 import type { PracticeFontId } from "./data/practice-fonts";
 import type { PracticeItem, Recorder, WordsFocus } from "./data/practice-modes";
 import { startSession, type Session } from "./data/practice-session";
@@ -27,6 +36,7 @@ import {
   type ThemePreference,
 } from "./data/theme";
 import {
+  makeWord,
   mergeWords,
   type MergeResult,
   type SortDirection,
@@ -54,6 +64,13 @@ export class App {
   stats = $state<Stats>(emptyStats());
   // lives here rather than in Practice, which is destroyed when the user switches tabs
   practice = $state<Session<PracticeItem>>(startSession());
+  // Learn keeps a session of its own, so each mode has its own score
+  learn = $state<Session<PracticeItem>>(startSession());
+  progress = $state<Progress>({});
+  // the lists of the Learn path, loaded the first time Learn opens
+  path = $state<List[] | null>(null);
+  // the list that began with the last Learn answer, for a short notice
+  startedList = $state<ListId | null>(null);
   settings = $state<Settings>({ ...DEFAULT_SETTINGS, theme: readThemeCache() });
   status = $state<"loading" | "ready" | "failed">("loading");
   readonly toasts = new Toasts();
@@ -71,6 +88,7 @@ export class App {
   readonly recorder: Recorder = {
     word: (word, verdict) => this.recordWord(word, verdict),
     kana: (script, hiragana, hit) => this.recordKana(script, hiragana, hit),
+    learn: (key, hit) => this.recordLearn(key, hit),
   };
 
   readonly #repo: Repo;
@@ -90,6 +108,8 @@ export class App {
     this.toasts.dismiss("load");
     this.newWordIds.clear();
     this.practice = startSession();
+    this.learn = startSession();
+    this.startedList = null;
     try {
       const stored = await this.#repo.load();
       this.account = await this.#repo.account();
@@ -245,6 +265,58 @@ export class App {
     );
   }
 
+  /** Opens Learn on the loaded path, introducing the first groups when fewer items are learning than it needs. */
+  startLearn(path: List[]): void {
+    this.path = path;
+    this.#introduce([]);
+  }
+
+  recordLearn(key: string, hit: boolean): void {
+    recordProgress(this.progress, key, hit);
+    this.startedList = null;
+    this.#introduce([key]);
+  }
+
+  /** Makes every item of the list new again; the words and the lifetime tallies stay. */
+  restartList(list: List): void {
+    const items = list.items
+      .map((item) => item.key)
+      .filter((key) => this.progress[key]);
+    if (!items.length) return;
+    for (const key of items) delete this.progress[key];
+    this.startedList = null;
+    this.#persist(() => this.#repo.deleteProgress(items));
+    this.#introduce([]);
+  }
+
+  // saves the answered item along with the ones that entered, and keeps the notice for a list that began
+  #introduce(changed: string[]): void {
+    const path = this.path;
+    if (!path) return;
+    const { keys, started } = introduce(path, this.progress, Date.now());
+    const next = started.filter((id) => id !== path[0].id).at(-1);
+    if (next) this.startedList = next;
+    this.#addListWords(path);
+    const saved = [...changed, ...keys];
+    if (!saved.length) return;
+    const patch: Progress = Object.fromEntries(
+      saved.map((key) => [key, $state.snapshot(this.progress[key])]),
+    );
+    this.#persist(() => this.#repo.saveProgress(patch));
+  }
+
+  // a word the user already has stays as it is and counts for the list too; only missing ones are added, kept out of Free practice
+  #addListWords(path: List[]): void {
+    const missing = missingWords(path, this.progress, this.words);
+    if (!missing.length) return;
+    const incoming = missing.map(({ japanese, hiragana, meaning }) => ({
+      ...makeWord({ japanese, hiragana, meaning, tags: [] }),
+      disabled: true,
+      mine: false,
+    }));
+    this.setWords(mergeWords(this.words, incoming).words);
+  }
+
   resetStats(): void {
     this.stats = emptyStats();
     this.#persist(() => this.#repo.resetStats());
@@ -287,6 +359,10 @@ export class App {
     this.#setSettings({ showResultRomaji });
   }
 
+  setPracticeMode(practiceMode: PracticeModeId): void {
+    this.#setSettings({ practiceMode });
+  }
+
   setKanaSelection(kanaSelection: string[]): void {
     this.#setSettings({ kanaSelection: [...kanaSelection] });
   }
@@ -300,6 +376,7 @@ export class App {
     this.words = stored.words;
     this.stats = stored.stats;
     this.settings = stored.settings;
+    this.progress = stored.progress;
     writeThemeCache(stored.settings.theme);
   }
 

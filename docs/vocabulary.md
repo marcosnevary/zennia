@@ -18,6 +18,25 @@ The add form, Add from romaji and every import go through `mergeWords`, which on
 
 - When the word already exists, a different meaning is appended after `; `, and the tags are united. The add form says so under its button, because the list gains no row.
 - An incoming word with the id of an existing but different word counts as already existing.
+- Adding a word that only a list brought makes it the user's (`mine`), and that counts as a change too.
+
+## List words
+
+A word is one record with one tally, whether the user added it, a [Learn](practice.md#learn) list brought it, or both. When Learn introduces a word of the N5 list that the user doesn't have, it enters through `mergeWords` with `mine` false and turned off, so it stays out of Free practice. A word the user already has is left exactly as it is, and Learn practices it too, whether or not it is on. If an introduced list word is missing from the user's words, Learn adds it back the next time it introduces anything.
+
+Which list a word comes from isn't stored: it is found by its written form and reading in the list files (`wordLists`). A word of a list shows that list's badge ("N5"), also when it is the user's own.
+
+The switch on each row only decides whether the word is in Free practice, and is labeled so. Learn practices every word it introduced regardless.
+
+**Filter.** A segmented control above the list shows All, My words (`mine`) or the words of the N5 list. Since list words only enter as Learn introduces them, the N5 filter grows with Learn instead of showing the whole list. Search and tags apply inside the filter.
+
+**Deleting** only touches the user's words (`deleteMine`):
+
+- A word Learn hasn't introduced is deleted.
+- A word Learn has introduced stays for Learn: it stops being the user's and leaves Free practice.
+- A word only a list brought can't be deleted, so Delete is disabled when the selection holds none of the user's words.
+
+Editing works on any word, and the change shows in both modes, since it is the same record.
 
 The edit dialog refuses a change that would match another word.
 
@@ -67,9 +86,9 @@ The Vocabulary and Stats searches share a bar (`TagSearch`), with tag chips befo
 
 ## List
 
-Bulk actions only touch what the user can see, so changing the search or the tag filter clears the selection. Select all covers every filtered word.
+Bulk actions only touch what the user can see, so changing the search, the tag filter or the origin filter clears the selection. Select all covers every filtered word.
 
-Sorting by status puts active words first when ascending, oldest activation first. The sort is saved in the settings.
+Sorting by status puts the words in Free practice first when ascending, oldest activation first. The sort is saved in the settings.
 
 ## Writing sheet
 
@@ -88,3 +107,4 @@ The shell renders the sheet hidden, and opens the browser's print dialog once it
 - **Tag names hold no spaces or `#`.** A space would end a `#` search term and a `#` would start one, so this way a `#term` can name any tag.
 - **Tag colors are saved rather than derived from the name.** Only a saved color can be picked to stand apart from the others, and survive a rename.
 - **Import never replaces or deletes.** A file can only add to what the user has.
+- **Deleting a word Learn practices keeps it.** Its progress and tally would otherwise be orphaned, and Learn would add it back anyway; dropping `mine` gives the user what they asked for, a word that is no longer theirs.
