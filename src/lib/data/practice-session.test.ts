@@ -3,18 +3,19 @@ import {
   nextRound,
   startSession,
   submit,
+  type Checked,
   type PracticeMode,
 } from "./practice-session";
 import type { Verdict } from "#lib/core/types.ts";
 
 type Item = { id: string };
 
-const typed = { reading: "x", meaning: "" };
-const blank = { reading: "   ", meaning: "" };
+const typed = { reading: "x", meaning: "", responseMs: 1500, hidden: false };
+const blank = { reading: "   ", meaning: "", responseMs: 0, hidden: false };
 
 /** A mode over plain items whose check is scripted by the test. */
 function fakeMode(ids: string[], verdicts: Verdict[] = []) {
-  const recorded: [string, Verdict][] = [];
+  const recorded: [string, Checked][] = [];
   const mode: PracticeMode<Item> = {
     pool: ids.map((id) => ({ id })),
     keyOf: (item) => item.id,
@@ -24,7 +25,7 @@ function fakeMode(ids: string[], verdicts: Verdict[] = []) {
       const verdict = verdicts.shift() ?? "correct";
       return { verdict, reading: verdict, meaning: null };
     },
-    record: (item, verdict) => recorded.push([item.id, verdict]),
+    record: (item, checked) => recorded.push([item.id, checked]),
   };
   return { mode, recorded };
 }
@@ -96,7 +97,9 @@ describe("submit", () => {
       hits: 1,
       answers: 1,
     });
-    expect(recorded).toEqual([["a", "correct"]]);
+    expect(recorded.map(([id, { outcome }]) => [id, outcome.verdict])).toEqual([
+      ["a", "correct"],
+    ]);
   });
 
   it("counts a wrong or almost answer in the answers but not in the hits", () => {
@@ -116,6 +119,31 @@ describe("submit", () => {
     const moved = submit(checked, blank, mode);
     expect(moved).toMatchObject({ outcome: null, hits: 1, answers: 1 });
     expect(recorded).toHaveLength(1);
+  });
+
+  it("records the answer with its chance and its place in the session", () => {
+    const { mode, recorded } = fakeMode(["a", "b"]);
+    let session = nextRound(startSession<Item>(), mode, () => 0);
+    session = submit(
+      submit(session, typed, mode, () => 0),
+      blank,
+      mode,
+    );
+    submit(session, typed, mode);
+    expect(recorded).toEqual([
+      [
+        "a",
+        {
+          outcome: { verdict: "correct", reading: "correct", meaning: null },
+          answer: typed,
+          chance: 0.5,
+          session: session.id,
+          seq: 1,
+        },
+      ],
+      // the only choice left, since the previous item isn't drawn again
+      ["b", expect.objectContaining({ chance: 1, seq: 2 })],
+    ]);
   });
 
   it("ignores an empty answer without counting or recording it", () => {

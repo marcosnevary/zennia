@@ -3,8 +3,11 @@ import {
   pronunciationPath,
   type Pronounced,
 } from "#functions/_shared/pronunciation.ts";
-import type { Memory, Stats, Word } from "#lib/core/types.ts";
+import type { Memory, Stats, Verdict, Word } from "#lib/core/types.ts";
+import { DRAW_ALGORITHM } from "#lib/data/memory.ts";
+import type { WordsFocus } from "#lib/data/practice-modes.ts";
 import type { Settings } from "#lib/data/settings.ts";
+import type { UsageEvent } from "#lib/data/usage-log.ts";
 import {
   deleteAccount,
   getAccount,
@@ -44,15 +47,14 @@ export interface Repo {
   upsertWords(words: Word[]): Promise<void>;
   deleteWords(ids: string[]): Promise<void>;
   /**
-   * Adds one answer to the tally of a word (`key` is its id) or of a kana (`key` is its `kanaKey`), saves the memory
-   * it led to and logs it.
+   * Adds one answer to the tally of its item, saves the memory it led to and, unless the user objects, logs it.
    */
-  recordAnswer(
-    kind: "word" | "kana",
-    key: string,
-    hit: boolean,
-    memory: Memory,
-  ): Promise<void>;
+  recordAnswer(answer: AnswerRecord): Promise<void>;
+  /** Logs how long the result of a logged answer stayed up, once Next closes it. */
+  logResult(result: AnswerResult): Promise<void>;
+  logEvent(session: string, event: UsageEvent): Promise<void>;
+  /** Whether the user's log has an event of this type. */
+  hasEvent(type: UsageEvent["type"]): Promise<boolean>;
   resetStats(): Promise<void>;
   saveSettings(patch: Partial<Settings>): Promise<void>;
   account(): Promise<Account>;
@@ -75,6 +77,38 @@ export interface Repo {
   makePronunciation(pronounced: Pronounced): Promise<void>;
 }
 
+/** A checked answer, as `record_answer` saves and logs it. */
+export interface AnswerRecord {
+  kind: "word" | "kana";
+  /** A word's id, or a kana's `kanaKey` */
+  key: string;
+  verdict: Verdict;
+  memory: Memory;
+  /** The recall the model predicted before the answer */
+  recall: number;
+  /** The chance the item had of being drawn */
+  chance: number;
+  session: string;
+  seq: number;
+  typedReading: string;
+  responseMs: number;
+  hidden: boolean;
+  /** Words only */
+  focus?: WordsFocus;
+  /** Words only */
+  typedMeaning?: string;
+}
+
+/** What Next adds to a logged answer. */
+export interface AnswerResult {
+  kind: "word" | "kana";
+  session: string;
+  seq: number;
+  resultMs: number;
+  /** Whether the page was hidden at any point of the answer, its result included */
+  hidden: boolean;
+}
+
 /** The user's rows as the database holds them, and their Auth user, which has the Google profile. */
 export interface UserData {
   exportedAt: string;
@@ -85,6 +119,7 @@ export interface UserData {
   kanaStats: unknown[];
   wordAnswers: unknown[];
   kanaAnswers: unknown[];
+  events: unknown[];
 }
 
 /** The tables of a user in the export, with the columns that order them for paging. */
@@ -94,7 +129,10 @@ const USER_TABLES = {
   kanaStats: { table: "kana_stats", order: ["script", "hiragana"] },
   wordAnswers: { table: "word_answers", order: ["id"] },
   kanaAnswers: { table: "kana_answers", order: ["id"] },
+  events: { table: "events", order: ["id"] },
 } as const;
+
+const ANSWER_TABLES = { word: "word_answers", kana: "kana_answers" } as const;
 
 const PAGE = 1000;
 const WRITE_CHUNK = 500;
@@ -198,25 +236,64 @@ export function createRepo(getDb: () => Db): Repo {
       }
     },
 
-    async recordAnswer(kind, key, hit, memory) {
+    async recordAnswer(answer) {
       const { db } = await open();
       unwrap(
         await db.rpc("record_answer", {
-          p_kind: kind,
-          p_key: key,
-          p_hit: hit,
-          p_half_life_ms: Math.round(memory.halfLife),
-          p_streak: memory.streak,
+          p_kind: answer.kind,
+          p_key: answer.key,
+          p_verdict: answer.verdict,
+          p_half_life_ms: Math.round(answer.memory.halfLife),
+          p_streak: answer.memory.streak,
+          p_p: answer.recall,
+          p_chance: answer.chance,
+          p_algorithm: DRAW_ALGORITHM,
+          p_session_id: answer.session,
+          p_seq: answer.seq,
+          p_typed_reading: answer.typedReading,
+          p_response_ms: Math.round(answer.responseMs),
+          p_hidden: answer.hidden,
+          p_focus: answer.focus ?? null,
+          p_typed_meaning: answer.typedMeaning ?? null,
         }),
       );
     },
 
+    async logResult({ kind, session, seq, resultMs, hidden }) {
+      const { db } = await open();
+      unwrap(
+        await db
+          .from(ANSWER_TABLES[kind])
+          .update({ result_ms: Math.round(resultMs), hidden })
+          .eq("session_id", session)
+          .eq("seq", seq),
+      );
+    },
+
+    async logEvent(session, event) {
+      const { db } = await open();
+      unwrap(
+        await db.from("events").insert({
+          type: event.type,
+          session_id: session,
+          payload: "payload" in event ? event.payload : {},
+        }),
+      );
+    },
+
+    async hasEvent(type) {
+      const { db } = await open();
+      const rows = unwrap(
+        await db.from("events").select("id").eq("type", type).limit(1),
+      );
+      return Boolean(rows?.length);
+    },
+
+    // the logs are kept: they are there to improve zennia, not to show the user's results
     async resetStats() {
       const { db, userId } = await open();
       unwrap(await db.from("word_stats").delete().eq("user_id", userId));
       unwrap(await db.from("kana_stats").delete().eq("user_id", userId));
-      unwrap(await db.from("word_answers").delete().eq("user_id", userId));
-      unwrap(await db.from("kana_answers").delete().eq("user_id", userId));
     },
 
     async saveSettings(patch) {
@@ -288,6 +365,7 @@ export function createRepo(getDb: () => Db): Repo {
         kanaStats,
         wordAnswers,
         kanaAnswers,
+        events,
       ] = await Promise.all([
         db.auth.getUser(),
         db.from("settings").select("*").maybeSingle(),
@@ -296,6 +374,7 @@ export function createRepo(getDb: () => Db): Repo {
         rowsOf("kanaStats"),
         rowsOf("wordAnswers"),
         rowsOf("kanaAnswers"),
+        rowsOf("events"),
       ]);
       if (user.error) throw new Error(user.error.message);
       return {
@@ -307,6 +386,7 @@ export function createRepo(getDb: () => Db): Repo {
         kanaStats,
         wordAnswers,
         kanaAnswers,
+        events,
       };
     },
 

@@ -34,7 +34,7 @@
   async function add() {
     adding = true;
     try {
-      app.addList(await loadList(lesson.list));
+      app.addList(lesson.id, await loadList(lesson.list));
       await goto(resolve("/practice"));
     } catch {
       app.toasts.show(

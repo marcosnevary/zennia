@@ -91,6 +91,9 @@
       readyFontKey = key;
     });
   });
+  const promptReady = $derived(
+    !promptFontKey || readyFontKey === promptFontKey,
+  );
 
   const pronunciation = new Pronunciation({
     url: (pronounced) => app.pronunciationUrl(pronounced),
@@ -119,6 +122,17 @@
   const outcome = $derived(app.practice.outcome);
   const verdict = $derived(outcome?.verdict ?? null);
 
+  // the log times an answer from its prompt showing to Check, and its result from Check to Next; a hidden page
+  // inflates both, so that is logged too
+  let shownAt = 0;
+  let checkedAt = 0;
+  let hiddenMeanwhile = false;
+  $effect(() => {
+    if (!current || !promptReady || verdict !== null) return;
+    shownAt = performance.now();
+    hiddenMeanwhile = document.hidden;
+  });
+
   // the fields show the parts by color, so screen readers get them in words when both are practiced
   const note = $derived(
     outcome?.reading && outcome.meaning
@@ -135,9 +149,16 @@
   function submit(event: Event) {
     event.preventDefault();
     const advancing = verdict !== null;
+    const now = performance.now();
+    if (advancing) app.logResult(now - checkedAt, hiddenMeanwhile);
     app.practice = submitAnswer(
       app.practice,
-      { reading: answer, meaning: meaningAnswer },
+      {
+        reading: answer,
+        meaning: meaningAnswer,
+        responseMs: now - shownAt,
+        hidden: hiddenMeanwhile,
+      },
       mode,
     );
     if (advancing) {
@@ -150,6 +171,7 @@
       meaningEl?.blur();
       const checked = app.practice.outcome;
       if (!checked) return;
+      checkedAt = now;
       drawUpcomingFont();
       if (playAnswerSound) answerSound.play(checked.verdict === "correct");
       if (playPronunciation)
@@ -192,6 +214,11 @@
 </script>
 
 <svelte:window onkeydown={onWindowKeydown} />
+<svelte:document
+  onvisibilitychange={() => {
+    if (document.hidden) hiddenMeanwhile = true;
+  }}
+/>
 
 <!-- sized for a phone, so on a wide screen it keeps that width in the middle -->
 <div class="mx-auto mt-6 max-w-xl">
@@ -207,7 +234,7 @@
       promptFont={current.kind === "word" && font
         ? fontFamily(font)
         : undefined}
-      promptReady={!promptFontKey || readyFontKey === promptFontKey}
+      {promptReady}
       {verdict}
       rightAnswer={rightAnswer(current)}
       {note}
