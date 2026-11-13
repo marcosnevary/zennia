@@ -3,6 +3,7 @@
   import "../app.css";
   import BookOpen from "@lucide/svelte/icons/book-open";
   import ChartColumn from "@lucide/svelte/icons/chart-column";
+  import GraduationCap from "@lucide/svelte/icons/graduation-cap";
   import Languages from "@lucide/svelte/icons/languages";
   import LogIn from "@lucide/svelte/icons/log-in";
   import PencilLine from "@lucide/svelte/icons/pencil-line";
@@ -42,6 +43,7 @@
   const wide = new MediaQuery("min-width: 48rem");
 
   const tabs = [
+    { path: "/learn", label: "Learn", icon: GraduationCap },
     { path: "/practice", label: "Practice", icon: PencilLine },
     { path: "/vocabulary", label: "Vocabulary", icon: BookOpen },
     { path: "/kana", label: "Kana", icon: Languages },
@@ -56,6 +58,10 @@
   const currentPath = $derived(
     navigating.to?.url.pathname ?? page.url.pathname,
   );
+  // a lesson belongs to the Learn tab
+  const isCurrent = (path: (typeof tabs)[number]["path"]) =>
+    currentPath === resolve(path) ||
+    currentPath.startsWith(`${resolve(path)}/`);
   const loadingRoute = $derived(
     navigating.to != null && navigating.to.route.id !== page.route.id,
   );
@@ -143,7 +149,7 @@
           <a
             class="tab justify-start"
             href={resolve(path)}
-            aria-current={currentPath === resolve(path) ? "page" : undefined}
+            aria-current={isCurrent(path) ? "page" : undefined}
             title={app.settings.numberKeyTabs ? `${label} (${i + 1})` : label}
             aria-keyshortcuts={app.settings.numberKeyTabs
               ? String(i + 1)
@@ -190,7 +196,7 @@
       data-sveltekit-preload-code="eager"
     >
       {#each tabs as { path, label, icon: TabIcon }, i (path)}
-        {@const current = currentPath === resolve(path)}
+        {@const current = isCurrent(path)}
         <a
           class={[
             "tab flex size-12 items-center justify-center p-0",

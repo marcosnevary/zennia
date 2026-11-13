@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Word } from "#lib/core/types.ts";
-import type { Progress } from "#lib/data/learn.ts";
 import { DEFAULT_SETTINGS } from "#lib/data/settings.ts";
 import {
-  progressFromRows,
-  progressToRows,
   settingsFromRow,
   settingsToRow,
   statsFromRows,
@@ -18,7 +15,6 @@ const word: Word = {
   hiragana: "たべる",
   meaning: "to eat",
   disabled: false,
-  mine: true,
   activatedAt: Date.UTC(2026, 0, 2),
   createdAt: Date.UTC(2026, 0, 1),
   tags: ["N5"],
@@ -67,7 +63,6 @@ describe("settings", () => {
         play_pronunciation: false,
         play_answer_sound: true,
         show_result_romaji: true,
-        practice_mode: "x",
       }),
     ).toEqual({ ...DEFAULT_SETTINGS, kanaSelection: ["hiragana:あ"] });
   });
@@ -88,7 +83,6 @@ describe("settings", () => {
         play_pronunciation: false,
         play_answer_sound: true,
         show_result_romaji: true,
-        practice_mode: "learn",
       }),
     ).toMatchObject({
       wordsSort: "reading",
@@ -118,7 +112,6 @@ describe("settings", () => {
         play_pronunciation: false,
         play_answer_sound: true,
         show_result_romaji: true,
-        practice_mode: "learn",
       }).tagColors,
     ).toEqual({ food: { hue: 10, tone: 1 } });
   });
@@ -139,7 +132,6 @@ describe("settings", () => {
         play_pronunciation: false,
         play_answer_sound: true,
         show_result_romaji: true,
-        practice_mode: "learn",
       }).numberKeyTabs,
     ).toBe(false);
   });
@@ -160,7 +152,6 @@ describe("settings", () => {
         play_pronunciation: false,
         play_answer_sound: true,
         show_result_romaji: true,
-        practice_mode: "learn",
       }).practiceFonts,
     ).toEqual(["klee-one", "yomogi"]);
   });
@@ -198,28 +189,5 @@ describe("settings", () => {
     expect(settingsToRow({ playPronunciation: true })).toEqual({
       play_pronunciation: true,
     });
-    expect(settingsToRow({ practiceMode: "free" })).toEqual({
-      practice_mode: "free",
-    });
-  });
-});
-
-describe("progress", () => {
-  it("survives a round trip through its rows", () => {
-    const progress: Progress = {
-      "kana:hiragana:あ": {
-        state: "known",
-        streak: 4,
-        introducedAt: Date.UTC(2026, 0, 1),
-      },
-      "kana:hiragana:い": {
-        state: "learning",
-        streak: 0,
-        introducedAt: Date.UTC(2026, 0, 2),
-      },
-    };
-    const rows = progressToRows(progress, "u1");
-    expect(rows.every((r) => r.user_id === "u1")).toBe(true);
-    expect(progressFromRows(rows)).toEqual(progress);
   });
 });

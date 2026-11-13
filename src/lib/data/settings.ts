@@ -1,4 +1,3 @@
-import type { PracticeModeId } from "./learn";
 import type { PracticeFontId } from "./practice-fonts";
 import type { WordsFocus } from "./practice-modes";
 import type { StatsSort } from "./stats";
@@ -17,7 +16,7 @@ export interface Settings {
   statsSortDirection: SortDirection;
   /** The color of each tag in use, by `tagKey`. */
   tagColors: Record<string, TagColor>;
-  /** Whether the keys 1 to 4 switch tabs. */
+  /** Whether the number keys switch tabs. */
   numberKeyTabs: boolean;
   /** The fonts a practice word is drawn from; none keeps the UI font. */
   practiceFonts: PracticeFontId[];
@@ -27,8 +26,6 @@ export interface Settings {
   playAnswerSound: boolean;
   /** Whether the practice result shows the romaji below the answer. */
   showResultRomaji: boolean;
-  /** Whether Practice opens in Learn or Free practice, as it was left. */
-  practiceMode: PracticeModeId;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -45,5 +42,4 @@ export const DEFAULT_SETTINGS: Settings = {
   playPronunciation: false,
   playAnswerSound: true,
   showResultRomaji: true,
-  practiceMode: "learn",
 };

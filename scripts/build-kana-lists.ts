@@ -1,7 +1,7 @@
 // Builds static/lists/hiragana.json and katakana.json from the tables of the Kana tab.
 // Usage: node scripts/build-kana-lists.ts
 import { mkdirSync, writeFileSync } from "node:fs";
-import { kanaList } from "#lib/data/learn.ts";
+import { kanaList } from "#lib/data/lists.ts";
 
 const dir = new URL("../static/lists/", import.meta.url);
 mkdirSync(dir, { recursive: true });

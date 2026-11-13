@@ -30,7 +30,7 @@
 
   <SettingRow
     title="Switch tabs with number keys"
-    description="Press 1 to 4 to open each tab."
+    description="Press 1 to 5 to open each tab."
   >
     <div class="flex sm:justify-end">
       <Switch

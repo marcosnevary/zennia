@@ -4,15 +4,13 @@
 // Usage: node scripts/build-n5-list.ts <n5_vocab_cleaned.csv>
 import { readFileSync, writeFileSync } from "node:fs";
 import type { DictionaryRow } from "#lib/data/dictionary.ts";
-import { wordItemKey, type WordListItem } from "#lib/data/learn.ts";
+import { wordItemKey, type WordListItem } from "#lib/data/lists.ts";
 
 const file = process.argv[2];
 if (!file) {
   console.error("Usage: node scripts/build-n5-list.ts <n5_vocab_cleaned.csv>");
   process.exit(1);
 }
-
-const GROUP_SIZE = 5;
 
 type Fix = [japanese: string, reading: string, meaning?: string];
 
@@ -149,14 +147,7 @@ for (const line of lines) {
   const meaning = given ?? meanings.get(key);
   if (!meaning) unmatched.push(line);
   else if (items.some((item) => item.key === key)) duplicates.push(line);
-  else
-    items.push({
-      key,
-      group: Math.floor(items.length / GROUP_SIZE),
-      japanese,
-      hiragana,
-      meaning,
-    });
+  else items.push({ key, japanese, hiragana, meaning });
 }
 
 if (unmatched.length) {

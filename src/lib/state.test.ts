@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Stats, Word } from "./core/types";
 import type { Repo, Stored } from "./data/db/repo";
-import type { List } from "./data/learn";
+import type { List } from "./data/lists";
 import { DEFAULT_SETTINGS } from "./data/settings";
 import { emptyStats } from "./data/stats";
 import { App } from "./state.svelte";
@@ -16,7 +16,6 @@ const word = (
   hiragana: "ひ",
   meaning: id,
   disabled: false,
-  mine: true,
   activatedAt: createdAt,
   tags: [],
   createdAt,
@@ -28,7 +27,6 @@ function fakeRepo(stored: Partial<Stored> = {}, conflict = false) {
     words: [],
     stats: emptyStats(),
     settings: { ...DEFAULT_SETTINGS },
-    progress: {},
     ...stored,
   };
   const calls: string[] = [];
@@ -45,12 +43,6 @@ function fakeRepo(stored: Partial<Stored> = {}, conflict = false) {
     }),
     resetStats: vi.fn(async () => {
       calls.push("reset stats");
-    }),
-    deleteProgress: vi.fn(async (items) => {
-      calls.push(`delete progress ${items.join(",")}`);
-    }),
-    saveProgress: vi.fn(async (progress) => {
-      calls.push(`progress ${Object.keys(progress).join(",")}`);
     }),
     saveSettings: vi.fn(async (patch) => {
       calls.push(`settings ${JSON.stringify(patch)}`);
@@ -296,7 +288,6 @@ describe("App", () => {
       words: [word("a", 1)],
       stats: emptyStats(),
       settings: { ...DEFAULT_SETTINGS },
-      progress: {},
     });
     app.setWords([word("b", 2), ...app.words]);
     await app.flush();
@@ -373,119 +364,65 @@ describe("login", () => {
   });
 });
 
-describe("Learn", () => {
-  const path: List[] = [
-    {
-      id: "hiragana",
-      items: [0, 1, 2, 3, 4, 5].map((i) => ({
-        key: `kana:hiragana:${i}`,
-        group: Math.floor(i / 5),
-      })),
-    },
-    { id: "katakana", items: [{ key: "kana:katakana:0", group: 0 }] },
-  ];
-
-  it("introduces the first group and saves it", async () => {
-    const { app, calls } = await ready();
-    app.startLearn(path);
-    await app.flush();
-    expect(Object.keys(app.progress)).toHaveLength(5);
-    expect(calls).toEqual([
-      "progress kana:hiragana:0,kana:hiragana:1,kana:hiragana:2,kana:hiragana:3,kana:hiragana:4",
-    ]);
-    expect(app.startedList).toBeNull();
-  });
-
-  it("saves only the answered item while enough items are learning", async () => {
-    const { app, calls } = await ready();
-    app.startLearn(path);
-    app.recordLearn("kana:hiragana:0", true);
-    await app.flush();
-    expect(calls.at(-1)).toBe("progress kana:hiragana:0");
-    expect(app.progress["kana:hiragana:0"].streak).toBe(1);
-  });
-
-  it("says when the next list starts", async () => {
-    const { app } = await ready();
-    app.startLearn(path);
-    for (let i = 0; i < 3; i++) app.recordLearn("kana:hiragana:0", true);
-    expect(app.progress["kana:hiragana:5"]).toBeDefined();
-    for (let i = 0; i < 3; i++) app.recordLearn("kana:hiragana:1", true);
-    expect(app.startedList).toBe("katakana");
-    app.recordLearn("kana:hiragana:2", true);
-    expect(app.startedList).toBeNull();
-  });
-
-  it("restarts a list from its first group, keeping the other lists and the tallies", async () => {
-    const { app, calls } = await ready();
-    app.startLearn(path);
-    for (let i = 0; i < 3; i++) app.recordLearn("kana:hiragana:0", true);
-    for (let i = 0; i < 3; i++) app.recordLearn("kana:hiragana:1", true);
-    app.recordKana("hiragana", "あ", true);
-    await app.flush();
-    calls.length = 0;
-
-    app.restartList(path[0]);
-    await app.flush();
-    expect(Object.keys(app.progress).sort()).toEqual([
-      "kana:hiragana:0",
-      "kana:hiragana:1",
-      "kana:hiragana:2",
-      "kana:hiragana:3",
-      "kana:hiragana:4",
-      "kana:katakana:0",
-    ]);
-    expect(app.progress["kana:hiragana:0"]).toMatchObject({
-      state: "learning",
-      streak: 0,
-    });
-    expect(app.progress["kana:katakana:0"]).toBeDefined();
-    expect(app.stats.kana["hiragana:あ"]).toEqual({ hits: 1, misses: 0 });
-    expect(calls).toEqual([
-      "delete progress kana:hiragana:0,kana:hiragana:1,kana:hiragana:2,kana:hiragana:3,kana:hiragana:4,kana:hiragana:5",
-      "progress kana:hiragana:0,kana:hiragana:1,kana:hiragana:2,kana:hiragana:3,kana:hiragana:4",
-    ]);
-  });
-});
-
-describe("List words", () => {
+describe("addList", () => {
+  const hiragana: List = {
+    id: "hiragana",
+    items: ["あ", "い", "が"].map((kana) => ({ key: `kana:hiragana:${kana}` })),
+  };
   const n5: List = {
     id: "n5",
-    items: ["a", "b", "c", "d", "e", "f"].map((id, i) => ({
+    items: ["a", "b"].map((id) => ({
       key: `word:日${id}:ひ`,
-      group: Math.floor(i / 5),
       japanese: `日${id}`,
       hiragana: "ひ",
       meaning: `list ${id}`,
     })),
   };
 
-  it("adds the words Learn introduces, out of Free practice, and leaves the user's own as they are", async () => {
-    const { app } = await ready({ words: [word("a", 1)] });
-    app.startLearn([n5]);
+  it("adds the kana to the selection, keeping the ones already selected", async () => {
+    const { app } = await ready({
+      settings: {
+        ...DEFAULT_SETTINGS,
+        kanaSelection: ["katakana:ア", "hiragana:あ"],
+      },
+    });
+    expect(app.addList(hiragana)).toBe(2);
+    expect(app.kanaSelection).toEqual([
+      "katakana:ア",
+      "hiragana:あ",
+      "hiragana:い",
+      "hiragana:が",
+    ]);
+    expect(app.addList(hiragana)).toBe(0);
+  });
+
+  it("starts from the default selection when the user never chose one", async () => {
+    const { app } = await ready();
+    app.addList(hiragana);
+    expect(app.kanaSelection).toContain("hiragana:が");
+    expect(app.kanaSelection).toContain("hiragana:か");
+  });
+
+  it("adds the words active and tagged with the list, and tags the ones the user has", async () => {
+    const { app } = await ready({
+      words: [word("a", 1, { disabled: true })],
+    });
+    expect(app.addList(n5)).toBe(1);
     const byJapanese = Object.fromEntries(
       app.words.map((w) => [w.japanese, w]),
     );
-    expect(app.words).toHaveLength(5);
     expect(byJapanese["日a"]).toMatchObject({
       id: "a",
       meaning: "a",
-      mine: true,
-      disabled: false,
+      disabled: true,
+      tags: ["JLPT-N5"],
     });
     expect(byJapanese["日b"]).toMatchObject({
       meaning: "list b",
-      mine: false,
-      disabled: true,
+      disabled: false,
+      tags: ["JLPT-N5"],
     });
-    expect(byJapanese["日f"]).toBeUndefined();
-  });
-
-  it("adds a list word back when it was deleted", async () => {
-    const { app } = await ready();
-    app.startLearn([n5]);
-    app.setWords(app.words.filter((w) => w.japanese !== "日b"));
-    app.recordLearn("word:日c:ひ", true);
-    expect(app.words.some((w) => w.japanese === "日b")).toBe(true);
+    expect(app.addList(n5)).toBe(0);
+    expect(app.words).toHaveLength(2);
   });
 });
