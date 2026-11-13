@@ -26,6 +26,8 @@ export interface Settings {
   playAnswerSound: boolean;
   /** Whether the practice result shows the romaji below the answer. */
   showResultRomaji: boolean;
+  /** Whether data on how zennia is used, such as the answer log, is kept to improve it; the user can object (docs/privacy.md). */
+  shareUsageData: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -42,4 +44,5 @@ export const DEFAULT_SETTINGS: Settings = {
   playPronunciation: false,
   playAnswerSound: true,
   showResultRomaji: true,
+  shareUsageData: true,
 };

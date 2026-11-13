@@ -668,6 +668,7 @@
   button,
   select,
   .file,
+  .button,
   .tab {
     position: relative;
     padding: 8px 16px;
@@ -688,7 +689,8 @@
 
   /* secondary buttons: a faint tint, so they read as buttons and not as text */
   button,
-  .file {
+  .file,
+  .button {
     background: var(--color-tint);
     text-align: center;
   }
@@ -710,7 +712,8 @@
   }
 
   button:not(:disabled):hover,
-  .file:hover {
+  .file:hover,
+  .button:hover {
     background: var(--color-tint-hover);
   }
 
@@ -767,7 +770,8 @@
     color: var(--surface);
   }
 
-  a.tab {
+  a.tab,
+  a.button {
     display: inline-block;
     text-align: center;
     text-decoration: none;

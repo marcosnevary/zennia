@@ -69,6 +69,24 @@ function fakeRepo(stored: Partial<Stored> = {}, conflict = false) {
     signOut: vi.fn(async () => {
       calls.push("signout");
     }),
+    exportData: vi.fn(async () => ({
+      exportedAt: "2026-11-13T00:00:00.000Z",
+      user: null,
+      settings: null,
+      words: current.words,
+      wordStats: [],
+      kanaStats: [],
+      wordAnswers: [],
+      kanaAnswers: [],
+    })),
+    deleteAccount: vi.fn(async () => {
+      calls.push("delete account");
+      current = {
+        words: [],
+        stats: emptyStats(),
+        settings: { ...DEFAULT_SETTINGS },
+      };
+    }),
     pronunciationUrl: vi.fn(async (p) => `audio/${p.reading}.mp3`),
     makePronunciation: vi.fn(async (p) => {
       calls.push(`pronounce ${p.reading}`);
@@ -354,6 +372,14 @@ describe("login", () => {
     await app.signOut();
     expect(calls).toEqual(["signout"]);
     expect(repo.load).toHaveBeenCalledTimes(2);
+  });
+
+  it("deletes the account after the pending writes, and starts over empty", async () => {
+    const { app, calls } = await ready({ words: [word("a", 1)] });
+    app.setWords([word("a", 1), word("b", 2)]);
+    await app.deleteAccount();
+    expect(calls).toEqual(["upsert b", "delete account"]);
+    expect(app.words).toEqual([]);
   });
 
   it("reloads the account after a profile change", async () => {

@@ -6,6 +6,7 @@ import {
 import type { Memory, Stats, Word } from "#lib/core/types.ts";
 import type { Settings } from "#lib/data/settings.ts";
 import {
+  deleteAccount,
   getAccount,
   linkGoogle,
   openSession,
@@ -64,11 +65,36 @@ export interface Repo {
   signInToAccount(google: GoogleToken): Promise<void>;
   /** Signs out; the next load starts a new anonymous user. */
   signOut(): Promise<void>;
+  /** Everything stored about the user, for the data export of the privacy notice. */
+  exportData(): Promise<UserData>;
+  /** Deletes the user and all their data; the next load starts a new anonymous user. */
+  deleteAccount(): Promise<void>;
   /** Where the audio of a word is played from, though it may not have been made yet. */
   pronunciationUrl(pronounced: Pronounced): Promise<string>;
   /** Makes the audio of a word, unless it is already stored. */
   makePronunciation(pronounced: Pronounced): Promise<void>;
 }
+
+/** The user's rows as the database holds them, and their Auth user, which has the Google profile. */
+export interface UserData {
+  exportedAt: string;
+  user: unknown;
+  settings: unknown;
+  words: unknown[];
+  wordStats: unknown[];
+  kanaStats: unknown[];
+  wordAnswers: unknown[];
+  kanaAnswers: unknown[];
+}
+
+/** The tables of a user in the export, with the columns that order them for paging. */
+const USER_TABLES = {
+  words: { table: "words", order: ["id"] },
+  wordStats: { table: "word_stats", order: ["word_id"] },
+  kanaStats: { table: "kana_stats", order: ["script", "hiragana"] },
+  wordAnswers: { table: "word_answers", order: ["id"] },
+  kanaAnswers: { table: "kana_answers", order: ["id"] },
+} as const;
 
 const PAGE = 1000;
 const WRITE_CHUNK = 500;
@@ -242,6 +268,51 @@ export function createRepo(getDb: () => Db): Repo {
     async signOut() {
       const { db } = await open();
       await signOut(db);
+      opened = undefined;
+    },
+
+    async exportData() {
+      const { db, userId } = await open();
+      const rowsOf = (key: keyof typeof USER_TABLES) =>
+        fetchAll<unknown>((from, to) => {
+          const { table, order } = USER_TABLES[key];
+          let query = db.from(table).select("*").eq("user_id", userId);
+          for (const column of order) query = query.order(column);
+          return query.range(from, to);
+        });
+      const [
+        user,
+        settings,
+        words,
+        wordStats,
+        kanaStats,
+        wordAnswers,
+        kanaAnswers,
+      ] = await Promise.all([
+        db.auth.getUser(),
+        db.from("settings").select("*").maybeSingle(),
+        rowsOf("words"),
+        rowsOf("wordStats"),
+        rowsOf("kanaStats"),
+        rowsOf("wordAnswers"),
+        rowsOf("kanaAnswers"),
+      ]);
+      if (user.error) throw new Error(user.error.message);
+      return {
+        exportedAt: new Date().toISOString(),
+        user: user.data.user,
+        settings: unwrap(settings),
+        words,
+        wordStats,
+        kanaStats,
+        wordAnswers,
+        kanaAnswers,
+      };
+    },
+
+    async deleteAccount() {
+      const { db, userId } = await open();
+      await deleteAccount(db, userId);
       opened = undefined;
     },
   };
