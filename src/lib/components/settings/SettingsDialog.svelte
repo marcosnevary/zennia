@@ -6,6 +6,7 @@
   import X from "@lucide/svelte/icons/x";
   import ProfileSettings from "#lib/components/account/ProfileSettings.svelte";
   import Dialog from "#lib/components/Dialog.svelte";
+  import { arrowIndex } from "#lib/components/arrow-keys.ts";
   import DataSettings from "./DataSettings.svelte";
   import GeneralSettings from "./GeneralSettings.svelte";
   import PracticeSettings from "./PracticeSettings.svelte";
@@ -43,14 +44,11 @@
     dialogEl?.showModal();
   }
 
-  // arrow keys move and select at once, like the tabs of an ARIA tablist; both axes, as the tabs are a row below sm
+  // arrow keys move and select at once, like the tabs of an ARIA tablist
   function onkeydown(event: KeyboardEvent) {
-    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[
-      event.key
-    ];
-    if (!step) return;
-    event.preventDefault();
-    selected = (selected + step + TABS.length) % TABS.length;
+    const next = arrowIndex(event, selected, TABS.length);
+    if (next === null) return;
+    selected = next;
     tabEls[selected]?.focus();
   }
 </script>

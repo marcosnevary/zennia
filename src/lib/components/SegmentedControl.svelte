@@ -1,5 +1,6 @@
 <script lang="ts" generics="T extends string">
   import type { Component } from "svelte";
+  import { arrowIndex } from "./arrow-keys.ts";
 
   let {
     options,
@@ -24,12 +25,8 @@
 
   // arrow keys move and select at once, like a native radio group
   function onkeydown(e: KeyboardEvent) {
-    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[
-      e.key
-    ];
-    if (!step) return;
-    e.preventDefault();
-    const next = (selected + step + options.length) % options.length;
+    const next = arrowIndex(e, selected, options.length);
+    if (next === null) return;
     onchange(options[next].id);
     buttons[next]?.focus();
   }
