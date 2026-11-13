@@ -47,6 +47,14 @@
     font = practiceFonts.length ? nextFont(practiceFonts, font) : undefined;
   }
 
+  // Settings opens over Practice, so a change there redraws the shown word's font once it's no longer chosen
+  $effect(() => {
+    const chosen = practiceFonts;
+    untrack(() => {
+      if (font ? !chosen.includes(font) : chosen.length) drawFont();
+    });
+  });
+
   // a font's glyphs are fetched only for the text it shows, so the word waits hidden for them instead of
   // appearing in the fallback font and swapping in view
   const promptFontKey = $derived(

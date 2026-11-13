@@ -104,7 +104,7 @@ The answer can be heard in Japanese: the written form, said with the saved readi
 
 ## Fonts
 
-Settings lists the fonts in `PRACTICE_FONTS` (`src/lib/data/practice-fonts.ts`), each with a preview in hiragana, kanji and katakana, and the user picks which ones Practice uses. Each word is then shown in one of them, never the same one twice in a row unless only one is chosen. With none chosen, words keep the UI font. Kana always keep the UI font, and a word keeps its font in the result.
+Settings lists the fonts in `PRACTICE_FONTS` (`src/lib/data/practice-fonts.ts`), each with a preview in hiragana, kanji and katakana, and the user picks which ones Practice uses. Each word is then shown in one of them, never the same one twice in a row unless only one is chosen. With none chosen, words keep the UI font. Kana always keep the UI font, and a word keeps its font in the result. If the selection changes while a word is shown and no longer includes its font, the word switches to one that is chosen (or to the UI font with none).
 
 The fonts are self-hosted from Fontsource. Practice loads only the chosen ones, and the picker loads them all for its previews. Fontsource splits each font by `unicode-range`, so the browser fetches only the chunks of the text it shows. Each word stays hidden until its chunks arrive, so it never appears in the fallback font and then swaps; after 3 seconds it shows anyway. A font that lacks a glyph falls back to the system's Japanese font for it.
 
