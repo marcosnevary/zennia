@@ -12,10 +12,10 @@ describe("typedKana", () => {
     expect(typedKana("tabe k")).toBe("たべ k");
     expect(typedKana("ky")).toBe("ky");
   });
-  it("keeps a final n as romaji until the next letter", () => {
-    expect(typedKana("kan")).toBe("かn");
+  it("shows a final n as ん until a vowel turns it into な", () => {
+    expect(typedKana("kan")).toBe("かん");
     expect(typedKana("kana")).toBe("かな");
-    expect(typedKana("n")).toBe("n");
+    expect(typedKana("n")).toBe("ん");
   });
   it("reads a final nn as ん, and a double n before a vowel as んな", () => {
     expect(typedKana("kann")).toBe("かん");
@@ -40,6 +40,8 @@ describe("editedRomaji", () => {
   it("keeps what was typed at the end as romaji", () => {
     expect(typeIn("", "konnichiwa")).toBe("konnichiwa");
     expect(typeIn("", "ti")).toBe("ti");
+    expect(typeIn("", "kana")).toBe("kana");
+    expect(typeIn("", "minna")).toBe("minna");
   });
   it("keeps the romaji behind the kana, so ti still answers ティ", () => {
     const romaji = typeIn("", "paatii");

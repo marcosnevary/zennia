@@ -1,12 +1,11 @@
 import { toKana } from "wanakana";
 
 /**
- * Typed romaji as a field shows it, in hiragana. A final n stays romaji until the next letter tells ん from な,
- * and a final nn is ん, as the answer check reads it.
+ * Typed romaji as a field shows it, in hiragana. A final n shows as ん at once and turns into な if a vowel follows;
+ * a final nn is also ん, as the answer check reads it.
  */
 export function typedKana(romaji: string): string {
   const typed = romaji.toLowerCase();
-  if (/(^|[^n])n$/.test(typed)) return `${toKana(typed.slice(0, -1))}n`;
   if (typed.endsWith("nn")) return toKana(typed.slice(0, -1));
   return toKana(typed);
 }

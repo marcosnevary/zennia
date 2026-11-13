@@ -38,7 +38,7 @@ A never-answered item gets the top weight of 5, and no item drops to zero. Low a
 
 For a word with kanji, the romaji field shows what is typed as kana (`src/lib/core/kana-input.ts`), while the check still gets the romaji. Every spelling the check accepts keeps working, such as `ti` for ティ, shown as ち.
 
-- A final `n` stays romaji until the next letter tells ん from な, and a final `nn` shows as ん.
+- A final `n` shows as ん at once and turns into な (or に, にゃ…) when the next letter needs it, and a final `nn` also shows as ん, so typing ん either way gives one.
 - A kana and a word written only in kana keep the romaji as typed: their prompt is already kana, so the field could be matched against it before Check.
 - Typing and deleting at the end keep the romaji. After any other edit, and for kana typed with a Japanese keyboard, the field's text is kept from the first changed kana on, and the check reads it as kana.
 
