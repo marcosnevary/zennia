@@ -4,24 +4,15 @@ Practice draws an item, checks what the user typed and records the result. Stats
 
 The session is in `src/lib/data/practice-session.ts` and the rules of each kind of item in `src/lib/data/practice-modes.ts`. Words and kana are drawn together, and each item is weighted, checked and recorded by the rules of its kind.
 
-## Modes
-
-Two tabs at the top of Practice switch between two modes, on the same practice card:
-
-- **Learn**: the app leads through the lists of the path and decides what is practiced ([Learn](#learn)).
-- **Free practice**: the user's own pool, described below.
-
-Practice opens in the mode it was left in (`practiceMode`), and in Learn for someone who never chose. Each mode keeps its own session score, while an answer counts in the item's lifetime tally in both.
-
 ## The card
 
 The card shows only the prompt while asking. The answer fields and Check are stacked below the card at full width, and on a wide screen Practice keeps the width of a phone in the middle.
 
 ## What is drawn
 
-In Free practice, the pool is the words the Vocabulary tab puts in Free practice and the kana chosen in the Kana tab. Until the user chooses, the kana are the basic hiragana, everything before the dakuten block.
+The pool is the active words of the Vocabulary tab and the kana chosen in the Kana tab. Until the user chooses, the kana are the basic hiragana, everything before the dakuten block. The [Learn lessons](learn.md) add to both.
 
-With an empty pool, Practice links to both tabs and offers to start Learn, which switches the mode in place, so someone without words of their own still has something to practice.
+With an empty pool, Practice links to Learn, Kana and Vocabulary.
 
 ## Draw weight
 
@@ -42,30 +33,6 @@ A never-answered item gets the top weight of 5, and no item drops to zero. Low a
 | 10 answers, half right | 1.5    |
 | 1 answer, right        | 0.57   |
 | 10 answers, all right  | 0.51   |
-
-## Learn
-
-Learn leads through the lists of the path, Hiragana, then Katakana, then N5, and decides when each item enters (`src/lib/data/learn.ts`). N5's words enter the user's words as Learn introduces them ([list words](vocabulary.md#list-words)), and are practiced with the same card under the focus chosen in Settings. While N5 is the current list, a line under the progress credits it as the unofficial list by Jonathan Waller, with JMdict for its meanings ([source](integrations.md#bundled-data)). The lists load the first time Learn opens (`src/lib/data/lists.ts`), and the first groups enter then.
-
-Above the card, Learn shows the latest list with introduced items and how many of its items are `known`, such as "Hiragana · 12 of 107 known". When an answer starts the next list, a line says so until the next answer.
-
-**Restart list**, in the menu next to that line, makes every item of the list new again after a confirmation: it deletes their `list_progress` rows, and the list starts over from its first group by the usual entry rule. The words and the lifetime tallies stay. It is the only control over Learn's progress; to pause Learn, the user practices in Free practice.
-
-### Schedule
-
-An item with no progress is new; once introduced it is `learning`, and it becomes `known` after 3 hits in a row (`HITS_TO_KNOW`). A miss, `almost` included, resets the streak, and a `known` item goes back to `learning`.
-
-- Lists come in groups: a row of kana or a handful of words. While fewer than 5 items are `learning` (`LEARNING_TARGET`), the next group enters, so a list of small groups can bring in more than one at a time.
-- When a list has no new items left, the next list starts, and `introduce` names it so the screen can say so. Items still `learning` from the finished list keep counting, so they mix with the first groups of the next one.
-- At the end of the path nothing more enters.
-
-The kana lists, `static/lists/hiragana.json` and `katakana.json`, hold every kana of the Kana tab in its order: the basic rows, then dakuten, then combinations, one row per group. They are generated from the tables in `src/lib/core/kana.ts` ([rebuild](integrations.md#bundled-data)), and a test fails when they drift apart. An item's key is `kana:<script>:<hiragana>`, such as `kana:katakana:か`.
-
-The user never picks what enters nor says what they already know: whoever knows an item gets it right in a row and it becomes `known`. The numbers are a starting point to tune with real use.
-
-### Draw
-
-Learn draws from the introduced items, weighted by their progress rather than their lifetime tally (`learnWeight`). A `learning` item has the top weight of 5, the same as a never-answered item in Free practice. A `known` item starts at half of that and halves again with each further hit in a row, down to 0.1, so it keeps coming back for review. An answer saves the progress of only the items it changed, the answered one and any that entered.
 
 ## Typing in kana
 
@@ -156,8 +123,6 @@ The Stats tab lists one row per answered word or kana, and sums every tally at t
 - Search and tag filters work as in the [Vocabulary list](vocabulary.md#search). A word shows its tags, and a kana its script as a system tag, which isn't stored and can't be edited.
 
 ## Decisions
-
-- **Dakuten and combinations are in the same list as the basic kana.** Nearly every N5 word needs them, so the path stays Hiragana, Katakana, N5, and each script is done in one go.
 
 - **`almost` counts as an error.** Relaxing this needs a decision from the user.
 - **Kana have no `almost`.** Single sounds have no vowel-length ambiguity.

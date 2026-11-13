@@ -8,8 +8,6 @@ export interface Word {
   meaning: string;
   /** When true the word is excluded from practice. Always stored, `false` for an active word. */
   disabled: boolean;
-  /** Whether the user added the word, as opposed to only a list bringing it into Learn. Always stored. */
-  mine: boolean;
   /** When the word was last activated (ms since epoch), or added if it was never deactivated. */
   activatedAt: number;
   /** When the word was added (ms since epoch); the list shows the newest first. Missing for words not stored yet. */

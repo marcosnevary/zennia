@@ -2,7 +2,6 @@ import { isKana } from "wanakana";
 import { plural } from "#lib/core/plural.ts";
 import { toDisplayRomaji } from "#lib/core/romaji.ts";
 import type { Word } from "#lib/core/types.ts";
-import { LIST_LABELS, type ListId } from "./learn";
 import { cleanTags, matchTags } from "./tags";
 
 export function newId(): string {
@@ -85,7 +84,6 @@ export function makeWord({
     hiragana: hiragana.trim(),
     meaning: meaning.trim(),
     disabled: false,
-    mine: true,
     activatedAt: Date.now(),
     createdAt: Date.now(),
     tags: cleanTags(tags),
@@ -101,41 +99,6 @@ export function setDisabled(
   if (!disabled && word.disabled)
     return { ...word, disabled, activatedAt: now };
   return { ...word, disabled };
-}
-
-/** Which words the Vocabulary list shows: every word, the user's own, or those of a list. */
-export type WordOrigin = "all" | "mine" | ListId;
-
-export const WORD_ORIGINS: { id: WordOrigin; label: string }[] = [
-  { id: "all", label: "All" },
-  { id: "mine", label: "My words" },
-  { id: "n5", label: LIST_LABELS.n5 },
-];
-
-/** `listOf` gives the list a word belongs to, if any (see `wordLists`). */
-export function filterByOrigin(
-  words: Word[],
-  origin: WordOrigin,
-  listOf: (word: Word) => ListId | undefined,
-): Word[] {
-  if (origin === "all") return words;
-  if (origin === "mine") return words.filter((w) => w.mine);
-  return words.filter((w) => listOf(w) === origin);
-}
-
-/**
- * Deletes the user's words among `ids`. One that Learn practices only stops being theirs: it leaves Free
- * practice and stays in Learn. A word that only a list brought is kept.
- */
-export function deleteMine(
-  words: Word[],
-  ids: Set<string>,
-  inLearn: (word: Word) => boolean,
-): Word[] {
-  return words.flatMap((w) => {
-    if (!ids.has(w.id) || !w.mine) return [w];
-    return inLearn(w) ? [{ ...setDisabled(w, true), mine: false }] : [];
-  });
 }
 
 /** The word with the form texts applied; the id and whether it is active stay. */
@@ -246,7 +209,6 @@ export function sanitizeWords(raw: unknown): SanitizeResult {
       hiragana,
       meaning,
       disabled: o.disabled === true,
-      mine: true,
       activatedAt:
         typeof o.activatedAt === "number" && Number.isFinite(o.activatedAt)
           ? o.activatedAt
@@ -325,20 +287,13 @@ export function mergeWords(current: Word[], incoming: Word[]): MergeResult {
     if (at !== undefined) {
       const meaning = joinMeanings(words[at].meaning, w.meaning);
       const tags = cleanTags([...words[at].tags, ...w.tags]);
-      // adding a word that only a list brought makes it the user's
-      const mine = words[at].mine || w.mine;
-      if (
-        meaning === null &&
-        tags.length === words[at].tags.length &&
-        mine === words[at].mine
-      )
+      if (meaning === null && tags.length === words[at].tags.length)
         duplicates++;
       else {
         words[at] = {
           ...words[at],
           meaning: meaning ?? words[at].meaning,
           tags,
-          mine,
         };
         updated++;
       }

@@ -2,18 +2,18 @@
 
 A static SvelteKit SPA. There is no server of our own: the browser talks directly to Supabase, which stores the data and the accounts. The one piece of code that runs elsewhere is a Supabase Edge Function that [makes the pronunciation audio](integrations.md#pronunciation).
 
-The other docs cover the [data model](data-model.md), [practice and stats](practice.md), [vocabulary](vocabulary.md) and the [integrations and setup](integrations.md).
+The other docs cover the [data model](data-model.md), [Learn](learn.md), [practice and stats](practice.md), [vocabulary](vocabulary.md) and the [integrations and setup](integrations.md).
 
 ## Structure
 
 Dependencies point one way, with each layer using only the ones before it: `core`, `data`, `state.svelte.ts`, then components and routes.
 
 - `src/lib/core/`: pure logic with no app data (kana tables, answer checking, meaning matching, furigana, writing sheet layout).
-- `src/lib/data/`: the rules over the app's data (words, tags, stats, practice, the Learn schedule, settings), import and export, and the dictionary lookup.
+- `src/lib/data/`: the rules over the app's data (words, tags, stats, practice, the lists of the Learn lessons, settings), import and export, and the dictionary lookup.
 - `src/lib/data/db/`: database access: the Supabase client (`client.ts`), the [Google sign-in popup](integrations.md#accounts) (`google.ts`), and the `Repo` that reads and writes the rows (`repo.ts`, `rows.ts`).
 - `src/lib/state.svelte.ts`: `App`, the shared data and the actions that change it.
 - `src/lib/components/`: Svelte components, grouped by feature.
-- `src/routes/`: one folder per tab (`practice`, `vocabulary`, `kana`, `stats`), and the shell in `+layout.svelte`. `/` redirects to `/practice`.
+- `src/routes/`: one folder per tab (`learn`, `practice`, `vocabulary`, `kana`, `stats`), with each lesson at `learn/[lesson]`, and the shell in `+layout.svelte`. `/` redirects to `/practice`.
 - `src/app.css`: Tailwind setup, theme variables and shared styles.
 - `src/app.html`: the page shell.
 - `static/`: fonts, favicons, the [bundled data](integrations.md#bundled-data), which `scripts/` builds, and the page Google sign-in returns to (`auth/google.html`).
@@ -39,7 +39,7 @@ The database is the source of truth, but a change doesn't wait for it:
 - From the `md` width up, the navigation is a sidebar with the logo, the tabs and the account menu at the bottom. Below it, on a phone, the logo is centered in a header with the account menu on its right, and the tabs are round icons in a bar at the bottom. The layout picks one with a media query in script rather than hiding the other with CSS, so the account menu and its popover exist once.
 
 - It preloads every tab's code as soon as the nav renders. A click switches the tab at once, showing `Loading` while that tab's code is still on its way.
-- The keys 1 to 4 switch to the tabs in nav order, unless turned off in Settings. They do nothing in a text field or select, which take typed digits themselves, or while a dialog is open.
+- The keys 1 to 5 switch to the tabs in nav order, unless turned off in Settings. They do nothing in a text field or select, which take typed digits themselves, or while a dialog is open.
 - Escape takes the focus off the current control. In a dialog it closes the dialog as usual.
 - The content wrapper has a 76px top padding and relies on every screen opening with a 24px top margin, so that the first block starts at the top of the first tab. A new screen must open the same way. On a phone the top padding is the header's 56px instead, and a bottom padding keeps the end of the page clear of the tab bar.
 

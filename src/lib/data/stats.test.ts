@@ -20,7 +20,6 @@ const word: Word = {
   hiragana: "たべる",
   meaning: "",
   disabled: false,
-  mine: true,
   activatedAt: 0,
   tags: [],
 };

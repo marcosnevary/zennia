@@ -1,10 +1,5 @@
 import { kanaKey, type KanaScript } from "#lib/core/kana.ts";
 import type { Stats, Tally, Word } from "#lib/core/types.ts";
-import {
-  PRACTICE_MODES,
-  type ItemProgress,
-  type Progress,
-} from "#lib/data/learn.ts";
 import { practiceFontsFrom } from "#lib/data/practice-fonts.ts";
 import { WORDS_FOCUSES } from "#lib/data/practice-modes.ts";
 import { DEFAULT_SETTINGS, type Settings } from "#lib/data/settings.ts";
@@ -19,7 +14,6 @@ export interface WordRow {
   hiragana: string;
   meaning: string;
   disabled: boolean;
-  mine: boolean;
   activated_at: string;
   tags: string[];
   created_at: string;
@@ -48,14 +42,6 @@ export interface SettingsRow {
   play_pronunciation: boolean;
   play_answer_sound: boolean;
   show_result_romaji: boolean;
-  practice_mode: string;
-}
-
-export interface ProgressRow {
-  item: string;
-  state: ItemProgress["state"];
-  streak: number;
-  introduced_at: string;
 }
 
 function oneOf<T extends string>(
@@ -84,7 +70,6 @@ export function wordFromRow(row: WordRow): Word {
     hiragana: row.hiragana,
     meaning: row.meaning,
     disabled: row.disabled,
-    mine: row.mine,
     tags: row.tags,
     activatedAt: Date.parse(row.activated_at),
     createdAt: Date.parse(row.created_at),
@@ -99,7 +84,6 @@ export function wordToRow(word: Word, userId: string) {
     hiragana: word.hiragana,
     meaning: word.meaning,
     disabled: word.disabled,
-    mine: word.mine,
     activated_at: new Date(word.activatedAt).toISOString(),
     tags: word.tags,
     created_at: new Date(word.createdAt ?? Date.now()).toISOString(),
@@ -121,31 +105,6 @@ export function statsFromRows(
   return stats;
 }
 
-export function progressFromRows(rows: ProgressRow[]): Progress {
-  return Object.fromEntries(
-    rows.map((r) => [
-      r.item,
-      {
-        state: r.state,
-        streak: r.streak,
-        introducedAt: Date.parse(r.introduced_at),
-      },
-    ]),
-  );
-}
-
-export function progressToRows(progress: Progress, userId: string) {
-  const updatedAt = new Date().toISOString();
-  return Object.entries(progress).map(([item, p]) => ({
-    user_id: userId,
-    item,
-    state: p.state,
-    streak: p.streak,
-    introduced_at: new Date(p.introducedAt).toISOString(),
-    updated_at: updatedAt,
-  }));
-}
-
 /** The column of each setting. */
 const SETTING_COLUMNS = {
   theme: "theme",
@@ -161,7 +120,6 @@ const SETTING_COLUMNS = {
   playPronunciation: "play_pronunciation",
   playAnswerSound: "play_answer_sound",
   showResultRomaji: "show_result_romaji",
-  practiceMode: "practice_mode",
 } as const satisfies Record<keyof Settings, keyof SettingsRow>;
 
 /** What `load` selects from the `settings` table. */
@@ -207,11 +165,6 @@ export function settingsFromRow(row: SettingsRow | null): Settings {
     playPronunciation: row.play_pronunciation,
     playAnswerSound: row.play_answer_sound,
     showResultRomaji: row.show_result_romaji,
-    practiceMode: oneOf(
-      row.practice_mode,
-      PRACTICE_MODES.map((m) => m.id),
-      DEFAULT_SETTINGS.practiceMode,
-    ),
   };
 }
 

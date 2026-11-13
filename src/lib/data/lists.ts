@@ -1,26 +1,58 @@
-import { asset } from "$app/paths";
-import type { List } from "./learn";
+import { KANA_SECTIONS, kanaKey, type KanaScript } from "#lib/core/kana.ts";
 
-/** The files of the path's lists, in path order. */
-const FILES = [
-  "lists/hiragana.json",
-  "lists/katakana.json",
-  "lists/n5.json",
-] as const;
+/** The lists a lesson of Learn adds to practice, in the order of the lessons. */
+export const LIST_IDS = ["hiragana", "katakana", "n5"] as const;
 
-async function loadList(file: (typeof FILES)[number]): Promise<List> {
-  const response = await fetch(asset(file));
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  return response.json() as Promise<List>;
+export type ListId = (typeof LIST_IDS)[number];
+
+/** The tag of the words the N5 list adds, so they can be found in Vocabulary (#JLPT-N5). */
+export const N5_TAG = "JLPT-N5";
+
+/** A kana or a word of a list. */
+export interface ListItem {
+  key: string;
 }
 
-let cached: Promise<List[]> | undefined;
+/** A word of a list carries the word itself, which joins the user's words once the list is added. */
+export interface WordListItem extends ListItem {
+  japanese: string;
+  hiragana: string;
+  meaning: string;
+}
 
-/** Loads the lists of the Learn path (`static/lists/`) on first use, and keeps them for the session. */
-export function loadPath(): Promise<List[]> {
-  cached ??= Promise.all(FILES.map(loadList)).catch((error) => {
-    cached = undefined; // lets the next attempt retry
-    throw error;
-  });
-  return cached;
+export interface List {
+  id: ListId;
+  items: ListItem[];
+}
+
+/** Identifies a kana item of a list, e.g. "kana:katakana:か". */
+export function kanaItemKey(script: KanaScript, hiragana: string): string {
+  return `kana:${kanaKey(script, hiragana)}`;
+}
+
+/** Identifies a word item of a list by its written form and reading, the identity `mergeWords` uses. */
+export function wordItemKey(japanese: string, hiragana: string): string {
+  return `word:${japanese}:${hiragana}`;
+}
+
+/** The `kanaKey` of a kana item; null for a word. */
+export function kanaKeyOfItem(key: string): string | null {
+  return key.startsWith("kana:") ? key.slice("kana:".length) : null;
+}
+
+export function isWordItem(item: ListItem): item is WordListItem {
+  return "japanese" in item;
+}
+
+/** Every kana of the Kana tab, in its order. */
+export function kanaList(script: KanaScript): List {
+  const rows = KANA_SECTIONS.flatMap((s) => s.rows);
+  return {
+    id: script,
+    items: rows.flatMap((row) =>
+      row.cells
+        .filter((c): c is string => c !== null)
+        .map((hiragana) => ({ key: kanaItemKey(script, hiragana) })),
+    ),
+  };
 }

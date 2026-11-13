@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Word } from "#lib/core/types.ts";
 import {
-  deleteMine,
-  filterByOrigin,
   hasSearchTags,
   importBrief,
   importSummary,
@@ -86,18 +83,6 @@ describe("sanitizeWords and mergeWords", () => {
     expect(r.duplicates).toBe(1);
     expect(r.words).toHaveLength(2);
   });
-  it("makes a word that only a list brought the user's when they add it", () => {
-    const [listWord] = sanitizeWords([
-      { id: "1", japanese: "犬", hiragana: "いぬ", meaning: "dog" },
-    ]).words;
-    const r = mergeWords(
-      [{ ...listWord, mine: false }],
-      sanitizeWords([{ japanese: "犬", hiragana: "いぬ", meaning: "dog" }])
-        .words,
-    );
-    expect(r.updated).toBe(1);
-    expect(r.words[0]).toMatchObject({ id: "1", mine: true, meaning: "dog" });
-  });
 });
 
 describe("sortWords", () => {
@@ -113,7 +98,6 @@ describe("sortWords", () => {
     hiragana,
     meaning,
     disabled,
-    mine: true,
     activatedAt: 0,
     tags: [],
   });
@@ -187,7 +171,6 @@ describe("setDisabled", () => {
     hiragana: "いぬ",
     meaning: "",
     disabled: true,
-    mine: true,
     activatedAt: 0,
     tags: [],
   };
@@ -195,7 +178,6 @@ describe("setDisabled", () => {
   it("stamps the activation time when a word is activated", () => {
     expect(setDisabled(base, false, 500)).toMatchObject({
       disabled: false,
-      mine: true,
       activatedAt: 500,
     });
   });
@@ -205,52 +187,8 @@ describe("setDisabled", () => {
     expect(setDisabled(on, false, 500).activatedAt).toBe(100);
     expect(setDisabled(on, true, 500)).toMatchObject({
       disabled: true,
-      mine: true,
       activatedAt: 100,
     });
-  });
-});
-
-describe("filterByOrigin and deleteMine", () => {
-  const word = (id: string, japanese: string, mine: boolean): Word => ({
-    id,
-    japanese,
-    hiragana: japanese,
-    meaning: "",
-    disabled: false,
-    mine,
-    activatedAt: 0,
-    tags: [],
-  });
-  const own = word("1", "いぬ", true);
-  const ownInN5 = word("2", "あう", true);
-  const listOnly = word("3", "あさ", false);
-  const words = [own, ownInN5, listOnly];
-  const listOf = (w: Word) => (w === own ? undefined : ("n5" as const));
-
-  it("shows every word, the user's own, or the words of a list", () => {
-    expect(filterByOrigin(words, "all", listOf)).toEqual(words);
-    expect(filterByOrigin(words, "mine", listOf)).toEqual([own, ownInN5]);
-    expect(filterByOrigin(words, "n5", listOf)).toEqual([ownInN5, listOnly]);
-  });
-
-  it("deletes the user's words that Learn doesn't practice", () => {
-    expect(deleteMine(words, new Set(["1"]), () => false)).toEqual([
-      ownInN5,
-      listOnly,
-    ]);
-  });
-
-  it("keeps a word Learn practices, no longer the user's and out of Free practice", () => {
-    expect(deleteMine(words, new Set(["2"]), (w) => w === ownInN5)).toEqual([
-      own,
-      { ...ownInN5, mine: false, disabled: true },
-      listOnly,
-    ]);
-  });
-
-  it("never deletes a word that only a list brought", () => {
-    expect(deleteMine(words, new Set(["3"]), () => false)).toEqual(words);
   });
 });
 
@@ -320,7 +258,6 @@ describe("makeWord and updateWord", () => {
       hiragana: "たべる",
       meaning: "to eat",
       disabled: false,
-      mine: true,
     });
     expect(a.id).toBeTruthy();
     expect(makeWord(typed).id).not.toBe(a.id);
@@ -336,7 +273,6 @@ describe("makeWord and updateWord", () => {
         tags: [],
       }),
       disabled: true,
-      mine: true,
     };
     expect(updateWord(word, typed)).toEqual({
       id: word.id,
@@ -344,7 +280,6 @@ describe("makeWord and updateWord", () => {
       hiragana: "たべる",
       meaning: "to eat",
       disabled: true,
-      mine: true,
       activatedAt: word.activatedAt,
       createdAt: word.createdAt,
       tags: [],
@@ -365,7 +300,6 @@ describe("searchWords", () => {
     hiragana,
     meaning,
     disabled: false,
-    mine: true,
     activatedAt: 0,
     tags: [],
   });

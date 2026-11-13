@@ -6,8 +6,8 @@ Try it at [zennia-japanese.vercel.app](https://zennia-japanese.vercel.app/).
 
 ## Features
 
-- **Learn.** A guided path through hiragana, katakana and the N5 words. The app decides what comes next: it introduces a few items at a time, and an item is known after three right answers in a row.
-- **Free practice.** Practice your own words and the kana you choose, weighted toward the ones you miss.
+- **Learn.** Short lessons on hiragana, katakana and the JLPT N5 vocabulary. Each one ends by adding what it teaches to your practice.
+- **Practice.** Your words and the kana you choose, weighted toward the ones you miss.
 - **Answers checked by sound.** `shi` and `si`, `tsu` and `tu`, or macrons like `ō` all count. A wrong vowel length is pointed out as almost right. For words with kanji, what you type is shown as kana while you type.
 - **Reading, meaning or both.** Choose whether a word asks for its reading, its meaning, or both.
 - **Feedback.** The result shows the word with furigana and romaji, plays a short sound, and can say the word aloud in Japanese.

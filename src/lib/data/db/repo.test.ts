@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Db } from "./client";
 import { chunks, createRepo, fetchAll } from "./repo";
-import type { ProgressRow, SettingsRow } from "./rows";
+import type { SettingsRow } from "./rows";
 
 // typed in full so that a new column of `SettingsRow` has to be added here, and then fails the test until `load` selects it
 const SETTINGS_ROW: SettingsRow = {
@@ -18,17 +18,13 @@ const SETTINGS_ROW: SettingsRow = {
   play_pronunciation: true,
   play_answer_sound: false,
   show_result_romaji: true,
-  practice_mode: "free",
 };
 
 /** A client whose `settings` table answers like the real API: only the selected columns come back. */
-function fakeDb(row: SettingsRow, progress: ProgressRow[] = []) {
-  const rowsOf = (data: unknown[]) => {
-    const query = {
-      order: () => query,
-      range: async () => ({ data, error: null }),
-    };
-    return { select: () => query };
+function fakeDb(row: SettingsRow) {
+  const noRows = {
+    order: () => noRows,
+    range: async () => ({ data: [], error: null }),
   };
   const selected: string[] = [];
   const settings = {
@@ -54,9 +50,7 @@ function fakeDb(row: SettingsRow, progress: ProgressRow[] = []) {
       }),
     },
     from: (table: string) =>
-      table === "settings"
-        ? settings
-        : rowsOf(table === "list_progress" ? progress : []),
+      table === "settings" ? settings : { select: () => noRows },
   } as unknown as Db;
   return { db, selected };
 }
@@ -72,25 +66,6 @@ describe("load", () => {
     const { db } = fakeDb(SETTINGS_ROW);
     const { settings } = await createRepo(() => db).load();
     expect(settings.tagColors).toEqual(SETTINGS_ROW.tag_colors);
-  });
-
-  it("returns the Learn progress by item", async () => {
-    const { db } = fakeDb(SETTINGS_ROW, [
-      {
-        item: "kana:hiragana:あ",
-        state: "known",
-        streak: 3,
-        introduced_at: "2026-01-01T00:00:00.000Z",
-      },
-    ]);
-    const { progress } = await createRepo(() => db).load();
-    expect(progress).toEqual({
-      "kana:hiragana:あ": {
-        state: "known",
-        streak: 3,
-        introducedAt: Date.UTC(2026, 0, 1),
-      },
-    });
   });
 });
 
