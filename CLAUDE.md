@@ -7,7 +7,7 @@ The structure and commands are in [docs/architecture.md](docs/architecture.md). 
 ## Conventions
 
 - Answers are compared by sound ([src/lib/core/romaji.ts](src/lib/core/romaji.ts)). `almost` (only the vowel length differs) counts as an error: do not relax this without a decision from the user.
-- Spacing and sizes are multiples of 4px, and buttons, selects and fields are 40px tall. Small inline controls (the help button, kana selector headers, tag chips, the add form's pins and the toast close button) are the exception.
+- Spacing and sizes are multiples of 4px, and buttons, selects and fields are 40px tall. Small inline controls (the help button, kana selector headers, tag chips, the add form's pins and the toast close button) and the 48px tabs of the phone tab bar are the exception.
 - Buttons, selects and fields are pills (`rounded-pill`). Fields have the surface fill and a border; a multi-line textarea keeps `rounded-control`, and the items of a menu keep it to follow the menu's corners.
 - Font sizes come only from the scale in `src/app.css` (`text-xs` to `text-display`), never arbitrary values.
 - Corner radii come only from the tokens in `src/app.css` (`rounded-control`, `rounded-panel`, `rounded-pill`), never arbitrary values.
