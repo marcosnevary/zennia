@@ -32,30 +32,56 @@ export interface Session<T> {
   current: T | null;
   /** Set once the current item was checked; the next submit moves on. */
   outcome: Outcome | null;
+  /** Drawn when the current item is checked, so what it shows with can load while the result is up. */
+  upcoming: T | null;
   hits: number;
   answers: number;
   lastKey: string | null;
 }
 
 export function startSession<T>(): Session<T> {
-  return { current: null, outcome: null, hits: 0, answers: 0, lastKey: null };
+  return {
+    current: null,
+    outcome: null,
+    upcoming: null,
+    hits: 0,
+    answers: 0,
+    lastKey: null,
+  };
 }
 
-/** Draws the next item, avoiding the previous one when there are others. */
+/** Avoids the previous item when there are others. */
+function draw<T>(
+  session: Session<T>,
+  mode: PracticeMode<T>,
+  random?: () => number,
+): T | null {
+  const choices =
+    mode.pool.length > 1
+      ? mode.pool.filter((item) => mode.keyOf(item) !== session.lastKey)
+      : mode.pool;
+  return pickWeighted(choices, mode.weightOf, random);
+}
+
+/**
+ * Moves on to the upcoming item, or draws one when there's none or it left the pool meanwhile (the selection
+ * can change in Settings while the result is up).
+ */
 export function nextRound<T>(
   session: Session<T>,
   mode: PracticeMode<T>,
   random?: () => number,
 ): Session<T> {
-  const choices =
-    mode.pool.length > 1
-      ? mode.pool.filter((item) => mode.keyOf(item) !== session.lastKey)
-      : mode.pool;
-  const current = pickWeighted(choices, mode.weightOf, random);
+  const { upcoming } = session;
+  const kept = upcoming
+    ? mode.pool.find((item) => mode.keyOf(item) === mode.keyOf(upcoming))
+    : undefined;
+  const current = kept ?? draw(session, mode, random);
   return {
     ...session,
     current,
     outcome: null,
+    upcoming: null,
     lastKey: current ? mode.keyOf(current) : null,
   };
 }
@@ -76,6 +102,7 @@ export function submit<T>(
   return {
     ...session,
     outcome,
+    upcoming: draw(session, mode, random),
     hits: session.hits + (outcome.verdict === "correct" ? 1 : 0),
     answers: session.answers + 1,
   };

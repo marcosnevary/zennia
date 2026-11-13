@@ -54,6 +54,33 @@ describe("nextRound", () => {
     });
   });
 
+  it("moves on to the item drawn when the answer was checked", () => {
+    const { mode } = fakeMode(["a", "b", "c"]);
+    const checked = submit(
+      nextRound(startSession<Item>(), mode, () => 0),
+      typed,
+      mode,
+      () => 0.99,
+    );
+    expect(checked.upcoming).toEqual({ id: "c" });
+    expect(nextRound(checked, mode, () => 0)).toMatchObject({
+      current: { id: "c" },
+      upcoming: null,
+    });
+  });
+
+  it("draws again when the upcoming item left the pool", () => {
+    const { mode } = fakeMode(["a", "b", "c"]);
+    const checked = submit(
+      nextRound(startSession<Item>(), mode, () => 0),
+      typed,
+      mode,
+      () => 0.99,
+    );
+    const shrunk = { ...mode, pool: [{ id: "a" }, { id: "b" }] };
+    expect(nextRound(checked, shrunk, () => 0).current).toEqual({ id: "b" });
+  });
+
   it("has no current item when the pool is empty", () => {
     const { mode } = fakeMode([]);
     expect(nextRound(startSession<Item>(), mode).current).toBeNull();
