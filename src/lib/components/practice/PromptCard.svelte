@@ -68,7 +68,7 @@
       <span class="sr-only">{written}</span>
       {#each answer.written as part, i (i)}
         <span class="flex flex-col items-center" aria-hidden="true">
-          {@render reveal(part.reading, "text-base leading-5")}
+          {@render reveal(part.reading, "text-base leading-6")}
           <!-- text-2xl's negative letter spacing would cramp Japanese -->
           <span class="text-2xl tracking-normal">{part.text}</span>
         </span>
@@ -78,7 +78,7 @@
     {#if showRomaji}
       <p
         class={[
-          "text-sm leading-5",
+          "text-base leading-6",
           verdict ? "text-muted" : "bg-tint text-transparent select-none",
         ]}
         aria-hidden="true"
