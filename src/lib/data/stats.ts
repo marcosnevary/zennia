@@ -1,31 +1,49 @@
 import type { SortDirection } from "./words";
 import { kanaKey, type KanaScript } from "#lib/core/kana.ts";
-import type { Stats, Tally, Verdict, Word } from "#lib/core/types.ts";
+import type { Memory, Stats, Tally, Verdict, Word } from "#lib/core/types.ts";
+import { remember } from "./memory";
 
 export function emptyStats(): Stats {
   return { words: {}, kana: {} };
 }
 
-function bump(tallies: Record<string, Tally>, key: string, hit: boolean): void {
+function bump(
+  tallies: Record<string, Tally>,
+  key: string,
+  hit: boolean,
+  now: number,
+): Memory {
   const tally = tallies[key] ?? { hits: 0, misses: 0 };
   if (hit) tally.hits++;
   else tally.misses++;
+  const memory = remember(tally.memory, hit, now);
+  tally.memory = memory;
   tallies[key] = tally;
+  return memory;
 }
 
-/** Records one checked answer of the word practice. "almost" counts as a miss, like in the session score. */
-export function recordAnswer(stats: Stats, word: Word, verdict: Verdict): void {
-  bump(stats.words, word.id, verdict === "correct");
+/**
+ * Records one checked answer of the word practice and returns the memory it led to. "almost" counts as a miss, like
+ * in the session score.
+ */
+export function recordAnswer(
+  stats: Stats,
+  word: Word,
+  verdict: Verdict,
+  now: number = Date.now(),
+): Memory {
+  return bump(stats.words, word.id, verdict === "correct", now);
 }
 
-/** Records one answer of the hiragana/katakana practice. */
+/** Records one answer of the hiragana/katakana practice and returns the memory it led to. */
 export function recordKana(
   stats: Stats,
   script: KanaScript,
   hiragana: string,
   hit: boolean,
-): void {
-  bump(stats.kana, kanaKey(script, hiragana), hit);
+  now: number = Date.now(),
+): Memory {
+  return bump(stats.kana, kanaKey(script, hiragana), hit, now);
 }
 
 /** Sum of every tally in a record. */
@@ -96,40 +114,4 @@ export function sortTallies<T extends { key: string; tally: Tally }>(
       answerCount(b.tally) - answerCount(a.tally) ||
       a.key.localeCompare(b.key, "ja"),
   );
-}
-
-const MIN_WEIGHT = 0.5;
-const MAX_WEIGHT = 5;
-
-/** Share of the priority that comes from having few answers; the rest is the miss rate. */
-const SAMPLE_SHARE = 0.06;
-
-/**
- * How likely an item is to be drawn, relative to the others. The priority (0 to 1) blends the miss
- * rate with how few answers the item has (1 divided by the answers), so low accuracy comes first,
- * then few answers, and even always-missed items rank by how little they were answered. A
- * never-answered item has the top priority. The weight grows exponentially from 0.5 to 5 (10 times
- * between the extremes) and no item ever drops to zero.
- */
-export function drawWeight(tally: Tally | undefined): number {
-  const n = tally ? answerCount(tally) : 0;
-  if (!tally || n === 0) return MAX_WEIGHT;
-  const priority = (1 - SAMPLE_SHARE) * (tally.misses / n) + SAMPLE_SHARE / n;
-  return MIN_WEIGHT * (MAX_WEIGHT / MIN_WEIGHT) ** priority;
-}
-
-/** Weighted random choice; `random` returns a number in [0, 1) and can be replaced in tests. */
-export function pickWeighted<T>(
-  items: T[],
-  weightOf: (item: T) => number,
-  random: () => number = Math.random,
-): T | null {
-  if (!items.length) return null;
-  const weights = items.map((item) => Math.max(0, weightOf(item)));
-  let remaining = random() * weights.reduce((a, b) => a + b, 0);
-  for (let i = 0; i < items.length; i++) {
-    remaining -= weights[i];
-    if (remaining < 0) return items[i];
-  }
-  return items[items.length - 1];
 }

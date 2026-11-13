@@ -2,7 +2,7 @@
 
 A static SvelteKit SPA. There is no server of our own: the browser talks directly to Supabase, which stores the data and the accounts. The one piece of code that runs elsewhere is a Supabase Edge Function that [makes the pronunciation audio](integrations.md#pronunciation).
 
-The other docs cover the [data model](data-model.md), [Learn](learn.md), [practice and stats](practice.md), [vocabulary](vocabulary.md) and the [integrations and setup](integrations.md).
+The other docs cover the [data model](data-model.md), [Learn](learn.md), [practice and stats](practice.md), [the practice draw](practice-draw.md), [vocabulary](vocabulary.md) and the [integrations and setup](integrations.md).
 
 ## Structure
 

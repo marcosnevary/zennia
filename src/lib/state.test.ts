@@ -38,8 +38,8 @@ function fakeRepo(stored: Partial<Stored> = {}, conflict = false) {
     deleteWords: vi.fn(async (ids: string[]) => {
       calls.push(`delete ${ids.join(",")}`);
     }),
-    recordAnswer: vi.fn(async (kind, key, hit) => {
-      calls.push(`answer ${kind} ${key} ${hit}`);
+    recordAnswer: vi.fn(async (kind, key, hit, memory) => {
+      calls.push(`answer ${kind} ${key} ${hit} streak ${memory.streak}`);
     }),
     resetStats: vi.fn(async () => {
       calls.push("reset stats");
@@ -233,11 +233,11 @@ describe("App", () => {
     app.recorder.word(app.words[0], "almost");
     app.recorder.kana("hiragana", "あ", true);
     await app.flush();
-    expect(app.stats.words.a).toEqual({ hits: 0, misses: 1 });
-    expect(app.stats.kana["hiragana:あ"]).toEqual({ hits: 1, misses: 0 });
+    expect(app.stats.words.a).toMatchObject({ hits: 0, misses: 1 });
+    expect(app.stats.kana["hiragana:あ"]).toMatchObject({ hits: 1, misses: 0 });
     expect(calls).toEqual([
-      "answer word a false",
-      "answer kana hiragana:あ true",
+      "answer word a false streak 0",
+      "answer kana hiragana:あ true streak 2",
     ]);
   });
 

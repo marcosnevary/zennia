@@ -19,11 +19,23 @@ export interface WordRow {
   created_at: string;
 }
 
-export interface WordStatRow extends Tally {
+/** The tally and the memory of an item, as `word_stats` and `kana_stats` hold them. */
+interface StatRow {
+  hits: number;
+  misses: number;
+  /** Null until the item is answered under the memory model */
+  half_life_ms: number | null;
+  answered_at: string | null;
+  streak: number;
+}
+
+export const STAT_COLUMNS = "hits, misses, half_life_ms, answered_at, streak";
+
+export interface WordStatRow extends StatRow {
   word_id: string;
 }
 
-export interface KanaStatRow extends Tally {
+export interface KanaStatRow extends StatRow {
   script: KanaScript;
   hiragana: string;
 }
@@ -90,18 +102,25 @@ export function wordToRow(word: Word, userId: string) {
   };
 }
 
+function tallyFromRow(row: StatRow): Tally {
+  const tally: Tally = { hits: row.hits, misses: row.misses };
+  if (row.half_life_ms !== null && row.answered_at !== null)
+    tally.memory = {
+      halfLife: row.half_life_ms,
+      answeredAt: Date.parse(row.answered_at),
+      streak: row.streak,
+    };
+  return tally;
+}
+
 export function statsFromRows(
   wordRows: WordStatRow[],
   kanaRows: KanaStatRow[],
 ): Stats {
   const stats: Stats = { words: {}, kana: {} };
-  for (const r of wordRows)
-    stats.words[r.word_id] = { hits: r.hits, misses: r.misses };
+  for (const r of wordRows) stats.words[r.word_id] = tallyFromRow(r);
   for (const r of kanaRows)
-    stats.kana[kanaKey(r.script, r.hiragana)] = {
-      hits: r.hits,
-      misses: r.misses,
-    };
+    stats.kana[kanaKey(r.script, r.hiragana)] = tallyFromRow(r);
   return stats;
 }
 

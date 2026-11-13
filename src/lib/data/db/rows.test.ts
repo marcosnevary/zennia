@@ -29,14 +29,44 @@ describe("words", () => {
 });
 
 describe("stats", () => {
-  it("reads the tallies of words and kana", () => {
+  it("reads the tallies and the memory of words and kana", () => {
     expect(
       statsFromRows(
-        [{ word_id: "w1", hits: 3, misses: 1 }],
-        [{ script: "katakana", hiragana: "か", hits: 2, misses: 0 }],
+        [
+          {
+            word_id: "w1",
+            hits: 3,
+            misses: 1,
+            half_life_ms: 600_000,
+            answered_at: "2026-11-13T12:00:00.000Z",
+            streak: 2,
+          },
+        ],
+        [
+          {
+            script: "katakana",
+            hiragana: "か",
+            hits: 2,
+            misses: 0,
+            half_life_ms: null,
+            answered_at: null,
+            streak: 0,
+          },
+        ],
       ),
     ).toEqual({
-      words: { w1: { hits: 3, misses: 1 } },
+      words: {
+        w1: {
+          hits: 3,
+          misses: 1,
+          memory: {
+            halfLife: 600_000,
+            answeredAt: Date.parse("2026-11-13T12:00:00.000Z"),
+            streak: 2,
+          },
+        },
+      },
+      // a tally from before the memory model starts as a new item
       kana: { "katakana:か": { hits: 2, misses: 0 } },
     });
   });

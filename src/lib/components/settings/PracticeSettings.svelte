@@ -1,6 +1,7 @@
 <script lang="ts">
   import Switch from "#lib/components/Switch.svelte";
   import { plural } from "#lib/core/plural.ts";
+  import { DEV_MODE_AVAILABLE, devMode } from "#lib/data/dev-mode.svelte.ts";
   import { WORDS_FOCUSES, type WordsFocus } from "#lib/data/practice-modes.ts";
   import { getApp } from "#lib/state.svelte.ts";
   import FontsDialog from "./FontsDialog.svelte";
@@ -79,5 +80,20 @@
       />
     </div>
   </SettingRow>
+
+  {#if DEV_MODE_AVAILABLE}
+    <SettingRow
+      title="Developer mode"
+      description="Show how the draw picks each item. Only on the local dev server."
+    >
+      <div class="flex sm:justify-end">
+        <Switch
+          checked={devMode.on}
+          onchange={() => devMode.toggle()}
+          label="Developer mode"
+        />
+      </div>
+    </SettingRow>
+  {/if}
 </div>
 <FontsDialog bind:this={fontsDialog} />

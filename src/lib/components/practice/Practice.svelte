@@ -1,6 +1,7 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
   import { untrack } from "svelte";
+  import DrawDetails from "./DrawDetails.svelte";
   import PracticeCard from "./PracticeCard.svelte";
   import { ANSWER_SOUND_MS, AnswerSound } from "./answer-sound.ts";
   import { fontReady, loadFonts } from "./fonts.ts";
@@ -20,6 +21,7 @@
     nextRound,
     submit as submitAnswer,
   } from "#lib/data/practice-session.ts";
+  import { devMode } from "#lib/data/dev-mode.svelte.ts";
   import { getApp } from "#lib/state.svelte.ts";
 
   const app = getApp();
@@ -225,5 +227,8 @@
       {onkeydown}
       onplay={() => pronunciation.play()}
     />
+    {#if devMode.on}
+      <DrawDetails {mode} session={app.practice} />
+    {/if}
   {/if}
 </div>

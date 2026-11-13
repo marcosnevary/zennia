@@ -3,7 +3,7 @@ import {
   pronunciationPath,
   type Pronounced,
 } from "#functions/_shared/pronunciation.ts";
-import type { Stats, Word } from "#lib/core/types.ts";
+import type { Memory, Stats, Word } from "#lib/core/types.ts";
 import type { Settings } from "#lib/data/settings.ts";
 import {
   getAccount,
@@ -21,6 +21,7 @@ import {
   settingsFromRow,
   settingsToRow,
   statsFromRows,
+  STAT_COLUMNS,
   SETTINGS_SELECT,
   wordFromRow,
   wordToRow,
@@ -41,8 +42,16 @@ export interface Repo {
   load(): Promise<Stored>;
   upsertWords(words: Word[]): Promise<void>;
   deleteWords(ids: string[]): Promise<void>;
-  /** Adds one answer to the tally of a word (`key` is its id) or of a kana (`key` is its `kanaKey`). */
-  recordAnswer(kind: "word" | "kana", key: string, hit: boolean): Promise<void>;
+  /**
+   * Adds one answer to the tally of a word (`key` is its id) or of a kana (`key` is its `kanaKey`), saves the memory
+   * it led to and logs it.
+   */
+  recordAnswer(
+    kind: "word" | "kana",
+    key: string,
+    hit: boolean,
+    memory: Memory,
+  ): Promise<void>;
   resetStats(): Promise<void>;
   saveSettings(patch: Partial<Settings>): Promise<void>;
   account(): Promise<Account>;
@@ -121,14 +130,14 @@ export function createRepo(getDb: () => Db): Repo {
         fetchAll<WordStatRow>((from, to) =>
           db
             .from("word_stats")
-            .select("word_id, hits, misses")
+            .select(`word_id, ${STAT_COLUMNS}`)
             .order("word_id")
             .range(from, to),
         ),
         fetchAll<KanaStatRow>((from, to) =>
           db
             .from("kana_stats")
-            .select("script, hiragana, hits, misses")
+            .select(`script, hiragana, ${STAT_COLUMNS}`)
             .order("script")
             .order("hiragana")
             .range(from, to),
@@ -163,10 +172,16 @@ export function createRepo(getDb: () => Db): Repo {
       }
     },
 
-    async recordAnswer(kind, key, hit) {
+    async recordAnswer(kind, key, hit, memory) {
       const { db } = await open();
       unwrap(
-        await db.rpc("record_answer", { p_kind: kind, p_key: key, p_hit: hit }),
+        await db.rpc("record_answer", {
+          p_kind: kind,
+          p_key: key,
+          p_hit: hit,
+          p_half_life_ms: Math.round(memory.halfLife),
+          p_streak: memory.streak,
+        }),
       );
     },
 
@@ -174,6 +189,8 @@ export function createRepo(getDb: () => Db): Repo {
       const { db, userId } = await open();
       unwrap(await db.from("word_stats").delete().eq("user_id", userId));
       unwrap(await db.from("kana_stats").delete().eq("user_id", userId));
+      unwrap(await db.from("word_answers").delete().eq("user_id", userId));
+      unwrap(await db.from("kana_answers").delete().eq("user_id", userId));
     },
 
     async saveSettings(patch) {
