@@ -25,9 +25,21 @@ export interface WordsFile {
   words: Word[];
 }
 
+/** What the practice draw knows about how well an item is remembered (`src/lib/data/memory.ts`). */
+export interface Memory {
+  /** How long after the last answer the chance of recalling the item falls to one half, in ms */
+  halfLife: number;
+  /** When the item was last answered, in ms since the epoch */
+  answeredAt: number;
+  /** Correct answers in a row */
+  streak: number;
+}
+
 export interface Tally {
   hits: number;
   misses: number;
+  /** Absent until the item is answered under the memory model, so a tally from before it counts as new */
+  memory?: Memory;
 }
 
 /** Lifetime results: per word (by id) and per kana of the hiragana/katakana practice (see `kanaKey`) */

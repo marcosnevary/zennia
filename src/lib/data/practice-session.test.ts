@@ -18,7 +18,7 @@ function fakeMode(ids: string[], verdicts: Verdict[] = []) {
   const mode: PracticeMode<Item> = {
     pool: ids.map((id) => ({ id })),
     keyOf: (item) => item.id,
-    weightOf: () => 1,
+    memoryOf: () => undefined,
     check: ({ reading }) => {
       if (!reading.trim()) return null;
       const verdict = verdicts.shift() ?? "correct";

@@ -67,7 +67,7 @@ describe("wordsMode", () => {
     const stats = emptyStats();
     const mode = wordsMode([word("a")], stats);
     mode.record(mode.pool[0], "almost");
-    expect(stats.words.a).toEqual({ hits: 0, misses: 1 });
+    expect(stats.words.a).toMatchObject({ hits: 0, misses: 1 });
   });
 });
 
@@ -172,7 +172,7 @@ describe("kanaMode", () => {
     const stats = emptyStats();
     const mode = kanaMode(selected, stats);
     mode.record(mode.pool[1], "correct");
-    expect(stats.kana["katakana:お"]).toEqual({ hits: 1, misses: 0 });
+    expect(stats.kana["katakana:お"]).toMatchObject({ hits: 1, misses: 0 });
     expect(stats.kana["hiragana:お"]).toBeUndefined();
   });
 });
@@ -203,8 +203,8 @@ describe("mixedMode", () => {
     const mode = mixedMode([word("a")], kana, stats);
     mode.record(mode.pool[0], "correct");
     mode.record(mode.pool[1], "incorrect");
-    expect(stats.words.a).toEqual({ hits: 1, misses: 0 });
-    expect(stats.kana["hiragana:お"]).toEqual({ hits: 0, misses: 1 });
+    expect(stats.words.a).toMatchObject({ hits: 1, misses: 0 });
+    expect(stats.kana["hiragana:お"]).toMatchObject({ hits: 0, misses: 1 });
   });
 });
 

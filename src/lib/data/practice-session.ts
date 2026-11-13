@@ -1,5 +1,5 @@
-import { pickWeighted } from "./stats";
-import type { Verdict } from "#lib/core/types.ts";
+import { drawItem } from "./memory";
+import type { Memory, Verdict } from "#lib/core/types.ts";
 
 /** What was typed in each field; a field that isn't shown stays empty. */
 export interface TypedAnswer {
@@ -20,8 +20,8 @@ export interface PracticeMode<T> {
   pool: T[];
   /** Identity used to avoid drawing the same item twice in a row. */
   keyOf: (item: T) => string;
-  /** Draw weight of an item (higher comes up more often). */
-  weightOf: (item: T) => number;
+  /** What the draw knows about how well the item is remembered; undefined while it is new. */
+  memoryOf: (item: T) => Memory | undefined;
   /** Null when nothing was typed for what the item asks. */
   check: (answer: TypedAnswer, item: T) => Outcome | null;
   /** Persists the outcome (stats); called once per checked answer. */
@@ -60,7 +60,7 @@ function draw<T>(
     mode.pool.length > 1
       ? mode.pool.filter((item) => mode.keyOf(item) !== session.lastKey)
       : mode.pool;
-  return pickWeighted(choices, mode.weightOf, random);
+  return drawItem(mode.pool, choices, mode.memoryOf, random);
 }
 
 /**

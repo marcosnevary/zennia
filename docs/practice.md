@@ -2,7 +2,7 @@
 
 Practice draws an item, checks what the user typed and records the result. Stats shows those results.
 
-The session is in `src/lib/data/practice-session.ts` and the rules of each kind of item in `src/lib/data/practice-modes.ts`. Words and kana are drawn together, and each item is weighted, checked and recorded by the rules of its kind.
+The session is in `src/lib/data/practice-session.ts` and the rules of each kind of item in `src/lib/data/practice-modes.ts`. Words and kana are drawn together, and each item is checked and recorded by the rules of its kind.
 
 ## The card
 
@@ -14,25 +14,9 @@ The pool is the active words of the Vocabulary tab and the kana chosen in the Ka
 
 With an empty pool, Practice links to Learn, Kana and Vocabulary.
 
-## Draw weight
+## How the next item is chosen
 
-The next item is drawn when the answer is checked, so what it needs can load while the result is up; if the selection changes in Settings meanwhile and leaves it out, Next draws again. An item never comes up twice in a row, unless it is the only one. Otherwise the draw is random, weighted by the item's lifetime tally (`drawWeight` in `src/lib/data/stats.ts`):
-
-```
-priority = 0.94 × misses / answers + 0.06 / answers
-weight   = 0.5 × 10^priority
-```
-
-A never-answered item gets the top weight of 5, and no item drops to zero. Low accuracy comes first, then few answers, and even items that are always missed rank by how little they were answered.
-
-| Tally                  | Weight |
-| ---------------------- | ------ |
-| Never answered         | 5      |
-| 1 answer, missed       | 5      |
-| 10 answers, all missed | 4.4    |
-| 10 answers, half right | 1.5    |
-| 1 answer, right        | 0.57   |
-| 10 answers, all right  | 0.51   |
+The draw favours what the user has probably forgotten, and new items join a few at a time. The next item is drawn when the answer is checked, so what it needs can load while the result is up. An item never comes up twice in a row, unless it is the only one. [Practice draw](practice-draw.md) explains the model.
 
 ## Typing in kana
 
@@ -77,7 +61,7 @@ The meaning is compared ignoring case and punctuation, with single spaces (`src/
 
 The focus, chosen in Settings, says what a word asks for. With Both, a wrong meaning makes the answer `incorrect`, and otherwise the verdict is the reading's.
 
-A blank answer is not checked. Only `correct` counts as a hit: `almost` is a miss in both the session score and the lifetime tally.
+A blank answer is not checked. Only `correct` counts as a hit: `almost` is a miss in the session score, the lifetime tally and the [draw](practice-draw.md).
 
 ## Feedback
 

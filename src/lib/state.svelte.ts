@@ -240,16 +240,16 @@ export class App {
   }
 
   recordWord(word: Word, verdict: Verdict): void {
-    recordAnswer(this.stats, word, verdict);
+    const memory = recordAnswer(this.stats, word, verdict);
     this.#persist(() =>
-      this.#repo.recordAnswer("word", word.id, verdict === "correct"),
+      this.#repo.recordAnswer("word", word.id, verdict === "correct", memory),
     );
   }
 
   recordKana(script: KanaScript, hiragana: string, hit: boolean): void {
-    recordKana(this.stats, script, hiragana, hit);
+    const memory = recordKana(this.stats, script, hiragana, hit);
     this.#persist(() =>
-      this.#repo.recordAnswer("kana", kanaKey(script, hiragana), hit),
+      this.#repo.recordAnswer("kana", kanaKey(script, hiragana), hit, memory),
     );
   }
 

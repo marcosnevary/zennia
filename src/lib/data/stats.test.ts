@@ -4,9 +4,7 @@ import {
   accuracy,
   accuracyLevel,
   totalTally,
-  drawWeight,
   emptyStats,
-  pickWeighted,
   recordAnswer,
   recordKana,
   sortTallies,
@@ -30,7 +28,7 @@ describe("recordAnswer", () => {
     recordAnswer(stats, word, "correct");
     recordAnswer(stats, word, "incorrect");
     recordAnswer(stats, word, "almost");
-    expect(stats.words.w1).toEqual({ hits: 1, misses: 2 });
+    expect(stats.words.w1).toMatchObject({ hits: 1, misses: 2 });
     expect(stats.kana).toEqual({});
   });
 });
@@ -41,8 +39,8 @@ describe("recordKana", () => {
     recordKana(stats, "katakana", "か", false);
     recordKana(stats, "hiragana", "か", true);
     recordKana(stats, "hiragana", "か", true);
-    expect(stats.kana["katakana:か"]).toEqual({ hits: 0, misses: 1 });
-    expect(stats.kana["hiragana:か"]).toEqual({ hits: 2, misses: 0 });
+    expect(stats.kana["katakana:か"]).toMatchObject({ hits: 0, misses: 1 });
+    expect(stats.kana["hiragana:か"]).toMatchObject({ hits: 2, misses: 0 });
     expect(stats.words).toEqual({});
   });
 });
@@ -88,67 +86,5 @@ describe("accuracy and sorting", () => {
     expect(keys("accuracy", "asc")).toEqual(["b", "a", "c"]);
     expect(keys("hits", "desc")).toEqual(["a", "c", "b"]);
     expect(keys("misses", "asc")).toEqual(["c", "b", "a"]);
-  });
-});
-
-describe("drawWeight and pickWeighted", () => {
-  it("ranks low accuracy first, then few answers, then well-proven items", () => {
-    const alwaysMissed = drawWeight({ hits: 0, misses: 2 });
-    const mostlyMissed = drawWeight({ hits: 1, misses: 3 });
-    const fewRight = drawWeight({ hits: 2, misses: 0 });
-    const provenRight = drawWeight({ hits: 7, misses: 0 });
-    expect(alwaysMissed).toBeGreaterThan(mostlyMissed);
-    expect(mostlyMissed).toBeGreaterThan(fewRight);
-    expect(fewRight).toBeGreaterThan(provenRight);
-  });
-  it("weighs an always-missed item with few answers above one with many", () => {
-    expect(drawWeight({ hits: 0, misses: 2 })).toBeGreaterThan(
-      drawWeight({ hits: 0, misses: 10 }),
-    );
-    expect(drawWeight({ hits: 0, misses: 1 })).toBeGreaterThan(
-      drawWeight({ hits: 0, misses: 2 }),
-    );
-  });
-  it("weighs an always-missed item about 10 times a proven one", () => {
-    expect(
-      drawWeight({ hits: 0, misses: 2 }) / drawWeight({ hits: 7, misses: 0 }),
-    ).toBeGreaterThanOrEqual(9);
-  });
-  it("keeps every weight between 0.5 and 5, and a never-answered item at the ceiling", () => {
-    expect(drawWeight(undefined)).toBe(5);
-    expect(drawWeight({ hits: 0, misses: 1 })).toBeLessThanOrEqual(5);
-    expect(drawWeight({ hits: 1000, misses: 0 })).toBeGreaterThanOrEqual(0.5);
-    expect(drawWeight({ hits: 1000, misses: 0 })).toBeLessThan(0.7);
-  });
-  it("distrusts small samples: 100% accuracy needs more answers to fade", () => {
-    const weights = [1, 2, 3, 5, 10, 20, 50].map((hits) =>
-      drawWeight({ hits, misses: 0 }),
-    );
-    for (let i = 1; i < weights.length; i++)
-      expect(weights[i]).toBeLessThan(weights[i - 1]);
-    // one correct answer still outweighs a long streak, and stays below an item that was missed
-    expect(weights[0]).toBeGreaterThan(weights[5]);
-    expect(weights[0]).toBeLessThan(drawWeight({ hits: 0, misses: 1 }));
-  });
-  it("the same accuracy weighs more with fewer answers", () => {
-    expect(drawWeight({ hits: 1, misses: 1 })).toBeGreaterThan(
-      drawWeight({ hits: 10, misses: 10 }),
-    );
-  });
-  it("a miss raises the weight", () => {
-    expect(drawWeight({ hits: 5, misses: 1 })).toBeGreaterThan(
-      drawWeight({ hits: 6, misses: 0 }),
-    );
-  });
-  it("picks proportionally to the weights", () => {
-    const items = ["a", "b"];
-    const w = (x: string) => (x === "a" ? 1 : 3);
-    expect(pickWeighted(items, w, () => 0)).toBe("a");
-    expect(pickWeighted(items, w, () => 0.24)).toBe("a");
-    expect(pickWeighted(items, w, () => 0.26)).toBe("b");
-    expect(pickWeighted(items, w, () => 0.999)).toBe("b");
-  });
-  it("returns null for an empty list", () => {
-    expect(pickWeighted([], () => 1)).toBeNull();
   });
 });

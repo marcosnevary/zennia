@@ -15,7 +15,6 @@ import {
 } from "#lib/core/romaji.ts";
 import type { Stats, Verdict, Word } from "#lib/core/types.ts";
 import type { Outcome, PracticeMode, TypedAnswer } from "./practice-session";
-import { drawWeight } from "./stats";
 
 /** What is typed for a word: its reading, its meaning or both. */
 export type WordsFocus = "reading" | "meaning" | "both";
@@ -55,7 +54,7 @@ export interface Recorder {
   kana: (script: KanaScript, hiragana: string, hit: boolean) => void;
 }
 
-/** Word practice: active words, weighted by past mistakes. "almost" is a real verdict here. */
+/** Word practice: the active words. "almost" is a real verdict here. */
 export function wordsMode(
   words: Word[],
   stats: Stats,
@@ -65,7 +64,7 @@ export function wordsMode(
   return {
     pool: words.filter((w) => !w.disabled),
     keyOf: (w) => w.id,
-    weightOf: (w) => drawWeight(stats.words[w.id]),
+    memoryOf: (w) => stats.words[w.id]?.memory,
     check: (answer, w) => checkWord(answer, w, focus),
     record: recorder.word,
   };
@@ -117,7 +116,7 @@ export function rightAnswer(item: PracticeItem): RightAnswer {
   };
 }
 
-/** Words and kana drawn together; each item is weighted, checked and recorded by its own mode. */
+/** Words and kana drawn together; each item is remembered, checked and recorded by its own mode. */
 export function mixedMode(
   words: Word[],
   selected: string[],
@@ -136,10 +135,10 @@ export function mixedMode(
       item.kind === "word"
         ? `word:${wordMode.keyOf(item.word)}`
         : `kana:${kana.keyOf(item.kana)}`,
-    weightOf: (item) =>
+    memoryOf: (item) =>
       item.kind === "word"
-        ? wordMode.weightOf(item.word)
-        : kana.weightOf(item.kana),
+        ? wordMode.memoryOf(item.word)
+        : kana.memoryOf(item.kana),
     check: (answer, item) =>
       item.kind === "word"
         ? wordMode.check(answer, item.word)
@@ -160,7 +159,7 @@ export function kanaMode(
   return {
     pool: buildKana(selected),
     keyOf: (k) => k.symbol,
-    weightOf: (k) => drawWeight(stats.kana[kanaKey(k.script, k.hiragana)]),
+    memoryOf: (k) => stats.kana[kanaKey(k.script, k.hiragana)]?.memory,
     check: ({ reading }, k) => {
       if (!reading.trim()) return null;
       const verdict =
