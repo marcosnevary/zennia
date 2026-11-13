@@ -43,15 +43,36 @@
   const practiceFonts = $derived(app.settings.practiceFonts);
   $effect(() => loadFonts(practiceFonts));
 
+  // drawn with the upcoming item, so its glyphs load while the result is up and Next shows it without waiting
+  let upcomingFont: PracticeFontId | undefined;
+
+  function fontAfter(previous: PracticeFontId | undefined) {
+    return practiceFonts.length ? nextFont(practiceFonts, previous) : undefined;
+  }
+
+  function drawUpcomingFont() {
+    const { upcoming } = app.practice;
+    upcomingFont = fontAfter(font);
+    if (upcoming?.kind === "word" && upcomingFont) {
+      void fontReady(upcomingFont, upcoming.word.japanese);
+    }
+  }
+
   function drawFont() {
-    font = practiceFonts.length ? nextFont(practiceFonts, font) : undefined;
+    font =
+      upcomingFont &&
+      upcomingFont !== font &&
+      practiceFonts.includes(upcomingFont)
+        ? upcomingFont
+        : fontAfter(font);
+    upcomingFont = undefined;
   }
 
   // Settings opens over Practice, so a change there redraws the shown word's font once it's no longer chosen
   $effect(() => {
     const chosen = practiceFonts;
     untrack(() => {
-      if (font ? !chosen.includes(font) : chosen.length) drawFont();
+      if (font ? !chosen.includes(font) : chosen.length) font = fontAfter(font);
     });
   });
 
@@ -127,6 +148,7 @@
       meaningEl?.blur();
       const checked = app.practice.outcome;
       if (!checked) return;
+      drawUpcomingFont();
       if (playAnswerSound) answerSound.play(checked.verdict === "correct");
       if (playPronunciation)
         pronunciation.play(playAnswerSound ? ANSWER_SOUND_MS : 0);
