@@ -93,6 +93,7 @@ describe("settings", () => {
         play_pronunciation: false,
         play_answer_sound: true,
         show_result_romaji: true,
+        share_usage_data: true,
       }),
     ).toEqual({ ...DEFAULT_SETTINGS, kanaSelection: ["hiragana:あ"] });
   });
@@ -113,6 +114,7 @@ describe("settings", () => {
         play_pronunciation: false,
         play_answer_sound: true,
         show_result_romaji: true,
+        share_usage_data: true,
       }),
     ).toMatchObject({
       wordsSort: "reading",
@@ -142,6 +144,7 @@ describe("settings", () => {
         play_pronunciation: false,
         play_answer_sound: true,
         show_result_romaji: true,
+        share_usage_data: true,
       }).tagColors,
     ).toEqual({ food: { hue: 10, tone: 1 } });
   });
@@ -162,6 +165,7 @@ describe("settings", () => {
         play_pronunciation: false,
         play_answer_sound: true,
         show_result_romaji: true,
+        share_usage_data: true,
       }).numberKeyTabs,
     ).toBe(false);
   });
@@ -182,6 +186,7 @@ describe("settings", () => {
         play_pronunciation: false,
         play_answer_sound: true,
         show_result_romaji: true,
+        share_usage_data: true,
       }).practiceFonts,
     ).toEqual(["klee-one", "yomogi"]);
   });

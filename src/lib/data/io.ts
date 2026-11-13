@@ -1,9 +1,12 @@
 import type { Word, WordsFile } from "#lib/core/types.ts";
 import { sanitizeWords, type SanitizeResult } from "./words";
 
-/** Name of the exported file, with the date of the export. */
-export function exportFilename(date = new Date()): string {
-  return `zennia-words-${date.toISOString().slice(0, 10)}.json`;
+/** Name of the exported file, with the date of the export. `what` is "words" for the word export, "data" for everything stored about the user. */
+export function exportFilename(
+  date = new Date(),
+  what: "words" | "data" = "words",
+): string {
+  return `zennia-${what}-${date.toISOString().slice(0, 10)}.json`;
 }
 
 /** Serializes the pool to JSON (format with `version`, for future migrations). */

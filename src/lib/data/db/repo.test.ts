@@ -18,6 +18,7 @@ const SETTINGS_ROW: SettingsRow = {
   play_pronunciation: true,
   play_answer_sound: false,
   show_result_romaji: true,
+  share_usage_data: true,
 };
 
 /** A client whose `settings` table answers like the real API: only the selected columns come back. */

@@ -2,7 +2,7 @@
 
 A static SvelteKit SPA. There is no server of our own: the browser talks directly to Supabase, which stores the data and the accounts. The one piece of code that runs elsewhere is a Supabase Edge Function that [makes the pronunciation audio](integrations.md#pronunciation).
 
-The other docs cover the [data model](data-model.md), [Learn](learn.md), [practice and stats](practice.md), [the practice draw](practice-draw.md), [vocabulary](vocabulary.md) and the [integrations and setup](integrations.md).
+The other docs cover the [data model](data-model.md), [Learn](learn.md), [practice and stats](practice.md), [the practice draw](practice-draw.md), [vocabulary](vocabulary.md), [privacy](privacy.md) and the [integrations and setup](integrations.md).
 
 ## Structure
 
@@ -16,7 +16,7 @@ Dependencies point one way, with each layer using only the ones before it: `core
 - `src/routes/`: one folder per tab (`learn`, `practice`, `vocabulary`, `kana`, `stats`), with each lesson at `learn/[lesson]`, and the shell in `+layout.svelte`. `/` redirects to `/practice`.
 - `src/app.css`: Tailwind setup, theme variables and shared styles.
 - `src/app.html`: the page shell.
-- `static/`: fonts, favicons, the [bundled data](integrations.md#bundled-data), which `scripts/` builds, and the page Google sign-in returns to (`auth/google.html`).
+- `static/`: fonts, favicons, the [bundled data](integrations.md#bundled-data), which `scripts/` builds, the page Google sign-in returns to (`auth/google.html`), and the [privacy notice](privacy.md) (`privacy.html`, `privacidade.html`).
 - `supabase/migrations/`: the [database schema](data-model.md#migrations).
 - `supabase/functions/`: the Edge Function (`pronounce`), and in `_shared/` the code it shares with the app, imported as `#functions/*`.
 

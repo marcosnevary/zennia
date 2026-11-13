@@ -10,13 +10,14 @@
   import { onMount } from "svelte";
   import { MediaQuery } from "svelte/reactivity";
   import { goto } from "$app/navigation";
-  import { resolve } from "$app/paths";
+  import { asset, resolve } from "$app/paths";
   import { navigating, page } from "$app/state";
   import AccountMenu from "#lib/components/account/AccountMenu.svelte";
   import Loading from "#lib/components/Loading.svelte";
   import PrintSheet from "#lib/components/print/PrintSheet.svelte";
   import Toaster from "#lib/components/Toaster.svelte";
   import { getDb } from "#lib/data/db/client.ts";
+  import { privacyNoticeUrl } from "#lib/data/privacy.ts";
   import { createRepo } from "#lib/data/db/repo.ts";
   import { resolveTheme } from "#lib/data/theme.ts";
   import { App, setApp } from "#lib/state.svelte.ts";
@@ -169,6 +170,11 @@
               Sign in to sync across devices.
             </p>
             {@render signIn(false)}
+            <a
+              class="text-center text-xs text-muted"
+              href={asset(privacyNoticeUrl())}
+              target="_blank">Privacy notice</a
+            >
           {:else}
             <AccountMenu />
           {/if}

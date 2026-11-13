@@ -57,14 +57,20 @@ export function accountOf(user: User | null): Account {
   };
 }
 
+const AVATAR_BUCKET = "avatars";
+
+function avatarPath(userId: string): string {
+  return `${userId}/avatar.jpg`;
+}
+
 export async function updateProfile(
   db: Db,
   userId: string,
   change: ProfileChange,
 ): Promise<void> {
   const data: Record<string, string> = { display_name: change.name };
-  const path = `${userId}/avatar.jpg`;
-  const avatars = db.storage.from("avatars");
+  const path = avatarPath(userId);
+  const avatars = db.storage.from(AVATAR_BUCKET);
   if (change.photo) {
     const { error } = await avatars.upload(path, change.photo, {
       upsert: true,
@@ -102,6 +108,20 @@ export async function signInGoogle(db: Db, google: GoogleToken): Promise<void> {
     ...google,
   });
   if (error) throw new Error(error.message);
+}
+
+/**
+ * Deletes the user and, by cascade, every row of theirs. Storage objects can't be deleted from SQL, so the profile
+ * photo goes first. The user is gone, so the session only needs clearing from this browser.
+ */
+export async function deleteAccount(db: Db, userId: string): Promise<void> {
+  const { error: photoError } = await db.storage
+    .from(AVATAR_BUCKET)
+    .remove([avatarPath(userId)]);
+  if (photoError) throw new Error(photoError.message);
+  const { error } = await db.rpc("delete_account");
+  if (error) throw new Error(error.message);
+  await db.auth.signOut({ scope: "local" });
 }
 
 export async function signOut(db: Db): Promise<void> {

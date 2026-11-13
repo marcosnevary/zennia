@@ -12,12 +12,15 @@
     exportJSON,
     importJSON,
   } from "#lib/data/io.ts";
+  import { privacyNoticeUrl } from "#lib/data/privacy.ts";
   import { answerCount, totalTally } from "#lib/data/stats.ts";
   import {
     importBrief,
     importSummary,
     type SanitizeResult,
   } from "#lib/data/words.ts";
+  import { asset } from "$app/paths";
+  import Switch from "#lib/components/Switch.svelte";
   import AnkiHelp from "./AnkiHelp.svelte";
   import SettingRow from "./SettingRow.svelte";
   import { getApp } from "#lib/state.svelte.ts";
@@ -114,6 +117,46 @@
     }
   }
 
+  async function exportData() {
+    try {
+      const data = await app.exportData();
+      downloadJSON(
+        exportFilename(new Date(), "data"),
+        JSON.stringify(data, null, 2),
+      );
+      flash("data", true, "Downloaded");
+    } catch {
+      app.toasts.show(
+        "Couldn't download your data. Check your connection and try again.",
+        { id: "data" },
+      );
+      flash("data", false, "Download failed");
+    }
+  }
+
+  let deleting = $state(false);
+
+  async function deleteAccount() {
+    if (
+      !confirm(
+        "Delete your account? Your words, statistics and profile will be erased for good.",
+      )
+    )
+      return;
+    deleting = true;
+    try {
+      await app.deleteAccount();
+      app.toasts.show("Your account was deleted.", { id: "account" });
+    } catch {
+      app.toasts.show(
+        "Couldn't delete your account. Check your connection and try again.",
+        { id: "account" },
+      );
+    } finally {
+      deleting = false;
+    }
+  }
+
   function resetStats() {
     if (!confirm("Reset all statistics? This cannot be undone.")) return;
     app.resetStats();
@@ -190,6 +233,42 @@
       >
     </SettingRow>
   {/if}
+  <SettingRow
+    title="Help improve zennia"
+    description="Share how you use zennia, such as your answers, to help make it better."
+  >
+    <div class="flex sm:justify-end">
+      <Switch
+        checked={app.settings.shareUsageData}
+        onchange={() => app.setShareUsageData(!app.settings.shareUsageData)}
+        label="Help improve zennia"
+      />
+    </div>
+  </SettingRow>
+  <SettingRow
+    title="Download your data"
+    description="Everything zennia stores about you, as a JSON file."
+  >
+    <button onclick={exportData} {@attach control("data")}
+      >{@render action("data", "Download")}</button
+    >
+  </SettingRow>
+  <SettingRow
+    title="Privacy"
+    description="What zennia stores, why, and your rights over it."
+  >
+    <a class="button" href={asset(privacyNoticeUrl())} target="_blank"
+      >Read the notice</a
+    >
+  </SettingRow>
+  <SettingRow
+    title="Delete account"
+    description="Erase your account and everything in it for good."
+  >
+    <button class="danger" onclick={deleteAccount} disabled={deleting}
+      >Delete account</button
+    >
+  </SettingRow>
 </div>
 <!-- a label change is not announced, so the outcome is also read from here -->
 <p class="sr-only" role="status">{feedback?.detail ?? feedback?.text ?? ""}</p>

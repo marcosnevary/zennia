@@ -5,7 +5,7 @@ import { defaultKanaSelection, kanaKey, type KanaScript } from "./core/kana";
 import type { Stats, Verdict, Word } from "./core/types";
 import type { Account, ProfileChange } from "./data/db/client";
 import { PopupBlockedError, type GoogleToken } from "./data/db/google";
-import type { Repo, Stored } from "./data/db/repo";
+import type { Repo, Stored, UserData } from "./data/db/repo";
 import {
   isWordItem,
   kanaKeyOfItem,
@@ -173,6 +173,18 @@ export class App {
     await this.init();
   }
 
+  exportData(): Promise<UserData> {
+    return this.#repo.exportData();
+  }
+
+  /** Deletes the user and all their data, and starts over as a new anonymous user; a failure is thrown. */
+  async deleteAccount(): Promise<void> {
+    // pending writes would recreate rows of the deleted user
+    await this.flush();
+    await this.#repo.deleteAccount();
+    await this.init();
+  }
+
   pronunciationUrl(pronounced: Pronounced): Promise<string> {
     return this.#repo.pronunciationUrl(pronounced);
   }
@@ -324,6 +336,10 @@ export class App {
 
   setShowResultRomaji(showResultRomaji: boolean): void {
     this.#setSettings({ showResultRomaji });
+  }
+
+  setShareUsageData(shareUsageData: boolean): void {
+    this.#setSettings({ shareUsageData });
   }
 
   setKanaSelection(kanaSelection: string[]): void {
