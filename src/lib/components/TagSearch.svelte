@@ -86,7 +86,7 @@
      button instead, which then turns hovered and clicked along with the whole bar -->
 <label
   for={id}
-  class="field group flex min-h-10 min-w-50 flex-1 cursor-text flex-wrap items-center gap-1 px-3 py-1"
+  class="field group flex min-h-10 min-w-50 flex-1 cursor-text flex-wrap items-center gap-1 px-4 py-1"
 >
   {#each tags as tag (tag)}
     <TagChip {tag} selected onclick={() => removeTag(tag)} />
