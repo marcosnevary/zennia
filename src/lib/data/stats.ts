@@ -1,10 +1,16 @@
 import type { SortDirection } from "./words";
 import { kanaKey, type KanaScript } from "#lib/core/kana.ts";
 import type { Memory, Stats, Tally, Verdict, Word } from "#lib/core/types.ts";
-import { remember } from "./memory";
+import { recall, remember } from "./memory";
 
 export function emptyStats(): Stats {
   return { words: {}, kana: {} };
+}
+
+/** The memory an answer led to, and the recall the model predicted before it. */
+export interface Remembered {
+  memory: Memory;
+  recall: number;
 }
 
 function bump(
@@ -12,18 +18,19 @@ function bump(
   key: string,
   hit: boolean,
   now: number,
-): Memory {
+): Remembered {
   const tally = tallies[key] ?? { hits: 0, misses: 0 };
   if (hit) tally.hits++;
   else tally.misses++;
+  const predicted = recall(tally.memory, now);
   const memory = remember(tally.memory, hit, now);
   tally.memory = memory;
   tallies[key] = tally;
-  return memory;
+  return { memory, recall: predicted };
 }
 
 /**
- * Records one checked answer of the word practice and returns the memory it led to. "almost" counts as a miss, like
+ * Records one checked answer of the word practice and returns the memory it led to, with the recall predicted before it. "almost" counts as a miss, like
  * in the session score.
  */
 export function recordAnswer(
@@ -31,18 +38,18 @@ export function recordAnswer(
   word: Word,
   verdict: Verdict,
   now: number = Date.now(),
-): Memory {
+): Remembered {
   return bump(stats.words, word.id, verdict === "correct", now);
 }
 
-/** Records one answer of the hiragana/katakana practice and returns the memory it led to. */
+/** Records one answer of the hiragana/katakana practice and returns the memory it led to, with the recall predicted before it. */
 export function recordKana(
   stats: Stats,
   script: KanaScript,
   hiragana: string,
   hit: boolean,
   now: number = Date.now(),
-): Memory {
+): Remembered {
   return bump(stats.kana, kanaKey(script, hiragana), hit, now);
 }
 

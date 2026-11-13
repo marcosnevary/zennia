@@ -11,13 +11,23 @@ import {
 } from "./practice-modes";
 import { emptyStats, recordAnswer, recordKana } from "./stats";
 import { kanaKey } from "#lib/core/kana.ts";
-import type { Stats, Word } from "#lib/core/types.ts";
+import type { Stats, Verdict, Word } from "#lib/core/types.ts";
+import type { Checked } from "./practice-session";
 
 const typed = (reading: string, meaning = "") => ({ reading, meaning });
 
+const checked = (verdict: Verdict): Checked => ({
+  outcome: { verdict, reading: verdict, meaning: null },
+  answer: { ...typed(""), responseMs: 0, hidden: false },
+  chance: 1,
+  session: "s",
+  seq: 1,
+});
+
 const recorderOf = (stats: Stats): Recorder => ({
-  word: (word, verdict) => recordAnswer(stats, word, verdict),
-  kana: (script, hiragana, hit) => recordKana(stats, script, hiragana, hit),
+  word: (word, { outcome }) => recordAnswer(stats, word, outcome.verdict),
+  kana: (script, hiragana, { outcome }) =>
+    recordKana(stats, script, hiragana, outcome.verdict === "correct"),
 });
 
 const wordsMode = (
@@ -66,7 +76,7 @@ describe("wordsMode", () => {
   it("records the verdict per word id", () => {
     const stats = emptyStats();
     const mode = wordsMode([word("a")], stats);
-    mode.record(mode.pool[0], "almost");
+    mode.record(mode.pool[0], checked("almost"));
     expect(stats.words.a).toMatchObject({ hits: 0, misses: 1 });
   });
 });
@@ -171,7 +181,7 @@ describe("kanaMode", () => {
   it("records per script, so hiragana and katakana stay apart", () => {
     const stats = emptyStats();
     const mode = kanaMode(selected, stats);
-    mode.record(mode.pool[1], "correct");
+    mode.record(mode.pool[1], checked("correct"));
     expect(stats.kana["katakana:お"]).toMatchObject({ hits: 1, misses: 0 });
     expect(stats.kana["hiragana:お"]).toBeUndefined();
   });
@@ -201,8 +211,8 @@ describe("mixedMode", () => {
   it("records words and kana in their own stats", () => {
     const stats = emptyStats();
     const mode = mixedMode([word("a")], kana, stats);
-    mode.record(mode.pool[0], "correct");
-    mode.record(mode.pool[1], "incorrect");
+    mode.record(mode.pool[0], checked("correct"));
+    mode.record(mode.pool[1], checked("incorrect"));
     expect(stats.words.a).toMatchObject({ hits: 1, misses: 0 });
     expect(stats.kana["hiragana:お"]).toMatchObject({ hits: 0, misses: 1 });
   });

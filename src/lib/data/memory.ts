@@ -2,6 +2,9 @@ import type { Memory } from "#lib/core/types.ts";
 
 const MINUTE = 60_000;
 
+/** Logged with each answer, so answers drawn by different rules can be told apart; 1 was the tally weight before it. */
+export const DRAW_ALGORITHM = 2;
+
 /** Half-life after the first answer, when it is right. */
 export const FIRST_HALF_LIFE = 10 * MINUTE;
 /** Half-life after any wrong answer. */
@@ -152,6 +155,12 @@ export function chanceOf<T>(plan: DrawPlan<T>, item: T): number {
     : learningSum && ((1 - learnedShare) * weightOf(item)) / learningSum;
 }
 
+/** A drawn item, with the chance it had of being drawn. */
+export interface Drawn<T> {
+  item: T;
+  chance: number;
+}
+
 /**
  * Draws the next item: a coin weighted by `learnedShare` picks the learning group or the learned items, and within
  * the group the draw follows the weights.
@@ -162,17 +171,20 @@ export function drawItem<T>(
   memoryOf: (item: T) => Memory | undefined,
   random: () => number = Math.random,
   now: number = Date.now(),
-): T | null {
+): Drawn<T> | null {
   if (!choices.length) return null;
+  const plan = drawPlan(pool, choices, memoryOf, now);
   const { learning, learned, weightOf, learningSum, learnedSum, learnedShare } =
-    drawPlan(pool, choices, memoryOf, now);
-  if (!learningSum && !learnedSum)
-    return pickWeighted(choices, () => 1, random);
+    plan;
   // the coin is only tossed when both sides can be drawn
   const tossed = learnedShare > 0 && learnedShare < 1;
   const group =
     learnedShare === 1 || (tossed && random() < learnedShare)
       ? learned
       : learning;
-  return pickWeighted(group, weightOf, random);
+  const item =
+    !learningSum && !learnedSum
+      ? pickWeighted(choices, () => 1, random)
+      : pickWeighted(group, weightOf, random);
+  return item === null ? null : { item, chance: chanceOf(plan, item) };
 }

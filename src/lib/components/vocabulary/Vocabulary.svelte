@@ -96,7 +96,7 @@
     errors = validateWord(fields);
     if (await hasErrors(errors, event.currentTarget as HTMLFormElement)) return;
     const word = makeWord(fields);
-    merged = mergeNote(word, app.importWords([word]));
+    merged = mergeNote(word, app.importWords([word], "hand"));
     resetForm();
     japaneseEl?.focus();
   }

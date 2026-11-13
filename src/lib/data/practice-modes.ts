@@ -13,8 +13,13 @@ import {
   spokenReading,
   toDisplayRomaji,
 } from "#lib/core/romaji.ts";
-import type { Stats, Verdict, Word } from "#lib/core/types.ts";
-import type { Outcome, PracticeMode, TypedAnswer } from "./practice-session";
+import type { Stats, Word } from "#lib/core/types.ts";
+import type {
+  Checked,
+  Outcome,
+  PracticeMode,
+  TypedAnswer,
+} from "./practice-session";
 
 /** What is typed for a word: its reading, its meaning or both. */
 export type WordsFocus = "reading" | "meaning" | "both";
@@ -50,8 +55,8 @@ function checkWord(
 
 /** Where the answers of a practice go. */
 export interface Recorder {
-  word: (word: Word, verdict: Verdict) => void;
-  kana: (script: KanaScript, hiragana: string, hit: boolean) => void;
+  word: (word: Word, checked: Checked) => void;
+  kana: (script: KanaScript, hiragana: string, checked: Checked) => void;
 }
 
 /** Word practice: the active words. "almost" is a real verdict here. */
@@ -143,10 +148,10 @@ export function mixedMode(
       item.kind === "word"
         ? wordMode.check(answer, item.word)
         : kana.check(answer, item.kana),
-    record: (item, verdict) =>
+    record: (item, checked) =>
       item.kind === "word"
-        ? wordMode.record(item.word, verdict)
-        : kana.record(item.kana, verdict),
+        ? wordMode.record(item.word, checked)
+        : kana.record(item.kana, checked),
   };
 }
 
@@ -168,7 +173,6 @@ export function kanaMode(
           : "incorrect";
       return { verdict, reading: verdict, meaning: null };
     },
-    record: (k, verdict) =>
-      recorder.kana(k.script, k.hiragana, verdict === "correct"),
+    record: (k, checked) => recorder.kana(k.script, k.hiragana, checked),
   };
 }

@@ -105,7 +105,7 @@ describe("drawItem", () => {
     now = 10 * MINUTE,
   ) => {
     const pool = Object.keys(memories);
-    return drawItem(pool, pool, (key) => memories[key], random, now);
+    return drawItem(pool, pool, (key) => memories[key], random, now)?.item;
   };
 
   it("leaves new items out while the learning group is full", () => {
@@ -125,13 +125,14 @@ describe("drawItem", () => {
   it("splits the room evenly among the new items", () => {
     const pool = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
     const picks = new Set(
-      [0, 0.15, 0.35, 0.55, 0.75, 0.95].map((r) =>
-        drawItem(
-          pool,
-          pool,
-          () => undefined,
-          () => r,
-        ),
+      [0, 0.15, 0.35, 0.55, 0.75, 0.95].map(
+        (r) =>
+          drawItem(
+            pool,
+            pool,
+            () => undefined,
+            () => r,
+          )?.item,
       ),
     );
     expect(picks).toEqual(new Set(["a", "b", "d", "f", "h", "j"]));
@@ -173,6 +174,17 @@ describe("drawItem", () => {
   it("draws among all the choices when every weight is 0", () => {
     const now = { ...learned, answeredAt: 10 * MINUTE };
     expect(draw({ a: now, b: now }, randoms(0.9))).toBe("b");
+  });
+
+  it("gives the chance the drawn item had", () => {
+    const memories = { a: learning, fresh: undefined };
+    const pool = Object.keys(memories);
+    const memoryOf = (key: string) => memories[key as keyof typeof memories];
+    // a weighs 0.5 and the new item 1
+    expect(drawItem(pool, pool, memoryOf, randoms(0.5), 10 * MINUTE)).toEqual({
+      item: "fresh",
+      chance: 2 / 3,
+    });
   });
 
   it("returns null when there is nothing to draw", () => {

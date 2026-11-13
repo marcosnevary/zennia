@@ -1,10 +1,18 @@
-import { drawItem } from "./memory";
+import { drawItem, type Drawn } from "./memory";
 import type { Memory, Verdict } from "#lib/core/types.ts";
 
 /** What was typed in each field; a field that isn't shown stays empty. */
 export interface TypedAnswer {
   reading: string;
   meaning: string;
+}
+
+/** What was typed, with how long it took. */
+export interface SubmittedAnswer extends TypedAnswer {
+  /** From the prompt showing, after its font loaded, to Check */
+  responseMs: number;
+  /** Whether the page was hidden meanwhile, which inflates the time */
+  hidden: boolean;
 }
 
 /** The verdict of an answer and of each part of it; a part that is not practiced is null. */
@@ -24,16 +32,32 @@ export interface PracticeMode<T> {
   memoryOf: (item: T) => Memory | undefined;
   /** Null when nothing was typed for what the item asks. */
   check: (answer: TypedAnswer, item: T) => Outcome | null;
-  /** Persists the outcome (stats); called once per checked answer. */
-  record: (item: T, verdict: Verdict) => void;
+  /** Persists the answer (stats and log); called once per checked answer. */
+  record: (item: T, answer: Checked) => void;
+}
+
+/** A checked answer, with what the log needs to know about it. */
+export interface Checked {
+  outcome: Outcome;
+  answer: SubmittedAnswer;
+  /** The chance the item had of being drawn */
+  chance: number;
+  session: string;
+  /** The answer's position in the session, from 1 */
+  seq: number;
 }
 
 export interface Session<T> {
+  /** Also identifies the app's session in the log, which starts with it */
+  id: string;
   current: T | null;
+  /** The chance the current item had of being drawn */
+  chance: number;
   /** Set once the current item was checked; the next submit moves on. */
   outcome: Outcome | null;
   /** Drawn when the current item is checked, so what it shows with can load while the result is up. */
   upcoming: T | null;
+  upcomingChance: number;
   hits: number;
   answers: number;
   lastKey: string | null;
@@ -41,9 +65,12 @@ export interface Session<T> {
 
 export function startSession<T>(): Session<T> {
   return {
+    id: crypto.randomUUID(),
     current: null,
+    chance: 0,
     outcome: null,
     upcoming: null,
+    upcomingChance: 0,
     hits: 0,
     answers: 0,
     lastKey: null,
@@ -55,7 +82,7 @@ function draw<T>(
   session: Session<T>,
   mode: PracticeMode<T>,
   random?: () => number,
-): T | null {
+): Drawn<T> | null {
   const choices =
     mode.pool.length > 1
       ? mode.pool.filter((item) => mode.keyOf(item) !== session.lastKey)
@@ -76,20 +103,24 @@ export function nextRound<T>(
   const kept = upcoming
     ? mode.pool.find((item) => mode.keyOf(item) === mode.keyOf(upcoming))
     : undefined;
-  const current = kept ?? draw(session, mode, random);
+  const drawn = kept
+    ? { item: kept, chance: session.upcomingChance }
+    : draw(session, mode, random);
   return {
     ...session,
-    current,
+    current: drawn?.item ?? null,
+    chance: drawn?.chance ?? 0,
     outcome: null,
     upcoming: null,
-    lastKey: current ? mode.keyOf(current) : null,
+    upcomingChance: 0,
+    lastKey: drawn ? mode.keyOf(drawn.item) : null,
   };
 }
 
 /** Checks the answer for the current item and updates the score. */
 export function submit<T>(
   session: Session<T>,
-  answer: TypedAnswer,
+  answer: SubmittedAnswer,
   mode: PracticeMode<T>,
   random?: () => number,
 ): Session<T> {
@@ -98,12 +129,21 @@ export function submit<T>(
   if (session.outcome) return nextRound(session, mode, random);
   const outcome = mode.check(answer, current);
   if (!outcome) return session;
-  mode.record(current, outcome.verdict);
+  const answers = session.answers + 1;
+  mode.record(current, {
+    outcome,
+    answer,
+    chance: session.chance,
+    session: session.id,
+    seq: answers,
+  });
+  const upcoming = draw(session, mode, random);
   return {
     ...session,
     outcome,
-    upcoming: draw(session, mode, random),
+    upcoming: upcoming?.item ?? null,
+    upcomingChance: upcoming?.chance ?? 0,
     hits: session.hits + (outcome.verdict === "correct" ? 1 : 0),
-    answers: session.answers + 1,
+    answers,
   };
 }

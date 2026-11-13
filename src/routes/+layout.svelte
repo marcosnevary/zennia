@@ -7,8 +7,9 @@
   import Languages from "@lucide/svelte/icons/languages";
   import LogIn from "@lucide/svelte/icons/log-in";
   import PencilLine from "@lucide/svelte/icons/pencil-line";
-  import { onMount } from "svelte";
+  import { onMount, untrack } from "svelte";
   import { MediaQuery } from "svelte/reactivity";
+  import { version } from "$app/env";
   import { goto } from "$app/navigation";
   import { asset, resolve } from "$app/paths";
   import { navigating, page } from "$app/state";
@@ -20,12 +21,19 @@
   import { privacyNoticeUrl } from "#lib/data/privacy.ts";
   import { createRepo } from "#lib/data/db/repo.ts";
   import { resolveTheme } from "#lib/data/theme.ts";
+  import { sessionInfo } from "#lib/data/usage-log.ts";
   import { App, setApp } from "#lib/state.svelte.ts";
 
   let { children } = $props();
 
-  const app = setApp(new App(createRepo(getDb)));
+  const app = setApp(new App(createRepo(getDb), () => sessionInfo(version)));
   onMount(() => app.init());
+
+  // a lesson counts as the Learn tab
+  $effect(() => {
+    const tab = page.route.id?.split("/")[1];
+    if (tab) untrack(() => app.openTab(tab));
+  });
 
   // 0 with overlay scrollbars; the probe picks up the thin scrollbar app.css gives every element
   onMount(() => {

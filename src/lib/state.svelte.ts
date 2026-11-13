@@ -2,10 +2,16 @@ import type { Pronounced } from "#functions/_shared/pronunciation.ts";
 import { getContext, setContext } from "svelte";
 import { SvelteSet } from "svelte/reactivity";
 import { defaultKanaSelection, kanaKey, type KanaScript } from "./core/kana";
-import type { Stats, Verdict, Word } from "./core/types";
+import type { Stats, Word } from "./core/types";
 import type { Account, ProfileChange } from "./data/db/client";
 import { PopupBlockedError, type GoogleToken } from "./data/db/google";
-import type { Repo, Stored, UserData } from "./data/db/repo";
+import type {
+  AnswerRecord,
+  AnswerResult,
+  Repo,
+  Stored,
+  UserData,
+} from "./data/db/repo";
 import {
   isWordItem,
   kanaKeyOfItem,
@@ -15,7 +21,11 @@ import {
 } from "./data/lists";
 import type { PracticeFontId } from "./data/practice-fonts";
 import type { PracticeItem, Recorder, WordsFocus } from "./data/practice-modes";
-import { startSession, type Session } from "./data/practice-session";
+import {
+  startSession,
+  type Checked,
+  type Session,
+} from "./data/practice-session";
 import { DEFAULT_SETTINGS, type Settings } from "./data/settings";
 import {
   answerCount,
@@ -23,6 +33,7 @@ import {
   recordAnswer,
   recordKana,
   totalTally,
+  type Remembered,
   type StatsSort,
 } from "./data/stats";
 import { assignTagColors } from "./data/tag-colors";
@@ -41,6 +52,12 @@ import {
   type SortKey,
 } from "./data/words";
 import { allTags, findTag, renameTag } from "./data/tags";
+import {
+  wordEvents,
+  type SessionInfo,
+  type UsageEvent,
+  type WordSource,
+} from "./data/usage-log";
 
 const SIGN_IN_FAILED = "Couldn't sign in. Check your connection and try again.";
 
@@ -77,15 +94,22 @@ export class App {
   readonly newWordIds = new SvelteSet<string>();
 
   readonly recorder: Recorder = {
-    word: (word, verdict) => this.recordWord(word, verdict),
-    kana: (script, hiragana, hit) => this.recordKana(script, hiragana, hit),
+    word: (word, checked) => this.recordWord(word, checked),
+    kana: (script, hiragana, checked) =>
+      this.recordKana(script, hiragana, checked),
   };
 
   readonly #repo: Repo;
+  readonly #describeSession: () => SessionInfo;
   #queue: Promise<void> = Promise.resolve();
+  // the answer whose result is up, which Next completes in the log
+  #lastAnswer: Omit<AnswerResult, "resultMs" | "hidden"> | null = null;
+  // logged again when a session starts, since the tab that was open then was logged in the previous one
+  #tab: string | null = null;
 
-  constructor(repo: Repo) {
+  constructor(repo: Repo, describeSession: () => SessionInfo) {
     this.#repo = repo;
+    this.#describeSession = describeSession;
   }
 
   /** The kana included in practice. */
@@ -102,8 +126,9 @@ export class App {
       const stored = await this.#repo.load();
       this.account = await this.#repo.account();
       this.#apply(stored);
-      this.#syncTagColors();
       this.status = "ready";
+      this.#startLog();
+      this.#syncTagColors();
     } catch {
       this.status = "failed";
       this.toasts.show(
@@ -199,7 +224,7 @@ export class App {
   }
 
   /** Replaces the word list; only the words that were added, changed or removed are written. */
-  setWords(next: Word[]): void {
+  setWords(next: Word[], source: WordSource = "hand"): void {
     const now = Date.now();
     let undated = 0;
     const previous: Word[] = $state.snapshot(this.words);
@@ -225,6 +250,8 @@ export class App {
       if (changed.length) await this.#repo.upsertWords(changed);
       if (removed.length) await this.#repo.deleteWords(removed);
     });
+    for (const event of wordEvents(previous, words, source))
+      this.#logEvent(event);
     this.#syncTagColors();
   }
 
@@ -245,24 +272,44 @@ export class App {
     this.newWordIds.delete(id);
   }
 
-  importWords(incoming: Word[]): MergeResult {
+  importWords(incoming: Word[], source: WordSource): MergeResult {
     const result = mergeWords(this.words, incoming);
-    this.setWords(result.words);
+    this.setWords(result.words, source);
     return result;
   }
 
-  recordWord(word: Word, verdict: Verdict): void {
-    const memory = recordAnswer(this.stats, word, verdict);
-    this.#persist(() =>
-      this.#repo.recordAnswer("word", word.id, verdict === "correct", memory),
+  recordWord(word: Word, checked: Checked): void {
+    const { verdict } = checked.outcome;
+    this.#recordAnswer(
+      { kind: "word", key: word.id },
+      recordAnswer(this.stats, word, verdict),
+      checked,
+      { focus: this.settings.wordsFocus, typedMeaning: checked.answer.meaning },
     );
   }
 
-  recordKana(script: KanaScript, hiragana: string, hit: boolean): void {
-    const memory = recordKana(this.stats, script, hiragana, hit);
-    this.#persist(() =>
-      this.#repo.recordAnswer("kana", kanaKey(script, hiragana), hit, memory),
+  recordKana(script: KanaScript, hiragana: string, checked: Checked): void {
+    const hit = checked.outcome.verdict === "correct";
+    this.#recordAnswer(
+      { kind: "kana", key: kanaKey(script, hiragana) },
+      recordKana(this.stats, script, hiragana, hit),
+      checked,
     );
+  }
+
+  /** Completes the last answer in the log once Next closes its result; `hidden` covers the whole answer. */
+  logResult(resultMs: number, hidden: boolean): void {
+    const answer = this.#lastAnswer;
+    if (!answer) return;
+    this.#lastAnswer = null;
+    this.#log(() => this.#repo.logResult({ ...answer, resultMs, hidden }));
+  }
+
+  /** Logs the tab the user opened. */
+  openTab(tab: string): void {
+    this.#tab = tab;
+    if (this.status === "ready")
+      this.#logEvent({ type: "tab_opened", payload: { tab } });
   }
 
   /**
@@ -270,7 +317,8 @@ export class App {
    * Words the user already has keep their meaning and whether they are active, and only gain the tag.
    * Returns how many items were new.
    */
-  addList(list: List): number {
+  addList(lesson: string, list: List): number {
+    this.#logEvent({ type: "lesson_completed", payload: { lesson } });
     const words = list.items.filter(isWordItem);
     if (words.length) {
       // without a meaning, a word the user has keeps theirs and only gains the tag
@@ -286,7 +334,7 @@ export class App {
           tags: [N5_TAG],
         }),
       );
-      return this.importWords(incoming).added;
+      return this.importWords(incoming, "lesson").added;
     }
     const selection = this.kanaSelection;
     const added = list.items
@@ -299,6 +347,7 @@ export class App {
   resetStats(): void {
     this.stats = emptyStats();
     this.#persist(() => this.#repo.resetStats());
+    this.#logEvent({ type: "stats_reset" });
   }
 
   setTheme(theme: ThemePreference): void {
@@ -338,17 +387,80 @@ export class App {
     this.#setSettings({ showResultRomaji });
   }
 
+  /** Sharing again snapshots the pool, since the words changed meanwhile without being logged. */
   setShareUsageData(shareUsageData: boolean): void {
     this.#setSettings({ shareUsageData });
+    this.#logEvent(this.#poolSnapshot());
   }
 
   setKanaSelection(kanaSelection: string[]): void {
     this.#setSettings({ kanaSelection: [...kanaSelection] });
   }
 
-  #setSettings(patch: Partial<Settings>): void {
+  // `logged` is false for what the app sets on its own, which says nothing about how zennia is used
+  #setSettings(patch: Partial<Settings>, logged = true): void {
     Object.assign(this.settings, patch);
     this.#persist(() => this.#repo.saveSettings(patch));
+    if (logged) this.#logEvent({ type: "settings_changed", payload: patch });
+  }
+
+  #recordAnswer(
+    item: Pick<AnswerRecord, "kind" | "key">,
+    { memory, recall }: Remembered,
+    { outcome, answer, chance, session, seq }: Checked,
+    word?: Pick<AnswerRecord, "focus" | "typedMeaning">,
+  ): void {
+    this.#lastAnswer = { kind: item.kind, session, seq };
+    this.#persist(() =>
+      this.#repo.recordAnswer({
+        ...item,
+        ...word,
+        verdict: outcome.verdict,
+        memory,
+        recall,
+        chance,
+        session,
+        seq,
+        typedReading: answer.reading,
+        responseMs: answer.responseMs,
+        hidden: answer.hidden,
+      }),
+    );
+  }
+
+  // the pool is snapshotted once, when the user's log starts: from then on the word events and the kana selection
+  // in the settings events rebuild it
+  #startLog(): void {
+    this.#logEvent({ type: "session_start", payload: this.#describeSession() });
+    if (this.#tab)
+      this.#logEvent({ type: "tab_opened", payload: { tab: this.#tab } });
+    const snapshot = this.#poolSnapshot();
+    this.#log(async (session) => {
+      if (!(await this.#repo.hasEvent("pool_snapshot")))
+        await this.#repo.logEvent(session, snapshot);
+    });
+  }
+
+  #poolSnapshot(): UsageEvent {
+    return {
+      type: "pool_snapshot",
+      payload: {
+        words: this.words.filter((w) => !w.disabled).map((w) => w.id),
+        kana: [...this.kanaSelection],
+      },
+    };
+  }
+
+  #logEvent(event: UsageEvent): void {
+    const logged = $state.snapshot(event) as UsageEvent;
+    this.#log((session) => this.#repo.logEvent(session, logged));
+  }
+
+  // only while the user shares usage data; a failed write is dropped, since the log isn't worth reloading the data
+  #log(write: (session: string) => Promise<void>): void {
+    if (!this.settings.shareUsageData) return;
+    const session = this.practice.id;
+    this.#persist(() => write(session).catch(() => {}));
   }
 
   #apply(stored: Stored): void {
@@ -362,7 +474,7 @@ export class App {
   #syncTagColors(): void {
     const saved = $state.snapshot(this.settings.tagColors);
     const tagColors = assignTagColors(allTags(this.words), saved);
-    if (tagColors !== saved) this.#setSettings({ tagColors });
+    if (tagColors !== saved) this.#setSettings({ tagColors }, false);
   }
 
   // the toast waits for the user to choose, and signing in reuses the token so Google isn't asked again

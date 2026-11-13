@@ -97,7 +97,7 @@
 
   async function runImport(
     event: Event,
-    key: string,
+    key: "json" | "anki",
     parse: (text: string) => SanitizeResult,
   ) {
     const input = event.currentTarget as HTMLInputElement;
@@ -106,7 +106,7 @@
     if (!file) return;
     try {
       const { words: incoming, skipped } = parse(await file.text());
-      const result = app.importWords(incoming);
+      const result = app.importWords(incoming, key);
       app.toasts.dismiss("import");
       flash(key, true, importBrief(result), importSummary(result, skipped));
     } catch (e) {

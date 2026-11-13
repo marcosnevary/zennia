@@ -89,6 +89,7 @@
         const { japanese, hiragana, meaning } = row.candidates[row.choice];
         return makeWord({ japanese, hiragana, meaning, tags: batchTags });
       }),
+      "paste",
     );
     message = importSummary(result, 0);
     text = "";

@@ -1,10 +1,30 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Stats, Word } from "./core/types";
 import type { Repo, Stored } from "./data/db/repo";
+import type { Checked } from "./data/practice-session";
 import type { List } from "./data/lists";
 import { DEFAULT_SETTINGS } from "./data/settings";
 import { emptyStats } from "./data/stats";
+import type { SessionInfo } from "./data/usage-log";
 import { App } from "./state.svelte";
+
+const SESSION: SessionInfo = {
+  app: "abc123",
+  device: "desktop",
+  viewport: [1280, 800],
+  timeZone: "America/Sao_Paulo",
+  language: "pt-BR",
+};
+
+const newApp = (repo: Repo) => new App(repo, () => SESSION);
+
+const checked = (verdict: Checked["outcome"]["verdict"], seq = 1): Checked => ({
+  outcome: { verdict, reading: verdict, meaning: null },
+  answer: { reading: "hi", meaning: "", responseMs: 1500, hidden: false },
+  chance: 0.25,
+  session: "s",
+  seq,
+});
 
 const word = (
   id: string,
@@ -30,6 +50,9 @@ function fakeRepo(stored: Partial<Stored> = {}, conflict = false) {
     ...stored,
   };
   const calls: string[] = [];
+  // the usage log, apart from the writes most tests check
+  const logged: unknown[] = [];
+  let snapshotted = false;
   const repo: Repo = {
     load: vi.fn(async () => structuredClone(current)),
     upsertWords: vi.fn(async (words: Word[]) => {
@@ -38,9 +61,17 @@ function fakeRepo(stored: Partial<Stored> = {}, conflict = false) {
     deleteWords: vi.fn(async (ids: string[]) => {
       calls.push(`delete ${ids.join(",")}`);
     }),
-    recordAnswer: vi.fn(async (kind, key, hit, memory) => {
-      calls.push(`answer ${kind} ${key} ${hit} streak ${memory.streak}`);
+    recordAnswer: vi.fn(async ({ kind, key, verdict, memory }) => {
+      calls.push(`answer ${kind} ${key} ${verdict} streak ${memory.streak}`);
     }),
+    logResult: vi.fn(async (result) => {
+      logged.push(result);
+    }),
+    logEvent: vi.fn(async (_session, event) => {
+      if (event.type === "pool_snapshot") snapshotted = true;
+      logged.push(event);
+    }),
+    hasEvent: vi.fn(async () => snapshotted),
     resetStats: vi.fn(async () => {
       calls.push("reset stats");
     }),
@@ -78,6 +109,7 @@ function fakeRepo(stored: Partial<Stored> = {}, conflict = false) {
       kanaStats: [],
       wordAnswers: [],
       kanaAnswers: [],
+      events: [],
     })),
     deleteAccount: vi.fn(async () => {
       calls.push("delete account");
@@ -92,7 +124,12 @@ function fakeRepo(stored: Partial<Stored> = {}, conflict = false) {
       calls.push(`pronounce ${p.reading}`);
     }),
   };
-  return { repo, calls, setStored: (next: Stored) => (current = next) };
+  return {
+    repo,
+    calls,
+    logged,
+    setStored: (next: Stored) => (current = next),
+  };
 }
 
 const messages = (app: App) => app.toasts.items.map((t) => t.message);
@@ -108,7 +145,7 @@ async function choose(app: App, label: string) {
 
 async function ready(stored?: Partial<Stored>, conflict = false) {
   const fake = fakeRepo(stored, conflict);
-  const app = new App(fake.repo);
+  const app = newApp(fake.repo);
   await app.init();
   return { app, ...fake };
 }
@@ -123,7 +160,7 @@ describe("App", () => {
   it("fails with the error of the repository", async () => {
     const { repo } = fakeRepo();
     vi.mocked(repo.load).mockRejectedValueOnce(new Error("offline"));
-    const app = new App(repo);
+    const app = newApp(repo);
     await app.init();
     expect(app.status).toBe("failed");
     expect(messages(app)).toEqual([
@@ -147,19 +184,23 @@ describe("App", () => {
 
   it("shows imported words first, in the order of the file", async () => {
     const { app } = await ready({ words: [word("a", 1)] });
-    const { added } = app.importWords([
-      word("x", undefined as never),
-      { ...word("y", undefined as never), japanese: "別" },
-    ]);
+    const { added } = app.importWords(
+      [
+        word("x", undefined as never),
+        { ...word("y", undefined as never), japanese: "別" },
+      ],
+      "json",
+    );
     expect(added).toBe(2);
     expect(app.words.map((w) => w.id)).toEqual(["x", "y", "a"]);
   });
 
   it("merges a word that already exists without adding a row or a new mark", async () => {
     const { app } = await ready({ words: [word("a", 1)] });
-    const { updated } = app.importWords([
-      word("b", 2, { japanese: "日a", meaning: "other" }),
-    ]);
+    const { updated } = app.importWords(
+      [word("b", 2, { japanese: "日a", meaning: "other" })],
+      "json",
+    );
     expect(updated).toBe(1);
     expect(app.words.map((w) => [w.id, w.meaning])).toEqual([
       ["a", "a; other"],
@@ -248,14 +289,14 @@ describe("App", () => {
 
   it("counts answers in memory and in the repository", async () => {
     const { app, calls } = await ready({ words: [word("a", 1)] });
-    app.recorder.word(app.words[0], "almost");
-    app.recorder.kana("hiragana", "あ", true);
+    app.recorder.word(app.words[0], checked("almost"));
+    app.recorder.kana("hiragana", "あ", checked("correct", 2));
     await app.flush();
     expect(app.stats.words.a).toMatchObject({ hits: 0, misses: 1 });
     expect(app.stats.kana["hiragana:あ"]).toMatchObject({ hits: 1, misses: 0 });
     expect(calls).toEqual([
-      "answer word a false streak 0",
-      "answer kana hiragana:あ true streak 2",
+      "answer word a almost streak 0",
+      "answer kana hiragana:あ correct streak 2",
     ]);
   });
 
@@ -412,19 +453,19 @@ describe("addList", () => {
         kanaSelection: ["katakana:ア", "hiragana:あ"],
       },
     });
-    expect(app.addList(hiragana)).toBe(2);
+    expect(app.addList("hiragana", hiragana)).toBe(2);
     expect(app.kanaSelection).toEqual([
       "katakana:ア",
       "hiragana:あ",
       "hiragana:い",
       "hiragana:が",
     ]);
-    expect(app.addList(hiragana)).toBe(0);
+    expect(app.addList("hiragana", hiragana)).toBe(0);
   });
 
   it("starts from the default selection when the user never chose one", async () => {
     const { app } = await ready();
-    app.addList(hiragana);
+    app.addList("hiragana", hiragana);
     expect(app.kanaSelection).toContain("hiragana:が");
     expect(app.kanaSelection).toContain("hiragana:か");
   });
@@ -433,7 +474,7 @@ describe("addList", () => {
     const { app } = await ready({
       words: [word("a", 1, { disabled: true })],
     });
-    expect(app.addList(n5)).toBe(1);
+    expect(app.addList("n5", n5)).toBe(1);
     const byJapanese = Object.fromEntries(
       app.words.map((w) => [w.japanese, w]),
     );
@@ -448,7 +489,111 @@ describe("addList", () => {
       disabled: false,
       tags: ["JLPT-N5"],
     });
-    expect(app.addList(n5)).toBe(0);
+    expect(app.addList("n5", n5)).toBe(0);
     expect(app.words).toHaveLength(2);
+  });
+});
+
+describe("App usage log", () => {
+  const types = (logged: unknown[]) =>
+    logged.map((e) => (e as { type?: string }).type ?? "result");
+
+  it("starts each session with its facts, the open tab and, once per user, the pool", async () => {
+    const fake = fakeRepo({
+      words: [word("a", 2), word("b", 1, { disabled: true })],
+    });
+    const app = newApp(fake.repo);
+    app.openTab("practice");
+    await app.init();
+    await app.flush();
+    expect(fake.logged).toEqual([
+      { type: "session_start", payload: SESSION },
+      { type: "tab_opened", payload: { tab: "practice" } },
+      {
+        type: "pool_snapshot",
+        payload: { words: ["a"], kana: app.kanaSelection },
+      },
+    ]);
+    await app.init();
+    await app.flush();
+    expect(types(fake.logged).slice(3)).toEqual([
+      "session_start",
+      "tab_opened",
+    ]);
+  });
+
+  it("logs the result of the last answer once Next closes it", async () => {
+    const { app, logged } = await ready({ words: [word("a", 1)] });
+    app.recorder.word(app.words[0], checked("correct", 3));
+    app.logResult(2000, true);
+    app.logResult(500, false);
+    await app.flush();
+    expect(logged.at(-1)).toEqual({
+      kind: "word",
+      session: "s",
+      seq: 3,
+      resultMs: 2000,
+      hidden: true,
+    });
+    expect(types(logged).filter((t) => t === "result")).toHaveLength(1);
+  });
+
+  it("logs the words added with their source, and the lesson completed", async () => {
+    const { app, logged } = await ready();
+    const items = [
+      { key: "word:日:ひ", japanese: "日", hiragana: "ひ", meaning: "sun" },
+    ];
+    app.addList("n5", { id: "n5", items });
+    await app.flush();
+    expect(logged.slice(-2)).toEqual([
+      { type: "lesson_completed", payload: { lesson: "n5" } },
+      {
+        type: "words_added",
+        payload: { ids: [app.words[0].id], source: "lesson" },
+      },
+    ]);
+  });
+
+  it("logs a reset, and the changes of the settings", async () => {
+    const { app, logged } = await ready();
+    app.resetStats();
+    app.setWordsFocus("both");
+    await app.flush();
+    expect(logged.slice(-2)).toEqual([
+      { type: "stats_reset" },
+      { type: "settings_changed", payload: { wordsFocus: "both" } },
+    ]);
+  });
+
+  it("logs nothing while the user doesn't share usage data, and snapshots the pool on sharing again", async () => {
+    const { app, logged } = await ready({ words: [word("a", 1)] });
+    app.setShareUsageData(false);
+    await app.flush();
+    const before = logged.length;
+    app.recorder.word(app.words[0], checked("correct"));
+    app.logResult(1000, false);
+    app.openTab("stats");
+    app.setWords([]);
+    await app.flush();
+    expect(logged).toHaveLength(before);
+    app.setShareUsageData(true);
+    await app.flush();
+    expect(logged.slice(before)).toEqual([
+      { type: "settings_changed", payload: { shareUsageData: true } },
+      {
+        type: "pool_snapshot",
+        payload: { words: [], kana: app.kanaSelection },
+      },
+    ]);
+  });
+
+  it("drops a failed log write without warning or reloading", async () => {
+    const { app, repo } = await ready();
+    vi.mocked(repo.logEvent).mockRejectedValueOnce(new Error("offline"));
+    const loads = vi.mocked(repo.load).mock.calls.length;
+    app.openTab("stats");
+    await app.flush();
+    expect(messages(app)).toEqual([]);
+    expect(vi.mocked(repo.load).mock.calls.length).toBe(loads);
   });
 });
