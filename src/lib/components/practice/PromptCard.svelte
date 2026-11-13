@@ -3,9 +3,6 @@
   import type { Verdict } from "#lib/core/types.ts";
   import type { RightAnswer } from "#lib/data/practice-modes.ts";
 
-  // shared by the meaning and the bar that stands in for it, so the bar has the meaning's size
-  const MEANING_TEXT = "text-base leading-6";
-
   const VERDICT_STYLES: Record<Verdict, string> = {
     correct: "bg-ok/15",
     almost: "bg-warn/15",
@@ -37,20 +34,11 @@
   } = $props();
 
   const written = $derived(answer.written.map((part) => part.text).join(""));
+  // a word all in hiragana has no furigana, so it gets no furigana line
+  const hasFurigana = $derived(answer.written.some((part) => part.reading));
   // only words have a meaning, below the prompt and its reading
   const hasMeaning = $derived(answer.meaning !== undefined);
 </script>
-
-<!-- the furigana is hidden until checked but keeps its line, so the word doesn't move when it appears -->
-{#snippet reveal(text: string | undefined, size: string)}
-  <span
-    class={[
-      size,
-      "motion-safe:transition-opacity motion-safe:duration-200",
-      !verdict && "opacity-0",
-    ]}>{text || "\u00a0"}</span
-  >
-{/snippet}
 
 <div
   class="relative flex flex-col items-center gap-1 rounded-panel p-4 text-ink motion-safe:transition-colors motion-safe:duration-200 {verdict
@@ -68,21 +56,17 @@
       <span class="sr-only">{written}</span>
       {#each answer.written as part, i (i)}
         <span class="flex flex-col items-center" aria-hidden="true">
-          {@render reveal(part.reading, "text-base leading-6")}
+          <!-- a run without furigana keeps the line, so the runs stay aligned on the word -->
+          {#if verdict && hasFurigana}
+            <span class="text-base leading-6">{part.reading || "\u00a0"}</span>
+          {/if}
           <!-- text-2xl's negative letter spacing would cramp Japanese -->
           <span class="text-2xl tracking-normal">{part.text}</span>
         </span>
       {/each}
     </p>
-    <!-- a gray bar of the romaji's own size while asking, like the meaning's -->
-    {#if showRomaji}
-      <p
-        class={[
-          "text-base leading-6",
-          verdict ? "text-muted" : "bg-tint text-transparent select-none",
-        ]}
-        aria-hidden="true"
-      >
+    {#if verdict && showRomaji}
+      <p class="text-base leading-6 text-muted" aria-hidden="true">
         {answer.romaji}
       </p>
     {/if}
@@ -103,7 +87,7 @@
       </p>
       <p class="sr-only">{answer.romaji}</p>
       {#if hasMeaning}
-        <p class={MEANING_TEXT}>{answer.meaning}</p>
+        <p class="text-base leading-6">{answer.meaning}</p>
       {/if}
       {#if verdict === "almost"}
         <p class="text-sm leading-5">Only the length of a vowel differs.</p>
@@ -122,16 +106,5 @@
     >
       <Volume2 />
     </button>
-  {:else if hasMeaning}
-    <!-- stands in for the meaning, which takes its place once checked: it holds the text, hidden, so it has the text's
-         size and the card keeps its height; the side padding wraps the text as the result does -->
-    <div
-      class="flex w-full flex-col items-center px-10 text-center"
-      aria-hidden="true"
-    >
-      <span class="bg-tint {MEANING_TEXT} text-transparent select-none"
-        >{answer.meaning}</span
-      >
-    </div>
   {/if}
 </div>

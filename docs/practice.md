@@ -15,7 +15,7 @@ Practice opens in the mode it was left in (`practiceMode`), and in Learn for som
 
 ## The card
 
-The card shows the prompt. Gray bars stand in for the romaji, right below it, and for a word's meaning, below it: each holds its text, hidden, so it has the text's size. The answer fields and Check are stacked below the card at full width, and on a wide screen Practice keeps the width of a phone in the middle.
+The card shows only the prompt while asking. The answer fields and Check are stacked below the card at full width, and on a wide screen Practice keeps the width of a phone in the middle.
 
 ## What is drawn
 
@@ -114,9 +114,9 @@ A blank answer is not checked. Only `correct` counts as a hit: `almost` is a mis
 
 ## Feedback
 
-The result shows on the card itself (`PromptCard.svelte`), laid out like a dictionary entry, centered. Its color tells the verdict, furigana appears above each run of the prompt that isn't hiragana, and the romaji of the whole word, in muted text, and the meaning take the place of the gray bars. Romaji is always derived from the reading, never saved. **Show romaji in the result**, on by default in Settings, can hide it for learners who read kana without it; screen readers still get it.
+The result shows on the card itself (`PromptCard.svelte`), laid out like a dictionary entry, centered. Its color tells the verdict, furigana appears above each run of the prompt that isn't hiragana, and the romaji of the whole word, in muted text, and the meaning appear below it. Romaji is always derived from the reading, never saved. **Show romaji in the result**, on by default in Settings, can hide it for learners who read kana without it; screen readers still get it.
 
-The prompt keeps the line of the furigana while asking, and the bars take the size of the text that replaces them, so checking doesn't move the fields below. Only an `almost` makes the card taller, with an extra line that says only the length of a vowel differs.
+Nothing reserves space for the result while asking, so the card grows when checked and the fields below move down. A word all in hiragana gets no furigana line, and the romaji's line is left out when Settings hides it. An `almost` adds a line that says only the length of a vowel differs.
 
 Furigana (`src/lib/core/furigana.ts`) splits the written form into runs of hiragana and of anything else, then uses the hiragana runs as anchors to find each other run's part of the reading. When they don't fit the reading, the whole word gets it.
 
