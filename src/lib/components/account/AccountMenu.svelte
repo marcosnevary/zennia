@@ -6,6 +6,9 @@
   import Avatar from "./Avatar.svelte";
   import SettingsDialog from "#lib/components/settings/SettingsDialog.svelte";
 
+  /** Compact shows only the avatar, at the top of a phone screen, and opens the menu below it. */
+  let { compact = false }: { compact?: boolean } = $props();
+
   const app = getApp();
   const label = $derived(app.account.name ?? app.account.email ?? "");
 
@@ -14,13 +17,19 @@
   let settingsDialog = $state<SettingsDialog>();
   let open = $state(false);
 
-  // the menu lives in the top layer, out of the sidebar, so it is placed by hand just above the trigger
+  // the menu lives in the top layer, out of the sidebar or header, so it is placed by hand next to the trigger:
+  // above it at the bottom of the sidebar, below it and aligned to its right edge at the top of the screen
   function ontoggle(event: ToggleEvent) {
     open = event.newState === "open";
     if (!open || !triggerEl || !menuEl) return;
     const trigger = triggerEl.getBoundingClientRect();
-    menuEl.style.left = `${trigger.left + 8}px`;
-    menuEl.style.bottom = `${window.innerHeight - trigger.top + 8}px`;
+    if (compact) {
+      menuEl.style.top = `${trigger.bottom + 8}px`;
+      menuEl.style.right = `${window.innerWidth - trigger.right}px`;
+    } else {
+      menuEl.style.left = `${trigger.left + 8}px`;
+      menuEl.style.bottom = `${window.innerHeight - trigger.top + 8}px`;
+    }
     menuEl.querySelector<HTMLElement>("[role=menuitem]")?.focus();
   }
 
@@ -52,7 +61,9 @@
 </script>
 
 <button
-  class="menu-item -mx-3 -mb-6 gap-2 rounded-none border-t border-tint px-3 py-4 max-md:justify-center md:-mx-4 md:px-4"
+  class={compact
+    ? "icon p-1"
+    : "menu-item -mx-4 -mb-6 gap-2 rounded-none border-t border-tint px-4 py-4"}
   bind:this={triggerEl}
   popovertarget="account-menu"
   aria-haspopup="menu"
@@ -60,15 +71,15 @@
   title={app.account.email}
 >
   <Avatar url={app.account.avatarUrl} {label} />
-  <span class="min-w-0 flex-1 truncate text-left text-sm max-md:hidden"
-    >{label}</span
-  >
-  <ChevronUp
-    class={[
-      "size-4 text-muted transition-transform motion-reduce:transition-none max-md:hidden",
-      open && "rotate-180",
-    ]}
-  />
+  {#if !compact}
+    <span class="min-w-0 flex-1 truncate text-left text-sm">{label}</span>
+    <ChevronUp
+      class={[
+        "size-4 text-muted transition-transform motion-reduce:transition-none",
+        open && "rotate-180",
+      ]}
+    />
+  {/if}
 </button>
 
 <div

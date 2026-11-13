@@ -40,7 +40,7 @@
   --text-sm: 0.875rem;
   --text-base: 1rem;
   --text-lg: 1.25rem;
-  --text-xl: 1.75rem;
+  --text-xl: 2rem;
   --text-xl--line-height: 1.1;
   --text-2xl: 2.5rem;
   --text-2xl--line-height: 1.1;
@@ -121,13 +121,14 @@
   --off: #f4a261;
 }
 
-/* filled with the secondary button tint and no visible border; the transparent border only shows focus and errors */
+/* a pill on the surface, outlined in the border color; a multi-line textarea keeps the control radius, which a pill
+   would round away */
 @utility field {
-  --field-border: transparent;
+  --field-border: var(--color-tint);
   border: 1px solid var(--field-border);
-  border-radius: var(--radius-control);
+  border-radius: var(--radius-pill);
   /* not the background shorthand, which would wipe the chevron's arrow */
-  background-color: var(--color-tint);
+  background-color: var(--surface);
   transition:
     border-color 150ms,
     box-shadow 150ms,
@@ -143,6 +144,10 @@
   &:is(input, textarea, select, button) {
     padding-top: 7px;
     padding-bottom: 7px;
+  }
+
+  &:is(textarea) {
+    border-radius: var(--radius-control);
   }
 
   /* the shadow doubles the border outwards without changing the field's size, in whatever color the state below sets */
@@ -186,14 +191,14 @@
 /* custom chevron so the arrow keeps its distance from the border */
 @utility chevron {
   appearance: none;
-  padding-right: 36px;
-  padding-left: 12px;
+  padding-right: 40px;
+  padding-left: 16px;
   background-image:
     linear-gradient(45deg, transparent 50%, var(--text) 50%),
     linear-gradient(135deg, var(--text) 50%, transparent 50%);
   background-position:
-    calc(100% - 20px) 50%,
-    calc(100% - 14px) 50%;
+    calc(100% - 24px) 50%,
+    calc(100% - 18px) 50%;
   background-size: 6px 6px;
   background-repeat: no-repeat;
 }
@@ -521,7 +526,7 @@
   input[type="search"],
   textarea {
     width: 100%;
-    padding: 8px 12px;
+    padding: 8px 16px;
     background: var(--surface);
   }
 
@@ -659,14 +664,14 @@
 }
 
 @layer components {
-  /* flat blocks with rounded corners and no borders */
+  /* flat pills with no borders */
   button,
   select,
   .file,
   .tab {
     position: relative;
     padding: 8px 16px;
-    border-radius: var(--radius-control);
+    border-radius: var(--radius-pill);
     background: var(--surface);
     cursor: pointer;
     transition:
@@ -719,8 +724,10 @@
   }
 
   /* the account button and menu items are ghost like the tabs: a light tint on hover, not the fill of a button */
+  /* rows of a menu rather than buttons on their own, so they keep the corners that follow the menu's */
   button.menu-item {
     justify-content: flex-start;
+    border-radius: var(--radius-control);
     background: transparent;
   }
 

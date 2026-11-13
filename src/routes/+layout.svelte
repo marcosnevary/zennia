@@ -7,6 +7,7 @@
   import LogIn from "@lucide/svelte/icons/log-in";
   import PencilLine from "@lucide/svelte/icons/pencil-line";
   import { onMount } from "svelte";
+  import { MediaQuery } from "svelte/reactivity";
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
   import { navigating, page } from "$app/state";
@@ -36,6 +37,9 @@
     );
     probe.remove();
   });
+
+  // md: below it the sidebar gives way to a header and a tab bar
+  const wide = new MediaQuery("min-width: 48rem");
 
   const tabs = [
     { path: "/practice", label: "Practice", icon: PencilLine },
@@ -118,60 +122,108 @@
 
 <svelte:window {onkeydown} />
 
-<div class="flex print:hidden">
-  <aside
-    class="sticky top-0 flex h-dvh w-16 shrink-0 flex-col border-r border-tint gap-8 self-start px-3 py-6 md:w-56 md:px-4"
+{#snippet signIn(compact: boolean)}
+  <button
+    class={["action", compact && "size-10 p-0"]}
+    onclick={() => app.signIn()}
+    title="Sign in with Google"
   >
-    <h1 class="h-11 font-logo text-2xl font-bold max-md:text-center md:px-4">
-      <span class="md:hidden" aria-hidden="true">z</span><span
-        class="max-md:sr-only">zennia</span
-      >
-    </h1>
-    <!-- below md the rail only fits the icons -->
-    <nav class="flex flex-col gap-2" data-sveltekit-preload-code="eager">
+    <LogIn /><span class={[compact && "sr-only"]}>Sign in</span>
+  </button>
+{/snippet}
+
+<div class="flex print:hidden">
+  {#if wide.current}
+    <aside
+      class="sticky top-0 flex h-dvh w-56 shrink-0 flex-col gap-8 self-start border-r border-tint px-4 py-6"
+    >
+      <h1 class="h-11 px-4 font-logo text-2xl font-bold">zennia</h1>
+      <nav class="flex flex-col gap-2" data-sveltekit-preload-code="eager">
+        {#each tabs as { path, label, icon: TabIcon }, i (path)}
+          <a
+            class="tab justify-start"
+            href={resolve(path)}
+            aria-current={currentPath === resolve(path) ? "page" : undefined}
+            title={app.settings.numberKeyTabs ? `${label} (${i + 1})` : label}
+            aria-keyshortcuts={app.settings.numberKeyTabs
+              ? String(i + 1)
+              : undefined}
+          >
+            <TabIcon /><span>{label}</span>
+          </a>
+        {/each}
+      </nav>
+      {#if app.status === "ready"}
+        <div class="mt-auto flex flex-col gap-2">
+          {#if app.account.anonymous}
+            <!-- free to reach into the sidebar's padding, so the note never wraps -->
+            <p
+              class="-mx-4 text-center text-xs whitespace-nowrap text-muted opacity-70"
+            >
+              Sign in to sync across devices.
+            </p>
+            {@render signIn(false)}
+          {:else}
+            <AccountMenu />
+          {/if}
+        </div>
+      {/if}
+    </aside>
+  {:else}
+    <!-- a phone has no room for a sidebar: the logo goes on top and the tabs in a bar at the bottom -->
+    <header
+      class="fixed inset-x-0 top-0 z-20 grid h-14 grid-cols-[1fr_auto_1fr] items-center bg-surface px-4 pt-3"
+    >
+      <h1 class="col-start-2 h-11 font-logo text-2xl font-bold">zennia</h1>
+      {#if app.status === "ready"}
+        <div class="justify-self-end">
+          {#if app.account.anonymous}
+            {@render signIn(true)}
+          {:else}
+            <AccountMenu compact />
+          {/if}
+        </div>
+      {/if}
+    </header>
+    <nav
+      class="fixed inset-x-0 bottom-4 z-20 mx-auto flex w-fit gap-4 rounded-pill bg-tint p-1"
+      data-sveltekit-preload-code="eager"
+    >
       {#each tabs as { path, label, icon: TabIcon }, i (path)}
+        {@const current = currentPath === resolve(path)}
         <a
-          class="tab rounded-pill max-md:size-10 max-md:p-0 md:justify-start"
+          class={[
+            "tab flex size-12 items-center justify-center p-0",
+            current
+              ? "bg-action text-on-action"
+              : "bg-surface hover:bg-tint-hover",
+          ]}
           href={resolve(path)}
-          aria-current={currentPath === resolve(path) ? "page" : undefined}
+          aria-current={current ? "page" : undefined}
+          aria-label={label}
           title={app.settings.numberKeyTabs ? `${label} (${i + 1})` : label}
           aria-keyshortcuts={app.settings.numberKeyTabs
             ? String(i + 1)
             : undefined}
         >
-          <TabIcon /><span class="max-md:sr-only">{label}</span>
+          <TabIcon />
         </a>
       {/each}
     </nav>
-    {#if app.status === "ready"}
-      <div class="mt-auto flex flex-col gap-2">
-        {#if app.account.anonymous}
-          <!-- free to reach into the sidebar's padding, so the note never wraps -->
-          <p
-            class="-mx-4 text-center text-xs whitespace-nowrap text-muted opacity-70 max-md:hidden"
-          >
-            Sign in to sync across devices.
-          </p>
-          <button
-            class="action rounded-pill max-md:size-10 max-md:p-0"
-            onclick={() => app.signIn()}
-            title="Sign in with Google"
-          >
-            <LogIn /><span class="max-md:sr-only">Sign in</span>
-          </button>
-        {:else}
-          <AccountMenu />
-        {/if}
-      </div>
-    {/if}
-  </aside>
+  {/if}
 
   <!-- sized on 100vw, which counts a classic scrollbar, so the content does not shrink or shift when one appears (shrink-0, or the
        flex row would take the scrollbar's width back out of it); 1568px is the 1376px content plus the widest side padding -->
-  <div class="w-[calc(100vw-64px)] shrink-0 md:w-[calc(100vw-224px)]">
-    <!-- every screen opens with a 24px margin, so its first block starts at the top of the first tab: 24px sidebar padding + 44px logo + 32px gap -->
+  <div
+    class={["shrink-0", wide.current ? "w-[calc(100vw-224px)]" : "w-screen"]}
+  >
+    <!-- every screen opens with a 24px margin, so its first block starts at the top of the first tab: 24px sidebar padding + 44px logo + 32px gap;
+         on a phone it starts below the header, and the bottom padding keeps the end of the page clear of the tab bar -->
     <div
-      class="mx-auto max-w-[1568px] px-4 pt-19 pb-6 sm:px-8 lg:px-16 xl:px-24"
+      class={[
+        "mx-auto max-w-[1568px] px-4 sm:px-8 lg:px-16 xl:px-24",
+        wide.current ? "pt-19 pb-6" : "pt-14 pb-24",
+      ]}
     >
       <main>
         {#if app.status === "ready"}

@@ -34,12 +34,14 @@ The database is the source of truth, but a change doesn't wait for it:
 
 ## Shell
 
-`+layout.svelte` holds the sidebar, the toasts and the writing sheet.
+`+layout.svelte` holds the navigation, the toasts and the writing sheet.
+
+- From the `md` width up, the navigation is a sidebar with the logo, the tabs and the account menu at the bottom. Below it, on a phone, the logo is centered in a header with the account menu on its right, and the tabs are round icons in a bar at the bottom. The layout picks one with a media query in script rather than hiding the other with CSS, so the account menu and its popover exist once.
 
 - It preloads every tab's code as soon as the nav renders. A click switches the tab at once, showing `Loading` while that tab's code is still on its way.
 - The keys 1 to 4 switch to the tabs in nav order, unless turned off in Settings. They do nothing in a text field or select, which take typed digits themselves, or while a dialog is open.
 - Escape takes the focus off the current control. In a dialog it closes the dialog as usual.
-- The content wrapper has a 76px top padding and relies on every screen opening with a 24px top margin, so that the first block starts at the top of the first tab. A new screen must open the same way.
+- The content wrapper has a 76px top padding and relies on every screen opening with a 24px top margin, so that the first block starts at the top of the first tab. A new screen must open the same way. On a phone the top padding is the header's 56px instead, and a bottom padding keeps the end of the page clear of the tab bar.
 
 ## Settings
 

@@ -1,5 +1,6 @@
 <script lang="ts" generics="T extends string">
   import type { Component } from "svelte";
+  import { arrowIndex } from "./arrow-keys.ts";
 
   let {
     options,
@@ -24,12 +25,8 @@
 
   // arrow keys move and select at once, like a native radio group
   function onkeydown(e: KeyboardEvent) {
-    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[
-      e.key
-    ];
-    if (!step) return;
-    e.preventDefault();
-    const next = (selected + step + options.length) % options.length;
+    const next = arrowIndex(e, selected, options.length);
+    if (next === null) return;
     onchange(options[next].id);
     buttons[next]?.focus();
   }
@@ -37,12 +34,12 @@
 
 <!-- the indicator is one element that slides under the segments, so the choice moves instead of jumping -->
 <div
-  class="relative grid h-10 auto-cols-fr grid-flow-col rounded-control bg-tint p-1"
+  class="relative grid h-10 auto-cols-fr grid-flow-col rounded-pill bg-tint p-1"
   role="radiogroup"
   aria-label={label}
 >
   <span
-    class="absolute inset-y-1 left-1 rounded-control bg-action transition-transform duration-200 ease-out motion-reduce:transition-none"
+    class="absolute inset-y-1 left-1 rounded-pill bg-action transition-transform duration-200 ease-out motion-reduce:transition-none"
     style:width="calc((100% - 8px) / {options.length})"
     style:transform="translateX({selected * 100}%)"
     aria-hidden="true"

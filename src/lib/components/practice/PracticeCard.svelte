@@ -4,7 +4,7 @@
   import { editedRomaji, typedKana } from "#lib/core/kana-input.ts";
   import type { Verdict } from "#lib/core/types.ts";
   import type { RightAnswer } from "#lib/data/practice-modes.ts";
-  import ResultPanel from "./ResultPanel.svelte";
+  import PromptCard from "./PromptCard.svelte";
   import Scoreboard from "./Scoreboard.svelte";
 
   const VERDICT_TEXT: Record<Verdict, string> = {
@@ -14,7 +14,6 @@
   };
 
   let {
-    prompt,
     promptFont,
     promptReady = true,
     verdict,
@@ -36,14 +35,12 @@
     onkeydown,
     onplay,
   }: {
-    /** The word or symbol being asked */
-    prompt: string;
     /** A font-family for the prompt instead of the UI font */
     promptFont?: string;
     /** False keeps the prompt hidden while its font loads */
     promptReady?: boolean;
     verdict: Verdict | null;
-    /** Shown with the verdict */
+    /** Its written runs are the prompt, and the rest shows with the verdict */
     rightAnswer: RightAnswer;
     /** Optional outcome of each part of the answer, for screen readers */
     note?: string;
@@ -58,7 +55,7 @@
     askReading?: boolean;
     /** Whether the meaning field is shown */
     askMeaning?: boolean;
-    /** Whether the result shows the romaji below the answer */
+    /** Whether the result shows the romaji in the reading */
     showRomaji?: boolean;
     /** Whether the romaji field shows what is typed as kana, while `answer` keeps the romaji */
     kanaInput?: boolean;
@@ -113,36 +110,31 @@
     <!-- top-2 puts the 24px icon on the text line of the 40px field -->
     {@const VerdictIcon = fieldVerdict === "correct" ? CircleSmall : X}
     <VerdictIcon
-      class="pointer-events-none absolute top-2 right-3 {VERDICT_TEXT[
+      class="pointer-events-none absolute top-2 right-4 {VERDICT_TEXT[
         fieldVerdict
       ]}"
     />
   {/if}
 {/snippet}
 
-<section class="mt-6 bg-surface px-4 pb-6 text-center">
-  <!-- the verdict takes the place of the prompt: they share one grid cell and cross-fade -->
-  <div class="mb-5 grid">
-    <p
-      class="col-start-1 row-start-1 self-center text-display motion-safe:transition-opacity motion-safe:duration-200 {verdict
-        ? 'opacity-0'
-        : ''} {promptReady ? '' : 'invisible'}"
-      style:font-family={promptFont}
-      lang="ja"
-      aria-hidden={verdict !== null}
-    >
-      {prompt}
-    </p>
-    <ResultPanel {verdict} answer={rightAnswer} {note} {showRomaji} {onplay} />
-  </div>
+<section class="mt-6">
+  <PromptCard
+    answer={rightAnswer}
+    {promptFont}
+    {promptReady}
+    {verdict}
+    {note}
+    {showRomaji}
+    {onplay}
+  />
 
-  <form class="flex gap-2" {onsubmit}>
-    <div class="flex min-w-0 flex-1 flex-col gap-2">
+  <form class="mt-4 flex flex-col gap-2" {onsubmit}>
+    <div class="flex flex-col gap-2">
       {#if askReading}
         <div class="relative">
           <input
             type="text"
-            class="field {readingVerdict ? 'pr-11' : ''}"
+            class="field {readingVerdict ? 'pr-12' : ''}"
             data-verdict={readingVerdict}
             aria-invalid={readingVerdict
               ? readingVerdict !== "correct"
@@ -166,7 +158,7 @@
         <div class="relative">
           <input
             type="text"
-            class="field {meaningVerdict ? 'pr-11' : ''}"
+            class="field {meaningVerdict ? 'pr-12' : ''}"
             data-verdict={meaningVerdict}
             aria-invalid={meaningVerdict
               ? meaningVerdict !== "correct"
@@ -185,10 +177,7 @@
         </div>
       {/if}
     </div>
-    <!-- fixed width, so the button does not resize when its label switches between Check and Next -->
-    <button class="action w-28 flex-none" type="submit"
-      >{verdict ? "Next" : "Check"}</button
-    >
+    <button class="action" type="submit">{verdict ? "Next" : "Check"}</button>
   </form>
 
   <Scoreboard {hits} {answers} />
