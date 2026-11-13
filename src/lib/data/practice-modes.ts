@@ -20,7 +20,6 @@ import {
   checkAnswer,
   spokenReading,
   toDisplayRomaji,
-  toDisplayRomajiRuns,
 } from "#lib/core/romaji.ts";
 import type { Stats, Verdict, Word } from "#lib/core/types.ts";
 import type { Outcome, PracticeMode, TypedAnswer } from "./practice-session";
@@ -86,15 +85,10 @@ export function wordsMode(
 export type PracticeItem =
   { kind: "word"; word: Word } | { kind: "kana"; kana: Kana };
 
-/** A run of the answer as written, with its furigana above it and its romaji below it. */
-export interface AnswerPart extends FuriganaPart {
-  romaji: string;
-}
-
 /** The right answer of an item, shown with the verdict. */
 export interface RightAnswer {
   /** The word as written, or the kana symbol, with its reading above what is not hiragana */
-  written: AnswerPart[];
+  written: FuriganaPart[];
   romaji: string;
   /** Only for words */
   meaning?: string;
@@ -126,12 +120,8 @@ export function typesInKana(item: PracticeItem): boolean {
 
 export function rightAnswer(item: PracticeItem): RightAnswer {
   const { written, reading: hiragana } = savedOf(item);
-  const parts = furigana(written, hiragana);
-  const romaji = toDisplayRomajiRuns(
-    parts.map((part) => part.reading ?? part.text),
-  );
   return {
-    written: parts.map((part, i) => ({ ...part, romaji: romaji[i] })),
+    written: furigana(written, hiragana),
     romaji: toDisplayRomaji(hiragana),
     meaning: item.kind === "word" ? item.word.meaning : undefined,
   };

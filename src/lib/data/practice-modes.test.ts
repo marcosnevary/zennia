@@ -214,16 +214,13 @@ describe("mixedMode", () => {
 });
 
 describe("rightAnswer", () => {
-  it("shows a word with furigana and romaji on each run, its romaji and meaning", () => {
+  it("shows a word with furigana, its romaji and meaning", () => {
     const item = {
       kind: "word",
       word: word("食べる", { hiragana: "たべる", meaning: "to eat" }),
     } as const;
     expect(rightAnswer(item)).toEqual({
-      written: [
-        { text: "食", reading: "た", romaji: "ta" },
-        { text: "べる", romaji: "beru" },
-      ],
+      written: [{ text: "食", reading: "た" }, { text: "べる" }],
       romaji: "taberu",
       meaning: "to eat",
     });
@@ -236,12 +233,12 @@ describe("rightAnswer", () => {
       emptyStats(),
     ).pool;
     expect(rightAnswer(hiragana)).toEqual({
-      written: [{ text: "あ", romaji: "a" }],
+      written: [{ text: "あ" }],
       romaji: "a",
       meaning: undefined,
     });
     expect(rightAnswer(katakana)).toEqual({
-      written: [{ text: "ア", reading: "あ", romaji: "a" }],
+      written: [{ text: "ア", reading: "あ" }],
       romaji: "a",
       meaning: undefined,
     });
@@ -253,7 +250,7 @@ describe("rightAnswer", () => {
       word: word("こんにちは", { hiragana: "こんにちは", meaning: "hello" }),
     } as const;
     expect(rightAnswer(item)).toEqual({
-      written: [{ text: "こんにちは", romaji: "konnichiwa" }],
+      written: [{ text: "こんにちは" }],
       romaji: "konnichiwa",
       meaning: "hello",
     });

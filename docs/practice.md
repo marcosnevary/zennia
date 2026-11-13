@@ -6,12 +6,16 @@ The session is in `src/lib/data/practice-session.ts` and the rules of each kind 
 
 ## Modes
 
-A segmented control at the top of Practice switches between two modes, on the same practice card:
+Two tabs at the top of Practice switch between two modes, on the same practice card:
 
 - **Learn**: the app leads through the lists of the path and decides what is practiced ([Learn](#learn)).
 - **Free practice**: the user's own pool, described below.
 
 Practice opens in the mode it was left in (`practiceMode`), and in Learn for someone who never chose. Each mode keeps its own session score, while an answer counts in the item's lifetime tally in both.
+
+## The card
+
+The card shows the prompt. Gray bars stand in for the romaji, right below it, and for a word's meaning, below it: each holds its text, hidden, so it has the text's size. The answer fields and Check are stacked below the card at full width, and on a wide screen Practice keeps the width of a phone in the middle.
 
 ## What is drawn
 
@@ -110,9 +114,9 @@ A blank answer is not checked. Only `correct` counts as a hit: `almost` is a mis
 
 ## Feedback
 
-The result shows the written form with furigana above what isn't hiragana and romaji below each run. Romaji is always derived from the reading, never saved. **Show romaji in the result**, on by default in Settings, can hide it for learners who read kana without it; screen readers still get it, and the result area is a line shorter.
+The result shows on the card itself (`PromptCard.svelte`), laid out like a dictionary entry, centered. Its color tells the verdict, furigana appears above each run of the prompt that isn't hiragana, and the romaji of the whole word, in muted text, and the meaning take the place of the gray bars. Romaji is always derived from the reading, never saved. **Show romaji in the result**, on by default in Settings, can hide it for learners who read kana without it; screen readers still get it.
 
-The verdict is told by the panel's color. An `almost` also says that only the length of a vowel differs, on a line the panel always keeps room for, so the prompt area doesn't resize.
+The prompt keeps the line of the furigana while asking, and the bars take the size of the text that replaces them, so checking doesn't move the fields below. Only an `almost` makes the card taller, with an extra line that says only the length of a vowel differs.
 
 Furigana (`src/lib/core/furigana.ts`) splits the written form into runs of hiragana and of anything else, then uses the hiragana runs as anchors to find each other run's part of the reading. When they don't fit the reading, the whole word gets it.
 
@@ -133,7 +137,7 @@ The answer can be heard in Japanese: the written form, said with the saved readi
 
 ## Fonts
 
-Settings lists the fonts in `PRACTICE_FONTS` (`src/lib/data/practice-fonts.ts`), each with a preview in hiragana, kanji and katakana, and the user picks which ones Practice uses. Each word is then shown in one of them, never the same one twice in a row unless only one is chosen. With none chosen, words keep the UI font. Kana and the result always keep the UI font.
+Settings lists the fonts in `PRACTICE_FONTS` (`src/lib/data/practice-fonts.ts`), each with a preview in hiragana, kanji and katakana, and the user picks which ones Practice uses. Each word is then shown in one of them, never the same one twice in a row unless only one is chosen. With none chosen, words keep the UI font. Kana always keep the UI font, and a word keeps its font in the result.
 
 The fonts are self-hosted from Fontsource. Practice loads only the chosen ones, and the picker loads them all for its previews. Fontsource splits each font by `unicode-range`, so the browser fetches only the chunks of the text it shows. Each word stays hidden until its chunks arrive, so it never appears in the fallback font and then swaps; after 3 seconds it shows anyway. A font that lacks a glyph falls back to the system's Japanese font for it.
 
