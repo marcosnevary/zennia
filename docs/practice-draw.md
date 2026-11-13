@@ -114,6 +114,17 @@ The item just shown is left out of the draw, unless it is the only one. The lear
 
 The next item is drawn when the answer is checked, so what it needs, such as its font and its audio, can load while the result is up. The answer is recorded first, so the draw already sees the new memory. If the selection changes in Settings meanwhile and leaves the drawn item out, Next draws again.
 
+## Watching the draw
+
+On the local dev server, Settings has a **Developer mode** switch, kept per browser in `localStorage` (`src/lib/data/dev-mode.svelte.ts`). The published app never shows it. With it on, Practice shows the draw details below the card (`DrawDetails.svelte`):
+
+- **Pool counts:** how many items are new, learning and learned, and how much room the learning group has.
+- **This item:** its stage, recall, half-life, time since its last answer and streak, and the chance it had when it was drawn.
+- **Effect of the answer:** after Check, the half-life, streak and stage before and after.
+- **Next draw:** the candidates ranked by their chance, with the weight sum of each side and the learned items' share. Before Check, these are the odds if the next item were drawn now. After Check, they are the odds of the draw that picked the upcoming item, shown in bold.
+
+The panel reads the same `drawPlan` and `chanceOf` the draw uses, so what it shows can't drift from what the draw does.
+
 ## What the model leaves out
 
 This first version keeps only what the behaviour needs. Each of these was considered and left out until use shows it is missing:
